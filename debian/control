@@ -1,0 +1,23 @@
+Source: unity-greeter
+Section: x11
+Priority: optional
+Maintainer: Robert Ancell <robert.ancell@canonical.com>
+Standards-Version: 3.9.2
+Build-Depends: debhelper (>= 7.0.50~),
+               dh-autoreconf,
+               gnome-common,
+               valac,
+               liblightdm-gobject-0-dev (>= 0.4.3),
+               libgtk-3-dev,
+               libindicator3-dev
+Homepage: https://launchpad.net/unity-greeter
+Vcs-Bzr: https://code.launchpad.net/~ubuntu-desktop/unity-greeter/ubuntu
+
+Package: unity-greeter
+Architecture: any
+Depends: ${misc:Depends},
+         ${shlibs:Depends}
+Recommends: lightdm
+Provides: lightdm-greeter
+Description: Unity Greeter
+ The greeter for the Unity desktop.
