@@ -1,3 +1,13 @@
+unity-greeter (0.0.2-0ubuntu1) oneiric; urgency=low
+
+  * New upstream release
+  * debian/control:
+    - Use liblightdm-gobject-1
+  * debian/copyright:
+    - Update copyright format to latest
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Tue, 26 Jul 2011 19:24:33 +1000
+
 unity-greeter (0.0.1-0ubuntu1) oneiric; urgency=low
 
   * New upstream release

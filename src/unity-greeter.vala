@@ -1,3 +1,21 @@
+/*
+ * Copyright (C) 2011 Canonical Ltd
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Authored by: Robert Ancell <robert.ancell@canonical.com>
+ */
+
 public class UnityGreeter
 {
     static bool show_version = false;
@@ -13,33 +31,47 @@ public class UnityGreeter
         { null }
     };
 
-    public UserList user_list;
+    private static KeyFile config;
+    
+    private static Cairo.Surface background_surface;
+
+    private UserList user_list;
 
     private Gtk.Window main_window;
     private LightDM.Greeter greeter;
     private bool prompted = false;
-    
+
     private string? test_username = null;
     private bool test_is_authenticated = false;
 
     public UnityGreeter ()
     {
+        greeter = new LightDM.Greeter ();
+        greeter.show_message.connect (show_message_cb);
+        greeter.show_prompt.connect (show_prompt_cb);
+        greeter.authentication_complete.connect (authentication_complete_cb);
         if (!test_mode)
         {
-            greeter = new LightDM.Greeter ();
-            greeter.connected.connect (connected_cb);
-            greeter.show_message.connect (show_message_cb);
-            greeter.show_prompt.connect (show_prompt_cb);
-            greeter.authentication_complete.connect (authentication_complete_cb);
-            greeter.quit.connect (quit_cb);
-            greeter.connect_to_server ();
+            try
+            {
+                greeter.connect_sync ();
+            }
+            catch (Error e)
+            {
+                warning ("Failed to connect to LightDM daemon");
+                Posix.exit (Posix.EXIT_FAILURE);
+            }
         }
 
         user_list = new UserList ();
         user_list.user_selected.connect (user_selected_cb);
         user_list.respond_to_prompt.connect (respond_to_prompt_cb);
         user_list.start_session.connect (start_session_cb);
+        user_list.default_background = get_config_value ("greeter", "background", "#000000");
         user_list.show ();
+
+        foreach (var session in LightDM.get_sessions ())
+            user_list.add_session (session.key, session.name);
 
         if (test_mode)
         {
@@ -54,14 +86,31 @@ public class UnityGreeter
             user_list.add_session ("kde", "KDE");
             user_list.session = "gnome";
         }
+        else
+        {
+            foreach (var user in LightDM.UserList.get_instance ().users)
+            {
+                var label = user.real_name;
+                if (user.real_name == "")
+                    label = user.name;
+                user_list.add_entry (user.name, label, null);
+            }
+            if (greeter.has_guest_account_hint)
+                user_list.add_entry ("*guest", "Guest Account", null);
+            user_list.add_entry (null, "Other...");
+        }
 
         main_window = new Gtk.Window ();
+        main_window.has_resize_grip = false;
         if (test_mode)
             main_window.set_default_size (1024, 600);
         else
         {
-            var screen = Gdk.Display.get_default ().get_default_screen ();
-            main_window.set_default_size (screen.get_width (), screen.get_height ());
+            var screen = Gdk.Screen.get_default ();
+            Gdk.Rectangle geometry;
+            screen.get_monitor_geometry (screen.get_primary_monitor (), out geometry);
+            main_window.set_default_size (geometry.width, geometry.height);
+            main_window.move (geometry.x, geometry.y);
         }
         main_window.add (user_list);
     }
@@ -71,38 +120,14 @@ public class UnityGreeter
         main_window.show ();
     }
 
-    private void connected_cb ()
-    {
-        foreach (var user in greeter.get_users ())
-        {
-            var label = user.real_name;
-            if (user.real_name == null)
-                label = user.name;
-            user_list.add_entry (user.name, label, null);
-        }
-        if (greeter.has_guest_session)
-            user_list.add_entry ("*guest", "Guest Account", null);
-        user_list.add_entry (null, "Other...");
-
-        foreach (var session in greeter.get_sessions ())
-            user_list.add_session (session.key, session.name);
-    }
-
     private void show_message_cb (string text, LightDM.MessageType type)
     {
     }
 
     private void show_prompt_cb (string text, LightDM.PromptType type)
     {
-        debug ("prompt '%s'", text);
         prompted = true;
         user_list.show_prompt (text, type == LightDM.PromptType.SECRET);
-    }
-
-    private bool test_quit_cb ()
-    {
-        Posix.exit (Posix.EXIT_SUCCESS);
-        return false;
     }
 
     private void authentication_complete_cb ()
@@ -120,12 +145,25 @@ public class UnityGreeter
             {
                 user_list.login_complete ();
                 if (test_mode)
-                {
                     user_list.login_complete ();
-                    Timeout.add (1000, test_quit_cb);
-                }
                 else
-                    greeter.start_session (user_list.session);
+                {
+                    /* Set the background */
+                    var c = new Cairo.Context (background_surface);
+                    c.set_source (user_list.get_background ());
+                    c.paint ();
+                    c = null;
+                    refresh_background (Gdk.Screen.get_default ());
+
+                    try
+                    {
+                        greeter.start_session_sync (user_list.session);
+                    }
+                    catch (Error e)
+                    {
+                        warning ("Failed to start session: %s", e.message);
+                    }
+                }
             }
             else
             {
@@ -135,8 +173,16 @@ public class UnityGreeter
         }
         else
         {
-            user_list.set_error ("Invalid password, please try again");
-            start_authentication ();
+            if (prompted)
+            {
+                user_list.set_error (_("Invalid password, please try again"));
+                start_authentication ();
+            }
+            else
+            {
+                user_list.set_error (_("Failed to authenticate"));
+                user_list.show_authenticated ();
+            }
         }
     }
 
@@ -146,10 +192,10 @@ public class UnityGreeter
         // FIXME: Need to handle unprompted login where username comes later
         if (!test_mode)
         {
-            user_list.session = greeter.default_session;
+            user_list.session = greeter.default_session_hint;
             if (username != null)
             {
-                var user = greeter.get_user_by_name (username);
+                var user = LightDM.UserList.get_instance ().get_user_by_name (username);
                 if (user != null)
                     user_list.session = user.session;
             }
@@ -183,11 +229,11 @@ public class UnityGreeter
         else
         {
             if (user_list.selected == null)
-                greeter.login_with_user_prompt ();
+                greeter.authenticate ();
             else if (user_list.selected == "*guest")
-                greeter.login_as_guest ();
+                greeter.authenticate_as_guest ();
             else
-                greeter.login (user_list.selected);
+                greeter.authenticate (user_list.selected);
         }
     }
 
@@ -216,20 +262,84 @@ public class UnityGreeter
 
     private void start_session_cb ()
     {
-        /* Finish authentication (again) */
-        authentication_complete_cb ();
+        var is_authenticated = false;
+        if (test_mode)
+            is_authenticated = test_is_authenticated;
+        else
+            is_authenticated = greeter.is_authenticated;
+
+        /* Finish authentication (again) or restart it */
+        if (is_authenticated)
+            authentication_complete_cb ();
+        else
+            start_authentication ();
     }
 
-    private void quit_cb ()
+    public static string? get_config_value (string group_name, string key, string? default = null)
     {
-        Posix.exit (Posix.EXIT_SUCCESS);
+        try
+        {
+            return config.get_value (group_name, key);
+        }
+        catch (Error e)
+        {
+            if (!(e is KeyFileError.KEY_NOT_FOUND || e is KeyFileError.GROUP_NOT_FOUND))
+                warning ("Error reading configuration item %s:%s: %s", group_name, key, e.message);
+            return default;
+        }
     }
+
+    private static Cairo.Surface? create_root_surface (Gdk.Screen screen)
+    {
+        var visual = screen.get_system_visual ();
+
+        /* Open a new connection so with Retain Permanent so the pixmap remains when the greeter quits */
+        Gdk.flush ();
+        var display = new X.Display (screen.get_display ().get_name ());
+        if (display == null)
+        {
+            warning ("Failed to create root pixmap");
+            return null;
+        }
+        display.set_close_down_mode (X.RetainPermanent);
+        var pixmap = X.CreatePixmap (display,
+                                     Gdk.X11Window.get_xid (screen.get_root_window ()),
+                                     screen.width (),
+                                     screen.height (),
+                                     visual.get_depth ());
+
+        /* Convert into a Cairo surface */
+        unowned X.Display xdisplay = Gdk.X11Display.get_xdisplay (screen.get_display ());
+        var surface = new Cairo.XlibSurface (xdisplay,
+                                             pixmap,
+                                             Gdk.X11Visual.get_xvisual (visual),
+                                             screen.width (), screen.height ());
+
+        /* Use this pixmap for the background */
+        X.SetWindowBackgroundPixmap (xdisplay,
+                                     Gdk.X11Window.get_xid (screen.get_root_window ()),
+                                     surface.get_drawable ());
+
+
+        return surface;  
+    }
+
+    private void refresh_background (Gdk.Screen screen)
+    {
+        Gdk.flush ();
+        X.ClearWindow (Gdk.X11Display.get_xdisplay (screen.get_display ()), Gdk.X11Window.get_xid (screen.get_root_window ()));
+    }
+
 
     public static int main (string[] args)
     {
         Gtk.init (ref args);
 
+        /* Set the cursor to not be the crap default */
         Gdk.get_default_root_window ().set_cursor (new Gdk.Cursor (Gdk.CursorType.LEFT_PTR));
+
+        /* Prepare to set the background */
+        background_surface = create_root_surface (Gdk.Screen.get_default ());
 
         var c = new OptionContext (/* Arguments and description for --help text */
                                    _("- Unity Greeter"));
@@ -253,6 +363,38 @@ public class UnityGreeter
             stderr.printf ("unity-greeter %s\n", Config.VERSION);
             return Posix.EXIT_SUCCESS;
         }
+
+        config = new KeyFile ();
+        try
+        {
+            config.load_from_file (Config.CONFIG_FILE, KeyFileFlags.NONE);
+        }
+        catch (Error e)
+        {
+            if (!(e is FileError.NOENT))
+                warning ("Failed to load configuration from %s: %s\n", Config.CONFIG_FILE, e.message);
+        }
+
+        /* Set GTK+ settings */
+        var settings = Gtk.Settings.get_default ();
+        var value = get_config_value ("greeter", "theme-name");
+        if (value != null)
+            settings.set ("gtk-theme-name", value, null);
+        value = get_config_value ("greeter", "font-name");
+        if (value != null)
+            settings.set ("gtk-font-name", value, null);
+        value = get_config_value ("greeter", "xft-dpi");
+        if (value != null)
+            settings.set ("gtk-xft-dpi", (int) (1024 * double.parse (value)), null);
+        value = get_config_value ("greeter", "xft-antialias");
+        if (value != null)
+            settings.set ("gtk-xft-antialias", strcmp (value, "true") == 0, null);
+        value = get_config_value ("greeter", "xft-hintstyle");
+        if (value != null)
+            settings.set ("gtk-xft-hintstyle", value, null);
+        value = get_config_value ("greeter", "xft-rgba");
+        if (value != null)
+            settings.set ("gtk-xft-rgba", value, null);
 
         var greeter = new UnityGreeter ();
         greeter.show ();

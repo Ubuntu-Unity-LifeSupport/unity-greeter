@@ -32,7 +32,7 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-greeter_PROGRAMS = unity-greeter$(EXEEXT)
+sbin_PROGRAMS = unity-greeter$(EXEEXT)
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	unity-greeter.c unity_greeter_vala.stamp user-list.c
@@ -44,8 +44,8 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-am__installdirs = "$(DESTDIR)$(greeterdir)"
-PROGRAMS = $(greeter_PROGRAMS)
+am__installdirs = "$(DESTDIR)$(sbindir)"
+PROGRAMS = $(sbin_PROGRAMS)
 am_unity_greeter_OBJECTS = unity_greeter-unity-greeter.$(OBJEXT) \
 	unity_greeter-user-list.$(OBJEXT)
 unity_greeter_OBJECTS = $(am_unity_greeter_OBJECTS)
@@ -106,7 +106,6 @@ ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
 EXEEXT = @EXEEXT@
 GMSGFMT = @GMSGFMT@
-GREETER_DIR = @GREETER_DIR@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -140,7 +139,6 @@ PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
-THEME_DIR = @THEME_DIR@
 UNITY_GREETER_CFLAGS = @UNITY_GREETER_CFLAGS@
 UNITY_GREETER_LIBS = @UNITY_GREETER_LIBS@
 USE_NLS = @USE_NLS@
@@ -190,9 +188,9 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-greeterdir = $(GREETER_DIR)
 unity_greeter_SOURCES = \
 	config.vapi \
+	fixes.vapi \
 	indicator.vapi \
 	unity-greeter.vala \
 	user-list.vala
@@ -201,12 +199,15 @@ unity_greeter_CFLAGS = \
 	$(UNITY_GREETER_CFLAGS) \
 	$(WARN_CFLAGS) \
 	-DGETTEXT_PACKAGE=\"$(GETTEXT_PACKAGE)\" \
-	-DVERSION=\"$(VERSION)\"
+	-DVERSION=\"$(VERSION)\" \
+	-DCONFIG_FILE=\""$(sysconfdir)/lightdm/unity-greeter.conf"\"
 
 unity_greeter_VALAFLAGS = \
 	--pkg posix \
 	--pkg gtk+-3.0 \
-	--pkg liblightdm-gobject-0
+	--pkg gdk-x11-3.0 \
+	--pkg x11 \
+	--pkg liblightdm-gobject-1
 
 unity_greeter_LDADD = \
 	$(UNITY_GREETER_LIBS)
@@ -248,10 +249,10 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
-install-greeterPROGRAMS: $(greeter_PROGRAMS)
+install-sbinPROGRAMS: $(sbin_PROGRAMS)
 	@$(NORMAL_INSTALL)
-	test -z "$(greeterdir)" || $(MKDIR_P) "$(DESTDIR)$(greeterdir)"
-	@list='$(greeter_PROGRAMS)'; test -n "$(greeterdir)" || list=; \
+	test -z "$(sbindir)" || $(MKDIR_P) "$(DESTDIR)$(sbindir)"
+	@list='$(sbin_PROGRAMS)'; test -n "$(sbindir)" || list=; \
 	for p in $$list; do echo "$$p $$p"; done | \
 	sed 's/$(EXEEXT)$$//' | \
 	while read p p1; do if test -f $$p; \
@@ -268,23 +269,23 @@ install-greeterPROGRAMS: $(greeter_PROGRAMS)
 	while read type dir files; do \
 	    if test "$$dir" = .; then dir=; else dir=/$$dir; fi; \
 	    test -z "$$files" || { \
-	      echo " $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$files '$(DESTDIR)$(greeterdir)$$dir'"; \
-	      $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$files "$(DESTDIR)$(greeterdir)$$dir" || exit $$?; \
+	      echo " $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$files '$(DESTDIR)$(sbindir)$$dir'"; \
+	      $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$files "$(DESTDIR)$(sbindir)$$dir" || exit $$?; \
 	    } \
 	; done
 
-uninstall-greeterPROGRAMS:
+uninstall-sbinPROGRAMS:
 	@$(NORMAL_UNINSTALL)
-	@list='$(greeter_PROGRAMS)'; test -n "$(greeterdir)" || list=; \
+	@list='$(sbin_PROGRAMS)'; test -n "$(sbindir)" || list=; \
 	files=`for p in $$list; do echo "$$p"; done | \
 	  sed -e 'h;s,^.*/,,;s/$(EXEEXT)$$//;$(transform)' \
 	      -e 's/$$/$(EXEEXT)/' `; \
 	test -n "$$list" || exit 0; \
-	echo " ( cd '$(DESTDIR)$(greeterdir)' && rm -f" $$files ")"; \
-	cd "$(DESTDIR)$(greeterdir)" && rm -f $$files
+	echo " ( cd '$(DESTDIR)$(sbindir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(sbindir)" && rm -f $$files
 
-clean-greeterPROGRAMS:
-	-test -z "$(greeter_PROGRAMS)" || rm -f $(greeter_PROGRAMS)
+clean-sbinPROGRAMS:
+	-test -z "$(sbin_PROGRAMS)" || rm -f $(sbin_PROGRAMS)
 unity-greeter$(EXEEXT): $(unity_greeter_OBJECTS) $(unity_greeter_DEPENDENCIES) 
 	@rm -f unity-greeter$(EXEEXT)
 	$(AM_V_CCLD)$(unity_greeter_LINK) $(unity_greeter_OBJECTS) $(unity_greeter_LDADD) $(LIBS)
@@ -445,7 +446,7 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(PROGRAMS)
 installdirs:
-	for dir in "$(DESTDIR)$(greeterdir)"; do \
+	for dir in "$(DESTDIR)$(sbindir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -479,7 +480,7 @@ maintainer-clean-generic:
 	-rm -f user-list.c
 clean: clean-am
 
-clean-am: clean-generic clean-greeterPROGRAMS mostlyclean-am
+clean-am: clean-generic clean-sbinPROGRAMS mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -499,13 +500,13 @@ info: info-am
 
 info-am:
 
-install-data-am: install-greeterPROGRAMS
+install-data-am:
 
 install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am:
+install-exec-am: install-sbinPROGRAMS
 
 install-html: install-html-am
 
@@ -544,22 +545,22 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-greeterPROGRAMS
+uninstall-am: uninstall-sbinPROGRAMS
 
 .MAKE: install-am install-strip
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
-	clean-greeterPROGRAMS ctags distclean distclean-compile \
+	clean-sbinPROGRAMS ctags distclean distclean-compile \
 	distclean-generic distclean-tags distdir dvi dvi-am html \
 	html-am info info-am install install-am install-data \
 	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-greeterPROGRAMS install-html \
-	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-compile mostlyclean-generic pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-greeterPROGRAMS
+	install-exec-am install-html install-html-am install-info \
+	install-info-am install-man install-pdf install-pdf-am \
+	install-ps install-ps-am install-sbinPROGRAMS install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
+	uninstall-am uninstall-sbinPROGRAMS
 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

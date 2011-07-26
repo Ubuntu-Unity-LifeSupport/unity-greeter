@@ -1,6 +1,4 @@
-Format-Specification: http://svn.debian.org/wsvn/dep/web/deps/dep5.mdwn?op=file&rev=59
-Name: Unity Greeter
-Maintainer: Robert Ancell <robert.ancell@canonical.com>
+Format: http://svn.debian.org/wsvn/dep/web/deps/dep5.mdwn?op=file&rev=174
 Source: https://launchpad.net/unity-greeter
 
 Files: *
@@ -17,5 +15,5 @@ License: GPL-3
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
 
-X-Comment: On Debian systems, the complete text of the GNU General
+Comment: On Debian systems, the complete text of the GNU General
  Public License can be found in `/usr/share/common-licenses/GPL-3’.

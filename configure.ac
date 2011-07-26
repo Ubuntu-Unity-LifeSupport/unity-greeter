@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT(unity-greeter, 0.0.1)
+AC_INIT(unity-greeter, 0.0.2)
 AC_CONFIG_MACRO_DIR(m4)
 AM_INIT_AUTOMAKE
 AM_PROG_CC_C_O
@@ -17,18 +17,10 @@ dnl ###########################################################################
 
 PKG_CHECK_MODULES(UNITY_GREETER, [
     gtk+-3.0
+    gdk-x11-3.0
     indicator3-0.4
-    liblightdm-gobject-0 >= 0.4.3
+    liblightdm-gobject-1 >= 0.9.2
 ])
-
-dnl ###########################################################################
-dnl Configurable values
-dnl ###########################################################################
-THEME_DIR=`$PKG_CONFIG --define-variable=prefix=$prefix --variable=themedir liblightdm-gobject-0`
-AC_SUBST(THEME_DIR)
-
-GREETER_DIR=`$PKG_CONFIG --define-variable=prefix=$prefix --variable=greeterdir liblightdm-gobject-0`
-AC_SUBST(GREETER_DIR)
 
 dnl ###########################################################################
 dnl Internationalization

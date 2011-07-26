@@ -1,3 +1,21 @@
+/*
+ * Copyright (C) 2011 Canonical Ltd
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Authored by: Robert Ancell <robert.ancell@canonical.com>
+ */
+
 private class UserEntry
 {
     public int index;
@@ -30,6 +48,8 @@ private class SessionMenuItem : Gtk.RadioMenuItem
 
 public class UserList : Gtk.Container
 {
+    public string default_background = "#000000";
+
     private int grid_size = 40;
     private int grid_x_offset;
     private int grid_y_offset;
@@ -386,6 +406,9 @@ public class UserList : Gtk.Container
         old_selected_entry = selected_entry;
         selected_entry = entry;
 
+        prompt_entry.hide ();
+        login_button.hide ();
+
         user_selected (selected_entry.name);
 
         if (old_selected_entry != null)
@@ -525,7 +548,7 @@ public class UserList : Gtk.Container
         menubar.get_preferred_size (null, out natural_size);
         var child_allocation = Gtk.Allocation ();
         natural_size.height = 32;
-        natural_size.width = 200;
+        natural_size.width = 300;
         child_allocation.x = allocation.width - natural_size.width;
         child_allocation.y = 0;
         child_allocation.width = natural_size.width;
@@ -590,9 +613,15 @@ public class UserList : Gtk.Container
     private Cairo.Pattern make_background (string? filename)
     {
         if (filename == null)
-            filename = "/usr/share/backgrounds/warty-final-ubuntu.png";
+            filename = default_background;
 
         debug ("making background %s at %dx%d", filename, get_allocated_width (), get_allocated_height ());
+
+        Gdk.Color color;
+        if (Gdk.Color.parse (filename, out color))
+        {
+            return new Cairo.Pattern.rgb (color.red / 65535.0, color.green / 65535.0, color.blue / 65535.0);
+        }
 
         Gdk.Pixbuf orig_image;
         try
@@ -655,7 +684,12 @@ public class UserList : Gtk.Container
         return pattern;
     }
 
-    private Cairo.Pattern get_background (UserEntry? entry)
+    public Cairo.Pattern get_background ()
+    {
+        return get_background_for_user (selected_entry);
+    }
+
+    private Cairo.Pattern get_background_for_user (UserEntry? entry)
     {
         if (entry == null)
             return new Cairo.Pattern.rgb (0, 0, 0);
@@ -670,17 +704,17 @@ public class UserList : Gtk.Container
         /* Draw background */
         if (background_alpha == 1.0)
         {
-            c.set_source (get_background (selected_entry));
+            c.set_source (get_background_for_user (selected_entry));
             c.paint ();
         }
         else
         {
             /* Draw old background */
-            c.set_source (get_background (old_selected_entry));
+            c.set_source (get_background_for_user (old_selected_entry));
             c.paint ();
 
             /* Draw new background */
-            c.set_source (get_background (selected_entry));
+            c.set_source (get_background_for_user (selected_entry));
             c.paint_with_alpha (background_alpha);
         }
 
@@ -802,7 +836,6 @@ public class UserList : Gtk.Container
     // FIXME: Don't seem to be defined in Vala
     private const uint KEY_Up = 0xff52;
     private const uint KEY_Down = 0xff54;
-    private const uint KEY_plus = 0x02b;
 
     public override bool key_press_event (Gdk.EventKey event)
     {
@@ -813,9 +846,6 @@ public class UserList : Gtk.Container
             break;
         case KEY_Down:
             select_next_entry ();
-            break;
-        case KEY_plus:
-            add_entry ("test", "TEST", "/usr/share/icons/hicolor/256x256/apps/inkscape.png");
             break;
         default:
             return false;

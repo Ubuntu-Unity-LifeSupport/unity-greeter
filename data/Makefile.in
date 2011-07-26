@@ -33,8 +33,8 @@ NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
 subdir = data
-DIST_COMMON = $(dist_theme_DATA) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in
+DIST_COMMON = $(dist_config_DATA) $(dist_xgreeter_DATA) \
+	$(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -72,8 +72,8 @@ am__nobase_list = $(am__nobase_strip_setup); \
 am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__installdirs = "$(DESTDIR)$(themedir)"
-DATA = $(dist_theme_DATA)
+am__installdirs = "$(DESTDIR)$(configdir)" "$(DESTDIR)$(xgreeterdir)"
+DATA = $(dist_config_DATA) $(dist_xgreeter_DATA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 ALL_LINGUAS = @ALL_LINGUAS@
@@ -96,7 +96,6 @@ ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
 EXEEXT = @EXEEXT@
 GMSGFMT = @GMSGFMT@
-GREETER_DIR = @GREETER_DIR@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -130,7 +129,6 @@ PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
-THEME_DIR = @THEME_DIR@
 UNITY_GREETER_CFLAGS = @UNITY_GREETER_CFLAGS@
 UNITY_GREETER_LIBS = @UNITY_GREETER_LIBS@
 USE_NLS = @USE_NLS@
@@ -180,8 +178,10 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-dist_theme_DATA = index.theme
-themedir = $(THEME_DIR)/unity
+dist_xgreeter_DATA = unity-greeter.desktop
+xgreeterdir = $(datarootdir)/xgreeters
+configdir = $(sysconfdir)/lightdm
+dist_config_DATA = unity-greeter.conf
 DISTCLEANFILES = \
 	Makefile.in
 
@@ -218,26 +218,46 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
-install-dist_themeDATA: $(dist_theme_DATA)
+install-dist_configDATA: $(dist_config_DATA)
 	@$(NORMAL_INSTALL)
-	test -z "$(themedir)" || $(MKDIR_P) "$(DESTDIR)$(themedir)"
-	@list='$(dist_theme_DATA)'; test -n "$(themedir)" || list=; \
+	test -z "$(configdir)" || $(MKDIR_P) "$(DESTDIR)$(configdir)"
+	@list='$(dist_config_DATA)'; test -n "$(configdir)" || list=; \
 	for p in $$list; do \
 	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
 	  echo "$$d$$p"; \
 	done | $(am__base_list) | \
 	while read files; do \
-	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(themedir)'"; \
-	  $(INSTALL_DATA) $$files "$(DESTDIR)$(themedir)" || exit $$?; \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(configdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(configdir)" || exit $$?; \
 	done
 
-uninstall-dist_themeDATA:
+uninstall-dist_configDATA:
 	@$(NORMAL_UNINSTALL)
-	@list='$(dist_theme_DATA)'; test -n "$(themedir)" || list=; \
+	@list='$(dist_config_DATA)'; test -n "$(configdir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
 	test -n "$$files" || exit 0; \
-	echo " ( cd '$(DESTDIR)$(themedir)' && rm -f" $$files ")"; \
-	cd "$(DESTDIR)$(themedir)" && rm -f $$files
+	echo " ( cd '$(DESTDIR)$(configdir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(configdir)" && rm -f $$files
+install-dist_xgreeterDATA: $(dist_xgreeter_DATA)
+	@$(NORMAL_INSTALL)
+	test -z "$(xgreeterdir)" || $(MKDIR_P) "$(DESTDIR)$(xgreeterdir)"
+	@list='$(dist_xgreeter_DATA)'; test -n "$(xgreeterdir)" || list=; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(xgreeterdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(xgreeterdir)" || exit $$?; \
+	done
+
+uninstall-dist_xgreeterDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(dist_xgreeter_DATA)'; test -n "$(xgreeterdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	test -n "$$files" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(xgreeterdir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(xgreeterdir)" && rm -f $$files
 tags: TAGS
 TAGS:
 
@@ -279,7 +299,7 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(themedir)"; do \
+	for dir in "$(DESTDIR)$(configdir)" "$(DESTDIR)$(xgreeterdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -328,7 +348,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-dist_themeDATA
+install-data-am: install-dist_configDATA install-dist_xgreeterDATA
 
 install-dvi: install-dvi-am
 
@@ -372,21 +392,21 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-dist_themeDATA
+uninstall-am: uninstall-dist_configDATA uninstall-dist_xgreeterDATA
 
 .MAKE: install-am install-strip
 
 .PHONY: all all-am check check-am clean clean-generic distclean \
 	distclean-generic distdir dvi dvi-am html html-am info info-am \
 	install install-am install-data install-data-am \
-	install-dist_themeDATA install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-generic pdf \
-	pdf-am ps ps-am uninstall uninstall-am \
-	uninstall-dist_themeDATA
+	install-dist_configDATA install-dist_xgreeterDATA install-dvi \
+	install-dvi-am install-exec install-exec-am install-html \
+	install-html-am install-info install-info-am install-man \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-generic pdf pdf-am ps ps-am uninstall uninstall-am \
+	uninstall-dist_configDATA uninstall-dist_xgreeterDATA
 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
