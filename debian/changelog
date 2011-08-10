@@ -1,3 +1,11 @@
+unity-greeter (0.0.2-0ubuntu2) oneiric; urgency=low
+
+  * debian/postinst, debian/postrm:
+    - set the unity-greeter as the default one if none set. Remove it on
+      uninstall
+
+ -- Didier Roche <didrocks@ubuntu.com>  Wed, 10 Aug 2011 02:22:19 +0200
+
 unity-greeter (0.0.2-0ubuntu1) oneiric; urgency=low
 
   * New upstream release
