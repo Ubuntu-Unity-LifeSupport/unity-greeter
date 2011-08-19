@@ -1,3 +1,11 @@
+unity-greeter (0.0.2-0ubuntu3) oneiric; urgency=low
+
+  * debian/patches/update_to_trunk.patch:
+    - backport the 3 commits which went to the vcs since the current version
+    - Setup indicators to run in greeter mode (lp: #811853)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Fri, 19 Aug 2011 11:01:32 +0200
+
 unity-greeter (0.0.2-0ubuntu2) oneiric; urgency=low
 
   * debian/postinst, debian/postrm:

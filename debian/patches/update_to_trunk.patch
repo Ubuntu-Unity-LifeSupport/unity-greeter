@@ -1,0 +1,88 @@
+=== modified file 'NEWS'
+--- unity-greeter/NEWS	2011-07-26 04:21:25 +0000
++++ unity-greeter/NEWS	2011-08-19 08:22:33 +0000
+@@ -1,3 +1,9 @@
++Overview of changes in lightdm 0.0.3
++
++    * Set icon theme
++    * Use power indicator
++    * Setup indicators to run in greeter mode
++
+ Overview of changes in lightdm 0.0.2
+ 
+     * Add copyright headers to .vala files
+
+=== modified file 'data/unity-greeter.conf'
+--- unity-greeter/data/unity-greeter.conf	2011-07-26 00:29:18 +0000
++++ unity-greeter/data/unity-greeter.conf	2011-08-19 08:22:33 +0000
+@@ -10,6 +10,7 @@
+ [greeter]
+ background=/usr/share/backgrounds/warty-final-ubuntu.png
+ theme-name=Ambiance
++icon-theme-name=ubuntu-mono-dark
+ font-name=Ubuntu 11
+ xft-antialias=true
+ xft-dpi=96
+
+=== modified file 'src/unity-greeter.vala'
+--- unity-greeter/src/unity-greeter.vala	2011-07-26 04:21:25 +0000
++++ unity-greeter/src/unity-greeter.vala	2011-08-19 08:22:33 +0000
+@@ -380,6 +380,9 @@
+         var value = get_config_value ("greeter", "theme-name");
+         if (value != null)
+             settings.set ("gtk-theme-name", value, null);
++        value = get_config_value ("greeter", "icon-theme-name");
++        if (value != null)
++            settings.set ("gtk-icon-theme-name", value, null);
+         value = get_config_value ("greeter", "font-name");
+         if (value != null)
+             settings.set ("gtk-font-name", value, null);
+
+=== modified file 'src/user-list.vala'
+--- unity-greeter/src/user-list.vala	2011-07-26 04:21:25 +0000
++++ unity-greeter/src/user-list.vala	2011-08-19 08:22:33 +0000
+@@ -147,10 +147,42 @@
+ 
+         options_menu = new Gtk.Menu ();
+ 
++        setup_indicators ();
++    }
++
++    async void setup_indicators ()
++    {
++        /* Set env var that will tell indicators to reduce functionality *.
++        GLib.Environment.set_variable ("INDICATOR_GREETER_MODE", "1", true);
++
++        /* And also set it in the DBus activation environment so that any
++         * indicator services pick it up. */
++        try
++        {
++            var proxy = new GLib.DBusProxy.for_bus_sync (GLib.BusType.SESSION,
++                                                         GLib.DBusProxyFlags.NONE, null, 
++                                                         "org.freedesktop.DBus",
++                                                         "/org/freedesktop/DBus",
++                                                         "org.freedesktop.DBus",
++                                                         null);
++
++            var builder = new GLib.VariantBuilder (GLib.VariantType.ARRAY);
++            builder.add ("{ss}", "INDICATOR_GREETER_MODE", "1");
++
++            yield proxy.call ("UpdateActivationEnvironment",
++                              new GLib.Variant ("(a{ss})", builder),
++                              GLib.DBusCallFlags.NONE, -1, null);
++        }
++        catch (Error e)
++        {
++            warning ("Could not get set environment for indicators: %s", e.message);
++            return;
++        }
++
+         load_indicator ("/usr/lib/indicators3/6/libsession.so");
+         load_indicator ("/usr/lib/indicators3/6/libdatetime.so");
++        load_indicator ("/usr/lib/indicators3/6/libpower.so");
+         load_indicator ("/usr/lib/indicators3/6/libsoundmenu.so");
+-        //load_indicator ("/usr/lib/indicators3/6/libapplication.so");
+     }
+ 
+     public void show_prompt (string text, bool secret = false)
+
