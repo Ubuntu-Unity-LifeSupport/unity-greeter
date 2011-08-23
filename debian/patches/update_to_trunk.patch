@@ -1,33 +1,235 @@
-=== modified file 'NEWS'
---- unity-greeter/NEWS	2011-07-26 04:21:25 +0000
-+++ unity-greeter/NEWS	2011-08-19 08:22:33 +0000
-@@ -1,3 +1,9 @@
-+Overview of changes in lightdm 0.0.3
-+
-+    * Set icon theme
-+    * Use power indicator
-+    * Setup indicators to run in greeter mode
-+
- Overview of changes in lightdm 0.0.2
+diff -Nur unity-greeter-0.0.2.vcs/configure.ac unity-greeter-0.0.2/configure.ac
+--- unity-greeter-0.0.2.vcs/configure.ac	2011-08-23 15:47:58.727996235 +0200
++++ unity-greeter-0.0.2/configure.ac	2011-08-23 15:48:11.975996739 +0200
+@@ -1,6 +1,6 @@
+ dnl Process this file with autoconf to produce a configure script.
  
-     * Add copyright headers to .vala files
-
-=== modified file 'data/unity-greeter.conf'
---- unity-greeter/data/unity-greeter.conf	2011-07-26 00:29:18 +0000
-+++ unity-greeter/data/unity-greeter.conf	2011-08-19 08:22:33 +0000
-@@ -10,6 +10,7 @@
+-AC_INIT(unity-greeter, 0.0.2)
++AC_INIT(unity-greeter, 0.0.3)
+ AC_CONFIG_MACRO_DIR(m4)
+ AM_INIT_AUTOMAKE
+ AM_PROG_CC_C_O
+diff -Nur unity-greeter-0.0.2.vcs/data/unity-greeter.conf unity-greeter-0.0.2/data/unity-greeter.conf
+--- unity-greeter-0.0.2.vcs/data/unity-greeter.conf	2011-08-23 15:47:58.735996234 +0200
++++ unity-greeter-0.0.2/data/unity-greeter.conf	2011-08-23 15:48:11.975996739 +0200
+@@ -1,5 +1,7 @@
+ #
+ # background = Background file to use, either an image path or a color (e.g. #772953)
++# os-name = Name of this OS
++# os-version = Version of this OS
+ # theme-name = GTK+ theme to use
+ # font-name = Font to use
+ # xft-antialias = Whether to antialias Xft fonts (true or false)
+@@ -9,7 +11,10 @@
+ #
  [greeter]
  background=/usr/share/backgrounds/warty-final-ubuntu.png
++os-name=ubuntu
++os-version=11.10
  theme-name=Ambiance
 +icon-theme-name=ubuntu-mono-dark
  font-name=Ubuntu 11
  xft-antialias=true
  xft-dpi=96
-
-=== modified file 'src/unity-greeter.vala'
---- unity-greeter/src/unity-greeter.vala	2011-07-26 04:21:25 +0000
-+++ unity-greeter/src/unity-greeter.vala	2011-08-19 08:22:33 +0000
-@@ -380,6 +380,9 @@
+diff -Nur unity-greeter-0.0.2.vcs/NEWS unity-greeter-0.0.2/NEWS
+--- unity-greeter-0.0.2.vcs/NEWS	2011-08-23 15:47:58.715996233 +0200
++++ unity-greeter-0.0.2/NEWS	2011-08-23 15:48:11.975996739 +0200
+@@ -1,11 +1,19 @@
+-Overview of changes in lightdm 0.0.2
++Overview of changes in unity-greeter 0.0.3
++
++    * Set icon theme
++    * Use power indicator
++    * Setup indicators to run in greeter mode
++    * Allow OS name and version to be configurable
++    * Run gnome-settings-daemon to get power management, a11y, xrandr etc
++
++Overview of changes in unity-greeter 0.0.2
+ 
+     * Add copyright headers to .vala files
+-    * Update to work with LightDM 0.9
++    * Update to work with lightdm 0.9
+     * Add a config file and load Ambiance theme
+     * Fit to primary monitor
+     * Set root background
+ 
+-Overview of changes in lightdm 0.0.1
++Overview of changes in unity-greeter 0.0.1
+ 
+     * Initial release
+diff -Nur unity-greeter-0.0.2.vcs/po/POTFILES.in unity-greeter-0.0.2/po/POTFILES.in
+--- unity-greeter-0.0.2.vcs/po/POTFILES.in	2011-08-23 15:47:58.719996234 +0200
++++ unity-greeter-0.0.2/po/POTFILES.in	2011-08-23 15:48:11.975996739 +0200
+@@ -1,3 +1,5 @@
+ # List of source files containing translatable strings.
+ # Please keep this file sorted alphabetically.
++src/settings-daemon.vala
+ src/unity-greeter.vala
++src/user-list.vala
+diff -Nur unity-greeter-0.0.2.vcs/po/POTFILES.skip unity-greeter-0.0.2/po/POTFILES.skip
+--- unity-greeter-0.0.2.vcs/po/POTFILES.skip	2011-08-23 15:47:58.719996234 +0200
++++ unity-greeter-0.0.2/po/POTFILES.skip	2011-08-23 15:48:11.979996739 +0200
+@@ -1 +1,3 @@
++src/settings-daemon.c
+ src/unity-greeter.c
++src/user-list.c
+diff -Nur unity-greeter-0.0.2.vcs/src/Makefile.am unity-greeter-0.0.2/src/Makefile.am
+--- unity-greeter-0.0.2.vcs/src/Makefile.am	2011-08-23 15:47:58.731996234 +0200
++++ unity-greeter-0.0.2/src/Makefile.am	2011-08-23 15:48:11.979996739 +0200
+@@ -4,6 +4,7 @@
+ 	config.vapi \
+ 	fixes.vapi \
+ 	indicator.vapi \
++	settings-daemon.vala \
+ 	unity-greeter.vala \
+ 	user-list.vala
+ 
+diff -Nur unity-greeter-0.0.2.vcs/src/settings-daemon.vala unity-greeter-0.0.2/src/settings-daemon.vala
+--- unity-greeter-0.0.2.vcs/src/settings-daemon.vala	1970-01-01 01:00:00.000000000 +0100
++++ unity-greeter-0.0.2/src/settings-daemon.vala	2011-08-23 15:48:11.979996739 +0200
+@@ -0,0 +1,96 @@
++/* -*- Mode:Vala; indent-tabs-mode:nil; tab-width:4 -*-
++ *
++ * Copyright (C) 2011 Canonical Ltd
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 3 as
++ * published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
++ *
++ * Authored by: Michael Terry <michael.terry@canonical.com>
++ */
++
++public class SettingsDaemon : Object
++{
++    public async void start ()
++    {
++        configure ();
++        yield run ();
++    }
++
++    private void configure ()
++    {
++        string[] disabled = {"org.gnome.settings-daemon.plugins.background",
++                             "org.gnome.settings-daemon.plugins.clipboard",
++                             "org.gnome.settings-daemon.plugins.font",
++                             "org.gnome.settings-daemon.plugins.gconf",
++                             "org.gnome.settings-daemon.plugins.housekeeping",
++                             "org.gnome.settings-daemon.plugins.keybindings",
++                             "org.gnome.settings-daemon.plugins.keyboard",
++                             "org.gnome.settings-daemon.plugins.media-keys",
++                             "org.gnome.settings-daemon.plugins.mouse",
++                             "org.gnome.settings-daemon.plugins.print-notifications",
++                             "org.gnome.settings-daemon.plugins.smartcard",
++                             "org.gnome.settings-daemon.plugins.sound",
++                             "org.gnome.settings-daemon.plugins.wacom",
++                             "org.gnome.settings-daemon.plugins.xsettings"};
++
++        string[] enabled =  {"org.gnome.settings-daemon.plugins.a11y-keyboard",
++                             "org.gnome.settings-daemon.plugins.a11y-settings",
++                             "org.gnome.settings-daemon.plugins.color",
++                             "org.gnome.settings-daemon.plugins.cursor",
++                             "org.gnome.settings-daemon.plugins.power",
++                             "org.gnome.settings-daemon.plugins.xrandr"};
++
++        Settings settings;
++
++        foreach (weak string schema in disabled)
++        {
++            settings = new Settings (schema);
++            settings.set_boolean ("active", false);
++        }
++
++        foreach (weak string schema in enabled)
++        {
++            settings = new Settings (schema);
++            settings.set_boolean ("active", true);
++        }
++
++        /* We want to block the screensaver from being activated by g-s-d or
++           any of the indicators.  So we own the name, preventing dbus
++           activation by anyone else.
++           If the screensaver were allowed to start, it would disable X's
++           builtin blanking logic which we do use and instead, blanking would
++           require gnome-session and it's Presence DBus interface to be run. */
++        GLib.Bus.own_name (GLib.BusType.SESSION, "org.gnome.ScreenSaver",
++                           GLib.BusNameOwnerFlags.NONE);
++    }
++
++    private async void run ()
++    {
++        /* Activate g-s-d over dbus */
++        try
++        {
++            var proxy = new GLib.DBusProxy.for_bus_sync (GLib.BusType.SESSION,
++                                                         GLib.DBusProxyFlags.NONE, null, 
++                                                         "org.gnome.SettingsDaemon",
++                                                         "/org/gnome/SettingsDaemon",
++                                                         "org.gnome.SettingsDaemon",
++                                                         null);
++
++            /* This tells g-s-d to activate its plugins */
++            yield proxy.call ("Awake", null, GLib.DBusCallFlags.NONE, -1, null);
++        }
++        catch (Error e)
++        {
++            debug ("Could not start gnome-settings-daemon over DBus: %s", e.message);
++        }
++    }
++}
+diff -Nur unity-greeter-0.0.2.vcs/src/unity-greeter.vala unity-greeter-0.0.2/src/unity-greeter.vala
+--- unity-greeter-0.0.2.vcs/src/unity-greeter.vala	2011-08-23 15:47:58.731996234 +0200
++++ unity-greeter-0.0.2/src/unity-greeter.vala	2011-08-23 15:48:11.979996739 +0200
+@@ -35,6 +35,8 @@
+     
+     private static Cairo.Surface background_surface;
+ 
++    private SettingsDaemon settings_daemon;
++
+     private UserList user_list;
+ 
+     private Gtk.Window main_window;
+@@ -63,11 +65,19 @@
+             }
+         }
+ 
++        if (!test_mode)
++        {
++            settings_daemon = new SettingsDaemon ();
++            settings_daemon.start ();
++        }
++
+         user_list = new UserList ();
+         user_list.user_selected.connect (user_selected_cb);
+         user_list.respond_to_prompt.connect (respond_to_prompt_cb);
+         user_list.start_session.connect (start_session_cb);
+         user_list.default_background = get_config_value ("greeter", "background", "#000000");
++        user_list.os_name = get_config_value ("greeter", "os-name", "ubuntu");
++        user_list.os_version = get_config_value ("greeter", "os-version", "");
+         user_list.show ();
+ 
+         foreach (var session in LightDM.get_sessions ())
+@@ -330,9 +340,11 @@
+         X.ClearWindow (Gdk.X11Display.get_xdisplay (screen.get_display ()), Gdk.X11Window.get_xid (screen.get_root_window ()));
+     }
+ 
+-
+     public static int main (string[] args)
+     {
++        /* Disable the stupid global menubar */
++        Environment.unset_variable ("UBUNTU_MENUPROXY");
++
+         Gtk.init (ref args);
+ 
+         /* Set the cursor to not be the crap default */
+@@ -380,6 +392,9 @@
          var value = get_config_value ("greeter", "theme-name");
          if (value != null)
              settings.set ("gtk-theme-name", value, null);
@@ -37,21 +239,28 @@
          value = get_config_value ("greeter", "font-name");
          if (value != null)
              settings.set ("gtk-font-name", value, null);
-
-=== modified file 'src/user-list.vala'
---- unity-greeter/src/user-list.vala	2011-07-26 04:21:25 +0000
-+++ unity-greeter/src/user-list.vala	2011-08-19 08:22:33 +0000
-@@ -147,10 +147,42 @@
+diff -Nur unity-greeter-0.0.2.vcs/src/user-list.vala unity-greeter-0.0.2/src/user-list.vala
+--- unity-greeter-0.0.2.vcs/src/user-list.vala	2011-08-23 15:47:58.731996234 +0200
++++ unity-greeter-0.0.2/src/user-list.vala	2011-08-23 15:48:11.983996738 +0200
+@@ -49,6 +49,8 @@
+ public class UserList : Gtk.Container
+ {
+     public string default_background = "#000000";
++    public string os_name = "";
++    public string os_version = "";
+ 
+     private int grid_size = 40;
+     private int grid_x_offset;
+@@ -147,10 +149,48 @@
  
          options_menu = new Gtk.Menu ();
  
 +        setup_indicators ();
 +    }
 +
-+    async void setup_indicators ()
++    async void greeter_set_env (string key, string val)
 +    {
-+        /* Set env var that will tell indicators to reduce functionality *.
-+        GLib.Environment.set_variable ("INDICATOR_GREETER_MODE", "1", true);
++        GLib.Environment.set_variable (key, val, true);
 +
 +        /* And also set it in the DBus activation environment so that any
 +         * indicator services pick it up. */
@@ -65,7 +274,7 @@
 +                                                         null);
 +
 +            var builder = new GLib.VariantBuilder (GLib.VariantType.ARRAY);
-+            builder.add ("{ss}", "INDICATOR_GREETER_MODE", "1");
++            builder.add ("{ss}", key, val);
 +
 +            yield proxy.call ("UpdateActivationEnvironment",
 +                              new GLib.Variant ("(a{ss})", builder),
@@ -76,6 +285,13 @@
 +            warning ("Could not get set environment for indicators: %s", e.message);
 +            return;
 +        }
++    }
++
++    async void setup_indicators ()
++    {
++        greeter_set_env ("INDICATOR_GREETER_MODE", "1"); // reduced functionality
++        greeter_set_env ("GIO_USE_VFS", "local"); // no gvfsd
++        greeter_set_env ("RUNNING_UNDER_GDM", "1"); // for gnome-settings-daemon
 +
          load_indicator ("/usr/lib/indicators3/6/libsession.so");
          load_indicator ("/usr/lib/indicators3/6/libdatetime.so");
@@ -85,4 +301,133 @@
      }
  
      public void show_prompt (string text, bool secret = false)
-
+@@ -581,7 +621,7 @@
+                 entry.background_pattern = null;
+         }
+     }
+-   
++
+     private void draw_entries (Cairo.Context c)
+     {
+         foreach (var entry in entries)
+@@ -591,19 +631,19 @@
+ 
+             if (entry.is_active)
+             {
+-                c.move_to (0, 0.25 * grid_size);
+-                c.rel_line_to (0.4 * grid_size, 0.25 * grid_size);
+-                c.rel_line_to (-0.4 * grid_size, 0.25 * grid_size);
++                c.move_to (0.1 * grid_size, 0.4 * grid_size);
++                c.rel_line_to (0.15 * grid_size, 0.1 * grid_size);
++                c.rel_line_to (-0.15 * grid_size, 0.1 * grid_size);
+                 c.close_path ();
+-                c.set_source_rgb (1.0, 1.0, 1.0);
++                c.set_source_rgba (1.0, 1.0, 1.0, 0.5);
+                 c.fill ();
+             }
+ 
+-            c.set_font_size (0.6 * grid_size);
++            c.set_font_size (0.5 * grid_size);
+             Cairo.TextExtents extents;
+             c.text_extents (entry.label, out extents);
+             c.move_to (grid_size / 2, grid_size - (grid_size - (extents.height)) / 2);
+-            c.set_source_rgb (1.0, 1.0, 1.0);
++            c.set_source_rgba (1.0, 1.0, 1.0, 0.5);
+             c.show_text (entry.label);
+ 
+             c.restore ();
+@@ -676,7 +716,8 @@
+ 
+         /* Draw overlay */
+         bc.set_source (overlay);
+-        bc.paint ();
++        bc.rectangle (grid_size - 1, grid_size - 1, get_allocated_width () - grid_size * 2 + 2, get_allocated_height () - grid_size * 2 + 2);
++        bc.fill ();
+ 
+         var pattern = new Cairo.Pattern.for_surface (surface);
+         pattern.set_extend (Cairo.Extend.REPEAT);
+@@ -728,16 +769,16 @@
+         c.show_text (utsname.nodename);
+ 
+         /* Release */
++        Cairo.TextExtents logo_extents;
+         c.set_font_size (0.8 * grid_size);
+-        c.move_to (grid_size, get_allocated_height () - grid_size);
++        c.text_extents (os_name, out logo_extents);
++        c.move_to (grid_size, get_allocated_height () - grid_size - (grid_size - logo_extents.height) / 2);
+         c.set_source_rgba (1.0, 1.0, 1.0, 0.5);
+-        c.show_text ("ubuntu");
+-        Cairo.TextExtents logo_extents;
+-        c.text_extents ("ubuntu", out logo_extents);
++        c.show_text (os_name);
+         c.set_font_size (0.4 * grid_size);
+-        c.move_to (grid_size + logo_extents.width, get_allocated_height () - grid_size);
++        c.move_to (grid_size + logo_extents.width, get_allocated_height () - grid_size - (grid_size - logo_extents.height) / 2);
+         c.set_source_rgba (1.0, 1.0, 1.0, 0.5);
+-        c.show_text ("  11.10");
++        c.show_text ("  " + os_version);
+ 
+         int base_x, base_y;
+         get_selected_location (out base_x, out base_y);
+@@ -765,26 +806,44 @@
+         c.restore ();
+ 
+         /* Draw box */
+-        cairo_rounded_rectangle (c, 0, 0, box_width * grid_size, box_height * grid_size, 0.2 * grid_size);
+-        c.set_source_rgba (0.0, 0.0, 0.0, 0.5);
+-        c.fill ();
++        var border = 0.1 * grid_size;
++        var box_w = box_width * grid_size - border * 2;
++        var box_h = box_height * grid_size - border * 2;
++        var box_r = 0.2 * grid_size;
++        cairo_rounded_rectangle (c,
++                                 border + 0.5, border + 0.5,
++                                 box_w - 1, box_h - 1,
++                                 box_r);
++        c.set_source_rgba (0.0, 0.0, 0.0, 0.4);
++        c.fill_preserve ();
++        c.set_line_width (1.0);
++        c.set_source_rgba (1.0, 1.0, 1.0, 0.25);
++        c.stroke ();
++
++        cairo_rounded_rectangle (c,
++                                 border + 0.5 + 2, border + 0.5 + 2,
++                                 box_w - 5, box_h - 5,
++                                 box_r - 2);
++        c.stroke ();
+ 
+         /* Selected item */
+         if (selected_entry != null)
+         {
+             Cairo.TextExtents extents;
+-            c.set_font_size (0.6 * grid_size);
++            c.set_font_size (0.5 * grid_size);
+             c.text_extents (selected_entry.label, out extents);
++            var text_y = grid_size - (grid_size - border - extents.height) / 4;
++
+             if (selected_entry.is_active)
+             {
+-                c.move_to (0, (grid_size - extents.height) / 2 + 0.25 * grid_size);
+-                c.rel_line_to (0.4 * grid_size, 0.25 * grid_size);
+-                c.rel_line_to (-0.4 * grid_size, 0.25 * grid_size);
++                c.move_to (0.1 * grid_size, text_y - extents.height / 2 - 0.1 * grid_size);
++                c.rel_line_to (0.15 * grid_size, 0.1 * grid_size);
++                c.rel_line_to (-0.15 * grid_size, 0.1 * grid_size);
+                 c.close_path ();
+                 c.set_source_rgb (1.0, 1.0, 1.0);
+                 c.fill ();
+             }
+-            c.move_to (grid_size / 2, grid_size);
++            c.move_to (grid_size / 2, text_y);
+             c.set_source_rgb (1.0, 1.0, 1.0);
+             c.show_text (selected_entry.label);
+         }
+@@ -822,7 +881,7 @@
+         var w = width - radius * 2;
+         var h = height - radius * 2;
+         var kappa = 0.5522847498 * radius;
+-        c.move_to (radius, 0);
++        c.move_to (x + radius, y);
+         c.rel_line_to (w, 0);
+         c.rel_curve_to (kappa, 0, radius, radius - kappa, radius, radius);
+         c.rel_line_to (0, h);
