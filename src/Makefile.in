@@ -35,7 +35,8 @@ POST_UNINSTALL = :
 sbin_PROGRAMS = unity-greeter$(EXEEXT)
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	unity-greeter.c unity_greeter_vala.stamp user-list.c
+	settings-daemon.c unity-greeter.c unity_greeter_vala.stamp \
+	user-list.c
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -46,7 +47,8 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(sbindir)"
 PROGRAMS = $(sbin_PROGRAMS)
-am_unity_greeter_OBJECTS = unity_greeter-unity-greeter.$(OBJEXT) \
+am_unity_greeter_OBJECTS = unity_greeter-settings-daemon.$(OBJEXT) \
+	unity_greeter-unity-greeter.$(OBJEXT) \
 	unity_greeter-user-list.$(OBJEXT)
 unity_greeter_OBJECTS = $(am_unity_greeter_OBJECTS)
 am__DEPENDENCIES_1 =
@@ -105,6 +107,7 @@ ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
 EXEEXT = @EXEEXT@
+GETTEXT_PACKAGE = @GETTEXT_PACKAGE@
 GMSGFMT = @GMSGFMT@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
@@ -192,6 +195,7 @@ unity_greeter_SOURCES = \
 	config.vapi \
 	fixes.vapi \
 	indicator.vapi \
+	settings-daemon.vala \
 	unity-greeter.vala \
 	user-list.vala
 
@@ -199,8 +203,10 @@ unity_greeter_CFLAGS = \
 	$(UNITY_GREETER_CFLAGS) \
 	$(WARN_CFLAGS) \
 	-DGETTEXT_PACKAGE=\"$(GETTEXT_PACKAGE)\" \
+	-DLOCALEDIR=\""$(localedir)"\" \
 	-DVERSION=\"$(VERSION)\" \
-	-DCONFIG_FILE=\""$(sysconfdir)/lightdm/unity-greeter.conf"\"
+	-DCONFIG_FILE=\""$(sysconfdir)/lightdm/unity-greeter.conf"\" \
+	-DPKGDATADIR=\""$(pkgdatadir)"\"
 
 unity_greeter_VALAFLAGS = \
 	--pkg posix \
@@ -296,6 +302,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-settings-daemon.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-unity-greeter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-user-list.Po@am__quote@
 
@@ -314,6 +321,22 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
+
+unity_greeter-settings-daemon.o: settings-daemon.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-settings-daemon.o -MD -MP -MF $(DEPDIR)/unity_greeter-settings-daemon.Tpo -c -o unity_greeter-settings-daemon.o `test -f 'settings-daemon.c' || echo '$(srcdir)/'`settings-daemon.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-settings-daemon.Tpo $(DEPDIR)/unity_greeter-settings-daemon.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='settings-daemon.c' object='unity_greeter-settings-daemon.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-settings-daemon.o `test -f 'settings-daemon.c' || echo '$(srcdir)/'`settings-daemon.c
+
+unity_greeter-settings-daemon.obj: settings-daemon.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-settings-daemon.obj -MD -MP -MF $(DEPDIR)/unity_greeter-settings-daemon.Tpo -c -o unity_greeter-settings-daemon.obj `if test -f 'settings-daemon.c'; then $(CYGPATH_W) 'settings-daemon.c'; else $(CYGPATH_W) '$(srcdir)/settings-daemon.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-settings-daemon.Tpo $(DEPDIR)/unity_greeter-settings-daemon.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='settings-daemon.c' object='unity_greeter-settings-daemon.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-settings-daemon.obj `if test -f 'settings-daemon.c'; then $(CYGPATH_W) 'settings-daemon.c'; else $(CYGPATH_W) '$(srcdir)/settings-daemon.c'; fi`
 
 unity_greeter-unity-greeter.o: unity-greeter.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-unity-greeter.o -MD -MP -MF $(DEPDIR)/unity_greeter-unity-greeter.Tpo -c -o unity_greeter-unity-greeter.o `test -f 'unity-greeter.c' || echo '$(srcdir)/'`unity-greeter.c
@@ -346,6 +369,11 @@ unity_greeter-user-list.obj: user-list.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='user-list.c' object='unity_greeter-user-list.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-user-list.obj `if test -f 'user-list.c'; then $(CYGPATH_W) 'user-list.c'; else $(CYGPATH_W) '$(srcdir)/user-list.c'; fi`
+$(srcdir)/settings-daemon.c: $(srcdir)/unity_greeter_vala.stamp
+	@if test -f $@; then :; else \
+	  rm -f $(srcdir)/unity_greeter_vala.stamp; \
+	  $(am__cd) $(srcdir) && $(MAKE) $(AM_MAKEFLAGS) unity_greeter_vala.stamp; \
+	fi
 $(srcdir)/unity-greeter.c: $(srcdir)/unity_greeter_vala.stamp
 	@if test -f $@; then :; else \
 	  rm -f $(srcdir)/unity_greeter_vala.stamp; \
@@ -475,6 +503,7 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+	-rm -f settings-daemon.c
 	-rm -f unity-greeter.c
 	-rm -f unity_greeter_vala.stamp
 	-rm -f user-list.c

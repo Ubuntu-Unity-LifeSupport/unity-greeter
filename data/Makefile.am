@@ -1,5 +1,7 @@
-dist_xgreeter_DATA = unity-greeter.desktop
 xgreeterdir = $(datarootdir)/xgreeters
+dist_xgreeter_DATA = unity-greeter.desktop
+
+dist_pkgdata_DATA = cog.png
 
 configdir = $(sysconfdir)/lightdm
 dist_config_DATA = unity-greeter.conf

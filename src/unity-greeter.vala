@@ -35,6 +35,8 @@ public class UnityGreeter
     
     private static Cairo.Surface background_surface;
 
+    private SettingsDaemon settings_daemon;
+
     private UserList user_list;
 
     private Gtk.Window main_window;
@@ -63,11 +65,19 @@ public class UnityGreeter
             }
         }
 
+        if (!test_mode)
+        {
+            settings_daemon = new SettingsDaemon ();
+            settings_daemon.start ();
+        }
+
         user_list = new UserList ();
         user_list.user_selected.connect (user_selected_cb);
         user_list.respond_to_prompt.connect (respond_to_prompt_cb);
         user_list.start_session.connect (start_session_cb);
         user_list.default_background = get_config_value ("greeter", "background", "#000000");
+        user_list.os_name = get_config_value ("greeter", "os-name", "ubuntu");
+        user_list.os_version = get_config_value ("greeter", "os-version", "");
         user_list.show ();
 
         foreach (var session in LightDM.get_sessions ())
@@ -78,8 +88,8 @@ public class UnityGreeter
             user_list.add_entry ("alice", "Alice User", "/usr/share/backgrounds/Berries_by_Orb9220.jpg", true);
             user_list.add_entry ("bob", "Bob User", "/usr/share/backgrounds/White_flowers_by_Garuna_bor-bor.jpg");
             user_list.add_entry ("carol", "Carol User", "/usr/share/backgrounds/Bird_by_Magnus.jpg");
-            user_list.add_entry ("*guest", "Guest Account", null, true);
-            user_list.add_entry (null, "Other...");
+            user_list.add_entry ("*guest", _("Guest Account"), null, true);
+            user_list.add_entry (null, _("Other..."));
 
             user_list.add_session ("gnome", "Ubuntu");
             user_list.add_session ("gnome-shell", "GNOME");
@@ -96,8 +106,8 @@ public class UnityGreeter
                 user_list.add_entry (user.name, label, null);
             }
             if (greeter.has_guest_account_hint)
-                user_list.add_entry ("*guest", "Guest Account", null);
-            user_list.add_entry (null, "Other...");
+                user_list.add_entry ("*guest", _("Guest Account"), null);
+            user_list.add_entry (null, _("Other..."));
         }
 
         main_window = new Gtk.Window ();
@@ -127,6 +137,9 @@ public class UnityGreeter
     private void show_prompt_cb (string text, LightDM.PromptType type)
     {
         prompted = true;
+        if (text == _("Password:"))
+            text = "";
+
         user_list.show_prompt (text, type == LightDM.PromptType.SECRET);
     }
 
@@ -214,7 +227,7 @@ public class UnityGreeter
             test_is_authenticated = false;
 
             if (user_list.selected == null)
-                show_prompt_cb ("Username:", LightDM.PromptType.QUESTION);
+                show_prompt_cb (_("Username:"), LightDM.PromptType.QUESTION);
             else if (user_list.selected == "*guest" || user_list.selected == "bob")
             {
                 test_is_authenticated = true;
@@ -223,7 +236,7 @@ public class UnityGreeter
             else
             {
                 test_username = user_list.selected;
-                show_prompt_cb ("Password:", LightDM.PromptType.SECRET);
+                show_prompt_cb (_("Password:"), LightDM.PromptType.SECRET);
             }
         }
         else
@@ -248,7 +261,7 @@ public class UnityGreeter
             {
                 debug ("username=%s", text);
                 test_username = text;
-                show_prompt_cb ("Password:", LightDM.PromptType.SECRET);
+                show_prompt_cb (_("Password:"), LightDM.PromptType.SECRET);
             }
             else
             {
@@ -330,9 +343,16 @@ public class UnityGreeter
         X.ClearWindow (Gdk.X11Display.get_xdisplay (screen.get_display ()), Gdk.X11Window.get_xid (screen.get_root_window ()));
     }
 
-
     public static int main (string[] args)
     {
+        /* Disable the stupid global menubar */
+        Environment.unset_variable ("UBUNTU_MENUPROXY");
+
+        /* Initialize i18n */
+        Intl.bindtextdomain (Config.GETTEXT_PACKAGE, Config.LOCALEDIR);
+        Intl.bind_textdomain_codeset (Config.GETTEXT_PACKAGE, "UTF-8");
+        Intl.textdomain (Config.GETTEXT_PACKAGE);
+
         Gtk.init (ref args);
 
         /* Set the cursor to not be the crap default */
@@ -380,6 +400,9 @@ public class UnityGreeter
         var value = get_config_value ("greeter", "theme-name");
         if (value != null)
             settings.set ("gtk-theme-name", value, null);
+        value = get_config_value ("greeter", "icon-theme-name");
+        if (value != null)
+            settings.set ("gtk-icon-theme-name", value, null);
         value = get_config_value ("greeter", "font-name");
         if (value != null)
             settings.set ("gtk-font-name", value, null);

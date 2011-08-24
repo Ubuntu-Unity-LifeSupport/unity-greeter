@@ -1,0 +1,96 @@
+/* -*- Mode:Vala; indent-tabs-mode:nil; tab-width:4 -*-
+ *
+ * Copyright (C) 2011 Canonical Ltd
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Authored by: Michael Terry <michael.terry@canonical.com>
+ */
+
+public class SettingsDaemon : Object
+{
+    public async void start ()
+    {
+        configure ();
+        yield run ();
+    }
+
+    private void configure ()
+    {
+        string[] disabled = {"org.gnome.settings-daemon.plugins.background",
+                             "org.gnome.settings-daemon.plugins.clipboard",
+                             "org.gnome.settings-daemon.plugins.font",
+                             "org.gnome.settings-daemon.plugins.gconf",
+                             "org.gnome.settings-daemon.plugins.housekeeping",
+                             "org.gnome.settings-daemon.plugins.keybindings",
+                             "org.gnome.settings-daemon.plugins.keyboard",
+                             "org.gnome.settings-daemon.plugins.media-keys",
+                             "org.gnome.settings-daemon.plugins.mouse",
+                             "org.gnome.settings-daemon.plugins.print-notifications",
+                             "org.gnome.settings-daemon.plugins.smartcard",
+                             "org.gnome.settings-daemon.plugins.sound",
+                             "org.gnome.settings-daemon.plugins.wacom",
+                             "org.gnome.settings-daemon.plugins.xsettings"};
+
+        string[] enabled =  {"org.gnome.settings-daemon.plugins.a11y-keyboard",
+                             "org.gnome.settings-daemon.plugins.a11y-settings",
+                             "org.gnome.settings-daemon.plugins.color",
+                             "org.gnome.settings-daemon.plugins.cursor",
+                             "org.gnome.settings-daemon.plugins.power",
+                             "org.gnome.settings-daemon.plugins.xrandr"};
+
+        Settings settings;
+
+        foreach (weak string schema in disabled)
+        {
+            settings = new Settings (schema);
+            settings.set_boolean ("active", false);
+        }
+
+        foreach (weak string schema in enabled)
+        {
+            settings = new Settings (schema);
+            settings.set_boolean ("active", true);
+        }
+
+        /* We want to block the screensaver from being activated by g-s-d or
+           any of the indicators.  So we own the name, preventing dbus
+           activation by anyone else.
+           If the screensaver were allowed to start, it would disable X's
+           builtin blanking logic which we do use and instead, blanking would
+           require gnome-session and it's Presence DBus interface to be run. */
+        GLib.Bus.own_name (GLib.BusType.SESSION, "org.gnome.ScreenSaver",
+                           GLib.BusNameOwnerFlags.NONE);
+    }
+
+    private async void run ()
+    {
+        /* Activate g-s-d over dbus */
+        try
+        {
+            var proxy = new GLib.DBusProxy.for_bus_sync (GLib.BusType.SESSION,
+                                                         GLib.DBusProxyFlags.NONE, null, 
+                                                         "org.gnome.SettingsDaemon",
+                                                         "/org/gnome/SettingsDaemon",
+                                                         "org.gnome.SettingsDaemon",
+                                                         null);
+
+            /* This tells g-s-d to activate its plugins */
+            yield proxy.call ("Awake", null, GLib.DBusCallFlags.NONE, -1, null);
+        }
+        catch (Error e)
+        {
+            debug ("Could not start gnome-settings-daemon over DBus: %s", e.message);
+        }
+    }
+}

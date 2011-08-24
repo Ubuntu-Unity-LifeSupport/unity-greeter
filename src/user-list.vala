@@ -49,6 +49,8 @@ private class SessionMenuItem : Gtk.RadioMenuItem
 public class UserList : Gtk.Container
 {
     public string default_background = "#000000";
+    public string os_name = "";
+    public string os_version = "";
 
     private int grid_size = 40;
     private int grid_x_offset;
@@ -71,6 +73,8 @@ public class UserList : Gtk.Container
     
     private string? error;
     private string? message;
+    
+    private Cairo.FontFace font_face;
 
     private Gtk.Entry prompt_entry;
     private Gtk.Button login_button;
@@ -118,18 +122,38 @@ public class UserList : Gtk.Container
         can_focus = false;
         background_alpha = 1.0;
 
+        FreeType.Library library;
+        FreeType.init (out library);
+        FreeType.Face face;
+        FreeType.new_face (library, "/usr/share/fonts/truetype/ubuntu-font-family/Ubuntu-L.ttf", 0, out face);
+        font_face = Cairo.ft_font_face_create_for_ft_face (face, 0);
+
         menubar = new Gtk.MenuBar ();
+
+        menubar.draw.connect_after (menubar_draw_cb);
         menubar.pack_direction = Gtk.PackDirection.RTL;
         menubar.show ();
         add (menubar);
 
+        var i = new Gtk.MenuItem.with_label (Posix.utsname ().nodename);
+        i.right_justified = true;
+        i.show ();
+        menubar.append (i);
+
         prompt_entry = new Gtk.Entry ();
+        prompt_entry.invisible_char = '✻';
         prompt_entry.has_frame = false;
+        var b = Gtk.Border ();
+        b.left = 15;
+        b.right = 15;
+        b.top = 15;
+        b.bottom = 15;
+        prompt_entry.set_inner_border (b);
         prompt_entry.activate.connect (prompt_entry_activate_cb);
         add (prompt_entry);
 
         login_button = new Gtk.Button ();
-        var label = new Gtk.Label ("<span font_size=\"large\">Login</span>");
+        var label = new Gtk.Label ("<span font_size=\"large\">" + _("Login") + "</span>");
         label.use_markup = true;
         label.show ();
         login_button.add (label);
@@ -137,20 +161,74 @@ public class UserList : Gtk.Container
         add (login_button);
 
         options_button = new Gtk.Button ();
-        label = new Gtk.Label ("<span size=\"x-large\" color=\"white\">⚙</span>");
-        label.use_markup = true;
-        label.show ();
+        var image = new Gtk.Image.from_file (Path.build_filename (Config.PKGDATADIR, "cog.png", null));
+        image.show ();
         options_button.relief = Gtk.ReliefStyle.NONE;
-        options_button.add (label);
+        options_button.add (image);
         options_button.clicked.connect (options_button_clicked_cb);
         add (options_button);
 
         options_menu = new Gtk.Menu ();
 
+        setup_indicators ();
+    }
+
+    private Cairo.Context menubar_cairo_context;
+
+    private void draw_child_cb (Gtk.Widget child)
+    {
+        menubar.propagate_draw (child, menubar_cairo_context);
+    }
+
+    private bool menubar_draw_cb (Cairo.Context c)
+    {
+        draw_background (c);
+
+        menubar_cairo_context = c;
+        menubar.forall (draw_child_cb);
+
+        return false;
+    }
+
+    async void greeter_set_env (string key, string val)
+    {
+        GLib.Environment.set_variable (key, val, true);
+
+        /* And also set it in the DBus activation environment so that any
+         * indicator services pick it up. */
+        try
+        {
+            var proxy = new GLib.DBusProxy.for_bus_sync (GLib.BusType.SESSION,
+                                                         GLib.DBusProxyFlags.NONE, null, 
+                                                         "org.freedesktop.DBus",
+                                                         "/org/freedesktop/DBus",
+                                                         "org.freedesktop.DBus",
+                                                         null);
+
+            var builder = new GLib.VariantBuilder (GLib.VariantType.ARRAY);
+            builder.add ("{ss}", key, val);
+
+            yield proxy.call ("UpdateActivationEnvironment",
+                              new GLib.Variant ("(a{ss})", builder),
+                              GLib.DBusCallFlags.NONE, -1, null);
+        }
+        catch (Error e)
+        {
+            warning ("Could not get set environment for indicators: %s", e.message);
+            return;
+        }
+    }
+
+    async void setup_indicators ()
+    {
+        greeter_set_env ("INDICATOR_GREETER_MODE", "1"); // reduced functionality
+        greeter_set_env ("GIO_USE_VFS", "local"); // no gvfsd
+        greeter_set_env ("RUNNING_UNDER_GDM", "1"); // for gnome-settings-daemon
+
         load_indicator ("/usr/lib/indicators3/6/libsession.so");
         load_indicator ("/usr/lib/indicators3/6/libdatetime.so");
+        load_indicator ("/usr/lib/indicators3/6/libpower.so");
         load_indicator ("/usr/lib/indicators3/6/libsoundmenu.so");
-        //load_indicator ("/usr/lib/indicators3/6/libapplication.so");
     }
 
     public void show_prompt (string text, bool secret = false)
@@ -179,7 +257,7 @@ public class UserList : Gtk.Container
         sensitive = false;
 
         error = null;
-        message = "Logging in...";
+        message = _("Logging in...");
 
         login_button.hide ();
         prompt_entry.hide ();
@@ -219,7 +297,7 @@ public class UserList : Gtk.Container
         if (entry.menu != null)
             menuitem.submenu = entry.menu;
 
-        menubar.append (menuitem);
+        menubar.insert (menuitem, (int) menubar.get_children ().length () - 1);
     }
 
     private void indicator_removed_cb (Indicator.ObjectEntry entry)
@@ -272,7 +350,7 @@ public class UserList : Gtk.Container
         e.label = label;
         e.background_filename = background;
         e.is_active = is_active;
-        e.width = 7;
+        e.width = 5;
         e.index = (int) n_entries;
         entries.append (e);
 
@@ -299,10 +377,21 @@ public class UserList : Gtk.Container
         debug ("login %s", selected_entry.name);
         start_session ();
     }
+    
+    private void options_menu_position_cb (Gtk.Menu menu, out int x, out int y, out bool push_in)
+    {
+        Gtk.Allocation button_allocation;
+        options_button.get_allocation (out button_allocation);
+
+        get_window ().get_origin (out x, out y);
+        x += button_allocation.x;
+        y += button_allocation.y + button_allocation.height;
+        push_in = true;
+    }
 
     private void options_button_clicked_cb ()
     {
-        options_menu.popup (null, null, null, 0, Gtk.get_current_event_time ());
+        options_menu.popup (null, null, options_menu_position_cb, 0, Gtk.get_current_event_time ());
     }
 
     private void update_entry_location (UserEntry entry)
@@ -377,7 +466,7 @@ public class UserList : Gtk.Container
 
     private bool background_animate_cb ()
     {
-        background_alpha += 0.07;
+        background_alpha += 0.05;
         if (background_alpha > 1.0)
             background_alpha = 1.0;
 
@@ -548,8 +637,8 @@ public class UserList : Gtk.Container
         menubar.get_preferred_size (null, out natural_size);
         var child_allocation = Gtk.Allocation ();
         natural_size.height = 32;
-        natural_size.width = 300;
-        child_allocation.x = allocation.width - natural_size.width;
+        natural_size.width = get_allocated_width ();
+        child_allocation.x = 0;
         child_allocation.y = 0;
         child_allocation.width = natural_size.width;
         child_allocation.height = natural_size.height;
@@ -559,12 +648,10 @@ public class UserList : Gtk.Container
         int base_x, base_y;
         get_selected_location (out base_x, out base_y);
         child_allocation.x = base_x + grid_size / 2;
-        child_allocation.y = base_y + grid_size * 2;
+        child_allocation.y = base_y + grid_size * 2 - grid_size / 2;
         child_allocation.width = grid_size * 8;
         child_allocation.height = grid_size;
         prompt_entry.size_allocate (child_allocation);
-
-        child_allocation.y -= grid_size / 2;
         login_button.size_allocate (child_allocation);
 
         child_allocation.x = base_x + box_width * grid_size - grid_size - grid_size / 4;
@@ -581,7 +668,7 @@ public class UserList : Gtk.Container
                 entry.background_pattern = null;
         }
     }
-   
+
     private void draw_entries (Cairo.Context c)
     {
         foreach (var entry in entries)
@@ -591,19 +678,19 @@ public class UserList : Gtk.Container
 
             if (entry.is_active)
             {
-                c.move_to (0, 0.25 * grid_size);
-                c.rel_line_to (0.4 * grid_size, 0.25 * grid_size);
-                c.rel_line_to (-0.4 * grid_size, 0.25 * grid_size);
+                c.move_to (8, grid_size / 2 + 0.5 - 4);
+                c.rel_line_to (5, 4);
+                c.rel_line_to (-5, 4);
                 c.close_path ();
-                c.set_source_rgb (1.0, 1.0, 1.0);
+                c.set_source_rgba (1.0, 1.0, 1.0, 0.5);
                 c.fill ();
             }
 
-            c.set_font_size (0.6 * grid_size);
+            c.set_font_size (0.5 * grid_size);
             Cairo.TextExtents extents;
             c.text_extents (entry.label, out extents);
             c.move_to (grid_size / 2, grid_size - (grid_size - (extents.height)) / 2);
-            c.set_source_rgb (1.0, 1.0, 1.0);
+            c.set_source_rgba (1.0, 1.0, 1.0, 0.5);
             c.show_text (entry.label);
 
             c.restore ();
@@ -676,7 +763,8 @@ public class UserList : Gtk.Container
 
         /* Draw overlay */
         bc.set_source (overlay);
-        bc.paint ();
+        bc.rectangle (grid_size - 1, grid_size - 1, get_allocated_width () - grid_size * 2 + 2, get_allocated_height () - grid_size * 2 + 2);
+        bc.fill ();
 
         var pattern = new Cairo.Pattern.for_surface (surface);
         pattern.set_extend (Cairo.Extend.REPEAT);
@@ -698,10 +786,9 @@ public class UserList : Gtk.Container
             entry.background_pattern = make_background (entry.background_filename);
         return entry.background_pattern;
     }
-
-    public override bool draw (Cairo.Context c)
+    
+    private void draw_background (Cairo.Context c)
     {
-        /* Draw background */
         if (background_alpha == 1.0)
         {
             c.set_source (get_background_for_user (selected_entry));
@@ -717,27 +804,25 @@ public class UserList : Gtk.Container
             c.set_source (get_background_for_user (selected_entry));
             c.paint_with_alpha (background_alpha);
         }
+    }
 
-        c.select_font_face ("ubuntu", Cairo.FontSlant.NORMAL, Cairo.FontWeight.NORMAL);
+    public override bool draw (Cairo.Context c)
+    {
+        draw_background (c);
 
-        /* Hostname */
-        c.set_font_size (0.4 * grid_size);
-        c.move_to (grid_size, grid_size);
-        c.set_source_rgba (1.0, 1.0, 1.0, 0.5);
-        var utsname = Posix.utsname ();
-        c.show_text (utsname.nodename);
+        c.set_font_face (font_face);
 
         /* Release */
-        c.set_font_size (0.8 * grid_size);
-        c.move_to (grid_size, get_allocated_height () - grid_size);
-        c.set_source_rgba (1.0, 1.0, 1.0, 0.5);
-        c.show_text ("ubuntu");
         Cairo.TextExtents logo_extents;
-        c.text_extents ("ubuntu", out logo_extents);
-        c.set_font_size (0.4 * grid_size);
-        c.move_to (grid_size + logo_extents.width, get_allocated_height () - grid_size);
+        c.set_font_size (0.8 * grid_size);
+        c.text_extents (os_name, out logo_extents);
+        c.move_to (grid_size, get_allocated_height () - grid_size - (grid_size - logo_extents.height) / 2);
         c.set_source_rgba (1.0, 1.0, 1.0, 0.5);
-        c.show_text ("  11.10");
+        c.show_text (os_name);
+        c.set_font_size (0.4 * grid_size);
+        c.move_to (grid_size + logo_extents.width, get_allocated_height () - grid_size - (grid_size - logo_extents.height) / 2);
+        c.set_source_rgba (1.0, 1.0, 1.0, 0.5);
+        c.show_text ("  " + os_version);
 
         int base_x, base_y;
         get_selected_location (out base_x, out base_y);
@@ -765,26 +850,44 @@ public class UserList : Gtk.Container
         c.restore ();
 
         /* Draw box */
-        cairo_rounded_rectangle (c, 0, 0, box_width * grid_size, box_height * grid_size, 0.2 * grid_size);
-        c.set_source_rgba (0.0, 0.0, 0.0, 0.5);
-        c.fill ();
+        var border = 5;
+        var box_w = box_width * grid_size - border * 2;
+        var box_h = box_height * grid_size - border * 2;
+        var box_r = 0.2 * grid_size;
+        cairo_rounded_rectangle (c,
+                                 border + 0.5, border + 0.5,
+                                 box_w - 1, box_h - 1,
+                                 box_r);
+        c.set_source_rgba (0.0, 0.0, 0.0, 0.4);
+        c.fill_preserve ();
+        c.set_line_width (1.0);
+        c.set_source_rgba (1.0, 1.0, 1.0, 0.25);
+        c.stroke ();
+
+        cairo_rounded_rectangle (c,
+                                 border + 0.5 + 2, border + 0.5 + 2,
+                                 box_w - 5, box_h - 5,
+                                 box_r - 2);
+        c.stroke ();
 
         /* Selected item */
         if (selected_entry != null)
         {
             Cairo.TextExtents extents;
-            c.set_font_size (0.6 * grid_size);
+            c.set_font_size (0.5 * grid_size);
             c.text_extents (selected_entry.label, out extents);
+            var text_y = grid_size - (grid_size - border - extents.height) / 4;
+
             if (selected_entry.is_active)
             {
-                c.move_to (0, (grid_size - extents.height) / 2 + 0.25 * grid_size);
-                c.rel_line_to (0.4 * grid_size, 0.25 * grid_size);
-                c.rel_line_to (-0.4 * grid_size, 0.25 * grid_size);
+                c.move_to (8, text_y - extents.height / 2 + 0.5 - 4);
+                c.rel_line_to (5, 4);
+                c.rel_line_to (-5, 4);
                 c.close_path ();
                 c.set_source_rgb (1.0, 1.0, 1.0);
                 c.fill ();
             }
-            c.move_to (grid_size / 2, grid_size);
+            c.move_to (grid_size / 2, text_y);
             c.set_source_rgb (1.0, 1.0, 1.0);
             c.show_text (selected_entry.label);
         }
@@ -799,9 +902,9 @@ public class UserList : Gtk.Container
             else
                 text = error;
 
-            c.set_font_size (0.4 * grid_size);
+            c.set_font_size (0.3 * grid_size);
             c.text_extents (text, out extents);
-            c.move_to (grid_size / 2, grid_size * 2);
+            c.move_to (grid_size / 2, grid_size * 1.25);
             if (error != null)
                 c.set_source_rgb (1.0, 0.0, 0.0);
             else
@@ -822,7 +925,7 @@ public class UserList : Gtk.Container
         var w = width - radius * 2;
         var h = height - radius * 2;
         var kappa = 0.5522847498 * radius;
-        c.move_to (radius, 0);
+        c.move_to (x + radius, y);
         c.rel_line_to (w, 0);
         c.rel_curve_to (kappa, 0, radius, radius - kappa, radius, radius);
         c.rel_line_to (0, h);

@@ -1,3 +1,10 @@
+unity-greeter (0.0.3-0ubuntu1) oneiric; urgency=low
+
+  * New upstream version
+  * debian/patches/update_to_trunk.patch: dropped, it's in the new version
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Wed, 24 Aug 2011 10:45:15 +0200
+
 unity-greeter (0.0.2-0ubuntu4) oneiric; urgency=low
 
   * debian/patches/update_to_trunk.patch: updated to current trunk

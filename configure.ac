@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT(unity-greeter, 0.0.2)
+AC_INIT(unity-greeter, 0.0.3)
 AC_CONFIG_MACRO_DIR(m4)
 AM_INIT_AUTOMAKE
 AM_PROG_CC_C_O
@@ -20,6 +20,8 @@ PKG_CHECK_MODULES(UNITY_GREETER, [
     gdk-x11-3.0
     indicator3-0.4
     liblightdm-gobject-1 >= 0.9.2
+    freetype2
+    cairo-ft
 ])
 
 dnl ###########################################################################
@@ -29,6 +31,7 @@ dnl ###########################################################################
 IT_PROG_INTLTOOL(0.35.0)
 GETTEXT_PACKAGE=unity-greeter
 AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, "$GETTEXT_PACKAGE", Gettext package)
+AC_SUBST(GETTEXT_PACKAGE)
 
 dnl ###########################################################################
 dnl Files to generate

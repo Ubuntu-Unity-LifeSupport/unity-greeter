@@ -33,8 +33,9 @@ NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
 subdir = data
-DIST_COMMON = $(dist_config_DATA) $(dist_xgreeter_DATA) \
-	$(srcdir)/Makefile.am $(srcdir)/Makefile.in
+DIST_COMMON = $(dist_config_DATA) $(dist_pkgdata_DATA) \
+	$(dist_xgreeter_DATA) $(srcdir)/Makefile.am \
+	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -72,8 +73,9 @@ am__nobase_list = $(am__nobase_strip_setup); \
 am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__installdirs = "$(DESTDIR)$(configdir)" "$(DESTDIR)$(xgreeterdir)"
-DATA = $(dist_config_DATA) $(dist_xgreeter_DATA)
+am__installdirs = "$(DESTDIR)$(configdir)" "$(DESTDIR)$(pkgdatadir)" \
+	"$(DESTDIR)$(xgreeterdir)"
+DATA = $(dist_config_DATA) $(dist_pkgdata_DATA) $(dist_xgreeter_DATA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 ALL_LINGUAS = @ALL_LINGUAS@
@@ -95,6 +97,7 @@ ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
 EXEEXT = @EXEEXT@
+GETTEXT_PACKAGE = @GETTEXT_PACKAGE@
 GMSGFMT = @GMSGFMT@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
@@ -178,8 +181,9 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-dist_xgreeter_DATA = unity-greeter.desktop
 xgreeterdir = $(datarootdir)/xgreeters
+dist_xgreeter_DATA = unity-greeter.desktop
+dist_pkgdata_DATA = cog.png
 configdir = $(sysconfdir)/lightdm
 dist_config_DATA = unity-greeter.conf
 DISTCLEANFILES = \
@@ -238,6 +242,26 @@ uninstall-dist_configDATA:
 	test -n "$$files" || exit 0; \
 	echo " ( cd '$(DESTDIR)$(configdir)' && rm -f" $$files ")"; \
 	cd "$(DESTDIR)$(configdir)" && rm -f $$files
+install-dist_pkgdataDATA: $(dist_pkgdata_DATA)
+	@$(NORMAL_INSTALL)
+	test -z "$(pkgdatadir)" || $(MKDIR_P) "$(DESTDIR)$(pkgdatadir)"
+	@list='$(dist_pkgdata_DATA)'; test -n "$(pkgdatadir)" || list=; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(pkgdatadir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(pkgdatadir)" || exit $$?; \
+	done
+
+uninstall-dist_pkgdataDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(dist_pkgdata_DATA)'; test -n "$(pkgdatadir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	test -n "$$files" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(pkgdatadir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(pkgdatadir)" && rm -f $$files
 install-dist_xgreeterDATA: $(dist_xgreeter_DATA)
 	@$(NORMAL_INSTALL)
 	test -z "$(xgreeterdir)" || $(MKDIR_P) "$(DESTDIR)$(xgreeterdir)"
@@ -299,7 +323,7 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(configdir)" "$(DESTDIR)$(xgreeterdir)"; do \
+	for dir in "$(DESTDIR)$(configdir)" "$(DESTDIR)$(pkgdatadir)" "$(DESTDIR)$(xgreeterdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -348,7 +372,8 @@ info: info-am
 
 info-am:
 
-install-data-am: install-dist_configDATA install-dist_xgreeterDATA
+install-data-am: install-dist_configDATA install-dist_pkgdataDATA \
+	install-dist_xgreeterDATA
 
 install-dvi: install-dvi-am
 
@@ -392,21 +417,24 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-dist_configDATA uninstall-dist_xgreeterDATA
+uninstall-am: uninstall-dist_configDATA uninstall-dist_pkgdataDATA \
+	uninstall-dist_xgreeterDATA
 
 .MAKE: install-am install-strip
 
 .PHONY: all all-am check check-am clean clean-generic distclean \
 	distclean-generic distdir dvi dvi-am html html-am info info-am \
 	install install-am install-data install-data-am \
-	install-dist_configDATA install-dist_xgreeterDATA install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-generic pdf pdf-am ps ps-am uninstall uninstall-am \
-	uninstall-dist_configDATA uninstall-dist_xgreeterDATA
+	install-dist_configDATA install-dist_pkgdataDATA \
+	install-dist_xgreeterDATA install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-generic pdf \
+	pdf-am ps ps-am uninstall uninstall-am \
+	uninstall-dist_configDATA uninstall-dist_pkgdataDATA \
+	uninstall-dist_xgreeterDATA
 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

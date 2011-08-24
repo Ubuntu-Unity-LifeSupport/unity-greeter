@@ -4,6 +4,7 @@ unity_greeter_SOURCES = \
 	config.vapi \
 	fixes.vapi \
 	indicator.vapi \
+	settings-daemon.vala \
 	unity-greeter.vala \
 	user-list.vala
 
@@ -11,8 +12,10 @@ unity_greeter_CFLAGS = \
 	$(UNITY_GREETER_CFLAGS) \
 	$(WARN_CFLAGS) \
 	-DGETTEXT_PACKAGE=\"$(GETTEXT_PACKAGE)\" \
+	-DLOCALEDIR=\""$(localedir)"\" \
 	-DVERSION=\"$(VERSION)\" \
-	-DCONFIG_FILE=\""$(sysconfdir)/lightdm/unity-greeter.conf"\"
+	-DCONFIG_FILE=\""$(sysconfdir)/lightdm/unity-greeter.conf"\" \
+	-DPKGDATADIR=\""$(pkgdatadir)"\"
 
 unity_greeter_VALAFLAGS = \
 	--pkg posix \

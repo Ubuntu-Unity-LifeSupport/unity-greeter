@@ -1,11 +1,22 @@
-Overview of changes in lightdm 0.0.2
+Overview of changes in unity-greeter 0.0.3
+
+    * Set icon theme
+    * Use power indicator
+    * Setup indicators to run in greeter mode
+    * Allow OS name and version to be configurable
+    * Run gnome-settings-daemon to get power management, a11y, xrandr etc
+    * Fix translations
+    * Get menubar with transparent background (finally)
+    * Update to latest design
+
+Overview of changes in unity-greeter 0.0.2
 
     * Add copyright headers to .vala files
-    * Update to work with LightDM 0.9
+    * Update to work with lightdm 0.9
     * Add a config file and load Ambiance theme
     * Fit to primary monitor
     * Set root background
 
-Overview of changes in lightdm 0.0.1
+Overview of changes in unity-greeter 0.0.1
 
     * Initial release
