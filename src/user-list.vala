@@ -49,13 +49,11 @@ private class SessionMenuItem : Gtk.RadioMenuItem
 public class UserList : Gtk.Container
 {
     public string default_background = "#000000";
-    public string os_name = "";
-    public string os_version = "";
 
-    private int grid_size = 40;
+    private int grid_size = 42;
     private int grid_x_offset;
     private int grid_y_offset;
-    private int box_width = 9;
+    private int box_width = 7;
 
     private List<UserEntry> entries = null;
     private UserEntry? selected_entry = null;
@@ -73,8 +71,10 @@ public class UserList : Gtk.Container
     
     private string? error;
     private string? message;
-    
+
     private Cairo.FontFace font_face;
+    private Cairo.ImageSurface logo_surface;
+    private Cairo.Pattern logo_pattern;
 
     private Gtk.Entry prompt_entry;
     private Gtk.Button login_button;
@@ -125,8 +125,11 @@ public class UserList : Gtk.Container
         FreeType.Library library;
         FreeType.init (out library);
         FreeType.Face face;
-        FreeType.new_face (library, "/usr/share/fonts/truetype/ubuntu-font-family/Ubuntu-L.ttf", 0, out face);
+        FreeType.new_face (library, "/usr/share/fonts/truetype/ubuntu-font-family/Ubuntu-R.ttf", 0, out face);
         font_face = Cairo.ft_font_face_create_for_ft_face (face, 0);
+
+        logo_surface = new Cairo.ImageSurface.from_png (Path.build_filename (Config.PKGDATADIR, "logo.png", null));
+        logo_pattern = new Cairo.Pattern.for_surface (logo_surface);
 
         menubar = new Gtk.MenuBar ();
 
@@ -649,7 +652,7 @@ public class UserList : Gtk.Container
         get_selected_location (out base_x, out base_y);
         child_allocation.x = base_x + grid_size / 2;
         child_allocation.y = base_y + grid_size * 2 - grid_size / 2;
-        child_allocation.width = grid_size * 8;
+        child_allocation.width = grid_size * (box_width - 1);
         child_allocation.height = grid_size;
         prompt_entry.size_allocate (child_allocation);
         login_button.size_allocate (child_allocation);
@@ -765,6 +768,11 @@ public class UserList : Gtk.Container
         bc.set_source (overlay);
         bc.rectangle (grid_size - 1, grid_size - 1, get_allocated_width () - grid_size * 2 + 2, get_allocated_height () - grid_size * 2 + 2);
         bc.fill ();
+        
+        /* Mask out dots under logo */
+        bc.rectangle (0, get_allocated_height () - logo_surface.get_height (), logo_surface.get_width (), logo_surface.get_height ());
+        Gdk.cairo_set_source_pixbuf (bc, image, 0, 0);
+        bc.fill ();
 
         var pattern = new Cairo.Pattern.for_surface (surface);
         pattern.set_extend (Cairo.Extend.REPEAT);
@@ -812,17 +820,13 @@ public class UserList : Gtk.Container
 
         c.set_font_face (font_face);
 
-        /* Release */
-        Cairo.TextExtents logo_extents;
-        c.set_font_size (0.8 * grid_size);
-        c.text_extents (os_name, out logo_extents);
-        c.move_to (grid_size, get_allocated_height () - grid_size - (grid_size - logo_extents.height) / 2);
-        c.set_source_rgba (1.0, 1.0, 1.0, 0.5);
-        c.show_text (os_name);
-        c.set_font_size (0.4 * grid_size);
-        c.move_to (grid_size + logo_extents.width, get_allocated_height () - grid_size - (grid_size - logo_extents.height) / 2);
-        c.set_source_rgba (1.0, 1.0, 1.0, 0.5);
-        c.show_text ("  " + os_version);
+        /* Logo */
+        c.save ();
+        c.translate (0, get_allocated_height () - logo_surface.get_height ());
+        c.set_source (logo_pattern);
+        c.rectangle (0, 0, logo_surface.get_width (), logo_surface.get_height ());
+        c.fill ();
+        c.restore ();
 
         int base_x, base_y;
         get_selected_location (out base_x, out base_y);

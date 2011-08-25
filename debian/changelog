@@ -1,3 +1,10 @@
+unity-greeter (0.0.5-0ubuntu1) oneiric; urgency=low
+
+  * New upstream release
+    - tweaks to the greeter interface
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Thu, 25 Aug 2011 18:42:47 +1000
+
 unity-greeter (0.0.3-0ubuntu1) oneiric; urgency=low
 
   * New upstream version

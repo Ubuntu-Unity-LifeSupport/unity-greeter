@@ -1,3 +1,14 @@
+Overview of changes in unity-greeter 0.0.5
+
+    * Use Ubuntu regular font
+    * Increase grid size to match design
+    * Reduce width of login box
+    * Use correct Ubuntu logo
+
+Overview of changes in unity-greeter 0.0.4
+
+    * (Not released due to broken bzr tag)
+
 Overview of changes in unity-greeter 0.0.3
 
     * Set icon theme

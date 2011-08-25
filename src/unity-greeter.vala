@@ -76,8 +76,6 @@ public class UnityGreeter
         user_list.respond_to_prompt.connect (respond_to_prompt_cb);
         user_list.start_session.connect (start_session_cb);
         user_list.default_background = get_config_value ("greeter", "background", "#000000");
-        user_list.os_name = get_config_value ("greeter", "os-name", "ubuntu");
-        user_list.os_version = get_config_value ("greeter", "os-version", "");
         user_list.show ();
 
         foreach (var session in LightDM.get_sessions ())

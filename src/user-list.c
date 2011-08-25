@@ -83,6 +83,7 @@ typedef struct _UserListPrivate UserListPrivate;
 #define __g_list_free__g_object_unref0_0(var) ((var == NULL) ? NULL : (var = (_g_list_free__g_object_unref0_ (var), NULL)))
 #define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
 #define _cairo_font_face_destroy0(var) ((var == NULL) ? NULL : (var = (cairo_font_face_destroy (var), NULL)))
+#define _cairo_surface_destroy0(var) ((var == NULL) ? NULL : (var = (cairo_surface_destroy (var), NULL)))
 #define _cairo_destroy0(var) ((var == NULL) ? NULL : (var = (cairo_destroy (var), NULL)))
 #define _g_variant_unref0(var) ((var == NULL) ? NULL : (var = (g_variant_unref (var), NULL)))
 #define _g_variant_builder_unref0(var) ((var == NULL) ? NULL : (var = (g_variant_builder_unref (var), NULL)))
@@ -90,7 +91,6 @@ typedef struct _UserListPrivate UserListPrivate;
 typedef struct _UserListGreeterSetEnvData UserListGreeterSetEnvData;
 typedef struct _UserListSetupIndicatorsData UserListSetupIndicatorsData;
 #define _g_list_free0(var) ((var == NULL) ? NULL : (var = (g_list_free (var), NULL)))
-#define _cairo_surface_destroy0(var) ((var == NULL) ? NULL : (var = (cairo_surface_destroy (var), NULL)))
 
 struct _UserEntry {
 	GTypeInstance parent_instance;
@@ -131,8 +131,6 @@ struct _UserList {
 	GtkContainer parent_instance;
 	UserListPrivate * priv;
 	gchar* default_background;
-	gchar* os_name;
-	gchar* os_version;
 };
 
 struct _UserListClass {
@@ -156,6 +154,8 @@ struct _UserListPrivate {
 	gchar* error;
 	gchar* message;
 	cairo_font_face_t* font_face;
+	cairo_surface_t* logo_surface;
+	cairo_pattern_t* logo_pattern;
 	GtkEntry* prompt_entry;
 	GtkButton* login_button;
 	GtkButton* options_button;
@@ -580,56 +580,69 @@ UserList* user_list_construct (GType object_type) {
 	FT_Face face;
 	FT_Face _tmp1_;
 	cairo_font_face_t* _tmp2_ = NULL;
-	GtkMenuBar* _tmp3_ = NULL;
-	struct utsname _tmp4_ = {0};
-	struct utsname _tmp5_ = {0};
-	GtkMenuItem* _tmp6_ = NULL;
+	gchar* _tmp3_ = NULL;
+	gchar* _tmp4_;
+	cairo_surface_t* _tmp5_ = NULL;
+	cairo_pattern_t* _tmp6_ = NULL;
+	GtkMenuBar* _tmp7_ = NULL;
+	struct utsname _tmp8_ = {0};
+	struct utsname _tmp9_ = {0};
+	GtkMenuItem* _tmp10_ = NULL;
 	GtkMenuItem* i;
-	GtkEntry* _tmp7_ = NULL;
+	GtkEntry* _tmp11_ = NULL;
 	GtkBorder b = {0};
-	GtkButton* _tmp8_ = NULL;
-	const gchar* _tmp9_ = NULL;
-	gchar* _tmp10_;
-	gchar* _tmp11_;
-	gchar* _tmp12_;
-	gchar* _tmp13_;
-	GtkLabel* _tmp14_ = NULL;
-	GtkLabel* _tmp15_;
+	GtkButton* _tmp12_ = NULL;
+	const gchar* _tmp13_ = NULL;
+	gchar* _tmp14_;
+	gchar* _tmp15_;
+	gchar* _tmp16_;
+	gchar* _tmp17_;
+	GtkLabel* _tmp18_ = NULL;
+	GtkLabel* _tmp19_;
 	GtkLabel* label;
-	GtkButton* _tmp16_ = NULL;
-	gchar* _tmp17_ = NULL;
-	gchar* _tmp18_;
-	GtkImage* _tmp19_ = NULL;
-	GtkImage* _tmp20_;
+	GtkButton* _tmp20_ = NULL;
+	gchar* _tmp21_ = NULL;
+	gchar* _tmp22_;
+	GtkImage* _tmp23_ = NULL;
+	GtkImage* _tmp24_;
 	GtkImage* image;
-	GtkMenu* _tmp21_ = NULL;
+	GtkMenu* _tmp25_ = NULL;
 	self = (UserList*) g_object_new (object_type, NULL);
 	g_object_set ((GtkWidget*) self, "can-focus", FALSE, NULL);
 	self->priv->background_alpha = 1.0;
 	FT_Init_FreeType (&_tmp0_);
 	library = _tmp0_;
-	FT_New_Face (library, "/usr/share/fonts/truetype/ubuntu-font-family/Ubuntu-L.ttf", 0, &_tmp1_);
+	FT_New_Face (library, "/usr/share/fonts/truetype/ubuntu-font-family/Ubuntu-R.ttf", 0, &_tmp1_);
 	face = _tmp1_;
 	_tmp2_ = cairo_ft_font_face_create_for_ft_face (face, 0);
 	_cairo_font_face_destroy0 (self->priv->font_face);
 	self->priv->font_face = _tmp2_;
-	_tmp3_ = (GtkMenuBar*) gtk_menu_bar_new ();
+	_tmp3_ = g_build_filename (PKGDATADIR, "logo.png", NULL, NULL);
+	_tmp4_ = _tmp3_;
+	_tmp5_ = cairo_image_surface_create_from_png (_tmp4_);
+	_cairo_surface_destroy0 (self->priv->logo_surface);
+	self->priv->logo_surface = _tmp5_;
+	_g_free0 (_tmp4_);
+	_tmp6_ = cairo_pattern_create_for_surface (self->priv->logo_surface);
+	_cairo_pattern_destroy0 (self->priv->logo_pattern);
+	self->priv->logo_pattern = _tmp6_;
+	_tmp7_ = (GtkMenuBar*) gtk_menu_bar_new ();
 	_g_object_unref0 (self->priv->menubar);
-	self->priv->menubar = g_object_ref_sink (_tmp3_);
+	self->priv->menubar = g_object_ref_sink (_tmp7_);
 	g_signal_connect_object ((GtkWidget*) self->priv->menubar, "draw", (GCallback) _user_list_menubar_draw_cb_gtk_widget_draw, self, G_CONNECT_AFTER);
 	gtk_menu_bar_set_pack_direction (self->priv->menubar, GTK_PACK_DIRECTION_RTL);
 	gtk_widget_show ((GtkWidget*) self->priv->menubar);
 	gtk_container_add ((GtkContainer*) self, (GtkWidget*) self->priv->menubar);
-	uname (&_tmp4_);
-	_tmp5_ = _tmp4_;
-	_tmp6_ = (GtkMenuItem*) gtk_menu_item_new_with_label (_tmp5_.nodename);
-	i = g_object_ref_sink (_tmp6_);
+	uname (&_tmp8_);
+	_tmp9_ = _tmp8_;
+	_tmp10_ = (GtkMenuItem*) gtk_menu_item_new_with_label (_tmp9_.nodename);
+	i = g_object_ref_sink (_tmp10_);
 	gtk_menu_item_set_right_justified (i, TRUE);
 	gtk_widget_show ((GtkWidget*) i);
 	gtk_menu_shell_append ((GtkMenuShell*) self->priv->menubar, (GtkWidget*) i);
-	_tmp7_ = (GtkEntry*) gtk_entry_new ();
+	_tmp11_ = (GtkEntry*) gtk_entry_new ();
 	_g_object_unref0 (self->priv->prompt_entry);
-	self->priv->prompt_entry = g_object_ref_sink (_tmp7_);
+	self->priv->prompt_entry = g_object_ref_sink (_tmp11_);
 	gtk_entry_set_invisible_char (self->priv->prompt_entry, (guint) 10043U);
 	gtk_entry_set_has_frame (self->priv->prompt_entry, FALSE);
 	memset (&b, 0, sizeof (GtkBorder));
@@ -640,41 +653,41 @@ UserList* user_list_construct (GType object_type) {
 	gtk_entry_set_inner_border (self->priv->prompt_entry, &b);
 	g_signal_connect_object (self->priv->prompt_entry, "activate", (GCallback) _user_list_prompt_entry_activate_cb_gtk_entry_activate, self, 0);
 	gtk_container_add ((GtkContainer*) self, (GtkWidget*) self->priv->prompt_entry);
-	_tmp8_ = (GtkButton*) gtk_button_new ();
+	_tmp12_ = (GtkButton*) gtk_button_new ();
 	_g_object_unref0 (self->priv->login_button);
-	self->priv->login_button = g_object_ref_sink (_tmp8_);
-	_tmp9_ = _ ("Login");
-	_tmp10_ = g_strconcat ("<span font_size=\"large\">", _tmp9_, NULL);
-	_tmp11_ = _tmp10_;
-	_tmp12_ = g_strconcat (_tmp11_, "</span>", NULL);
-	_tmp13_ = _tmp12_;
-	_tmp14_ = (GtkLabel*) gtk_label_new (_tmp13_);
-	_tmp15_ = g_object_ref_sink (_tmp14_);
-	_g_free0 (_tmp13_);
-	_g_free0 (_tmp11_);
-	label = _tmp15_;
+	self->priv->login_button = g_object_ref_sink (_tmp12_);
+	_tmp13_ = _ ("Login");
+	_tmp14_ = g_strconcat ("<span font_size=\"large\">", _tmp13_, NULL);
+	_tmp15_ = _tmp14_;
+	_tmp16_ = g_strconcat (_tmp15_, "</span>", NULL);
+	_tmp17_ = _tmp16_;
+	_tmp18_ = (GtkLabel*) gtk_label_new (_tmp17_);
+	_tmp19_ = g_object_ref_sink (_tmp18_);
+	_g_free0 (_tmp17_);
+	_g_free0 (_tmp15_);
+	label = _tmp19_;
 	gtk_label_set_use_markup (label, TRUE);
 	gtk_widget_show ((GtkWidget*) label);
 	gtk_container_add ((GtkContainer*) self->priv->login_button, (GtkWidget*) label);
 	g_signal_connect_object (self->priv->login_button, "clicked", (GCallback) _user_list_login_button_clicked_cb_gtk_button_clicked, self, 0);
 	gtk_container_add ((GtkContainer*) self, (GtkWidget*) self->priv->login_button);
-	_tmp16_ = (GtkButton*) gtk_button_new ();
+	_tmp20_ = (GtkButton*) gtk_button_new ();
 	_g_object_unref0 (self->priv->options_button);
-	self->priv->options_button = g_object_ref_sink (_tmp16_);
-	_tmp17_ = g_build_filename (PKGDATADIR, "cog.png", NULL, NULL);
-	_tmp18_ = _tmp17_;
-	_tmp19_ = (GtkImage*) gtk_image_new_from_file (_tmp18_);
-	_tmp20_ = g_object_ref_sink (_tmp19_);
-	_g_free0 (_tmp18_);
-	image = _tmp20_;
+	self->priv->options_button = g_object_ref_sink (_tmp20_);
+	_tmp21_ = g_build_filename (PKGDATADIR, "cog.png", NULL, NULL);
+	_tmp22_ = _tmp21_;
+	_tmp23_ = (GtkImage*) gtk_image_new_from_file (_tmp22_);
+	_tmp24_ = g_object_ref_sink (_tmp23_);
+	_g_free0 (_tmp22_);
+	image = _tmp24_;
 	gtk_widget_show ((GtkWidget*) image);
 	gtk_button_set_relief (self->priv->options_button, GTK_RELIEF_NONE);
 	gtk_container_add ((GtkContainer*) self->priv->options_button, (GtkWidget*) image);
 	g_signal_connect_object (self->priv->options_button, "clicked", (GCallback) _user_list_options_button_clicked_cb_gtk_button_clicked, self, 0);
 	gtk_container_add ((GtkContainer*) self, (GtkWidget*) self->priv->options_button);
-	_tmp21_ = (GtkMenu*) gtk_menu_new ();
+	_tmp25_ = (GtkMenu*) gtk_menu_new ();
 	_g_object_unref0 (self->priv->options_menu);
-	self->priv->options_menu = g_object_ref_sink (_tmp21_);
+	self->priv->options_menu = g_object_ref_sink (_tmp25_);
 	user_list_setup_indicators (self, NULL, NULL);
 	_g_object_unref0 (image);
 	_g_object_unref0 (label);
@@ -809,7 +822,7 @@ static gboolean user_list_greeter_set_env_co (UserListGreeterSetEnvData* _data_)
 	{
 		_data_->e = _data_->_inner_error_;
 		_data_->_inner_error_ = NULL;
-		g_warning ("user-list.vala:217: Could not get set environment for indicators: %s", _data_->e->message);
+		g_warning ("user-list.vala:220: Could not get set environment for indicators: %s", _data_->e->message);
 		_g_error_free0 (_data_->e);
 		if (_data_->_state_ == 0) {
 			g_simple_async_result_complete_in_idle (_data_->_async_result);
@@ -1114,7 +1127,7 @@ static void user_list_prompt_entry_activate_cb (UserList* self) {
 
 static void user_list_login_button_clicked_cb (UserList* self) {
 	g_return_if_fail (self != NULL);
-	g_debug ("user-list.vala:377: login %s", self->priv->selected_entry->name);
+	g_debug ("user-list.vala:380: login %s", self->priv->selected_entry->name);
 	g_signal_emit_by_name (self, "start-session");
 }
 
@@ -1265,7 +1278,7 @@ static gboolean user_list_scroll_animate_cb (UserList* self) {
 	gtk_widget_queue_draw ((GtkWidget*) self);
 	if (!animating) {
 		self->priv->scroll_animate_timer = (guint) 0;
-		g_debug ("user-list.vala:460: stop scroll animation");
+		g_debug ("user-list.vala:463: stop scroll animation");
 		result = FALSE;
 		return result;
 	} else {
@@ -1285,7 +1298,7 @@ static gboolean user_list_background_animate_cb (UserList* self) {
 	gtk_widget_queue_draw ((GtkWidget*) self);
 	if (self->priv->background_alpha == 1.0) {
 		self->priv->background_animate_timer = (guint) 0;
-		g_debug ("user-list.vala:479: stop background animation");
+		g_debug ("user-list.vala:482: stop background animation");
 		result = FALSE;
 		return result;
 	} else {
@@ -1318,7 +1331,7 @@ static void user_list_select_entry (UserList* self, UserEntry* entry) {
 	gboolean _tmp6_ = FALSE;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (entry != NULL);
-	g_debug ("user-list.vala:488: select %s", entry->name);
+	g_debug ("user-list.vala:491: select %s", entry->name);
 	direction = 1.0;
 	if (self->priv->selected_entry != NULL) {
 		_tmp0_ = entry->y > self->priv->selected_entry->y;
@@ -1341,7 +1354,7 @@ static void user_list_select_entry (UserList* self, UserEntry* entry) {
 		self->priv->background_alpha = 0.0;
 		if (self->priv->background_animate_timer == ((guint) 0)) {
 			guint _tmp3_;
-			g_debug ("user-list.vala:508: start background animation");
+			g_debug ("user-list.vala:511: start background animation");
 			_tmp3_ = g_timeout_add_full (G_PRIORITY_DEFAULT, (guint) 10, _user_list_background_animate_cb_gsource_func, g_object_ref (self), g_object_unref);
 			self->priv->background_animate_timer = _tmp3_;
 		}
@@ -1378,7 +1391,7 @@ static void user_list_select_entry (UserList* self, UserEntry* entry) {
 	}
 	if (_tmp6_) {
 		guint _tmp7_;
-		g_debug ("user-list.vala:529: start scroll animation");
+		g_debug ("user-list.vala:532: start scroll animation");
 		_tmp7_ = g_timeout_add_full (G_PRIORITY_DEFAULT, (guint) 10, _user_list_scroll_animate_cb_gsource_func, g_object_ref (self), g_object_unref);
 		self->priv->scroll_animate_timer = _tmp7_;
 	}
@@ -1653,7 +1666,7 @@ static void user_list_real_size_allocate (GtkWidget* base, GtkAllocation* alloca
 	base_y = _tmp8_;
 	child_allocation.x = base_x + (self->priv->grid_size / 2);
 	child_allocation.y = (base_y + (self->priv->grid_size * 2)) - (self->priv->grid_size / 2);
-	child_allocation.width = self->priv->grid_size * 8;
+	child_allocation.width = self->priv->grid_size * (self->priv->box_width - 1);
 	child_allocation.height = self->priv->grid_size;
 	gtk_widget_size_allocate ((GtkWidget*) self->priv->prompt_entry, &child_allocation);
 	gtk_widget_size_allocate ((GtkWidget*) self->priv->login_button, &child_allocation);
@@ -1764,7 +1777,11 @@ static cairo_pattern_t* user_list_make_background (UserList* self, const gchar* 
 	cairo_t* bc;
 	gint _tmp35_;
 	gint _tmp36_;
-	cairo_pattern_t* _tmp37_ = NULL;
+	gint _tmp37_;
+	gint _tmp38_;
+	gint _tmp39_;
+	gint _tmp40_;
+	cairo_pattern_t* _tmp41_ = NULL;
 	cairo_pattern_t* pattern;
 	GError * _inner_error_ = NULL;
 	g_return_val_if_fail (self != NULL, NULL);
@@ -1773,7 +1790,7 @@ static cairo_pattern_t* user_list_make_background (UserList* self, const gchar* 
 	}
 	_tmp0_ = gtk_widget_get_allocated_width ((GtkWidget*) self);
 	_tmp1_ = gtk_widget_get_allocated_height ((GtkWidget*) self);
-	g_debug ("user-list.vala:705: making background %s at %dx%d", filename, _tmp0_, _tmp1_);
+	g_debug ("user-list.vala:708: making background %s at %dx%d", filename, _tmp0_, _tmp1_);
 	_tmp3_ = gdk_color_parse (filename, &_tmp2_);
 	color = _tmp2_;
 	if (_tmp3_) {
@@ -1800,7 +1817,7 @@ static cairo_pattern_t* user_list_make_background (UserList* self, const gchar* 
 		cairo_pattern_t* _tmp7_ = NULL;
 		e = _inner_error_;
 		_inner_error_ = NULL;
-		g_debug ("user-list.vala:720: Error loading background: %s", e->message);
+		g_debug ("user-list.vala:723: Error loading background: %s", e->message);
 		_tmp7_ = cairo_pattern_create_rgb ((gdouble) 0, (gdouble) 0, (gdouble) 0);
 		result = _tmp7_;
 		_g_error_free0 (e);
@@ -1884,8 +1901,15 @@ static cairo_pattern_t* user_list_make_background (UserList* self, const gchar* 
 	_tmp36_ = gtk_widget_get_allocated_height ((GtkWidget*) self);
 	cairo_rectangle (bc, (gdouble) (self->priv->grid_size - 1), (gdouble) (self->priv->grid_size - 1), (gdouble) ((_tmp35_ - (self->priv->grid_size * 2)) + 2), (gdouble) ((_tmp36_ - (self->priv->grid_size * 2)) + 2));
 	cairo_fill (bc);
-	_tmp37_ = cairo_pattern_create_for_surface (surface);
-	pattern = _tmp37_;
+	_tmp37_ = gtk_widget_get_allocated_height ((GtkWidget*) self);
+	_tmp38_ = cairo_image_surface_get_height (self->priv->logo_surface);
+	_tmp39_ = cairo_image_surface_get_width (self->priv->logo_surface);
+	_tmp40_ = cairo_image_surface_get_height (self->priv->logo_surface);
+	cairo_rectangle (bc, (gdouble) 0, (gdouble) (_tmp37_ - _tmp38_), (gdouble) _tmp39_, (gdouble) _tmp40_);
+	gdk_cairo_set_source_pixbuf (bc, image, (gdouble) 0, (gdouble) 0);
+	cairo_fill (bc);
+	_tmp41_ = cairo_pattern_create_for_surface (surface);
+	pattern = _tmp41_;
 	cairo_pattern_set_extend (pattern, CAIRO_EXTEND_REPEAT);
 	result = pattern;
 	_cairo_destroy0 (bc);
@@ -1969,68 +1993,61 @@ static void user_list_draw_background (UserList* self, cairo_t* c) {
 static gboolean user_list_real_draw (GtkWidget* base, cairo_t* c) {
 	UserList * self;
 	gboolean result = FALSE;
-	cairo_text_extents_t logo_extents = {0};
-	cairo_text_extents_t _tmp0_ = {0};
+	gint _tmp0_;
 	gint _tmp1_;
 	gint _tmp2_;
-	gchar* _tmp3_;
-	gchar* _tmp4_;
+	gint _tmp3_;
 	gint base_x = 0;
 	gint base_y = 0;
+	gint _tmp4_;
 	gint _tmp5_;
-	gint _tmp6_;
+	guint _tmp6_;
 	guint _tmp7_;
 	guint _tmp8_;
 	guint _tmp9_;
 	guint _tmp10_;
-	guint _tmp11_;
 	gint border;
 	gint box_w;
 	gint box_h;
 	gdouble box_r;
-	gboolean _tmp13_ = FALSE;
+	gboolean _tmp12_ = FALSE;
 	self = (UserList*) base;
 	g_return_val_if_fail (c != NULL, FALSE);
 	user_list_draw_background (self, c);
 	cairo_set_font_face (c, self->priv->font_face);
-	cairo_set_font_size (c, 0.8 * self->priv->grid_size);
-	cairo_text_extents (c, self->os_name, &_tmp0_);
-	logo_extents = _tmp0_;
-	_tmp1_ = gtk_widget_get_allocated_height ((GtkWidget*) self);
-	cairo_move_to (c, (gdouble) self->priv->grid_size, (_tmp1_ - self->priv->grid_size) - ((self->priv->grid_size - logo_extents.height) / 2));
-	cairo_set_source_rgba (c, 1.0, 1.0, 1.0, 0.5);
-	cairo_show_text (c, self->os_name);
-	cairo_set_font_size (c, 0.4 * self->priv->grid_size);
-	_tmp2_ = gtk_widget_get_allocated_height ((GtkWidget*) self);
-	cairo_move_to (c, self->priv->grid_size + logo_extents.width, (_tmp2_ - self->priv->grid_size) - ((self->priv->grid_size - logo_extents.height) / 2));
-	cairo_set_source_rgba (c, 1.0, 1.0, 1.0, 0.5);
-	_tmp3_ = g_strconcat ("  ", self->os_version, NULL);
-	_tmp4_ = _tmp3_;
-	cairo_show_text (c, _tmp4_);
-	_g_free0 (_tmp4_);
-	user_list_get_selected_location (self, &_tmp5_, &_tmp6_);
-	base_x = _tmp5_;
-	base_y = _tmp6_;
+	cairo_save (c);
+	_tmp0_ = gtk_widget_get_allocated_height ((GtkWidget*) self);
+	_tmp1_ = cairo_image_surface_get_height (self->priv->logo_surface);
+	cairo_translate (c, (gdouble) 0, (gdouble) (_tmp0_ - _tmp1_));
+	cairo_set_source (c, self->priv->logo_pattern);
+	_tmp2_ = cairo_image_surface_get_width (self->priv->logo_surface);
+	_tmp3_ = cairo_image_surface_get_height (self->priv->logo_surface);
+	cairo_rectangle (c, (gdouble) 0, (gdouble) 0, (gdouble) _tmp2_, (gdouble) _tmp3_);
+	cairo_fill (c);
+	cairo_restore (c);
+	user_list_get_selected_location (self, &_tmp4_, &_tmp5_);
+	base_x = _tmp4_;
+	base_y = _tmp5_;
 	cairo_save (c);
 	cairo_translate (c, (gdouble) base_x, (gdouble) base_y);
 	cairo_save (c);
+	_tmp6_ = user_list_get_n_above (self);
 	_tmp7_ = user_list_get_n_above (self);
-	_tmp8_ = user_list_get_n_above (self);
-	cairo_rectangle (c, (gdouble) 0, (gdouble) ((-_tmp7_) * self->priv->grid_size), (gdouble) (self->priv->box_width * self->priv->grid_size), (gdouble) (_tmp8_ * self->priv->grid_size));
+	cairo_rectangle (c, (gdouble) 0, (gdouble) ((-_tmp6_) * self->priv->grid_size), (gdouble) (self->priv->box_width * self->priv->grid_size), (gdouble) (_tmp7_ * self->priv->grid_size));
 	cairo_clip (c);
 	user_list_draw_entries (self, c);
-	_tmp9_ = user_list_get_n_entries (self);
-	cairo_translate (c, (gdouble) 0, (gdouble) ((-_tmp9_) * self->priv->grid_size));
+	_tmp8_ = user_list_get_n_entries (self);
+	cairo_translate (c, (gdouble) 0, (gdouble) ((-_tmp8_) * self->priv->grid_size));
 	user_list_draw_entries (self, c);
 	cairo_restore (c);
 	cairo_save (c);
-	_tmp10_ = user_list_get_n_below (self);
-	cairo_rectangle (c, (gdouble) 0, (gdouble) (self->priv->box_height * self->priv->grid_size), (gdouble) (self->priv->box_width * self->priv->grid_size), (gdouble) (_tmp10_ * self->priv->grid_size));
+	_tmp9_ = user_list_get_n_below (self);
+	cairo_rectangle (c, (gdouble) 0, (gdouble) (self->priv->box_height * self->priv->grid_size), (gdouble) (self->priv->box_width * self->priv->grid_size), (gdouble) (_tmp9_ * self->priv->grid_size));
 	cairo_clip (c);
 	cairo_translate (c, (gdouble) 0, (gdouble) ((self->priv->box_height - 1) * self->priv->grid_size));
 	user_list_draw_entries (self, c);
-	_tmp11_ = user_list_get_n_entries (self);
-	cairo_translate (c, (gdouble) 0, (gdouble) (_tmp11_ * self->priv->grid_size));
+	_tmp10_ = user_list_get_n_entries (self);
+	cairo_translate (c, (gdouble) 0, (gdouble) (_tmp10_ * self->priv->grid_size));
 	user_list_draw_entries (self, c);
 	cairo_restore (c);
 	border = 5;
@@ -2047,11 +2064,11 @@ static gboolean user_list_real_draw (GtkWidget* base, cairo_t* c) {
 	cairo_stroke (c);
 	if (self->priv->selected_entry != NULL) {
 		cairo_text_extents_t extents = {0};
-		cairo_text_extents_t _tmp12_ = {0};
+		cairo_text_extents_t _tmp11_ = {0};
 		gdouble text_y;
 		cairo_set_font_size (c, 0.5 * self->priv->grid_size);
-		cairo_text_extents (c, self->priv->selected_entry->label, &_tmp12_);
-		extents = _tmp12_;
+		cairo_text_extents (c, self->priv->selected_entry->label, &_tmp11_);
+		extents = _tmp11_;
 		text_y = self->priv->grid_size - (((self->priv->grid_size - border) - extents.height) / 4);
 		if (self->priv->selected_entry->is_active) {
 			cairo_move_to (c, (gdouble) 8, ((text_y - (extents.height / 2)) + 0.5) - 4);
@@ -2066,28 +2083,28 @@ static gboolean user_list_real_draw (GtkWidget* base, cairo_t* c) {
 		cairo_show_text (c, self->priv->selected_entry->label);
 	}
 	if (self->priv->error != NULL) {
-		_tmp13_ = TRUE;
+		_tmp12_ = TRUE;
 	} else {
-		_tmp13_ = self->priv->message != NULL;
+		_tmp12_ = self->priv->message != NULL;
 	}
-	if (_tmp13_) {
+	if (_tmp12_) {
 		cairo_text_extents_t extents = {0};
 		gchar* text = NULL;
-		cairo_text_extents_t _tmp16_ = {0};
+		cairo_text_extents_t _tmp15_ = {0};
 		if (self->priv->error == NULL) {
+			gchar* _tmp13_;
+			_tmp13_ = g_strdup (self->priv->message);
+			_g_free0 (text);
+			text = _tmp13_;
+		} else {
 			gchar* _tmp14_;
-			_tmp14_ = g_strdup (self->priv->message);
+			_tmp14_ = g_strdup (self->priv->error);
 			_g_free0 (text);
 			text = _tmp14_;
-		} else {
-			gchar* _tmp15_;
-			_tmp15_ = g_strdup (self->priv->error);
-			_g_free0 (text);
-			text = _tmp15_;
 		}
 		cairo_set_font_size (c, 0.3 * self->priv->grid_size);
-		cairo_text_extents (c, text, &_tmp16_);
-		extents = _tmp16_;
+		cairo_text_extents (c, text, &_tmp15_);
+		extents = _tmp15_;
 		cairo_move_to (c, (gdouble) (self->priv->grid_size / 2), self->priv->grid_size * 1.25);
 		if (self->priv->error != NULL) {
 			cairo_set_source_rgb (c, 1.0, 0.0, 0.0);
@@ -2103,10 +2120,10 @@ static gboolean user_list_real_draw (GtkWidget* base, cairo_t* c) {
 		GList* child_it = NULL;
 		child_collection = self->priv->children;
 		for (child_it = child_collection; child_it != NULL; child_it = child_it->next) {
-			GtkWidget* _tmp17_;
+			GtkWidget* _tmp16_;
 			GtkWidget* child = NULL;
-			_tmp17_ = _g_object_ref0 ((GtkWidget*) child_it->data);
-			child = _tmp17_;
+			_tmp16_ = _g_object_ref0 ((GtkWidget*) child_it->data);
+			child = _tmp16_;
 			{
 				gtk_container_propagate_draw ((GtkContainer*) self, child, c);
 				_g_object_unref0 (child);
@@ -2355,17 +2372,11 @@ static void user_list_class_init (UserListClass * klass) {
 
 static void user_list_instance_init (UserList * self) {
 	gchar* _tmp0_;
-	gchar* _tmp1_;
-	gchar* _tmp2_;
 	self->priv = USER_LIST_GET_PRIVATE (self);
 	_tmp0_ = g_strdup ("#000000");
 	self->default_background = _tmp0_;
-	_tmp1_ = g_strdup ("");
-	self->os_name = _tmp1_;
-	_tmp2_ = g_strdup ("");
-	self->os_version = _tmp2_;
-	self->priv->grid_size = 40;
-	self->priv->box_width = 9;
+	self->priv->grid_size = 42;
+	self->priv->box_width = 7;
 	self->priv->entries = NULL;
 	self->priv->selected_entry = NULL;
 	self->priv->old_selected_entry = NULL;
@@ -2382,8 +2393,6 @@ static void user_list_finalize (GObject* obj) {
 	UserList * self;
 	self = USER_LIST (obj);
 	_g_free0 (self->default_background);
-	_g_free0 (self->os_name);
-	_g_free0 (self->os_version);
 	__g_list_free__user_entry_unref0_0 (self->priv->entries);
 	_user_entry_unref0 (self->priv->selected_entry);
 	_user_entry_unref0 (self->priv->old_selected_entry);
@@ -2393,6 +2402,8 @@ static void user_list_finalize (GObject* obj) {
 	_g_free0 (self->priv->error);
 	_g_free0 (self->priv->message);
 	_cairo_font_face_destroy0 (self->priv->font_face);
+	_cairo_surface_destroy0 (self->priv->logo_surface);
+	_cairo_pattern_destroy0 (self->priv->logo_pattern);
 	_g_object_unref0 (self->priv->prompt_entry);
 	_g_object_unref0 (self->priv->login_button);
 	_g_object_unref0 (self->priv->options_button);

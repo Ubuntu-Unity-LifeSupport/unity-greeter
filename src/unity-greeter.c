@@ -109,8 +109,6 @@ struct _UserList {
 	GtkContainer parent_instance;
 	UserListPrivate * priv;
 	gchar* default_background;
-	gchar* os_name;
-	gchar* os_version;
 };
 
 struct _UserListClass {
@@ -225,10 +223,8 @@ UnityGreeter* unity_greeter_construct (GType object_type) {
 	LightDMGreeter* _tmp0_ = NULL;
 	UserList* _tmp2_ = NULL;
 	gchar* _tmp3_ = NULL;
-	gchar* _tmp4_ = NULL;
-	gchar* _tmp5_ = NULL;
-	GList* _tmp6_ = NULL;
-	GtkWindow* _tmp22_ = NULL;
+	GList* _tmp4_ = NULL;
+	GtkWindow* _tmp20_ = NULL;
 	GError * _inner_error_ = NULL;
 	self = (UnityGreeter*) g_type_create_instance (object_type);
 	_tmp0_ = lightdm_greeter_new ();
@@ -277,110 +273,104 @@ UnityGreeter* unity_greeter_construct (GType object_type) {
 	_tmp3_ = unity_greeter_get_config_value ("greeter", "background", "#000000");
 	_g_free0 (self->priv->user_list->default_background);
 	self->priv->user_list->default_background = _tmp3_;
-	_tmp4_ = unity_greeter_get_config_value ("greeter", "os-name", "ubuntu");
-	_g_free0 (self->priv->user_list->os_name);
-	self->priv->user_list->os_name = _tmp4_;
-	_tmp5_ = unity_greeter_get_config_value ("greeter", "os-version", "");
-	_g_free0 (self->priv->user_list->os_version);
-	self->priv->user_list->os_version = _tmp5_;
 	gtk_widget_show ((GtkWidget*) self->priv->user_list);
-	_tmp6_ = lightdm_get_sessions ();
+	_tmp4_ = lightdm_get_sessions ();
 	{
 		GList* session_collection = NULL;
 		GList* session_it = NULL;
-		session_collection = _tmp6_;
+		session_collection = _tmp4_;
 		for (session_it = session_collection; session_it != NULL; session_it = session_it->next) {
 			LightDMSession* session = NULL;
 			session = (LightDMSession*) session_it->data;
 			{
-				const gchar* _tmp7_ = NULL;
-				const gchar* _tmp8_ = NULL;
-				_tmp7_ = lightdm_session_get_key (session);
-				_tmp8_ = lightdm_session_get_name (session);
-				user_list_add_session (self->priv->user_list, _tmp7_, _tmp8_);
+				const gchar* _tmp5_ = NULL;
+				const gchar* _tmp6_ = NULL;
+				_tmp5_ = lightdm_session_get_key (session);
+				_tmp6_ = lightdm_session_get_name (session);
+				user_list_add_session (self->priv->user_list, _tmp5_, _tmp6_);
 			}
 		}
 	}
 	if (unity_greeter_test_mode) {
-		const gchar* _tmp9_ = NULL;
-		const gchar* _tmp10_ = NULL;
+		const gchar* _tmp7_ = NULL;
+		const gchar* _tmp8_ = NULL;
 		user_list_add_entry (self->priv->user_list, "alice", "Alice User", "/usr/share/backgrounds/Berries_by_Orb9220.jpg", TRUE);
 		user_list_add_entry (self->priv->user_list, "bob", "Bob User", "/usr/share/backgrounds/White_flowers_by_Garuna_bor-bor.jpg", FALSE);
 		user_list_add_entry (self->priv->user_list, "carol", "Carol User", "/usr/share/backgrounds/Bird_by_Magnus.jpg", FALSE);
-		_tmp9_ = _ ("Guest Account");
-		user_list_add_entry (self->priv->user_list, "*guest", _tmp9_, NULL, TRUE);
-		_tmp10_ = _ ("Other...");
-		user_list_add_entry (self->priv->user_list, NULL, _tmp10_, NULL, FALSE);
+		_tmp7_ = _ ("Guest Account");
+		user_list_add_entry (self->priv->user_list, "*guest", _tmp7_, NULL, TRUE);
+		_tmp8_ = _ ("Other...");
+		user_list_add_entry (self->priv->user_list, NULL, _tmp8_, NULL, FALSE);
 		user_list_add_session (self->priv->user_list, "gnome", "Ubuntu");
 		user_list_add_session (self->priv->user_list, "gnome-shell", "GNOME");
 		user_list_add_session (self->priv->user_list, "kde", "KDE");
 		user_list_set_session (self->priv->user_list, "gnome");
 	} else {
-		LightDMUserList* _tmp11_ = NULL;
-		GList* _tmp12_ = NULL;
-		gboolean _tmp19_;
-		const gchar* _tmp21_ = NULL;
-		_tmp11_ = lightdm_user_list_get_instance ();
-		_tmp12_ = lightdm_user_list_get_users (_tmp11_);
+		LightDMUserList* _tmp9_ = NULL;
+		GList* _tmp10_ = NULL;
+		gboolean _tmp17_;
+		const gchar* _tmp19_ = NULL;
+		_tmp9_ = lightdm_user_list_get_instance ();
+		_tmp10_ = lightdm_user_list_get_users (_tmp9_);
 		{
 			GList* user_collection = NULL;
 			GList* user_it = NULL;
-			user_collection = _tmp12_;
+			user_collection = _tmp10_;
 			for (user_it = user_collection; user_it != NULL; user_it = user_it->next) {
 				LightDMUser* user = NULL;
 				user = (LightDMUser*) user_it->data;
 				{
-					const gchar* _tmp13_ = NULL;
-					gchar* _tmp14_;
+					const gchar* _tmp11_ = NULL;
+					gchar* _tmp12_;
 					gchar* label;
-					const gchar* _tmp15_ = NULL;
-					const gchar* _tmp18_ = NULL;
+					const gchar* _tmp13_ = NULL;
+					const gchar* _tmp16_ = NULL;
+					_tmp11_ = lightdm_user_get_real_name (user);
+					_tmp12_ = g_strdup (_tmp11_);
+					label = _tmp12_;
 					_tmp13_ = lightdm_user_get_real_name (user);
-					_tmp14_ = g_strdup (_tmp13_);
-					label = _tmp14_;
-					_tmp15_ = lightdm_user_get_real_name (user);
-					if (g_strcmp0 (_tmp15_, "") == 0) {
-						const gchar* _tmp16_ = NULL;
-						gchar* _tmp17_;
-						_tmp16_ = lightdm_user_get_name (user);
-						_tmp17_ = g_strdup (_tmp16_);
+					if (g_strcmp0 (_tmp13_, "") == 0) {
+						const gchar* _tmp14_ = NULL;
+						gchar* _tmp15_;
+						_tmp14_ = lightdm_user_get_name (user);
+						_tmp15_ = g_strdup (_tmp14_);
 						_g_free0 (label);
-						label = _tmp17_;
+						label = _tmp15_;
 					}
-					_tmp18_ = lightdm_user_get_name (user);
-					user_list_add_entry (self->priv->user_list, _tmp18_, label, NULL, FALSE);
+					_tmp16_ = lightdm_user_get_name (user);
+					user_list_add_entry (self->priv->user_list, _tmp16_, label, NULL, FALSE);
 					_g_free0 (label);
 				}
 			}
 		}
-		_tmp19_ = lightdm_greeter_get_has_guest_account_hint (self->priv->greeter);
-		if (_tmp19_) {
-			const gchar* _tmp20_ = NULL;
-			_tmp20_ = _ ("Guest Account");
-			user_list_add_entry (self->priv->user_list, "*guest", _tmp20_, NULL, FALSE);
+		_tmp17_ = lightdm_greeter_get_has_guest_account_hint (self->priv->greeter);
+		if (_tmp17_) {
+			const gchar* _tmp18_ = NULL;
+			_tmp18_ = _ ("Guest Account");
+			user_list_add_entry (self->priv->user_list, "*guest", _tmp18_, NULL, FALSE);
 		}
-		_tmp21_ = _ ("Other...");
-		user_list_add_entry (self->priv->user_list, NULL, _tmp21_, NULL, FALSE);
+		_tmp19_ = _ ("Other...");
+		user_list_add_entry (self->priv->user_list, NULL, _tmp19_, NULL, FALSE);
 	}
-	_tmp22_ = (GtkWindow*) gtk_window_new (GTK_WINDOW_TOPLEVEL);
+	_tmp20_ = (GtkWindow*) gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	_g_object_unref0 (self->priv->main_window);
-	self->priv->main_window = g_object_ref_sink (_tmp22_);
+	self->priv->main_window = g_object_ref_sink (_tmp20_);
 	gtk_window_set_has_resize_grip (self->priv->main_window, FALSE);
 	if (unity_greeter_test_mode) {
 		gtk_window_set_default_size (self->priv->main_window, 1024, 600);
 	} else {
-		GdkScreen* _tmp23_ = NULL;
-		GdkScreen* _tmp24_;
+		GdkScreen* _tmp21_ = NULL;
+		GdkScreen* _tmp22_;
 		GdkScreen* screen;
 		GdkRectangle geometry = {0};
-		gint _tmp25_;
-		GdkRectangle _tmp26_ = {0};
-		_tmp23_ = gdk_screen_get_default ();
-		_tmp24_ = _g_object_ref0 (_tmp23_);
-		screen = _tmp24_;
-		_tmp25_ = gdk_screen_get_primary_monitor (screen);
-		gdk_screen_get_monitor_geometry (screen, _tmp25_, &_tmp26_);
-		geometry = _tmp26_;
+		gint _tmp23_;
+		GdkRectangle _tmp24_ = {0};
+		_tmp21_ = gdk_screen_get_default ();
+		_tmp22_ = _g_object_ref0 (_tmp21_);
+		screen = _tmp22_;
+		_tmp23_ = gdk_screen_get_primary_monitor (screen);
+		gdk_screen_get_monitor_geometry (screen, _tmp23_, &_tmp24_);
+		geometry = _tmp24_;
 		gtk_window_set_default_size (self->priv->main_window, geometry.width, geometry.height);
 		gtk_window_move (self->priv->main_window, geometry.x, geometry.y);
 		_g_object_unref0 (screen);
@@ -467,7 +457,7 @@ static void unity_greeter_authentication_complete_cb (UnityGreeter* self) {
 					GError* e = NULL;
 					e = _inner_error_;
 					_inner_error_ = NULL;
-					g_warning ("unity-greeter.vala:177: Failed to start session: %s", e->message);
+					g_warning ("unity-greeter.vala:175: Failed to start session: %s", e->message);
 					_g_error_free0 (e);
 				}
 				__finally2:
@@ -501,7 +491,7 @@ static void unity_greeter_authentication_complete_cb (UnityGreeter* self) {
 
 static void unity_greeter_user_selected_cb (UnityGreeter* self, const gchar* username) {
 	g_return_if_fail (self != NULL);
-	g_debug ("unity-greeter.vala:204: start authentication %s", username);
+	g_debug ("unity-greeter.vala:202: start authentication %s", username);
 	if (!unity_greeter_test_mode) {
 		const gchar* _tmp0_ = NULL;
 		_tmp0_ = lightdm_greeter_get_default_session_hint (self->priv->greeter);
@@ -592,11 +582,11 @@ static void unity_greeter_respond_to_prompt_cb (UnityGreeter* self, const gchar*
 	g_return_if_fail (text != NULL);
 	user_list_set_error (self->priv->user_list, NULL);
 	if (unity_greeter_test_mode) {
-		g_debug ("unity-greeter.vala:259: response %s", text);
+		g_debug ("unity-greeter.vala:257: response %s", text);
 		if (self->priv->test_username == NULL) {
 			gchar* _tmp0_;
 			const gchar* _tmp1_ = NULL;
-			g_debug ("unity-greeter.vala:262: username=%s", text);
+			g_debug ("unity-greeter.vala:260: username=%s", text);
 			_tmp0_ = g_strdup (text);
 			_g_free0 (self->priv->test_username);
 			self->priv->test_username = _tmp0_;
@@ -661,7 +651,7 @@ gchar* unity_greeter_get_config_value (const gchar* group_name, const gchar* key
 			_tmp2_ = g_error_matches (e, G_KEY_FILE_ERROR, G_KEY_FILE_ERROR_GROUP_NOT_FOUND);
 		}
 		if (!_tmp2_) {
-			g_warning ("unity-greeter.vala:300: Error reading configuration item %s:%s: %s", group_name, key, e->message);
+			g_warning ("unity-greeter.vala:298: Error reading configuration item %s:%s: %s", group_name, key, e->message);
 		}
 		_tmp3_ = g_strdup (_default_);
 		result = _tmp3_;
@@ -712,7 +702,7 @@ static cairo_surface_t* unity_greeter_create_root_surface (GdkScreen* screen) {
 	_tmp4_ = XOpenDisplay (_tmp3_);
 	display = _tmp4_;
 	if (display == NULL) {
-		g_warning ("unity-greeter.vala:314: Failed to create root pixmap");
+		g_warning ("unity-greeter.vala:312: Failed to create root pixmap");
 		result = NULL;
 		_XCloseDisplay0 (display);
 		_g_object_unref0 (visual);
@@ -868,7 +858,7 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 		e = _inner_error_;
 		_inner_error_ = NULL;
 		if (!g_error_matches (e, G_FILE_ERROR, G_FILE_ERROR_NOENT)) {
-			g_warning ("unity-greeter.vala:395: Failed to load configuration from %s: %s\n", CONFIG_FILE, e->message);
+			g_warning ("unity-greeter.vala:393: Failed to load configuration from %s: %s\n", CONFIG_FILE, e->message);
 		}
 		_g_error_free0 (e);
 	}
