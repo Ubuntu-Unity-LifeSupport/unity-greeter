@@ -1,3 +1,11 @@
+unity-greeter (0.0.5-0ubuntu2) oneiric; urgency=low
+
+  * debian/patches/disable-fuse.patch:
+    - Disable fuse daemon, which will crash if run because we also force
+      the 'local' vfs backend.  LP: #832533
+
+ -- Michael Terry <mterry@ubuntu.com>  Thu, 25 Aug 2011 15:28:31 -0400
+
 unity-greeter (0.0.5-0ubuntu1) oneiric; urgency=low
 
   * New upstream release
