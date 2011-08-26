@@ -1,3 +1,10 @@
+unity-greeter (0.0.5-0ubuntu3) oneiric; urgency=low
+
+  * debian/patches/customize-logo.patch:
+    - Allow derivatives to customize logo again.  LP: #834701
+
+ -- Michael Terry <mterry@ubuntu.com>  Fri, 26 Aug 2011 13:38:47 -0400
+
 unity-greeter (0.0.5-0ubuntu2) oneiric; urgency=low
 
   * debian/patches/disable-fuse.patch:
