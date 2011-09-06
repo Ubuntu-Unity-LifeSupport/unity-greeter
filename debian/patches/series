@@ -1,2 +1,3 @@
 disable-fuse.patch
 customize-logo.patch
+run_unity_support_test.patch

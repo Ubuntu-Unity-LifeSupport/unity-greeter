@@ -1,0 +1,25 @@
+# Description: try to run unity_support_test for ubuntu for pre-caching the
+#              result in /tmp for further call while the user is typing his
+#              password.
+
+Index: ubuntu-unity-greeter/src/unity-greeter.vala
+===================================================================
+--- ubuntu-unity-greeter.orig/src/unity-greeter.vala	2011-09-06 16:30:06.209204307 +0200
++++ ubuntu-unity-greeter/src/unity-greeter.vala	2011-09-06 16:36:59.483253629 +0200
+@@ -420,6 +420,16 @@
+         var greeter = new UnityGreeter ();
+         greeter.show ();
+ 
++        /* Launch the unity_support_test tool as an async process to cache
++           its result */
++        var exec = new string[1];
++        exec[0] = "/usr/lib/nux/unity_support_test";
++        try {
++            Process.spawn_async (null, exec, null, SpawnFlags.SEARCH_PATH, null, null);
++        } catch (SpawnError e) {
++            warning ("Failed to spawn unity-support-test tool for pre-caching: %s", e.message);
++        }
++
+         Gtk.main ();
+ 
+         return Posix.EXIT_SUCCESS;

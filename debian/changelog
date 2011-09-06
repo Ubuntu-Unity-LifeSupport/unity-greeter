@@ -1,3 +1,12 @@
+unity-greeter (0.0.5-0ubuntu4) oneiric; urgency=low
+
+  * debian/patches/run_unity_support_test.patch:
+    - try to run unity_support_test for ubuntu for pre-caching the
+     result in /tmp for further call while the user is typing his
+     password (LP: #842656)
+
+ -- Didier Roche <didrocks@ubuntu.com>  Tue, 06 Sep 2011 17:24:37 +0200
+
 unity-greeter (0.0.5-0ubuntu3) oneiric; urgency=low
 
   * debian/patches/customize-logo.patch:
