@@ -33,3 +33,14 @@ namespace Cairo
     [CCode (cprefix = "", lower_case_cprefix = "", cheader_filename = "cairo-ft.h")]
     public Cairo.FontFace ft_font_face_create_for_ft_face (FreeType.Face face, int load_flags);
 }
+
+namespace Gdk
+{
+    public const int KEY_Up;
+    public const int KEY_Down;
+}
+
+namespace Gtk
+{
+    public void socket_add_id (Gtk.Socket socket, int id);
+}

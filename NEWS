@@ -1,3 +1,33 @@
+Overview of changes in unity-greeter 0.0.7
+
+    * Show caps-lock warning in password field
+    * Use constant time animation
+    * Render background images in a background thread
+    * Load indicators in a thread
+    * Add timing to logs
+    * Add more logging messages
+    * Fade out long names
+    * Wait until background is loaded before showing the main window - stops
+      a white flash being seen on startup.
+
+Overview of changes in unity-greeter 0.0.6
+
+    * Fix password cursors not getting focus
+    * Make logo configurable again
+    * Disable FUSE
+    * Show if users are currently logged in
+    * Update user list when users are added/removed/modified
+    * Use select user hint to select the correct user
+    * Fix vertical grid alignment of user list
+    * Add accessibility menu with high contrast, screen reader and onscreen
+      keyboard
+    * Make use of hide users hint
+    * Change "Other..." entry to match username being entered
+    * Rename "Guest Account" to "Guest Session" to match desktop
+    * Don't give keyboard focus to session selector when clicking on it
+    * Stop hostname being selectable
+    * Hide the "Other..." entry when user list showing
+
 Overview of changes in unity-greeter 0.0.5
 
     * Use Ubuntu regular font

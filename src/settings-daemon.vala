@@ -49,17 +49,15 @@ public class SettingsDaemon : Object
                              "org.gnome.settings-daemon.plugins.power",
                              "org.gnome.settings-daemon.plugins.xrandr"};
 
-        Settings settings;
-
-        foreach (weak string schema in disabled)
+        foreach (var schema in disabled)
         {
-            settings = new Settings (schema);
+            var settings = new Settings (schema);
             settings.set_boolean ("active", false);
         }
 
-        foreach (weak string schema in enabled)
+        foreach (var schema in enabled)
         {
-            settings = new Settings (schema);
+            var settings = new Settings (schema);
             settings.set_boolean ("active", true);
         }
 

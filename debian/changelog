@@ -1,3 +1,44 @@
+unity-greeter (0.0.7-0ubuntu1) oneiric; urgency=low
+
+  * New upstream release: (LP: #843621)
+    - Show caps-lock warning in password field
+    - Use constant time animation
+    - Render background images in a background thread
+    - Load indicators in a thread
+    - Add timing to logs
+    - Add more logging messages
+    - Fade out long names (LP: #844047)
+    - Wait until background is loaded before showing the main window - stops
+      a white flash being seen on startup. (LP: #836479)
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Wed, 14 Sep 2011 16:30:31 +1000
+
+unity-greeter (0.0.6-0ubuntu1) UNRELEASED; urgency=low
+
+  * New upstream release:
+    - Fix password cursors not getting focus (LP: #810805)
+    - Make logo configurable again (LP: #834701)
+    - Disable FUSE
+    - Show if users are currently logged in (LP: #835312)
+    - Update user list when users are added/removed/modified
+    - Use select user hint to select the correct user (LP: #835311)
+    - Fix vertical grid alignment of user list
+    - Add accessibility menu with high contrast, screen reader and onscreen
+      keyboard (LP: #810697)
+    - Make use of hide users hint (LP: #836395)
+    - Change "Other..." entry to match username being entered
+    - Rename "Guest Account" to "Guest Session" to match desktop
+    - Don't give keyboard focus to session selector when clicking on it
+      (LP: #827749)
+    - Stop hostname being selectable (LP: #837149)
+    - Hide the "Other..." entry when user list showing
+    - Fix battery indicator (LP: #830175)
+  * debian/patches/customize-logo.patch:
+  * debian/patches/disable-fuse.patch:
+    - Applied upstream
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Wed, 07 Sep 2011 17:02:43 +1000
+
 unity-greeter (0.0.5-0ubuntu4) oneiric; urgency=low
 
   * debian/patches/run_unity_support_test.patch:

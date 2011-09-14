@@ -16,18 +16,51 @@
  * Authored by: Robert Ancell <robert.ancell@canonical.com>
  */
 
+private class AnimateTimer
+{
+    private Timer timer;
+    private uint timeout = 0;
+    private double last_timestep;
+
+    public signal void animate (double timestep);
+
+    private bool animate_cb ()
+    {
+        var t = timer.elapsed ();
+        var timestep = t - last_timestep;
+        last_timestep = t;
+
+        animate (timestep);
+
+        return true;
+    }
+    
+    public bool is_running { get { return timeout != 0; } }
+
+    public void reset ()
+    {
+        stop ();
+        last_timestep = 0.0;
+        timer = new Timer ();
+        timeout = Timeout.add (10, animate_cb);
+    }
+    
+    public void stop ()
+    {
+        if (timeout != 0)
+            Source.remove (timeout);
+        timeout = 0;
+    }
+}
+
 private class UserEntry
 {
-    public int index;
-
     public string? name;
 
     /* Label to display */
     public string label;
 
-    public string? background_filename;
-    public Cairo.Pattern background_pattern;
-
+    public Background background;
     public double y;
     public double target_y;
     public double direction;
@@ -41,40 +74,291 @@ private class UserEntry
     }
 }
 
+private class IndicatorMenuItem : Gtk.MenuItem
+{
+    public unowned Indicator.ObjectEntry entry;
+    private Gtk.HBox hbox;
+
+    public IndicatorMenuItem (Indicator.ObjectEntry entry)
+    {
+        this.entry = entry;
+        this.hbox = new Gtk.HBox (false, 3);
+        this.add (this.hbox);
+        this.hbox.show ();
+
+        if (entry.label != null)
+        {
+            entry.label.show.connect (this.visibility_changed_cb);
+            entry.label.hide.connect (this.visibility_changed_cb);
+            hbox.pack_start (entry.label, false, false, 0);
+        }
+        if (entry.image != null)
+        {
+            entry.image.show.connect (visibility_changed_cb);
+            entry.image.hide.connect (visibility_changed_cb);
+            hbox.pack_start (entry.image, false, false, 0);
+        }
+        if (entry.accessible_desc != null)
+            get_accessible ().set_name (entry.accessible_desc);
+        if (entry.menu != null)
+            submenu = entry.menu;
+
+        if (has_visible_child ())
+            show();
+    }
+
+    public bool has_visible_child ()
+    {
+        return (entry.image != null && entry.image.get_visible ()) ||
+               (entry.label != null && entry.label.get_visible ());
+    }
+
+    public void visibility_changed_cb (Gtk.Widget widget)
+    {
+        visible = has_visible_child ();
+    }
+}
+
 private class SessionMenuItem : Gtk.RadioMenuItem
 {
     public string session_name;
 }
 
+public class Background
+{
+    public string filename;
+    public int width;
+    public int height;
+    public int grid_size;
+    public int grid_x_offset;
+    public int grid_y_offset;
+    public Cairo.Surface logo_surface;
+    public Cairo.Pattern logo_pattern;
+
+    public Cairo.Pattern pattern;
+
+    private unowned Thread<Cairo.Pattern> thread;
+    
+    public signal void loaded ();
+    
+    public Background (string filename)
+    {
+        this.filename = filename;
+    }
+
+    public bool load ()
+    {
+        if (pattern != null)
+            return true;
+
+        Gdk.Color color;
+        if (Gdk.Color.parse (filename, out color))
+        {
+            pattern = new Cairo.Pattern.rgb (color.red / 65535.0, color.green / 65535.0, color.blue / 65535.0);
+            return true;
+        }
+
+        if (thread != null)
+            return false;
+
+        debug ("Making background %s at %dx%d", filename, width, height);
+        try
+        {
+            thread = Thread<Cairo.Pattern>.create<Cairo.Pattern> (render, true);
+        }
+        catch (ThreadError e)
+        {
+            pattern = new Cairo.Pattern.rgb (0, 0, 0);            
+            return true;
+        }
+
+        return false;
+    }
+    
+    private bool ready_cb ()
+    {
+        debug ("Render of background %s at %dx%d complete", filename, width, height);
+
+        pattern = thread.join ();
+        loaded ();
+
+        return false;
+    }
+
+    private Cairo.Pattern render ()
+    {
+        Gdk.Pixbuf orig_image;
+        try
+        {
+            orig_image = new Gdk.Pixbuf.from_file (filename);
+        }
+        catch (Error e)
+        {
+            debug ("Error loading background: %s", e.message);
+            var pattern = new Cairo.Pattern.rgb (0, 0, 0);
+            Gdk.threads_add_idle (ready_cb);
+            return pattern;
+        }
+
+        var target_aspect = (double) width / height;
+        var aspect = (double) orig_image.width / orig_image.height;
+        double scale, offset_x = 0, offset_y = 0;
+        if (aspect > target_aspect)
+        {
+            /* Fit height and trim sides */
+            scale = (double) height / orig_image.height;
+            offset_x = (orig_image.width * scale - width) / 2;
+        }
+        else
+        {
+            /* Fit width and trim top and bottom */
+            scale = (double) width / orig_image.width;
+            offset_y = (orig_image.height * scale - height) / 2;
+        }
+
+        var image = new Gdk.Pixbuf (orig_image.colorspace, orig_image.has_alpha, orig_image.bits_per_sample, width, height);
+        orig_image.scale (image, 0, 0, width, height, -offset_x, -offset_y, scale, scale, Gdk.InterpType.BILINEAR);
+
+        /* Overlay grid */
+        var overlay_surface = new Cairo.ImageSurface (Cairo.Format.ARGB32, grid_size, grid_size);
+        var oc = new Cairo.Context (overlay_surface);
+        oc.rectangle (0, 0, 1, 1);
+        oc.rectangle (grid_size - 1, 0, 1, 1);
+        oc.rectangle (0, grid_size - 1, 1, 1);
+        oc.rectangle (grid_size - 1, grid_size - 1, 1, 1);
+        oc.set_source_rgba (1.0, 1.0, 1.0, 0.25);
+        oc.fill ();
+        var overlay = new Cairo.Pattern.for_surface (overlay_surface);
+        var matrix = Cairo.Matrix.identity ();
+        matrix.translate (-grid_x_offset, -grid_y_offset);
+        overlay.set_matrix (matrix);
+        overlay.set_extend (Cairo.Extend.REPEAT);
+
+        /* Create background */
+        var surface = new Cairo.ImageSurface (Cairo.Format.RGB24, width, height);
+        var bc = new Cairo.Context (surface);
+        Gdk.cairo_set_source_pixbuf (bc, image, 0, 0);
+        bc.paint ();
+
+        /* Draw overlay */
+        bc.set_source (overlay);
+        bc.rectangle (grid_size - 1, grid_size - 1, width - grid_size * 2 + 2, height - grid_size * 2 + 2);
+        bc.fill ();
+
+        /* Draw logo */
+        if (logo_surface != null)
+        {
+            bc.save ();
+            var y = (int) (height / grid_size - 2) * grid_size + grid_y_offset;
+            bc.translate (grid_x_offset, y);
+            bc.set_source (logo_pattern);
+            bc.paint_with_alpha (0.5);
+            bc.restore ();
+        }
+
+        var pattern = new Cairo.Pattern.for_surface (surface);
+        pattern.set_extend (Cairo.Extend.REPEAT);
+
+        Gdk.threads_add_idle (ready_cb);
+        
+        return pattern;
+    }
+}
+
+private class IndicatorLoader
+{
+    public Indicator.Object indicator_object;
+
+    private string filename;
+    private unowned Thread<Indicator.Object> thread;
+
+    public signal void loaded ();
+
+    public IndicatorLoader (string filename)
+    {
+        this.filename = filename;
+    }
+
+    public void load ()
+    {
+        debug ("Loading indicator %s", filename);
+        
+        try
+        {
+            thread = Thread<Indicator.Object>.create<Indicator.Object> (load_indicator, true);
+        }
+        catch (ThreadError e)
+        {
+        }
+    }
+    
+    private bool ready_cb ()
+    {
+        debug ("Indicator %s loaded", filename);
+
+        indicator_object = thread.join ();
+        loaded ();
+
+        return false;
+    }
+
+    private Indicator.Object load_indicator ()
+    {
+        var o = new Indicator.Object.from_file (filename);
+        Gdk.threads_add_idle (ready_cb);
+        return o;
+    }
+}
+
 public class UserList : Gtk.Container
 {
-    public string default_background = "#000000";
+    private string default_theme_name;
+
+    private int frame_count = 0;
+
+    private Timer draw_timer = null;
+    private uint draw_timeout = 0;
+    private int draw_count = 0;
+    
+    private int width;
+    private int height;
 
     private int grid_size = 42;
     private int grid_x_offset;
     private int grid_y_offset;
     private int box_width = 7;
 
+    private HashTable<string, Background> backgrounds;
+    private Background background;
+    private Background old_background;
+    private uint change_background_timeout = 0;
+
     private List<UserEntry> entries = null;
     private UserEntry? selected_entry = null;
-    private UserEntry? old_selected_entry = null;
 
-    private uint scroll_animate_timer = 0;
+    private AnimateTimer scroll_timer;
 
-    private uint background_animate_timer = 0;
+    private AnimateTimer background_timer;
     private double background_alpha;
 
     private List<Gtk.Widget> children;
 
     private Gtk.MenuBar menubar;
-    private GLib.List<Indicator.Object> indicators = null;
-    
+    private Cairo.Context menubar_cairo_context;
+    private List<IndicatorLoader> indicators = null;
+    private Gtk.CheckMenuItem high_contrast_item;
+
+    private Gtk.Socket? keyboard_socket = null;
+
     private string? error;
     private string? message;
 
     private Cairo.FontFace font_face;
-    private Cairo.ImageSurface logo_surface;
-    private Cairo.Pattern logo_pattern;
+    private Cairo.ImageSurface? logo_surface = null;
+    private Cairo.Pattern? logo_pattern;
+
+    private Cairo.ImageSurface? box_surface = null;
+    private Cairo.Pattern? box_pattern;
 
     private Gtk.Entry prompt_entry;
     private Gtk.Button login_button;
@@ -87,7 +371,7 @@ public class UserList : Gtk.Container
     public signal void user_selected (string? username);
     public signal void respond_to_prompt (string text);
     public signal void start_session ();
-    
+
     public string? selected
     {
         get { if (selected_entry == null) return null; return selected_entry.name; }
@@ -117,8 +401,10 @@ public class UserList : Gtk.Container
         }
     }
 
-    public UserList ()
+    public UserList (int width, int height)
     {
+        this.width = width;
+        this.height = height;
         can_focus = false;
         background_alpha = 1.0;
 
@@ -128,23 +414,30 @@ public class UserList : Gtk.Container
         FreeType.new_face (library, "/usr/share/fonts/truetype/ubuntu-font-family/Ubuntu-R.ttf", 0, out face);
         font_face = Cairo.ft_font_face_create_for_ft_face (face, 0);
 
-        logo_surface = new Cairo.ImageSurface.from_png (Path.build_filename (Config.PKGDATADIR, "logo.png", null));
-        logo_pattern = new Cairo.Pattern.for_surface (logo_surface);
+        Gtk.Settings.get_default ().get ("gtk-theme-name", out default_theme_name);
 
         menubar = new Gtk.MenuBar ();
-
         menubar.draw.connect_after (menubar_draw_cb);
         menubar.pack_direction = Gtk.PackDirection.RTL;
         menubar.show ();
         add (menubar);
 
-        var i = new Gtk.MenuItem.with_label (Posix.utsname ().nodename);
-        i.right_justified = true;
-        i.show ();
-        menubar.append (i);
+        var label = new Gtk.Label (Posix.utsname ().nodename);
+        label.show ();
+        var hostname_item = new Gtk.MenuItem ();
+        hostname_item.add (label);
+        hostname_item.sensitive = false;
+        hostname_item.right_justified = true;
+        hostname_item.show ();
+        menubar.append (hostname_item);
+
+        /* Hack to get a label showing on the menubar */
+        label.ensure_style ();
+        label.modify_fg (Gtk.StateType.INSENSITIVE, label.get_style ().fg[Gtk.StateType.NORMAL]);
 
         prompt_entry = new Gtk.Entry ();
         prompt_entry.invisible_char = '✻';
+        prompt_entry.caps_lock_warning = true;
         prompt_entry.has_frame = false;
         var b = Gtk.Border ();
         b.left = 15;
@@ -156,7 +449,7 @@ public class UserList : Gtk.Container
         add (prompt_entry);
 
         login_button = new Gtk.Button ();
-        var label = new Gtk.Label ("<span font_size=\"large\">" + _("Login") + "</span>");
+        label = new Gtk.Label ("<span font_size=\"large\">" + _("Login") + "</span>");
         label.use_markup = true;
         label.show ();
         login_button.add (label);
@@ -164,6 +457,8 @@ public class UserList : Gtk.Container
         add (login_button);
 
         options_button = new Gtk.Button ();
+        options_button.focus_on_click = false;
+        options_button.get_accessible ().set_name (_("Session Options"));
         var image = new Gtk.Image.from_file (Path.build_filename (Config.PKGDATADIR, "cog.png", null));
         image.show ();
         options_button.relief = Gtk.ReliefStyle.NONE;
@@ -173,10 +468,35 @@ public class UserList : Gtk.Container
 
         options_menu = new Gtk.Menu ();
 
+        draw_timer = new Timer ();
+
+        box_surface = new Cairo.ImageSurface.from_png (Path.build_filename (Config.PKGDATADIR, "dialog_background.png", null));
+        box_pattern = new Cairo.Pattern.for_surface (box_surface);
+
+        backgrounds = new HashTable<string?, Background> (str_hash, str_equal);
+        old_background = background = new Background ("#000000");
+
+        scroll_timer = new AnimateTimer ();
+        scroll_timer.animate.connect (scroll_animate_cb);
+        background_timer = new AnimateTimer ();
+        background_timer.animate.connect (background_animate_cb);
+
         setup_indicators ();
     }
 
-    private Cairo.Context menubar_cairo_context;
+    public void set_logo (string logo_path)
+    {
+        if (FileUtils.test (logo_path, FileTest.EXISTS))
+        {
+            logo_surface = new Cairo.ImageSurface.from_png (logo_path);
+            logo_pattern = new Cairo.Pattern.for_surface (logo_surface);
+        }
+        else
+        {
+            logo_surface = null;
+            logo_pattern = null;
+        }
+    }
 
     private void draw_child_cb (Gtk.Widget child)
     {
@@ -202,7 +522,7 @@ public class UserList : Gtk.Container
         try
         {
             var proxy = new GLib.DBusProxy.for_bus_sync (GLib.BusType.SESSION,
-                                                         GLib.DBusProxyFlags.NONE, null, 
+                                                         GLib.DBusProxyFlags.NONE, null,
                                                          "org.freedesktop.DBus",
                                                          "/org/freedesktop/DBus",
                                                          "org.freedesktop.DBus",
@@ -224,14 +544,101 @@ public class UserList : Gtk.Container
 
     async void setup_indicators ()
     {
-        greeter_set_env ("INDICATOR_GREETER_MODE", "1"); // reduced functionality
-        greeter_set_env ("GIO_USE_VFS", "local"); // no gvfsd
-        greeter_set_env ("RUNNING_UNDER_GDM", "1"); // for gnome-settings-daemon
+        /* Set indicators to run with reduced functionality */
+        greeter_set_env ("INDICATOR_GREETER_MODE", "1");
+
+        /* Don't allow virtual file systems? */
+        greeter_set_env ("GIO_USE_VFS", "local");
+        greeter_set_env ("GVFS_DISABLE_FUSE", "1");
+
+        /* Hint to have gnome-settings-daemon run in greeter mode */
+        greeter_set_env ("RUNNING_UNDER_GDM", "1");
+
+        var a11y_item = new Gtk.MenuItem ();
+        var hbox = new Gtk.HBox (false, 3);
+        hbox.show ();
+        a11y_item.add (hbox);
+        var image = new Gtk.Image.from_file (Path.build_filename (Config.PKGDATADIR, "a11y.svg"));
+        image.show ();
+        hbox.add (image);
+        a11y_item.show ();
+        a11y_item.submenu = new Gtk.Menu ();
+        var item = new Gtk.CheckMenuItem.with_label (_("Onscreen keyboard"));
+        item.toggled.connect (keyboard_toggled_cb);
+        item.show ();
+        a11y_item.submenu.append (item);
+        high_contrast_item = new Gtk.CheckMenuItem.with_label (_("High Contrast"));
+        high_contrast_item.toggled.connect (high_contrast_toggled_cb);
+        high_contrast_item.show ();
+        a11y_item.submenu.append (high_contrast_item);
+        item = new Gtk.CheckMenuItem.with_label (_("Screen Reader"));
+        item.toggled.connect (screen_reader_toggled_cb);
+        item.show ();
+        a11y_item.submenu.append (item);
+        menubar.insert (a11y_item, (int) menubar.get_children ().length () - 1);
 
         load_indicator ("/usr/lib/indicators3/6/libsession.so");
         load_indicator ("/usr/lib/indicators3/6/libdatetime.so");
         load_indicator ("/usr/lib/indicators3/6/libpower.so");
         load_indicator ("/usr/lib/indicators3/6/libsoundmenu.so");
+    }
+
+    private void keyboard_toggled_cb (Gtk.CheckMenuItem item)
+    {
+        if (keyboard_socket == null)
+        {
+            Pid onboard_pid;
+            try
+            {
+                string[] argv;
+                int onboard_stdout_fd;
+
+                Shell.parse_argv ("onboard --xid", out argv);
+                Process.spawn_async_with_pipes (null,
+                                                argv,
+                                                null,
+                                                SpawnFlags.SEARCH_PATH,
+                                                null,
+                                                out onboard_pid,
+                                                null,
+                                                out onboard_stdout_fd,
+                                                null);
+                var f = FileStream.fdopen (onboard_stdout_fd, "r");
+                var stdout_text = new char[1024];
+                f.gets (stdout_text);
+                var id = int.parse ((string) stdout_text);
+
+                keyboard_socket = new Gtk.Socket ();
+                add (keyboard_socket);
+                keyboard_socket.set_size_request (800, 200);
+                Gtk.socket_add_id (keyboard_socket, id);
+            }
+            catch (Error e)
+            {
+                warning ("Error setting up keyboard: %s", e.message);
+            }
+        }
+
+        if (keyboard_socket != null)
+            keyboard_socket.visible = item.active;
+    }
+
+    private void high_contrast_toggled_cb (Gtk.CheckMenuItem item)
+    {
+        var settings = Gtk.Settings.get_default ();
+        if (item.active)
+            settings.set ("gtk-theme-name", "HighContrastInverse");
+        else
+            settings.set ("gtk-theme-name", default_theme_name);
+        queue_draw ();
+    }
+
+    private void screen_reader_toggled_cb (Gtk.CheckMenuItem item)
+    {
+        var settings = new Settings ("org.gnome.desktop.a11y.applications");
+        settings.set_boolean ("screen-reader-enabled", item.active);
+        settings = new Settings ("org.gnome.desktop.interface");
+        settings.set_boolean ("toolkit-accessibility", item.active);
     }
 
     public void show_prompt (string text, bool secret = false)
@@ -241,6 +648,16 @@ public class UserList : Gtk.Container
         prompt_entry.text = "";
         prompt_entry.show ();
         prompt_entry.visibility = !secret;
+        var accessible = prompt_entry.get_accessible ();
+        if (selected_entry.name != null)
+            accessible.set_name (_("Enter password for %s").printf (selected_entry.label));
+        else
+        {
+            if (prompt_entry.visibility)
+                accessible.set_name (_("Enter username"));
+            else
+                accessible.set_name (_("Enter password"));
+        }
         prompt_entry.grab_focus ();
         queue_draw ();
     }
@@ -250,6 +667,8 @@ public class UserList : Gtk.Container
         prompt_entry.hide ();
         message = "";
         login_button.show ();
+        var accessible = login_button.get_accessible ();
+        accessible.set_name (_("Login as %s").printf (selected_entry.label));
         login_button.grab_focus ();
         queue_draw ();
     }
@@ -273,68 +692,111 @@ public class UserList : Gtk.Container
         error = text;
         queue_draw ();
     }
-    
+
     private void load_indicator (string filename)
     {
-        var io = new Indicator.Object.from_file (filename);
-        indicators.append (io);
+        var loader = new IndicatorLoader (filename);
+        indicators.append (loader);
+        loader.loaded.connect (indicator_loaded_cb);
+        loader.load ();
+    }
+
+    private void indicator_loaded_cb (IndicatorLoader loader)
+    {
+        var io = loader.indicator_object;
+
         io.entry_added.connect (indicator_added_cb);
         io.entry_removed.connect (indicator_removed_cb);
         foreach (var entry in io.get_entries ())
-            indicator_added_cb (entry);
+            indicator_added_cb (io, entry);
     }
 
-    private void indicator_added_cb (Indicator.ObjectEntry entry)
+    private uint get_indicator_index (Indicator.Object object)
     {
-        var menuitem = new Gtk.MenuItem ();
-        menuitem.show ();
+        uint index = 0;
 
-        var hbox = new Gtk.HBox (false, 3);
-        menuitem.add (hbox);
-        hbox.show ();
+        foreach (var loader in indicators)
+        {
+            if (loader.indicator_object == object)
+                return index;
+            index++;
+        }
 
-        if (entry.image != null)
-            hbox.pack_start (entry.image, false, false, 0);
-        if (entry.label != null)
-            hbox.pack_start (entry.label, false, false, 0);
-        if (entry.menu != null)
-            menuitem.submenu = entry.menu;
-
-        menubar.insert (menuitem, (int) menubar.get_children ().length () - 1);
+        return index;
     }
 
-    private void indicator_removed_cb (Indicator.ObjectEntry entry)
+    private Indicator.Object? get_indicator_object_from_entry (Indicator.ObjectEntry entry)
     {
-        // FIXME
+        foreach (var loader in indicators)
+        {
+            if (loader.indicator_object == null)
+                continue;
+
+            foreach (var e in loader.indicator_object.get_entries ())
+            {
+                if (e == entry)
+                    return loader.indicator_object;
+            }
+        }
+
+        return null;
     }
 
-    /* Number of entries in the list */
-    private uint n_entries
+    private void indicator_added_cb (Indicator.Object object, Indicator.ObjectEntry entry)
     {
-        get { return entries.length (); }
+        var index = get_indicator_index (object);
+        var pos = 0;
+        foreach (var child in menubar.get_children ())
+        {
+            if (!(child is IndicatorMenuItem))
+                break;
+
+            var menuitem = (IndicatorMenuItem) child;
+            var child_object = get_indicator_object_from_entry (menuitem.entry);
+            var child_index = get_indicator_index (child_object);
+            if (child_index > index)
+                break;
+            pos++;
+        }
+
+        debug ("Adding indicator object %p at position %d", entry, pos);
+
+        var menuitem = new IndicatorMenuItem (entry);
+        menubar.insert (menuitem, pos);
+    }
+
+    private void indicator_removed_cb (Indicator.Object object, Indicator.ObjectEntry entry)
+    {
+        debug ("Removing indicator object %p", entry);
+
+        foreach (var child in menubar.get_children ())
+        {
+            var menuitem = (IndicatorMenuItem) child;
+            if (menuitem.entry == entry)
+            {
+                menubar.remove (child);
+                return;
+            }
+        }
+
+        warning ("Indicator object %p not in menubar", entry);
     }
 
     /* Half above the line, rounding down */
     private uint n_above
     {
-        get { return (n_entries - 1) / 2; }
+        get { return (entries.length () - 1) / 2; }
     }
 
     /* Half below the line, rounding up */
     private uint n_below
     {
-        get { return n_entries / 2; }
+        get { return entries.length () / 2; }
     }
 
     /* Box in the middle taking up three rows */
     private int box_height = 3;
 
-    /* Total height of the box and entries */
-    private new int height
-    {
-        get { return ((int) n_entries - 1) + box_height; }
-    }
-    
     public void add_session (string name, string label)
     {
         var item = new SessionMenuItem ();
@@ -346,16 +808,31 @@ public class UserList : Gtk.Container
         session_group = (GLib.SList<SessionMenuItem>) item.get_group ();
     }
 
-    public void add_entry (string? name, string label, string? background = null, bool is_active = false)
+    private UserEntry? find_entry (string? name)
     {
-        var e = new UserEntry ();
-        e.name = name;
+        foreach (var entry in entries)
+        {
+            if (entry.name == name)
+                return entry;
+        }
+
+        return null;
+    }
+
+    public void add_entry (string? name, string label, string background, bool is_active = false)
+    {
+        var e = find_entry (name);
+        if (e == null)
+        {
+            e = new UserEntry ();
+            entries.append (e);
+            e.name = name;
+        }
         e.label = label;
-        e.background_filename = background;
+        e.background = make_background (background);
+        e.background.loaded.connect (background_loaded_cb);
         e.is_active = is_active;
         e.width = 5;
-        e.index = (int) n_entries;
-        entries.append (e);
 
         if (selected_entry == null)
             select_entry (e);
@@ -369,18 +846,52 @@ public class UserList : Gtk.Container
         queue_draw ();
     }
 
+    public void set_active_entry (string ?name)
+    {
+        var e = find_entry (name);
+        if (e != null)
+            select_entry (e);
+
+        foreach (var entry in entries)
+        {
+            update_entry_location (entry);
+            entry.y = entry.target_y;
+        }
+    }
+
+    public void remove_entry (string? name)
+    {
+        var entry = find_entry (name);
+        if (entry == null)
+            return;
+
+        var index = entries.index (entry);
+        entries.remove (entry);
+
+        if (entry == selected_entry)
+        {
+            if (index >= entries.length ())
+                index--;
+            select_entry (entries.nth_data (index));
+        }
+
+        foreach (var e in entries)
+            update_entry_location (e);
+        queue_draw ();
+    }
+
     private void prompt_entry_activate_cb ()
     {
         respond_to_prompt (prompt_entry.text);
         prompt_entry.text = "";
     }
-    
+
     private void login_button_clicked_cb ()
     {
-        debug ("login %s", selected_entry.name);
+        debug ("Start session for %s", selected_entry.name);
         start_session ();
     }
-    
+
     private void options_menu_position_cb (Gtk.Menu menu, out int x, out int y, out bool push_in)
     {
         Gtk.Allocation button_allocation;
@@ -400,14 +911,14 @@ public class UserList : Gtk.Container
     private void update_entry_location (UserEntry entry)
     {
         /* Get the number of steps below the selected item */
-        var offset = entry.index - selected_entry.index;
+        var offset = entries.index (entry) - entries.index (selected_entry);
 
         /* If above then place before box */
         if (offset > (int) n_below)
-            offset -= (int) n_entries;
+            offset -= (int) entries.length ();
         /* If below then place after box */
         else if (offset < - (int) n_above)
-            offset += (int) n_entries;
+            offset += (int) entries.length ();
 
         entry.target_y = offset;
 
@@ -418,33 +929,38 @@ public class UserList : Gtk.Container
             entry.direction = -1.0;
     }
 
-    private bool scroll_animate_cb ()
+    private void scroll_animate_cb (double timestep)
     {
         var animating = false;
         foreach (var entry in entries)
         {
             if (entry.y != entry.target_y)
             {
-                var speed = 0.1;
+                var speed = 5.0;
+
+                var delta = timestep * speed;
+
+                /* Total height of the box and entries */
+                var h = ((int) entries.length () - 1) + box_height;
 
                 var step = entry.target_y - entry.y;
                 if (entry.direction < 0)
                     step = -step;
                 if (step < 0)
-                    step += height;
+                    step += h;
 
                 /* If close enough finish moving */
-                if (step <= speed)
+                if (step <= delta)
                     entry.y = entry.target_y;
                 else
                 {
-                    entry.y += speed * entry.direction;
+                    entry.y += delta * entry.direction;
 
                     /* Wrap around */
                     if (entry.direction < 0 && entry.y < - (int) n_above)
-                        entry.y += n_entries;
+                        entry.y += entries.length ();
                     if (entry.direction > 0 && entry.y >= n_below)
-                        entry.y -= n_entries;
+                        entry.y -= entries.length ();
 
                 }
             }
@@ -459,17 +975,16 @@ public class UserList : Gtk.Container
         /* Stop when we get there */
         if (!animating)
         {
-            scroll_animate_timer = 0;
-            debug ("stop scroll animation");
-            return false;
+            debug ("Stop scroll animation");
+            scroll_timer.stop ();
         }
-        else
-            return true;
     }
 
-    private bool background_animate_cb ()
+    private void background_animate_cb (double timestep)
     {
-        background_alpha += 0.05;
+        var speed = 5.0;
+
+        background_alpha += timestep * speed;
         if (background_alpha > 1.0)
             background_alpha = 1.0;
 
@@ -478,40 +993,54 @@ public class UserList : Gtk.Container
         /* Stop when we get there */
         if (background_alpha == 1.0)
         {
-            background_animate_timer = 0;
-            debug ("stop background animation");
-            return false;
+            debug ("Stop background animation");
+            old_background = background;
+            background_timer.stop ();
         }
-        else
-            return true;
+    }
+    
+    private bool change_background_timeout_cb ()
+    {
+        if (background != selected_entry.background)
+        {
+            debug ("Change background");
+
+            if (frame_count > 0)
+                background_alpha = 0.0;
+            old_background = background;
+            background = selected_entry.background;
+            queue_draw ();
+        }
+
+        change_background_timeout = 0;
+        return false;
     }
 
     private void select_entry (UserEntry entry)
     {
-        debug ("select %s", entry.name);
+        debug ("Select %s", entry.name);
 
         /* Roll everything in the same direction */
         var direction = 1.0;
         if (selected_entry != null && entry.y > selected_entry.y)
            direction = -1.0;
 
-        old_selected_entry = selected_entry;
         selected_entry = entry;
 
         prompt_entry.hide ();
         login_button.hide ();
 
-        user_selected (selected_entry.name);
-
-        if (old_selected_entry != null)
+        /* Set background after user stops scrolling */
+        if (frame_count > 0)
         {
-            background_alpha = 0.0;
-            if (background_animate_timer == 0)
-            {
-                debug ("start background animation");
-                background_animate_timer = Timeout.add (10, background_animate_cb);
-            }
+            if (change_background_timeout != 0)
+                Source.remove (change_background_timeout);
+            change_background_timeout = Timeout.add (200, change_background_timeout_cb);
         }
+        else
+            change_background_timeout_cb ();
+
+        user_selected (selected_entry.name);
 
         var animate = false;
         foreach (var e in entries)
@@ -519,54 +1048,44 @@ public class UserList : Gtk.Container
             update_entry_location (e);
             e.direction = direction;
 
-            /* Move straight there if haven't selected anything previously */
-            if (old_selected_entry == null)
+            /* Move straight there if not drawn yet */
+            if (frame_count == 0)
                 e.y = e.target_y;
 
             if (e.moving)
                 animate = true;
         }
 
-        if (animate && scroll_animate_timer == 0)
+        if (animate && !scroll_timer.is_running)
         {
-            debug ("start scroll animation");
-            scroll_animate_timer = Timeout.add (10, scroll_animate_cb);
+            debug ("Start scroll animation");
+            scroll_timer.reset ();
         }
-    }
-
-    private UserEntry? get_entry_by_index (int index)
-    {
-        foreach (var entry in entries)
-        {
-            if (entry.index == index)
-                return entry;
-        }
-
-        return null;
     }
 
     private void select_prev_entry ()
     {
-        var index = selected_entry.index - 1;
+        var index = entries.index (selected_entry) - 1;
         if (index < 0)
-            index += (int) n_entries;
-        select_entry (get_entry_by_index (index));
+            index += (int) entries.length ();
+        select_entry (entries.nth_data (index));
     }
 
     private void select_next_entry ()
     {
-        var index = selected_entry.index + 1;
-        if (index >= (int) n_entries)
-            index -= (int) n_entries;
-        select_entry (get_entry_by_index (index));
+        var index = entries.index (selected_entry) + 1;
+        if (index >= (int) entries.length ())
+            index -= (int) entries.length ();
+        select_entry (entries.nth_data (index));
     }
 
     private void get_selected_location (out int x, out int y)
     {
         x = grid_x_offset + grid_size;
-        y = grid_y_offset + (get_allocated_height () - box_height * grid_size) / 2;
+        var row = (int) (get_allocated_height () / grid_size - box_height) / 2;
+        y = grid_y_offset + row * grid_size;
     }
-    
+
     public override void add (Gtk.Widget widget)
     {
         children.append (widget);
@@ -629,7 +1148,7 @@ public class UserList : Gtk.Container
         var resized = allocation.height != get_allocated_height () || allocation.width != get_allocated_width ();
 
         set_allocation (allocation);
-        
+
         if (get_realized ())
             get_window ().move_resize (allocation.x, allocation.y, allocation.width, allocation.height);
 
@@ -664,11 +1183,21 @@ public class UserList : Gtk.Container
         options_button.size_allocate (child_allocation);
         options_button.show ();
 
+        /* Put keyboard at the bottom of the screen */
+        if (keyboard_socket != null)
+        {
+            child_allocation.x = 0;
+            child_allocation.y = allocation.height - 200;
+            child_allocation.width = allocation.width;
+            child_allocation.height = 200;
+            keyboard_socket.size_allocate (child_allocation);
+        }
+
         /* Regenerate backgrounds */
         if (resized)
         {
-            foreach (var entry in entries)
-                entry.background_pattern = null;
+            debug ("Regenerating backgrounds");
+            backgrounds.remove_all ();
         }
     }
 
@@ -689,145 +1218,114 @@ public class UserList : Gtk.Container
                 c.fill ();
             }
 
-            c.set_font_size (0.5 * grid_size);
+            c.set_font_size (21);
             Cairo.TextExtents extents;
             c.text_extents (entry.label, out extents);
             c.move_to (grid_size / 2, grid_size - (grid_size - (extents.height)) / 2);
-            c.set_source_rgba (1.0, 1.0, 1.0, 0.5);
-            c.show_text (entry.label);
+            c.text_path (entry.label);
+            var mask = new Cairo.Pattern.linear (0, 0, grid_size * box_width, 0);
+            var left = 1.0 - 2.0 / 7;
+            mask.add_color_stop_rgba (left, 1.0, 1.0, 1.0, 0.5);
+            mask.add_color_stop_rgba (left + 64.0 / (grid_size * box_width), 1.0, 1.0, 1.0, 0.0);
+            c.set_source (mask);
+            c.fill ();
 
             c.restore ();
         }
     }
 
-    private Cairo.Pattern make_background (string? filename)
+    private void background_loaded_cb (Background b)
     {
-        if (filename == null)
-            filename = default_background;
-
-        debug ("making background %s at %dx%d", filename, get_allocated_width (), get_allocated_height ());
-
-        Gdk.Color color;
-        if (Gdk.Color.parse (filename, out color))
-        {
-            return new Cairo.Pattern.rgb (color.red / 65535.0, color.green / 65535.0, color.blue / 65535.0);
-        }
-
-        Gdk.Pixbuf orig_image;
-        try
-        {
-            orig_image = new Gdk.Pixbuf.from_file (filename);
-        }
-        catch (Error e)
-        {
-            debug ("Error loading background: %s", e.message);
-            return new Cairo.Pattern.rgb (0, 0, 0);
-        }
-
-        var target_aspect = (double) get_allocated_width () / get_allocated_height ();
-        var aspect = (double) orig_image.width / orig_image.height;
-        double scale, offset_x = 0, offset_y = 0;
-        if (aspect > target_aspect)
-        {
-            /* Fit height and trim sides */
-            scale = (double) get_allocated_height () / orig_image.height;
-            offset_x = (orig_image.width * scale - get_allocated_width ()) / 2;
-        }
-        else
-        {
-            /* Fit width and trim top and bottom */
-            scale = (double) get_allocated_width () / orig_image.width;
-            offset_y = (orig_image.height * scale - get_allocated_height ()) / 2;
-        }
-
-        var image = new Gdk.Pixbuf (orig_image.colorspace, orig_image.has_alpha, orig_image.bits_per_sample, get_allocated_width (), get_allocated_height ());
-        orig_image.scale (image, 0, 0, get_allocated_width (), get_allocated_height (), -offset_x, -offset_y, scale, scale, Gdk.InterpType.BILINEAR);
-
-        /* Overlay grid */
-        var overlay_surface = new Cairo.ImageSurface (Cairo.Format.ARGB32, grid_size, grid_size);
-        var oc = new Cairo.Context (overlay_surface);
-        oc.rectangle (0, 0, 1, 1);
-        oc.rectangle (grid_size - 1, 0, 1, 1);
-        oc.rectangle (0, grid_size - 1, 1, 1);
-        oc.rectangle (grid_size - 1, grid_size - 1, 1, 1);
-        oc.set_source_rgba (1.0, 1.0, 1.0, 0.25);
-        oc.fill ();
-        var overlay = new Cairo.Pattern.for_surface (overlay_surface);
-        var matrix = Cairo.Matrix.identity ();
-        matrix.translate (-grid_x_offset, -grid_y_offset);
-        overlay.set_matrix (matrix);
-        overlay.set_extend (Cairo.Extend.REPEAT);
-
-        /* Create background */
-        var surface = new Cairo.ImageSurface (Cairo.Format.RGB24, get_allocated_width (), get_allocated_height ());
-        var bc = new Cairo.Context (surface);
-        Gdk.cairo_set_source_pixbuf (bc, image, 0, 0);
-        bc.paint ();
-
-        /* Draw overlay */
-        bc.set_source (overlay);
-        bc.rectangle (grid_size - 1, grid_size - 1, get_allocated_width () - grid_size * 2 + 2, get_allocated_height () - grid_size * 2 + 2);
-        bc.fill ();
-        
-        /* Mask out dots under logo */
-        bc.rectangle (0, get_allocated_height () - logo_surface.get_height (), logo_surface.get_width (), logo_surface.get_height ());
-        Gdk.cairo_set_source_pixbuf (bc, image, 0, 0);
-        bc.fill ();
-
-        var pattern = new Cairo.Pattern.for_surface (surface);
-        pattern.set_extend (Cairo.Extend.REPEAT);
-
-        return pattern;
+        queue_draw ();
     }
 
-    public Cairo.Pattern get_background ()
+    private Background make_background (string filename)
     {
-        return get_background_for_user (selected_entry);
-    }
+        var b = backgrounds.lookup (filename);
+        if (b == null)
+        {
+            b = new Background (filename);
+            b.width = width;
+            b.height = height;
+            b.grid_size = grid_size;
+            b.grid_x_offset = grid_x_offset;
+            b.grid_y_offset = grid_y_offset;
+            b.logo_surface = logo_surface;
+            b.logo_pattern = logo_pattern;
 
-    private Cairo.Pattern get_background_for_user (UserEntry? entry)
-    {
-        if (entry == null)
-            return new Cairo.Pattern.rgb (0, 0, 0);
+            backgrounds.insert (filename, b);
+        }
 
-        if (entry.background_pattern == null)
-            entry.background_pattern = make_background (entry.background_filename);
-        return entry.background_pattern;
+        return b;
     }
     
+    public Background get_background ()
+    {
+        if (selected_entry != null)
+            return selected_entry.background;
+        else
+            return make_background ("#000000");
+    }
+
     private void draw_background (Cairo.Context c)
     {
-        if (background_alpha == 1.0)
+        /* Fade to this background when loaded */
+        if (background.load () && background != old_background && !background_timer.is_running)
         {
-            c.set_source (get_background_for_user (selected_entry));
-            c.paint ();
+            debug ("Start background animation");
+            background_timer.reset ();
         }
-        else
-        {
-            /* Draw old background */
-            c.set_source (get_background_for_user (old_selected_entry));
+
+        c.set_source_rgb (0, 0, 0);
+
+        if (high_contrast_item.active)
             c.paint ();
 
-            /* Draw new background */
-            c.set_source (get_background_for_user (selected_entry));
+        /* Draw old background */
+        if (background_alpha < 1.0)
+        {
+            if (old_background.load ())
+                c.set_source (old_background.pattern);
+            c.paint ();
+        }
+
+        /* Draw new background */
+        if (background.load () && background_alpha > 0.0)
+        {
+            c.set_source (background.pattern);
             c.paint_with_alpha (background_alpha);
         }
     }
 
+    private bool draw_expire_cb ()
+    {
+        var elapsed = draw_timer.elapsed ();
+        debug ("Drew %d frames in %.1f seconds (%f fps)", draw_count, elapsed, draw_count / elapsed);
+
+        draw_timer = null;
+        draw_count = 0;
+        draw_timeout = 0;
+
+        return false;
+    }
+
     public override bool draw (Cairo.Context c)
     {
+        if (frame_count == 0)
+            debug ("Rendered first frame");
+
+        if (draw_timeout != 0)
+            Source.remove (draw_timeout);
+        if (draw_timer == null)
+            draw_timer = new Timer ();
+        draw_timeout = Timeout.add (100, draw_expire_cb);
+        draw_count++;
+
+        frame_count++;
+
         draw_background (c);
 
         c.set_font_face (font_face);
-
-        /* Logo */
-        c.save ();
-        c.translate (0, get_allocated_height () - logo_surface.get_height ());
-        c.set_source (logo_pattern);
-        c.rectangle (0, 0, logo_surface.get_width (), logo_surface.get_height ());
-        c.fill ();
-        c.restore ();
-
         int base_x, base_y;
         get_selected_location (out base_x, out base_y);
 
@@ -839,7 +1337,7 @@ public class UserList : Gtk.Container
         c.rectangle (0, -n_above * grid_size, box_width * grid_size, n_above * grid_size);
         c.clip ();
         draw_entries (c);
-        c.translate (0, -n_entries * grid_size);
+        c.translate (0, -entries.length () * grid_size);
         draw_entries (c);
         c.restore ();
 
@@ -849,36 +1347,23 @@ public class UserList : Gtk.Container
         c.clip ();
         c.translate (0, (box_height - 1) * grid_size);
         draw_entries (c);
-        c.translate (0, n_entries * grid_size);
+        c.translate (0, entries.length () * grid_size);
         draw_entries (c);
         c.restore ();
 
         /* Draw box */
-        var border = 5;
-        var box_w = box_width * grid_size - border * 2;
-        var box_h = box_height * grid_size - border * 2;
-        var box_r = 0.2 * grid_size;
-        cairo_rounded_rectangle (c,
-                                 border + 0.5, border + 0.5,
-                                 box_w - 1, box_h - 1,
-                                 box_r);
-        c.set_source_rgba (0.0, 0.0, 0.0, 0.4);
-        c.fill_preserve ();
-        c.set_line_width (1.0);
-        c.set_source_rgba (1.0, 1.0, 1.0, 0.25);
-        c.stroke ();
-
-        cairo_rounded_rectangle (c,
-                                 border + 0.5 + 2, border + 0.5 + 2,
-                                 box_w - 5, box_h - 5,
-                                 box_r - 2);
-        c.stroke ();
+        c.save ();
+        var border = 4;
+        c.translate (-border, -border);
+        c.set_source (box_pattern);
+        c.paint ();
+        c.restore ();
 
         /* Selected item */
         if (selected_entry != null)
         {
             Cairo.TextExtents extents;
-            c.set_font_size (0.5 * grid_size);
+            c.set_font_size (21);
             c.text_extents (selected_entry.label, out extents);
             var text_y = grid_size - (grid_size - border - extents.height) / 4;
 
@@ -892,7 +1377,12 @@ public class UserList : Gtk.Container
                 c.fill ();
             }
             c.move_to (grid_size / 2, text_y);
-            c.set_source_rgb (1.0, 1.0, 1.0);
+            var mask = new Cairo.Pattern.linear (0, 0, grid_size * box_width, 0);
+            var left = 1.0 - 2.0 / 7;
+            mask.add_color_stop_rgba (left, 1.0, 1.0, 1.0, 1.0);
+            mask.add_color_stop_rgba (left + 5.4 / (grid_size * box_width), 1.0, 1.0, 1.0, 0.5);
+            mask.add_color_stop_rgba (left + 27.0 / (grid_size * box_width), 1.0, 1.0, 1.0, 0.0);
+            c.set_source (mask);
             c.show_text (selected_entry.label);
         }
 
@@ -906,7 +1396,7 @@ public class UserList : Gtk.Container
             else
                 text = error;
 
-            c.set_font_size (0.3 * grid_size);
+            c.set_font_size (12);
             c.text_extents (text, out extents);
             c.move_to (grid_size / 2, grid_size * 1.25);
             if (error != null)
@@ -924,34 +1414,16 @@ public class UserList : Gtk.Container
         return false;
     }
 
-    private void cairo_rounded_rectangle (Cairo.Context c, double x, double y, double width, double height, double radius)
-    {
-        var w = width - radius * 2;
-        var h = height - radius * 2;
-        var kappa = 0.5522847498 * radius;
-        c.move_to (x + radius, y);
-        c.rel_line_to (w, 0);
-        c.rel_curve_to (kappa, 0, radius, radius - kappa, radius, radius);
-        c.rel_line_to (0, h);
-        c.rel_curve_to (0, kappa, kappa - radius, radius, -radius, radius);
-        c.rel_line_to (-w, 0);
-        c.rel_curve_to (-kappa, 0, -radius, kappa - radius, -radius, -radius);
-        c.rel_line_to (0, -h);
-        c.rel_curve_to (0, -kappa, radius - kappa, -radius, radius, -radius);
-    }
-
-    // FIXME: Don't seem to be defined in Vala
-    private const uint KEY_Up = 0xff52;
-    private const uint KEY_Down = 0xff54;
-
     public override bool key_press_event (Gdk.EventKey event)
     {
         switch (event.keyval)
         {
-        case KEY_Up:
+        case Gdk.KEY_Up:
+            debug ("Up pressed");
             select_prev_entry ();
             break;
-        case KEY_Down:
+        case Gdk.KEY_Down:
+            debug ("Down pressed");
             select_next_entry ();
             break;
         default:

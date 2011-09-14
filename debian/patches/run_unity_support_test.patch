@@ -7,7 +7,7 @@ Index: ubuntu-unity-greeter/src/unity-greeter.vala
 --- ubuntu-unity-greeter.orig/src/unity-greeter.vala	2011-09-06 16:30:06.209204307 +0200
 +++ ubuntu-unity-greeter/src/unity-greeter.vala	2011-09-06 16:36:59.483253629 +0200
 @@ -420,6 +420,16 @@
-         var greeter = new UnityGreeter ();
+         debug ("Showing greeter");
          greeter.show ();
  
 +        /* Launch the unity_support_test tool as an async process to cache
@@ -20,6 +20,6 @@ Index: ubuntu-unity-greeter/src/unity-greeter.vala
 +            warning ("Failed to spawn unity-support-test tool for pre-caching: %s", e.message);
 +        }
 +
+         debug ("Starting main loop");
          Gtk.main ();
  
-         return Posix.EXIT_SUCCESS;
