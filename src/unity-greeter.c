@@ -540,7 +540,7 @@ UnityGreeter* unity_greeter_construct (GType object_type) {
 		UserList* _tmp88_;
 		UserList* _tmp89_;
 		_tmp76_ = self->priv->user_list;
-		user_list_add_entry (_tmp76_, "alice", "Alice User", "/usr/share/backgrounds/Berries_by_Orb9220.jpg", TRUE);
+		user_list_add_entry (_tmp76_, "alice", "가나다라마", "/usr/share/backgrounds/Berries_by_Orb9220.jpg", TRUE);
 		_tmp77_ = self->priv->user_list;
 		user_list_add_entry (_tmp77_, "bob", "Bob User", "/usr/share/backgrounds/White_flowers_by_Garuna_bor-bor.jpg", FALSE);
 		_tmp78_ = self->priv->user_list;

@@ -25,6 +25,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+#include <pango/pango.h>
 #include <gtk/gtk.h>
 #include <libindicator/indicator.h>
 #include <libindicator/indicator-desktop-shortcuts.h>
@@ -37,13 +38,12 @@
 #include <gdk/gdk.h>
 #include <gdk-pixbuf/gdk-pixdata.h>
 #include <gtk/gtkx.h>
-#include <ft2build.h>
-#include <cairo-ft.h>
 #include <sys/utsname.h>
 #include <glib/gi18n-lib.h>
-#include <gio/gio.h>
 #include <glib/gstdio.h>
+#include <gio/gio.h>
 #include <stdio.h>
+#include <pango/pangocairo.h>
 #include <gobject/gvaluecollector.h>
 
 
@@ -81,6 +81,7 @@ typedef struct _UserEntryPrivate UserEntryPrivate;
 typedef struct _Background Background;
 typedef struct _BackgroundClass BackgroundClass;
 #define _g_free0(var) (var = (g_free (var), NULL))
+#define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
 #define _background_unref0(var) ((var == NULL) ? NULL : (var = (background_unref (var), NULL)))
 typedef struct _ParamSpecUserEntry ParamSpecUserEntry;
 
@@ -94,7 +95,6 @@ typedef struct _ParamSpecUserEntry ParamSpecUserEntry;
 typedef struct _IndicatorMenuItem IndicatorMenuItem;
 typedef struct _IndicatorMenuItemClass IndicatorMenuItemClass;
 typedef struct _IndicatorMenuItemPrivate IndicatorMenuItemPrivate;
-#define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
 
 #define TYPE_SESSION_MENU_ITEM (session_menu_item_get_type ())
 #define SESSION_MENU_ITEM(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_SESSION_MENU_ITEM, SessionMenuItem))
@@ -141,14 +141,12 @@ typedef struct _UserListPrivate UserListPrivate;
 #define _animate_timer_unref0(var) ((var == NULL) ? NULL : (var = (animate_timer_unref (var), NULL)))
 #define __g_list_free__g_object_unref0_0(var) ((var == NULL) ? NULL : (var = (_g_list_free__g_object_unref0_ (var), NULL)))
 #define __g_list_free__indicator_loader_unref0_0(var) ((var == NULL) ? NULL : (var = (_g_list_free__indicator_loader_unref0_ (var), NULL)))
-#define _cairo_font_face_destroy0(var) ((var == NULL) ? NULL : (var = (cairo_font_face_destroy (var), NULL)))
 #define _g_variant_unref0(var) ((var == NULL) ? NULL : (var = (g_variant_unref (var), NULL)))
 #define _g_variant_builder_unref0(var) ((var == NULL) ? NULL : (var = (g_variant_builder_unref (var), NULL)))
-typedef struct _UserListGreeterSetEnvData UserListGreeterSetEnvData;
 #define _g_list_free0(var) ((var == NULL) ? NULL : (var = (g_list_free (var), NULL)))
-typedef struct _UserListSetupIndicatorsData UserListSetupIndicatorsData;
 #define _fclose0(var) ((var == NULL) ? NULL : (var = (fclose (var), NULL)))
 #define _indicator_loader_unref0(var) ((var == NULL) ? NULL : (var = (indicator_loader_unref (var), NULL)))
+#define _pango_font_description_free0(var) ((var == NULL) ? NULL : (var = (pango_font_description_free (var), NULL)))
 
 struct _AnimateTimer {
 	GTypeInstance parent_instance;
@@ -176,12 +174,8 @@ struct _UserEntry {
 	volatile int ref_count;
 	UserEntryPrivate * priv;
 	gchar* name;
-	gchar* label;
+	PangoLayout* layout;
 	Background* background;
-	gdouble y;
-	gdouble target_y;
-	gdouble direction;
-	gdouble width;
 	gboolean is_active;
 };
 
@@ -294,6 +288,9 @@ struct _UserListPrivate {
 	guint change_background_timeout;
 	GList* entries;
 	UserEntry* selected_entry;
+	gdouble scroll_target_location;
+	gdouble scroll_location;
+	gdouble scroll_direction;
 	AnimateTimer* scroll_timer;
 	AnimateTimer* background_timer;
 	gdouble background_alpha;
@@ -305,7 +302,6 @@ struct _UserListPrivate {
 	GtkSocket* keyboard_socket;
 	gchar* error;
 	gchar* message;
-	cairo_font_face_t* font_face;
 	cairo_surface_t* logo_surface;
 	cairo_pattern_t* logo_pattern;
 	cairo_surface_t* box_surface;
@@ -317,88 +313,6 @@ struct _UserListPrivate {
 	GSList* session_group;
 	gboolean complete;
 	gint box_height;
-};
-
-struct _UserListGreeterSetEnvData {
-	int _state_;
-	GObject* _source_object_;
-	GAsyncResult* _res_;
-	GSimpleAsyncResult* _async_result;
-	UserList* self;
-	gchar* key;
-	gchar* val;
-	const gchar* _tmp0_;
-	const gchar* _tmp1_;
-	GDBusProxy* _tmp2_;
-	GDBusProxy* proxy;
-	const GVariantType* _tmp3_;
-	GVariantBuilder* _tmp4_;
-	GVariantBuilder* builder;
-	GVariantBuilder* _tmp5_;
-	const gchar* _tmp6_;
-	const gchar* _tmp7_;
-	GDBusProxy* _tmp8_;
-	GVariantBuilder* _tmp9_;
-	GVariant* _tmp10_;
-	GVariant* _tmp11_;
-	GVariant* _tmp12_;
-	GVariant* _tmp13_;
-	GError* e;
-	GError* _tmp14_;
-	const gchar* _tmp15_;
-	GError * _inner_error_;
-};
-
-struct _UserListSetupIndicatorsData {
-	int _state_;
-	GObject* _source_object_;
-	GAsyncResult* _res_;
-	GSimpleAsyncResult* _async_result;
-	UserList* self;
-	GtkMenuItem* _tmp0_;
-	GtkMenuItem* _tmp1_;
-	GtkMenuItem* a11y_item;
-	GtkHBox* _tmp2_;
-	GtkHBox* _tmp3_;
-	GtkHBox* hbox;
-	gchar* _tmp4_;
-	gchar* _tmp5_;
-	GtkImage* _tmp6_;
-	GtkImage* _tmp7_;
-	GtkImage* _tmp8_;
-	GtkImage* image;
-	GtkMenu* _tmp9_;
-	GtkMenu* _tmp10_;
-	const gchar* _tmp11_;
-	GtkCheckMenuItem* _tmp12_;
-	GtkCheckMenuItem* _tmp13_;
-	GtkCheckMenuItem* item;
-	GtkCheckMenuItem* _tmp14_;
-	GtkCheckMenuItem* _tmp15_;
-	GtkMenu* _tmp16_;
-	GtkMenu* _tmp17_;
-	GtkCheckMenuItem* _tmp18_;
-	const gchar* _tmp19_;
-	GtkCheckMenuItem* _tmp20_;
-	GtkCheckMenuItem* _tmp21_;
-	GtkCheckMenuItem* _tmp22_;
-	GtkCheckMenuItem* _tmp23_;
-	GtkMenu* _tmp24_;
-	GtkMenu* _tmp25_;
-	GtkCheckMenuItem* _tmp26_;
-	const gchar* _tmp27_;
-	GtkCheckMenuItem* _tmp28_;
-	GtkCheckMenuItem* _tmp29_;
-	GtkCheckMenuItem* _tmp30_;
-	GtkCheckMenuItem* _tmp31_;
-	GtkMenu* _tmp32_;
-	GtkMenu* _tmp33_;
-	GtkCheckMenuItem* _tmp34_;
-	GtkMenuBar* _tmp35_;
-	GtkMenuBar* _tmp36_;
-	GList* _tmp37_;
-	GList* _tmp38_;
-	guint _tmp39_;
 };
 
 
@@ -448,7 +362,6 @@ enum  {
 };
 UserEntry* user_entry_new (void);
 UserEntry* user_entry_construct (GType object_type);
-gboolean user_entry_get_moving (UserEntry* self);
 static void user_entry_finalize (UserEntry* obj);
 GType indicator_menu_item_get_type (void) G_GNUC_CONST;
 #define INDICATOR_MENU_ITEM_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TYPE_INDICATOR_MENU_ITEM, IndicatorMenuItemPrivate))
@@ -529,19 +442,12 @@ static void user_list_scroll_animate_cb (UserList* self, gdouble timestep);
 static void _user_list_scroll_animate_cb_animate_timer_animate (AnimateTimer* _sender, gdouble timestep, gpointer self);
 static void user_list_background_animate_cb (UserList* self, gdouble timestep);
 static void _user_list_background_animate_cb_animate_timer_animate (AnimateTimer* _sender, gdouble timestep, gpointer self);
-static void user_list_setup_indicators (UserList* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
-static void user_list_setup_indicators_finish (UserList* self, GAsyncResult* _res_);
+static void user_list_setup_indicators (UserList* self);
 void user_list_set_logo (UserList* self, const gchar* logo_path);
 static void user_list_draw_child_cb (UserList* self, GtkWidget* child);
 static void user_list_draw_background (UserList* self, cairo_t* c);
 static void _user_list_draw_child_cb_gtk_callback (GtkWidget* widget, gpointer self);
-static void user_list_greeter_set_env_data_free (gpointer _data);
-static void user_list_greeter_set_env (UserList* self, const gchar* key, const gchar* val, GAsyncReadyCallback _callback_, gpointer _user_data_);
-static void user_list_greeter_set_env_finish (UserList* self, GAsyncResult* _res_);
-static gboolean user_list_greeter_set_env_co (UserListGreeterSetEnvData* _data_);
-static void user_list_greeter_set_env_ready (GObject* source_object, GAsyncResult* _res_, gpointer _user_data_);
-static void user_list_setup_indicators_data_free (gpointer _data);
-static gboolean user_list_setup_indicators_co (UserListSetupIndicatorsData* _data_);
+static void user_list_greeter_set_env (UserList* self, const gchar* key, const gchar* val);
 static void user_list_keyboard_toggled_cb (UserList* self, GtkCheckMenuItem* item);
 static void _user_list_keyboard_toggled_cb_gtk_check_menu_item_toggled (GtkCheckMenuItem* _sender, gpointer self);
 static void user_list_high_contrast_toggled_cb (UserList* self, GtkCheckMenuItem* item);
@@ -567,14 +473,11 @@ void user_list_add_entry (UserList* self, const gchar* name, const gchar* label,
 static Background* user_list_make_background (UserList* self, const gchar* filename);
 static void user_list_background_loaded_cb (UserList* self, Background* b);
 static void _user_list_background_loaded_cb_background_loaded (Background* _sender, gpointer self);
-static void user_list_select_entry (UserList* self, UserEntry* entry);
-static void user_list_update_entry_location (UserList* self, UserEntry* entry);
+static void user_list_select_entry (UserList* self, UserEntry* entry, gdouble direction);
 void user_list_set_active_entry (UserList* self, const gchar* name);
 void user_list_remove_entry (UserList* self, const gchar* name);
 static void user_list_options_menu_position_cb (UserList* self, GtkMenu* menu, gint* x, gint* y, gboolean* push_in);
 static void _user_list_options_menu_position_cb_gtk_menu_position_func (GtkMenu* menu, gint* x, gint* y, gboolean* push_in, gpointer self);
-static guint user_list_get_n_below (UserList* self);
-static guint user_list_get_n_above (UserList* self);
 static gboolean user_list_change_background_timeout_cb (UserList* self);
 static gboolean _user_list_change_background_timeout_cb_gsource_func (gpointer self);
 static void user_list_select_prev_entry (UserList* self);
@@ -586,12 +489,15 @@ static void user_list_real_forall_internal (GtkContainer* base, gboolean include
 static void user_list_real_realize (GtkWidget* base);
 static void user_list_real_map (GtkWidget* base);
 static void user_list_real_size_allocate (GtkWidget* base, GtkAllocation* allocation);
-static void user_list_draw_entries (UserList* self, cairo_t* c);
+static void user_list_draw_entry (UserList* self, cairo_t* c, UserEntry* entry, gdouble alpha);
 Background* user_list_get_background (UserList* self);
 static gboolean user_list_draw_expire_cb (UserList* self);
 static gboolean user_list_real_draw (GtkWidget* base, cairo_t* c);
 static gboolean _user_list_draw_expire_cb_gsource_func (gpointer self);
+static guint user_list_get_n_above (UserList* self);
+static guint user_list_get_n_below (UserList* self);
 static gboolean user_list_real_key_press_event (GtkWidget* base, GdkEventKey* event);
+static gboolean user_list_inside_entry (UserList* self, gdouble x, gdouble y, gdouble entry_y, UserEntry* entry);
 static gboolean user_list_real_button_release_event (GtkWidget* base, GdkEventButton* event);
 const gchar* user_list_get_selected (UserList* self);
 const gchar* user_list_get_session (UserList* self);
@@ -855,18 +761,6 @@ UserEntry* user_entry_new (void) {
 }
 
 
-gboolean user_entry_get_moving (UserEntry* self) {
-	gboolean result;
-	gdouble _tmp0_;
-	gdouble _tmp1_;
-	g_return_val_if_fail (self != NULL, FALSE);
-	_tmp0_ = self->y;
-	_tmp1_ = self->target_y;
-	result = _tmp0_ != _tmp1_;
-	return result;
-}
-
-
 static void value_user_entry_init (GValue* value) {
 	value->data[0].v_pointer = NULL;
 }
@@ -992,7 +886,7 @@ static void user_entry_finalize (UserEntry* obj) {
 	UserEntry * self;
 	self = USER_ENTRY (obj);
 	_g_free0 (self->name);
-	_g_free0 (self->label);
+	_g_object_unref0 (self->layout);
 	_background_unref0 (self->background);
 }
 
@@ -1352,7 +1246,7 @@ gboolean background_load (Background* self) {
 	_tmp12_ = self->filename;
 	_tmp13_ = self->width;
 	_tmp14_ = self->height;
-	g_debug ("user-list.vala:164: Making background %s at %dx%d", _tmp12_, _tmp13_, _tmp14_);
+	g_debug ("user-list.vala:158: Making background %s at %dx%d", _tmp12_, _tmp13_, _tmp14_);
 	{
 		GThread* _tmp15_ = NULL;
 		GThread* _tmp16_;
@@ -1404,7 +1298,7 @@ static gboolean background_ready_cb (Background* self) {
 	_tmp0_ = self->filename;
 	_tmp1_ = self->width;
 	_tmp2_ = self->height;
-	g_debug ("user-list.vala:180: Render of background %s at %dx%d complete", _tmp0_, _tmp1_, _tmp2_);
+	g_debug ("user-list.vala:174: Render of background %s at %dx%d complete", _tmp0_, _tmp1_, _tmp2_);
 	_tmp3_ = self->priv->thread;
 	_tmp4_ = g_thread_join (_tmp3_);
 	_cairo_pattern_destroy0 (self->pattern);
@@ -1539,7 +1433,7 @@ static cairo_pattern_t* background_render (Background* self) {
 		_inner_error_ = NULL;
 		_tmp3_ = e;
 		_tmp4_ = _tmp3_->message;
-		g_debug ("user-list.vala:197: Error loading background: %s", _tmp4_);
+		g_debug ("user-list.vala:191: Error loading background: %s", _tmp4_);
 		_tmp5_ = cairo_pattern_create_rgb ((gdouble) 0, (gdouble) 0, (gdouble) 0);
 		pattern = _tmp5_;
 		gdk_threads_add_idle (_background_ready_cb_gsource_func, self);
@@ -1943,7 +1837,7 @@ void indicator_loader_load (IndicatorLoader* self) {
 	GError * _inner_error_ = NULL;
 	g_return_if_fail (self != NULL);
 	_tmp0_ = self->priv->filename;
-	g_debug ("user-list.vala:284: Loading indicator %s", _tmp0_);
+	g_debug ("user-list.vala:278: Loading indicator %s", _tmp0_);
 	{
 		GThread* _tmp1_ = NULL;
 		GThread* _tmp2_;
@@ -1983,7 +1877,7 @@ static gboolean indicator_loader_ready_cb (IndicatorLoader* self) {
 	gpointer _tmp2_ = NULL;
 	g_return_val_if_fail (self != NULL, FALSE);
 	_tmp0_ = self->priv->filename;
-	g_debug ("user-list.vala:297: Indicator %s loaded", _tmp0_);
+	g_debug ("user-list.vala:291: Indicator %s loaded", _tmp0_);
 	_tmp1_ = self->priv->thread;
 	_tmp2_ = g_thread_join (_tmp1_);
 	_g_object_unref0 (self->indicator_object);
@@ -2264,263 +2158,261 @@ UserList* user_list_construct (GType object_type, gint width, gint height) {
 	UserList * self = NULL;
 	gint _tmp0_;
 	gint _tmp1_;
-	FT_Library library = {0};
-	FT_Library _tmp2_ = {0};
-	FT_Face face = {0};
-	FT_Face _tmp3_ = {0};
-	cairo_font_face_t* _tmp4_ = NULL;
-	GtkSettings* _tmp5_ = NULL;
-	GtkMenuBar* _tmp6_;
+	gint _tmp2_;
+	gint _tmp3_;
+	gint _tmp4_;
+	gint _tmp5_;
+	GtkSettings* _tmp6_ = NULL;
 	GtkMenuBar* _tmp7_;
 	GtkMenuBar* _tmp8_;
 	GtkMenuBar* _tmp9_;
 	GtkMenuBar* _tmp10_;
 	GtkMenuBar* _tmp11_;
-	struct utsname _tmp12_ = {0};
-	const gchar* _tmp13_;
-	GtkLabel* _tmp14_;
+	GtkMenuBar* _tmp12_;
+	struct utsname _tmp13_ = {0};
+	const gchar* _tmp14_;
 	GtkLabel* _tmp15_;
-	GtkLabel* label;
 	GtkLabel* _tmp16_;
-	GtkMenuItem* _tmp17_;
+	GtkLabel* label;
+	GtkLabel* _tmp17_;
 	GtkMenuItem* _tmp18_;
+	GtkMenuItem* _tmp19_;
 	GtkMenuItem* hostname_item;
-	GtkLabel* _tmp19_;
-	GtkMenuBar* _tmp20_;
-	GtkLabel* _tmp21_;
+	GtkLabel* _tmp20_;
+	GtkMenuBar* _tmp21_;
 	GtkLabel* _tmp22_;
 	GtkLabel* _tmp23_;
-	GtkStyle* _tmp24_ = NULL;
-	GdkColor* _tmp25_;
-	gint _tmp25__length1;
-	GdkColor _tmp26_;
-	GtkEntry* _tmp27_;
+	GtkLabel* _tmp24_;
+	GtkStyle* _tmp25_ = NULL;
+	GdkColor* _tmp26_;
+	gint _tmp26__length1;
+	GdkColor _tmp27_;
 	GtkEntry* _tmp28_;
 	GtkEntry* _tmp29_;
 	GtkEntry* _tmp30_;
 	GtkEntry* _tmp31_;
-	GtkBorder b = {0};
 	GtkEntry* _tmp32_;
-	GtkBorder _tmp33_;
-	GtkEntry* _tmp34_;
+	GtkBorder b = {0};
+	GtkEntry* _tmp33_;
+	GtkBorder _tmp34_;
 	GtkEntry* _tmp35_;
-	GtkButton* _tmp36_;
+	GtkEntry* _tmp36_;
 	GtkButton* _tmp37_;
-	const gchar* _tmp38_ = NULL;
-	gchar* _tmp39_;
+	GtkButton* _tmp38_;
+	const gchar* _tmp39_ = NULL;
 	gchar* _tmp40_;
 	gchar* _tmp41_;
 	gchar* _tmp42_;
-	GtkLabel* _tmp43_;
+	gchar* _tmp43_;
 	GtkLabel* _tmp44_;
 	GtkLabel* _tmp45_;
 	GtkLabel* _tmp46_;
-	GtkButton* _tmp47_;
-	GtkLabel* _tmp48_;
-	GtkButton* _tmp49_;
+	GtkLabel* _tmp47_;
+	GtkButton* _tmp48_;
+	GtkLabel* _tmp49_;
 	GtkButton* _tmp50_;
 	GtkButton* _tmp51_;
 	GtkButton* _tmp52_;
 	GtkButton* _tmp53_;
 	GtkButton* _tmp54_;
-	AtkObject* _tmp55_ = NULL;
-	const gchar* _tmp56_ = NULL;
-	gchar* _tmp57_ = NULL;
-	gchar* _tmp58_;
-	GtkImage* _tmp59_;
+	GtkButton* _tmp55_;
+	AtkObject* _tmp56_ = NULL;
+	const gchar* _tmp57_ = NULL;
+	gchar* _tmp58_ = NULL;
+	gchar* _tmp59_;
 	GtkImage* _tmp60_;
 	GtkImage* _tmp61_;
+	GtkImage* _tmp62_;
 	GtkImage* image;
-	GtkButton* _tmp62_;
 	GtkButton* _tmp63_;
 	GtkButton* _tmp64_;
 	GtkButton* _tmp65_;
-	GtkMenu* _tmp66_;
+	GtkButton* _tmp66_;
 	GtkMenu* _tmp67_;
-	GTimer* _tmp68_;
-	gchar* _tmp69_ = NULL;
-	gchar* _tmp70_;
-	cairo_surface_t* _tmp71_;
+	GtkMenu* _tmp68_;
+	GTimer* _tmp69_;
+	gchar* _tmp70_ = NULL;
+	gchar* _tmp71_;
 	cairo_surface_t* _tmp72_;
-	cairo_pattern_t* _tmp73_;
-	GHashFunc _tmp74_;
-	GEqualFunc _tmp75_;
-	GHashTable* _tmp76_;
-	Background* _tmp77_;
+	cairo_surface_t* _tmp73_;
+	cairo_pattern_t* _tmp74_;
+	GHashFunc _tmp75_;
+	GEqualFunc _tmp76_;
+	GHashTable* _tmp77_;
 	Background* _tmp78_;
 	Background* _tmp79_;
-	AnimateTimer* _tmp80_;
+	Background* _tmp80_;
 	AnimateTimer* _tmp81_;
 	AnimateTimer* _tmp82_;
 	AnimateTimer* _tmp83_;
+	AnimateTimer* _tmp84_;
 	self = (UserList*) g_object_new (object_type, NULL);
 	_tmp0_ = width;
 	self->priv->width = _tmp0_;
 	_tmp1_ = height;
 	self->priv->height = _tmp1_;
+	_tmp2_ = width;
+	_tmp3_ = self->priv->grid_size;
+	self->priv->grid_x_offset = ((gint) (_tmp2_ % _tmp3_)) / 2;
+	_tmp4_ = height;
+	_tmp5_ = self->priv->grid_size;
+	self->priv->grid_y_offset = ((gint) (_tmp4_ % _tmp5_)) / 2;
 	g_object_set ((GtkWidget*) self, "can-focus", FALSE, NULL);
 	self->priv->background_alpha = 1.0;
-	FT_Init_FreeType (&_tmp2_);
-	library = _tmp2_;
-	FT_New_Face (library, "/usr/share/fonts/truetype/ubuntu-font-family/Ubuntu-R.ttf", 0, &_tmp3_);
-	face = _tmp3_;
-	_tmp4_ = cairo_ft_font_face_create_for_ft_face (face, 0);
-	_cairo_font_face_destroy0 (self->priv->font_face);
-	self->priv->font_face = _tmp4_;
-	_tmp5_ = gtk_settings_get_default ();
-	g_object_get ((GObject*) _tmp5_, "gtk-theme-name", &self->priv->default_theme_name, NULL);
-	_tmp6_ = (GtkMenuBar*) gtk_menu_bar_new ();
-	_tmp7_ = g_object_ref_sink (_tmp6_);
+	_tmp6_ = gtk_settings_get_default ();
+	g_object_get ((GObject*) _tmp6_, "gtk-theme-name", &self->priv->default_theme_name, NULL);
+	_tmp7_ = (GtkMenuBar*) gtk_menu_bar_new ();
+	_tmp8_ = g_object_ref_sink (_tmp7_);
 	_g_object_unref0 (self->priv->menubar);
-	self->priv->menubar = _tmp7_;
-	_tmp8_ = self->priv->menubar;
-	g_signal_connect_object ((GtkWidget*) _tmp8_, "draw", (GCallback) _user_list_menubar_draw_cb_gtk_widget_draw, self, G_CONNECT_AFTER);
+	self->priv->menubar = _tmp8_;
 	_tmp9_ = self->priv->menubar;
-	gtk_menu_bar_set_pack_direction (_tmp9_, GTK_PACK_DIRECTION_RTL);
+	g_signal_connect_object ((GtkWidget*) _tmp9_, "draw", (GCallback) _user_list_menubar_draw_cb_gtk_widget_draw, self, G_CONNECT_AFTER);
 	_tmp10_ = self->priv->menubar;
-	gtk_widget_show ((GtkWidget*) _tmp10_);
+	gtk_menu_bar_set_pack_direction (_tmp10_, GTK_PACK_DIRECTION_RTL);
 	_tmp11_ = self->priv->menubar;
-	gtk_container_add ((GtkContainer*) self, (GtkWidget*) _tmp11_);
-	uname (&_tmp12_);
-	_tmp13_ = _tmp12_.nodename;
-	_tmp14_ = (GtkLabel*) gtk_label_new (_tmp13_);
-	_tmp15_ = g_object_ref_sink (_tmp14_);
-	label = _tmp15_;
-	_tmp16_ = label;
-	gtk_widget_show ((GtkWidget*) _tmp16_);
-	_tmp17_ = (GtkMenuItem*) gtk_menu_item_new ();
-	_tmp18_ = g_object_ref_sink (_tmp17_);
-	hostname_item = _tmp18_;
-	_tmp19_ = label;
-	gtk_container_add ((GtkContainer*) hostname_item, (GtkWidget*) _tmp19_);
+	gtk_widget_show ((GtkWidget*) _tmp11_);
+	_tmp12_ = self->priv->menubar;
+	gtk_container_add ((GtkContainer*) self, (GtkWidget*) _tmp12_);
+	uname (&_tmp13_);
+	_tmp14_ = _tmp13_.nodename;
+	_tmp15_ = (GtkLabel*) gtk_label_new (_tmp14_);
+	_tmp16_ = g_object_ref_sink (_tmp15_);
+	label = _tmp16_;
+	_tmp17_ = label;
+	gtk_widget_show ((GtkWidget*) _tmp17_);
+	_tmp18_ = (GtkMenuItem*) gtk_menu_item_new ();
+	_tmp19_ = g_object_ref_sink (_tmp18_);
+	hostname_item = _tmp19_;
+	_tmp20_ = label;
+	gtk_container_add ((GtkContainer*) hostname_item, (GtkWidget*) _tmp20_);
 	gtk_widget_set_sensitive ((GtkWidget*) hostname_item, FALSE);
 	gtk_menu_item_set_right_justified (hostname_item, TRUE);
 	gtk_widget_show ((GtkWidget*) hostname_item);
-	_tmp20_ = self->priv->menubar;
-	gtk_menu_shell_append ((GtkMenuShell*) _tmp20_, (GtkWidget*) hostname_item);
-	_tmp21_ = label;
-	gtk_widget_ensure_style ((GtkWidget*) _tmp21_);
+	_tmp21_ = self->priv->menubar;
+	gtk_menu_shell_append ((GtkMenuShell*) _tmp21_, (GtkWidget*) hostname_item);
 	_tmp22_ = label;
+	gtk_widget_ensure_style ((GtkWidget*) _tmp22_);
 	_tmp23_ = label;
-	_tmp24_ = gtk_widget_get_style ((GtkWidget*) _tmp23_);
-	_tmp25_ = _tmp24_->fg;
-	_tmp25__length1 = -1;
-	_tmp26_ = _tmp25_[GTK_STATE_NORMAL];
-	gtk_widget_modify_fg ((GtkWidget*) _tmp22_, GTK_STATE_INSENSITIVE, &_tmp26_);
-	_tmp27_ = (GtkEntry*) gtk_entry_new ();
-	_tmp28_ = g_object_ref_sink (_tmp27_);
+	_tmp24_ = label;
+	_tmp25_ = gtk_widget_get_style ((GtkWidget*) _tmp24_);
+	_tmp26_ = _tmp25_->fg;
+	_tmp26__length1 = -1;
+	_tmp27_ = _tmp26_[GTK_STATE_NORMAL];
+	gtk_widget_modify_fg ((GtkWidget*) _tmp23_, GTK_STATE_INSENSITIVE, &_tmp27_);
+	_tmp28_ = (GtkEntry*) gtk_entry_new ();
+	_tmp29_ = g_object_ref_sink (_tmp28_);
 	_g_object_unref0 (self->priv->prompt_entry);
-	self->priv->prompt_entry = _tmp28_;
-	_tmp29_ = self->priv->prompt_entry;
-	gtk_entry_set_invisible_char (_tmp29_, (guint) 10043U);
+	self->priv->prompt_entry = _tmp29_;
 	_tmp30_ = self->priv->prompt_entry;
-	g_object_set (_tmp30_, "caps-lock-warning", TRUE, NULL);
+	gtk_entry_set_invisible_char (_tmp30_, (guint) 10043U);
 	_tmp31_ = self->priv->prompt_entry;
-	gtk_entry_set_has_frame (_tmp31_, FALSE);
+	g_object_set (_tmp31_, "caps-lock-warning", TRUE, NULL);
+	_tmp32_ = self->priv->prompt_entry;
+	gtk_entry_set_has_frame (_tmp32_, FALSE);
 	memset (&b, 0, sizeof (GtkBorder));
 	b.left = (gint16) 15;
 	b.right = (gint16) 15;
 	b.top = (gint16) 15;
 	b.bottom = (gint16) 15;
-	_tmp32_ = self->priv->prompt_entry;
-	_tmp33_ = b;
-	gtk_entry_set_inner_border (_tmp32_, &_tmp33_);
-	_tmp34_ = self->priv->prompt_entry;
-	g_signal_connect_object (_tmp34_, "activate", (GCallback) _user_list_prompt_entry_activate_cb_gtk_entry_activate, self, 0);
+	_tmp33_ = self->priv->prompt_entry;
+	_tmp34_ = b;
+	gtk_entry_set_inner_border (_tmp33_, &_tmp34_);
 	_tmp35_ = self->priv->prompt_entry;
-	gtk_container_add ((GtkContainer*) self, (GtkWidget*) _tmp35_);
-	_tmp36_ = (GtkButton*) gtk_button_new ();
-	_tmp37_ = g_object_ref_sink (_tmp36_);
+	g_signal_connect_object (_tmp35_, "activate", (GCallback) _user_list_prompt_entry_activate_cb_gtk_entry_activate, self, 0);
+	_tmp36_ = self->priv->prompt_entry;
+	gtk_container_add ((GtkContainer*) self, (GtkWidget*) _tmp36_);
+	_tmp37_ = (GtkButton*) gtk_button_new ();
+	_tmp38_ = g_object_ref_sink (_tmp37_);
 	_g_object_unref0 (self->priv->login_button);
-	self->priv->login_button = _tmp37_;
-	_tmp38_ = _ ("Login");
-	_tmp39_ = g_strconcat ("<span font_size=\"large\">", _tmp38_, NULL);
-	_tmp40_ = _tmp39_;
-	_tmp41_ = g_strconcat (_tmp40_, "</span>", NULL);
-	_tmp42_ = _tmp41_;
-	_tmp43_ = (GtkLabel*) gtk_label_new (_tmp42_);
-	_tmp44_ = g_object_ref_sink (_tmp43_);
+	self->priv->login_button = _tmp38_;
+	_tmp39_ = _ ("Login");
+	_tmp40_ = g_strconcat ("<span font_size=\"large\">", _tmp39_, NULL);
+	_tmp41_ = _tmp40_;
+	_tmp42_ = g_strconcat (_tmp41_, "</span>", NULL);
+	_tmp43_ = _tmp42_;
+	_tmp44_ = (GtkLabel*) gtk_label_new (_tmp43_);
+	_tmp45_ = g_object_ref_sink (_tmp44_);
 	_g_object_unref0 (label);
-	label = _tmp44_;
-	_g_free0 (_tmp42_);
-	_g_free0 (_tmp40_);
-	_tmp45_ = label;
-	gtk_label_set_use_markup (_tmp45_, TRUE);
+	label = _tmp45_;
+	_g_free0 (_tmp43_);
+	_g_free0 (_tmp41_);
 	_tmp46_ = label;
-	gtk_widget_show ((GtkWidget*) _tmp46_);
-	_tmp47_ = self->priv->login_button;
-	_tmp48_ = label;
-	gtk_container_add ((GtkContainer*) _tmp47_, (GtkWidget*) _tmp48_);
-	_tmp49_ = self->priv->login_button;
-	g_signal_connect_object (_tmp49_, "clicked", (GCallback) _user_list_login_button_clicked_cb_gtk_button_clicked, self, 0);
+	gtk_label_set_use_markup (_tmp46_, TRUE);
+	_tmp47_ = label;
+	gtk_widget_show ((GtkWidget*) _tmp47_);
+	_tmp48_ = self->priv->login_button;
+	_tmp49_ = label;
+	gtk_container_add ((GtkContainer*) _tmp48_, (GtkWidget*) _tmp49_);
 	_tmp50_ = self->priv->login_button;
-	gtk_container_add ((GtkContainer*) self, (GtkWidget*) _tmp50_);
-	_tmp51_ = (GtkButton*) gtk_button_new ();
-	_tmp52_ = g_object_ref_sink (_tmp51_);
+	g_signal_connect_object (_tmp50_, "clicked", (GCallback) _user_list_login_button_clicked_cb_gtk_button_clicked, self, 0);
+	_tmp51_ = self->priv->login_button;
+	gtk_container_add ((GtkContainer*) self, (GtkWidget*) _tmp51_);
+	_tmp52_ = (GtkButton*) gtk_button_new ();
+	_tmp53_ = g_object_ref_sink (_tmp52_);
 	_g_object_unref0 (self->priv->options_button);
-	self->priv->options_button = _tmp52_;
-	_tmp53_ = self->priv->options_button;
-	gtk_button_set_focus_on_click (_tmp53_, FALSE);
+	self->priv->options_button = _tmp53_;
 	_tmp54_ = self->priv->options_button;
-	_tmp55_ = gtk_widget_get_accessible ((GtkWidget*) _tmp54_);
-	_tmp56_ = _ ("Session Options");
-	atk_object_set_name (_tmp55_, _tmp56_);
-	_tmp57_ = g_build_filename (PKGDATADIR, "cog.png", NULL, NULL);
-	_tmp58_ = _tmp57_;
-	_tmp59_ = (GtkImage*) gtk_image_new_from_file (_tmp58_);
-	_tmp60_ = g_object_ref_sink (_tmp59_);
-	_tmp61_ = _tmp60_;
-	_g_free0 (_tmp58_);
-	image = _tmp61_;
+	gtk_button_set_focus_on_click (_tmp54_, FALSE);
+	_tmp55_ = self->priv->options_button;
+	_tmp56_ = gtk_widget_get_accessible ((GtkWidget*) _tmp55_);
+	_tmp57_ = _ ("Session Options");
+	atk_object_set_name (_tmp56_, _tmp57_);
+	_tmp58_ = g_build_filename (PKGDATADIR, "cog.png", NULL, NULL);
+	_tmp59_ = _tmp58_;
+	_tmp60_ = (GtkImage*) gtk_image_new_from_file (_tmp59_);
+	_tmp61_ = g_object_ref_sink (_tmp60_);
+	_tmp62_ = _tmp61_;
+	_g_free0 (_tmp59_);
+	image = _tmp62_;
 	gtk_widget_show ((GtkWidget*) image);
-	_tmp62_ = self->priv->options_button;
-	gtk_button_set_relief (_tmp62_, GTK_RELIEF_NONE);
 	_tmp63_ = self->priv->options_button;
-	gtk_container_add ((GtkContainer*) _tmp63_, (GtkWidget*) image);
+	gtk_button_set_relief (_tmp63_, GTK_RELIEF_NONE);
 	_tmp64_ = self->priv->options_button;
-	g_signal_connect_object (_tmp64_, "clicked", (GCallback) _user_list_options_button_clicked_cb_gtk_button_clicked, self, 0);
+	gtk_container_add ((GtkContainer*) _tmp64_, (GtkWidget*) image);
 	_tmp65_ = self->priv->options_button;
-	gtk_container_add ((GtkContainer*) self, (GtkWidget*) _tmp65_);
-	_tmp66_ = (GtkMenu*) gtk_menu_new ();
-	_tmp67_ = g_object_ref_sink (_tmp66_);
+	g_signal_connect_object (_tmp65_, "clicked", (GCallback) _user_list_options_button_clicked_cb_gtk_button_clicked, self, 0);
+	_tmp66_ = self->priv->options_button;
+	gtk_container_add ((GtkContainer*) self, (GtkWidget*) _tmp66_);
+	_tmp67_ = (GtkMenu*) gtk_menu_new ();
+	_tmp68_ = g_object_ref_sink (_tmp67_);
 	_g_object_unref0 (self->priv->options_menu);
-	self->priv->options_menu = _tmp67_;
-	_tmp68_ = g_timer_new ();
+	self->priv->options_menu = _tmp68_;
+	_tmp69_ = g_timer_new ();
 	_g_timer_destroy0 (self->priv->draw_timer);
-	self->priv->draw_timer = _tmp68_;
-	_tmp69_ = g_build_filename (PKGDATADIR, "dialog_background.png", NULL, NULL);
-	_tmp70_ = _tmp69_;
-	_tmp71_ = cairo_image_surface_create_from_png (_tmp70_);
+	self->priv->draw_timer = _tmp69_;
+	_tmp70_ = g_build_filename (PKGDATADIR, "dialog_background.png", NULL, NULL);
+	_tmp71_ = _tmp70_;
+	_tmp72_ = cairo_image_surface_create_from_png (_tmp71_);
 	_cairo_surface_destroy0 (self->priv->box_surface);
-	self->priv->box_surface = _tmp71_;
-	_g_free0 (_tmp70_);
-	_tmp72_ = self->priv->box_surface;
-	_tmp73_ = cairo_pattern_create_for_surface (_tmp72_);
+	self->priv->box_surface = _tmp72_;
+	_g_free0 (_tmp71_);
+	_tmp73_ = self->priv->box_surface;
+	_tmp74_ = cairo_pattern_create_for_surface (_tmp73_);
 	_cairo_pattern_destroy0 (self->priv->box_pattern);
-	self->priv->box_pattern = _tmp73_;
-	_tmp74_ = g_str_hash;
-	_tmp75_ = g_str_equal;
-	_tmp76_ = g_hash_table_new_full (_tmp74_, _tmp75_, _g_free0_, _background_unref0_);
+	self->priv->box_pattern = _tmp74_;
+	_tmp75_ = g_str_hash;
+	_tmp76_ = g_str_equal;
+	_tmp77_ = g_hash_table_new_full (_tmp75_, _tmp76_, _g_free0_, _background_unref0_);
 	_g_hash_table_unref0 (self->priv->backgrounds);
-	self->priv->backgrounds = _tmp76_;
-	_tmp77_ = background_new ("#000000");
+	self->priv->backgrounds = _tmp77_;
+	_tmp78_ = background_new ("#000000");
 	_background_unref0 (self->priv->background);
-	self->priv->background = _tmp77_;
-	_tmp78_ = self->priv->background;
-	_tmp79_ = _background_ref0 (_tmp78_);
+	self->priv->background = _tmp78_;
+	_tmp79_ = self->priv->background;
+	_tmp80_ = _background_ref0 (_tmp79_);
 	_background_unref0 (self->priv->old_background);
-	self->priv->old_background = _tmp79_;
-	_tmp80_ = animate_timer_new ();
+	self->priv->old_background = _tmp80_;
+	_tmp81_ = animate_timer_new ();
 	_animate_timer_unref0 (self->priv->scroll_timer);
-	self->priv->scroll_timer = _tmp80_;
-	_tmp81_ = self->priv->scroll_timer;
-	g_signal_connect_object (_tmp81_, "animate", (GCallback) _user_list_scroll_animate_cb_animate_timer_animate, self, 0);
-	_tmp82_ = animate_timer_new ();
+	self->priv->scroll_timer = _tmp81_;
+	_tmp82_ = self->priv->scroll_timer;
+	g_signal_connect_object (_tmp82_, "animate", (GCallback) _user_list_scroll_animate_cb_animate_timer_animate, self, 0);
+	_tmp83_ = animate_timer_new ();
 	_animate_timer_unref0 (self->priv->background_timer);
-	self->priv->background_timer = _tmp82_;
-	_tmp83_ = self->priv->background_timer;
-	g_signal_connect_object (_tmp83_, "animate", (GCallback) _user_list_background_animate_cb_animate_timer_animate, self, 0);
-	user_list_setup_indicators (self, NULL, NULL);
+	self->priv->background_timer = _tmp83_;
+	_tmp84_ = self->priv->background_timer;
+	g_signal_connect_object (_tmp84_, "animate", (GCallback) _user_list_background_animate_cb_animate_timer_animate, self, 0);
+	user_list_setup_indicators (self);
 	_g_object_unref0 (image);
 	_g_object_unref0 (hostname_item);
 	_g_object_unref0 (label);
@@ -2606,161 +2498,70 @@ static gboolean user_list_menubar_draw_cb (UserList* self, cairo_t* c) {
 }
 
 
-static void user_list_greeter_set_env_data_free (gpointer _data) {
-	UserListGreeterSetEnvData* _data_;
-	_data_ = _data;
-	_g_free0 (_data_->key);
-	_g_free0 (_data_->val);
-	_g_object_unref0 (_data_->self);
-	g_slice_free (UserListGreeterSetEnvData, _data_);
-}
-
-
-static gpointer _g_object_ref0 (gpointer self) {
-	return self ? g_object_ref (self) : NULL;
-}
-
-
-static void user_list_greeter_set_env (UserList* self, const gchar* key, const gchar* val, GAsyncReadyCallback _callback_, gpointer _user_data_) {
-	UserListGreeterSetEnvData* _data_;
-	UserList* _tmp0_;
+static void user_list_greeter_set_env (UserList* self, const gchar* key, const gchar* val) {
+	const gchar* _tmp0_;
 	const gchar* _tmp1_;
-	const gchar* _tmp2_;
-	const gchar* _tmp3_;
-	const gchar* _tmp4_;
-	_data_ = g_slice_new0 (UserListGreeterSetEnvData);
-	_data_->_async_result = g_simple_async_result_new (G_OBJECT (self), _callback_, _user_data_, user_list_greeter_set_env);
-	g_simple_async_result_set_op_res_gpointer (_data_->_async_result, _data_, user_list_greeter_set_env_data_free);
-	_tmp0_ = _g_object_ref0 (self);
-	_data_->self = _tmp0_;
-	_tmp1_ = key;
-	_tmp2_ = g_strdup (_tmp1_);
-	_data_->key = _tmp2_;
-	_tmp3_ = val;
-	_tmp4_ = g_strdup (_tmp3_);
-	_data_->val = _tmp4_;
-	user_list_greeter_set_env_co (_data_);
-}
-
-
-static void user_list_greeter_set_env_finish (UserList* self, GAsyncResult* _res_) {
-	UserListGreeterSetEnvData* _data_;
-	_data_ = g_simple_async_result_get_op_res_gpointer (G_SIMPLE_ASYNC_RESULT (_res_));
-}
-
-
-static void user_list_greeter_set_env_ready (GObject* source_object, GAsyncResult* _res_, gpointer _user_data_) {
-	UserListGreeterSetEnvData* _data_;
-	_data_ = _user_data_;
-	_data_->_source_object_ = source_object;
-	_data_->_res_ = _res_;
-	user_list_greeter_set_env_co (_data_);
-}
-
-
-static gboolean user_list_greeter_set_env_co (UserListGreeterSetEnvData* _data_) {
-	switch (_data_->_state_) {
-		case 0:
-		goto _state_0;
-		case 1:
-		goto _state_1;
-		default:
-		g_assert_not_reached ();
-	}
-	_state_0:
-	_data_->_tmp0_ = _data_->key;
-	_data_->_tmp1_ = _data_->val;
-	g_setenv (_data_->_tmp0_, _data_->_tmp1_, TRUE);
+	GError * _inner_error_ = NULL;
+	g_return_if_fail (self != NULL);
+	g_return_if_fail (key != NULL);
+	g_return_if_fail (val != NULL);
+	_tmp0_ = key;
+	_tmp1_ = val;
+	g_setenv (_tmp0_, _tmp1_, TRUE);
 	{
-		_data_->_tmp2_ = g_dbus_proxy_new_for_bus_sync (G_BUS_TYPE_SESSION, G_DBUS_PROXY_FLAGS_NONE, NULL, "org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus", NULL, &_data_->_inner_error_);
-		_data_->proxy = _data_->_tmp2_;
-		if (_data_->_inner_error_ != NULL) {
+		GDBusProxy* _tmp2_;
+		GDBusProxy* proxy;
+		const GVariantType* _tmp3_;
+		GVariantBuilder* _tmp4_;
+		GVariantBuilder* builder;
+		GVariantBuilder* _tmp5_;
+		const gchar* _tmp6_;
+		const gchar* _tmp7_;
+		GDBusProxy* _tmp8_;
+		GVariantBuilder* _tmp9_;
+		GVariant* _tmp10_;
+		GVariant* _tmp11_;
+		_tmp2_ = g_dbus_proxy_new_for_bus_sync (G_BUS_TYPE_SESSION, G_DBUS_PROXY_FLAGS_NONE, NULL, "org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus", NULL, &_inner_error_);
+		proxy = _tmp2_;
+		if (_inner_error_ != NULL) {
 			goto __catch9_g_error;
 		}
-		_data_->_tmp3_ = G_VARIANT_TYPE_ARRAY;
-		_data_->_tmp4_ = g_variant_builder_new (_data_->_tmp3_);
-		_data_->builder = _data_->_tmp4_;
-		_data_->_tmp5_ = _data_->builder;
-		_data_->_tmp6_ = _data_->key;
-		_data_->_tmp7_ = _data_->val;
-		g_variant_builder_add (_data_->_tmp5_, "{ss}", _data_->_tmp6_, _data_->_tmp7_, NULL);
-		_data_->_tmp8_ = _data_->proxy;
-		_data_->_tmp9_ = _data_->builder;
-		_data_->_tmp10_ = g_variant_new ("(a{ss})", _data_->_tmp9_, NULL);
-		_data_->_tmp11_ = g_variant_ref_sink (_data_->_tmp10_);
-		_data_->_state_ = 1;
-		g_dbus_proxy_call (_data_->_tmp8_, "UpdateActivationEnvironment", _data_->_tmp11_, G_DBUS_CALL_FLAGS_NONE, -1, NULL, user_list_greeter_set_env_ready, _data_);
-		return FALSE;
-		_state_1:
-		_data_->_tmp12_ = NULL;
-		_data_->_tmp12_ = g_dbus_proxy_call_finish (_data_->_tmp8_, _data_->_res_, &_data_->_inner_error_);
-		_data_->_tmp13_ = _data_->_tmp12_;
-		_g_variant_unref0 (_data_->_tmp13_);
-		_g_variant_unref0 (_data_->_tmp11_);
-		if (_data_->_inner_error_ != NULL) {
-			_g_variant_builder_unref0 (_data_->builder);
-			_g_object_unref0 (_data_->proxy);
-			goto __catch9_g_error;
-		}
-		_g_variant_builder_unref0 (_data_->builder);
-		_g_object_unref0 (_data_->proxy);
+		_tmp3_ = G_VARIANT_TYPE_ARRAY;
+		_tmp4_ = g_variant_builder_new (_tmp3_);
+		builder = _tmp4_;
+		_tmp5_ = builder;
+		_tmp6_ = key;
+		_tmp7_ = val;
+		g_variant_builder_add (_tmp5_, "{ss}", _tmp6_, _tmp7_, NULL);
+		_tmp8_ = proxy;
+		_tmp9_ = builder;
+		_tmp10_ = g_variant_new ("(a{ss})", _tmp9_, NULL);
+		_tmp11_ = g_variant_ref_sink (_tmp10_);
+		g_dbus_proxy_call (_tmp8_, "UpdateActivationEnvironment", _tmp11_, G_DBUS_CALL_FLAGS_NONE, -1, NULL, NULL, NULL);
+		_g_variant_unref0 (_tmp11_);
+		_g_variant_builder_unref0 (builder);
+		_g_object_unref0 (proxy);
 	}
 	goto __finally9;
 	__catch9_g_error:
 	{
-		_data_->e = _data_->_inner_error_;
-		_data_->_inner_error_ = NULL;
-		_data_->_tmp14_ = _data_->e;
-		_data_->_tmp15_ = _data_->_tmp14_->message;
-		g_warning ("user-list.vala:540: Could not get set environment for indicators: %s", _data_->_tmp15_);
-		_g_error_free0 (_data_->e);
-		if (_data_->_state_ == 0) {
-			g_simple_async_result_complete_in_idle (_data_->_async_result);
-		} else {
-			g_simple_async_result_complete (_data_->_async_result);
-		}
-		g_object_unref (_data_->_async_result);
-		return FALSE;
+		GError* e = NULL;
+		GError* _tmp12_;
+		const gchar* _tmp13_;
+		e = _inner_error_;
+		_inner_error_ = NULL;
+		_tmp12_ = e;
+		_tmp13_ = _tmp12_->message;
+		g_warning ("user-list.vala:532: Could not get set environment for indicators: %s", _tmp13_);
+		_g_error_free0 (e);
+		return;
 	}
 	__finally9:
-	if (_data_->_inner_error_ != NULL) {
-		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _data_->_inner_error_->message, g_quark_to_string (_data_->_inner_error_->domain), _data_->_inner_error_->code);
-		g_clear_error (&_data_->_inner_error_);
-		return FALSE;
+	if (_inner_error_ != NULL) {
+		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
+		g_clear_error (&_inner_error_);
+		return;
 	}
-	if (_data_->_state_ == 0) {
-		g_simple_async_result_complete_in_idle (_data_->_async_result);
-	} else {
-		g_simple_async_result_complete (_data_->_async_result);
-	}
-	g_object_unref (_data_->_async_result);
-	return FALSE;
-}
-
-
-static void user_list_setup_indicators_data_free (gpointer _data) {
-	UserListSetupIndicatorsData* _data_;
-	_data_ = _data;
-	_g_object_unref0 (_data_->self);
-	g_slice_free (UserListSetupIndicatorsData, _data_);
-}
-
-
-static void user_list_setup_indicators (UserList* self, GAsyncReadyCallback _callback_, gpointer _user_data_) {
-	UserListSetupIndicatorsData* _data_;
-	UserList* _tmp0_;
-	_data_ = g_slice_new0 (UserListSetupIndicatorsData);
-	_data_->_async_result = g_simple_async_result_new (G_OBJECT (self), _callback_, _user_data_, user_list_setup_indicators);
-	g_simple_async_result_set_op_res_gpointer (_data_->_async_result, _data_, user_list_setup_indicators_data_free);
-	_tmp0_ = _g_object_ref0 (self);
-	_data_->self = _tmp0_;
-	user_list_setup_indicators_co (_data_);
-}
-
-
-static void user_list_setup_indicators_finish (UserList* self, GAsyncResult* _res_) {
-	UserListSetupIndicatorsData* _data_;
-	_data_ = g_simple_async_result_get_op_res_gpointer (G_SIMPLE_ASYNC_RESULT (_res_));
 }
 
 
@@ -2779,106 +2580,131 @@ static void _user_list_screen_reader_toggled_cb_gtk_check_menu_item_toggled (Gtk
 }
 
 
-static gboolean user_list_setup_indicators_co (UserListSetupIndicatorsData* _data_) {
-	switch (_data_->_state_) {
-		case 0:
-		goto _state_0;
-		default:
-		g_assert_not_reached ();
-	}
-	_state_0:
-	user_list_greeter_set_env (_data_->self, "INDICATOR_GREETER_MODE", "1", NULL, NULL);
-	user_list_greeter_set_env (_data_->self, "GIO_USE_VFS", "local", NULL, NULL);
-	user_list_greeter_set_env (_data_->self, "GVFS_DISABLE_FUSE", "1", NULL, NULL);
-	user_list_greeter_set_env (_data_->self, "RUNNING_UNDER_GDM", "1", NULL, NULL);
-	_data_->_tmp0_ = (GtkMenuItem*) gtk_menu_item_new ();
-	_data_->_tmp1_ = g_object_ref_sink (_data_->_tmp0_);
-	_data_->a11y_item = _data_->_tmp1_;
-	_data_->_tmp2_ = (GtkHBox*) gtk_hbox_new (FALSE, 3);
-	_data_->_tmp3_ = g_object_ref_sink (_data_->_tmp2_);
-	_data_->hbox = _data_->_tmp3_;
-	gtk_widget_show ((GtkWidget*) _data_->hbox);
-	gtk_container_add ((GtkContainer*) _data_->a11y_item, (GtkWidget*) _data_->hbox);
-	_data_->_tmp4_ = NULL;
-	_data_->_tmp4_ = g_build_filename (PKGDATADIR, "a11y.svg", NULL);
-	_data_->_tmp5_ = _data_->_tmp4_;
-	_data_->_tmp6_ = (GtkImage*) gtk_image_new_from_file (_data_->_tmp5_);
-	_data_->_tmp7_ = g_object_ref_sink (_data_->_tmp6_);
-	_data_->_tmp8_ = _data_->_tmp7_;
-	_g_free0 (_data_->_tmp5_);
-	_data_->image = _data_->_tmp8_;
-	gtk_widget_show ((GtkWidget*) _data_->image);
-	gtk_container_add ((GtkContainer*) _data_->hbox, (GtkWidget*) _data_->image);
-	gtk_widget_show ((GtkWidget*) _data_->a11y_item);
-	_data_->_tmp9_ = (GtkMenu*) gtk_menu_new ();
-	_data_->_tmp10_ = g_object_ref_sink (_data_->_tmp9_);
-	gtk_menu_item_set_submenu (_data_->a11y_item, _data_->_tmp10_);
-	_g_object_unref0 (_data_->_tmp10_);
-	_data_->_tmp11_ = NULL;
-	_data_->_tmp11_ = _ ("Onscreen keyboard");
-	_data_->_tmp12_ = (GtkCheckMenuItem*) gtk_check_menu_item_new_with_label (_data_->_tmp11_);
-	_data_->_tmp13_ = g_object_ref_sink (_data_->_tmp12_);
-	_data_->item = _data_->_tmp13_;
-	_data_->_tmp14_ = _data_->item;
-	g_signal_connect_object (_data_->_tmp14_, "toggled", (GCallback) _user_list_keyboard_toggled_cb_gtk_check_menu_item_toggled, _data_->self, 0);
-	_data_->_tmp15_ = _data_->item;
-	gtk_widget_show ((GtkWidget*) _data_->_tmp15_);
-	_data_->_tmp16_ = gtk_menu_item_get_submenu (_data_->a11y_item);
-	_data_->_tmp17_ = _data_->_tmp16_;
-	_data_->_tmp18_ = _data_->item;
-	gtk_menu_shell_append ((GtkMenuShell*) _data_->_tmp17_, (GtkWidget*) ((GtkMenuItem*) _data_->_tmp18_));
-	_data_->_tmp19_ = NULL;
-	_data_->_tmp19_ = _ ("High Contrast");
-	_data_->_tmp20_ = (GtkCheckMenuItem*) gtk_check_menu_item_new_with_label (_data_->_tmp19_);
-	_data_->_tmp21_ = g_object_ref_sink (_data_->_tmp20_);
-	_g_object_unref0 (_data_->self->priv->high_contrast_item);
-	_data_->self->priv->high_contrast_item = _data_->_tmp21_;
-	_data_->_tmp22_ = _data_->self->priv->high_contrast_item;
-	g_signal_connect_object (_data_->_tmp22_, "toggled", (GCallback) _user_list_high_contrast_toggled_cb_gtk_check_menu_item_toggled, _data_->self, 0);
-	_data_->_tmp23_ = _data_->self->priv->high_contrast_item;
-	gtk_widget_show ((GtkWidget*) _data_->_tmp23_);
-	_data_->_tmp24_ = gtk_menu_item_get_submenu (_data_->a11y_item);
-	_data_->_tmp25_ = _data_->_tmp24_;
-	_data_->_tmp26_ = _data_->self->priv->high_contrast_item;
-	gtk_menu_shell_append ((GtkMenuShell*) _data_->_tmp25_, (GtkWidget*) ((GtkMenuItem*) _data_->_tmp26_));
-	_data_->_tmp27_ = NULL;
-	_data_->_tmp27_ = _ ("Screen Reader");
-	_data_->_tmp28_ = (GtkCheckMenuItem*) gtk_check_menu_item_new_with_label (_data_->_tmp27_);
-	_data_->_tmp29_ = g_object_ref_sink (_data_->_tmp28_);
-	_g_object_unref0 (_data_->item);
-	_data_->item = _data_->_tmp29_;
-	_data_->_tmp30_ = _data_->item;
-	g_signal_connect_object (_data_->_tmp30_, "toggled", (GCallback) _user_list_screen_reader_toggled_cb_gtk_check_menu_item_toggled, _data_->self, 0);
-	_data_->_tmp31_ = _data_->item;
-	gtk_widget_show ((GtkWidget*) _data_->_tmp31_);
-	_data_->_tmp32_ = gtk_menu_item_get_submenu (_data_->a11y_item);
-	_data_->_tmp33_ = _data_->_tmp32_;
-	_data_->_tmp34_ = _data_->item;
-	gtk_menu_shell_append ((GtkMenuShell*) _data_->_tmp33_, (GtkWidget*) ((GtkMenuItem*) _data_->_tmp34_));
-	_data_->_tmp35_ = _data_->self->priv->menubar;
-	_data_->_tmp36_ = _data_->self->priv->menubar;
-	_data_->_tmp37_ = NULL;
-	_data_->_tmp37_ = gtk_container_get_children ((GtkContainer*) _data_->_tmp36_);
-	_data_->_tmp38_ = _data_->_tmp37_;
-	_data_->_tmp39_ = 0U;
-	_data_->_tmp39_ = g_list_length (_data_->_tmp38_);
-	gtk_menu_shell_insert ((GtkMenuShell*) _data_->_tmp35_, (GtkWidget*) _data_->a11y_item, ((gint) _data_->_tmp39_) - 1);
-	_g_list_free0 (_data_->_tmp38_);
-	user_list_load_indicator (_data_->self, "/usr/lib/indicators3/6/libsession.so");
-	user_list_load_indicator (_data_->self, "/usr/lib/indicators3/6/libdatetime.so");
-	user_list_load_indicator (_data_->self, "/usr/lib/indicators3/6/libpower.so");
-	user_list_load_indicator (_data_->self, "/usr/lib/indicators3/6/libsoundmenu.so");
-	_g_object_unref0 (_data_->item);
-	_g_object_unref0 (_data_->image);
-	_g_object_unref0 (_data_->hbox);
-	_g_object_unref0 (_data_->a11y_item);
-	if (_data_->_state_ == 0) {
-		g_simple_async_result_complete_in_idle (_data_->_async_result);
-	} else {
-		g_simple_async_result_complete (_data_->_async_result);
-	}
-	g_object_unref (_data_->_async_result);
-	return FALSE;
+static void user_list_setup_indicators (UserList* self) {
+	GtkMenuItem* _tmp0_;
+	GtkMenuItem* _tmp1_;
+	GtkMenuItem* a11y_item;
+	GtkHBox* _tmp2_;
+	GtkHBox* _tmp3_;
+	GtkHBox* hbox;
+	gchar* _tmp4_ = NULL;
+	gchar* _tmp5_;
+	GtkImage* _tmp6_;
+	GtkImage* _tmp7_;
+	GtkImage* _tmp8_;
+	GtkImage* image;
+	GtkMenu* _tmp9_;
+	GtkMenu* _tmp10_;
+	const gchar* _tmp11_ = NULL;
+	GtkCheckMenuItem* _tmp12_;
+	GtkCheckMenuItem* _tmp13_;
+	GtkCheckMenuItem* item;
+	GtkCheckMenuItem* _tmp14_;
+	GtkCheckMenuItem* _tmp15_;
+	GtkMenu* _tmp16_;
+	GtkMenu* _tmp17_;
+	GtkCheckMenuItem* _tmp18_;
+	const gchar* _tmp19_ = NULL;
+	GtkCheckMenuItem* _tmp20_;
+	GtkCheckMenuItem* _tmp21_;
+	GtkCheckMenuItem* _tmp22_;
+	GtkCheckMenuItem* _tmp23_;
+	GtkMenu* _tmp24_;
+	GtkMenu* _tmp25_;
+	GtkCheckMenuItem* _tmp26_;
+	const gchar* _tmp27_ = NULL;
+	GtkCheckMenuItem* _tmp28_;
+	GtkCheckMenuItem* _tmp29_;
+	GtkCheckMenuItem* _tmp30_;
+	GtkCheckMenuItem* _tmp31_;
+	GtkMenu* _tmp32_;
+	GtkMenu* _tmp33_;
+	GtkCheckMenuItem* _tmp34_;
+	GtkMenuBar* _tmp35_;
+	GtkMenuBar* _tmp36_;
+	GList* _tmp37_ = NULL;
+	GList* _tmp38_;
+	guint _tmp39_ = 0U;
+	g_return_if_fail (self != NULL);
+	user_list_greeter_set_env (self, "INDICATOR_GREETER_MODE", "1");
+	user_list_greeter_set_env (self, "GIO_USE_VFS", "local");
+	user_list_greeter_set_env (self, "GVFS_DISABLE_FUSE", "1");
+	user_list_greeter_set_env (self, "RUNNING_UNDER_GDM", "1");
+	_tmp0_ = (GtkMenuItem*) gtk_menu_item_new ();
+	_tmp1_ = g_object_ref_sink (_tmp0_);
+	a11y_item = _tmp1_;
+	_tmp2_ = (GtkHBox*) gtk_hbox_new (FALSE, 3);
+	_tmp3_ = g_object_ref_sink (_tmp2_);
+	hbox = _tmp3_;
+	gtk_widget_show ((GtkWidget*) hbox);
+	gtk_container_add ((GtkContainer*) a11y_item, (GtkWidget*) hbox);
+	_tmp4_ = g_build_filename (PKGDATADIR, "a11y.svg", NULL);
+	_tmp5_ = _tmp4_;
+	_tmp6_ = (GtkImage*) gtk_image_new_from_file (_tmp5_);
+	_tmp7_ = g_object_ref_sink (_tmp6_);
+	_tmp8_ = _tmp7_;
+	_g_free0 (_tmp5_);
+	image = _tmp8_;
+	gtk_widget_show ((GtkWidget*) image);
+	gtk_container_add ((GtkContainer*) hbox, (GtkWidget*) image);
+	gtk_widget_show ((GtkWidget*) a11y_item);
+	_tmp9_ = (GtkMenu*) gtk_menu_new ();
+	_tmp10_ = g_object_ref_sink (_tmp9_);
+	gtk_menu_item_set_submenu (a11y_item, _tmp10_);
+	_g_object_unref0 (_tmp10_);
+	_tmp11_ = _ ("Onscreen keyboard");
+	_tmp12_ = (GtkCheckMenuItem*) gtk_check_menu_item_new_with_label (_tmp11_);
+	_tmp13_ = g_object_ref_sink (_tmp12_);
+	item = _tmp13_;
+	_tmp14_ = item;
+	g_signal_connect_object (_tmp14_, "toggled", (GCallback) _user_list_keyboard_toggled_cb_gtk_check_menu_item_toggled, self, 0);
+	_tmp15_ = item;
+	gtk_widget_show ((GtkWidget*) _tmp15_);
+	_tmp16_ = gtk_menu_item_get_submenu (a11y_item);
+	_tmp17_ = _tmp16_;
+	_tmp18_ = item;
+	gtk_menu_shell_append ((GtkMenuShell*) _tmp17_, (GtkWidget*) ((GtkMenuItem*) _tmp18_));
+	_tmp19_ = _ ("High Contrast");
+	_tmp20_ = (GtkCheckMenuItem*) gtk_check_menu_item_new_with_label (_tmp19_);
+	_tmp21_ = g_object_ref_sink (_tmp20_);
+	_g_object_unref0 (self->priv->high_contrast_item);
+	self->priv->high_contrast_item = _tmp21_;
+	_tmp22_ = self->priv->high_contrast_item;
+	g_signal_connect_object (_tmp22_, "toggled", (GCallback) _user_list_high_contrast_toggled_cb_gtk_check_menu_item_toggled, self, 0);
+	_tmp23_ = self->priv->high_contrast_item;
+	gtk_widget_show ((GtkWidget*) _tmp23_);
+	_tmp24_ = gtk_menu_item_get_submenu (a11y_item);
+	_tmp25_ = _tmp24_;
+	_tmp26_ = self->priv->high_contrast_item;
+	gtk_menu_shell_append ((GtkMenuShell*) _tmp25_, (GtkWidget*) ((GtkMenuItem*) _tmp26_));
+	_tmp27_ = _ ("Screen Reader");
+	_tmp28_ = (GtkCheckMenuItem*) gtk_check_menu_item_new_with_label (_tmp27_);
+	_tmp29_ = g_object_ref_sink (_tmp28_);
+	_g_object_unref0 (item);
+	item = _tmp29_;
+	_tmp30_ = item;
+	g_signal_connect_object (_tmp30_, "toggled", (GCallback) _user_list_screen_reader_toggled_cb_gtk_check_menu_item_toggled, self, 0);
+	_tmp31_ = item;
+	gtk_widget_show ((GtkWidget*) _tmp31_);
+	_tmp32_ = gtk_menu_item_get_submenu (a11y_item);
+	_tmp33_ = _tmp32_;
+	_tmp34_ = item;
+	gtk_menu_shell_append ((GtkMenuShell*) _tmp33_, (GtkWidget*) ((GtkMenuItem*) _tmp34_));
+	_tmp35_ = self->priv->menubar;
+	_tmp36_ = self->priv->menubar;
+	_tmp37_ = gtk_container_get_children ((GtkContainer*) _tmp36_);
+	_tmp38_ = _tmp37_;
+	_tmp39_ = g_list_length (_tmp38_);
+	gtk_menu_shell_insert ((GtkMenuShell*) _tmp35_, (GtkWidget*) a11y_item, ((gint) _tmp39_) - 1);
+	_g_list_free0 (_tmp38_);
+	user_list_load_indicator (self, "/usr/lib/indicators3/6/libsession.so");
+	user_list_load_indicator (self, "/usr/lib/indicators3/6/libdatetime.so");
+	user_list_load_indicator (self, "/usr/lib/indicators3/6/libpower.so");
+	user_list_load_indicator (self, "/usr/lib/indicators3/6/libsoundmenu.so");
+	_g_object_unref0 (item);
+	_g_object_unref0 (image);
+	_g_object_unref0 (hbox);
+	_g_object_unref0 (a11y_item);
 }
 
 
@@ -2980,7 +2806,7 @@ static void user_list_keyboard_toggled_cb (UserList* self, GtkCheckMenuItem* ite
 			_inner_error_ = NULL;
 			_tmp19_ = e;
 			_tmp20_ = _tmp19_->message;
-			g_warning ("user-list.vala:618: Error setting up keyboard: %s", _tmp20_);
+			g_warning ("user-list.vala:610: Error setting up keyboard: %s", _tmp20_);
 			_g_error_free0 (e);
 		}
 		__finally10:
@@ -3002,6 +2828,11 @@ static void user_list_keyboard_toggled_cb (UserList* self, GtkCheckMenuItem* ite
 		_tmp25_ = _tmp24_;
 		gtk_widget_set_visible ((GtkWidget*) _tmp22_, _tmp25_);
 	}
+}
+
+
+static gpointer _g_object_ref0 (gpointer self) {
+	return self ? g_object_ref (self) : NULL;
 }
 
 
@@ -3083,7 +2914,7 @@ void user_list_show_prompt (UserList* self, const gchar* text, gboolean secret) 
 	AtkObject* accessible;
 	UserEntry* _tmp10_;
 	const gchar* _tmp11_;
-	GtkEntry* _tmp25_;
+	GtkEntry* _tmp26_;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (text != NULL);
 	_tmp0_ = self->priv->login_button;
@@ -3109,40 +2940,42 @@ void user_list_show_prompt (UserList* self, const gchar* text, gboolean secret) 
 		AtkObject* _tmp12_;
 		const gchar* _tmp13_ = NULL;
 		UserEntry* _tmp14_;
-		const gchar* _tmp15_;
-		gchar* _tmp16_ = NULL;
-		gchar* _tmp17_;
+		PangoLayout* _tmp15_;
+		const gchar* _tmp16_ = NULL;
+		gchar* _tmp17_ = NULL;
+		gchar* _tmp18_;
 		_tmp12_ = accessible;
 		_tmp13_ = _ ("Enter password for %s");
 		_tmp14_ = self->priv->selected_entry;
-		_tmp15_ = _tmp14_->label;
-		_tmp16_ = g_strdup_printf (_tmp13_, _tmp15_);
-		_tmp17_ = _tmp16_;
-		atk_object_set_name (_tmp12_, _tmp17_);
-		_g_free0 (_tmp17_);
+		_tmp15_ = _tmp14_->layout;
+		_tmp16_ = pango_layout_get_text (_tmp15_);
+		_tmp17_ = g_strdup_printf (_tmp13_, _tmp16_);
+		_tmp18_ = _tmp17_;
+		atk_object_set_name (_tmp12_, _tmp18_);
+		_g_free0 (_tmp18_);
 	} else {
-		GtkEntry* _tmp18_;
-		gboolean _tmp19_;
+		GtkEntry* _tmp19_;
 		gboolean _tmp20_;
-		_tmp18_ = self->priv->prompt_entry;
-		_tmp19_ = gtk_entry_get_visibility (_tmp18_);
-		_tmp20_ = _tmp19_;
-		if (_tmp20_) {
-			AtkObject* _tmp21_;
-			const gchar* _tmp22_ = NULL;
-			_tmp21_ = accessible;
-			_tmp22_ = _ ("Enter username");
-			atk_object_set_name (_tmp21_, _tmp22_);
+		gboolean _tmp21_;
+		_tmp19_ = self->priv->prompt_entry;
+		_tmp20_ = gtk_entry_get_visibility (_tmp19_);
+		_tmp21_ = _tmp20_;
+		if (_tmp21_) {
+			AtkObject* _tmp22_;
+			const gchar* _tmp23_ = NULL;
+			_tmp22_ = accessible;
+			_tmp23_ = _ ("Enter username");
+			atk_object_set_name (_tmp22_, _tmp23_);
 		} else {
-			AtkObject* _tmp23_;
-			const gchar* _tmp24_ = NULL;
-			_tmp23_ = accessible;
-			_tmp24_ = _ ("Enter password");
-			atk_object_set_name (_tmp23_, _tmp24_);
+			AtkObject* _tmp24_;
+			const gchar* _tmp25_ = NULL;
+			_tmp24_ = accessible;
+			_tmp25_ = _ ("Enter password");
+			atk_object_set_name (_tmp24_, _tmp25_);
 		}
 	}
-	_tmp25_ = self->priv->prompt_entry;
-	gtk_widget_grab_focus ((GtkWidget*) _tmp25_);
+	_tmp26_ = self->priv->prompt_entry;
+	gtk_widget_grab_focus ((GtkWidget*) _tmp26_);
 	gtk_widget_queue_draw ((GtkWidget*) self);
 	_g_object_unref0 (accessible);
 }
@@ -3158,10 +2991,11 @@ void user_list_show_authenticated (UserList* self) {
 	AtkObject* accessible;
 	const gchar* _tmp6_ = NULL;
 	UserEntry* _tmp7_;
-	const gchar* _tmp8_;
-	gchar* _tmp9_ = NULL;
-	gchar* _tmp10_;
-	GtkButton* _tmp11_;
+	PangoLayout* _tmp8_;
+	const gchar* _tmp9_ = NULL;
+	gchar* _tmp10_ = NULL;
+	gchar* _tmp11_;
+	GtkButton* _tmp12_;
 	g_return_if_fail (self != NULL);
 	_tmp0_ = self->priv->prompt_entry;
 	gtk_widget_hide ((GtkWidget*) _tmp0_);
@@ -3176,13 +3010,14 @@ void user_list_show_authenticated (UserList* self) {
 	accessible = _tmp5_;
 	_tmp6_ = _ ("Login as %s");
 	_tmp7_ = self->priv->selected_entry;
-	_tmp8_ = _tmp7_->label;
-	_tmp9_ = g_strdup_printf (_tmp6_, _tmp8_);
-	_tmp10_ = _tmp9_;
-	atk_object_set_name (accessible, _tmp10_);
-	_g_free0 (_tmp10_);
-	_tmp11_ = self->priv->login_button;
-	gtk_widget_grab_focus ((GtkWidget*) _tmp11_);
+	_tmp8_ = _tmp7_->layout;
+	_tmp9_ = pango_layout_get_text (_tmp8_);
+	_tmp10_ = g_strdup_printf (_tmp6_, _tmp9_);
+	_tmp11_ = _tmp10_;
+	atk_object_set_name (accessible, _tmp11_);
+	_g_free0 (_tmp11_);
+	_tmp12_ = self->priv->login_button;
+	gtk_widget_grab_focus ((GtkWidget*) _tmp12_);
 	gtk_widget_queue_draw ((GtkWidget*) self);
 	_g_object_unref0 (accessible);
 }
@@ -3487,7 +3322,7 @@ static void user_list_indicator_added_cb (UserList* self, IndicatorObject* objec
 	}
 	_tmp15_ = entry;
 	_tmp16_ = pos;
-	g_debug ("user-list.vala:762: Adding indicator object %p at position %d", _tmp15_, _tmp16_);
+	g_debug ("user-list.vala:754: Adding indicator object %p at position %d", _tmp15_, _tmp16_);
 	_tmp17_ = entry;
 	_tmp18_ = indicator_menu_item_new (_tmp17_);
 	_tmp19_ = g_object_ref_sink (_tmp18_);
@@ -3508,7 +3343,7 @@ static void user_list_indicator_removed_cb (UserList* self, IndicatorObject* obj
 	g_return_if_fail (object != NULL);
 	g_return_if_fail (entry != NULL);
 	_tmp0_ = entry;
-	g_debug ("user-list.vala:770: Removing indicator object %p", _tmp0_);
+	g_debug ("user-list.vala:762: Removing indicator object %p", _tmp0_);
 	_tmp1_ = self->priv->menubar;
 	_tmp2_ = gtk_container_get_children ((GtkContainer*) _tmp1_);
 	{
@@ -3547,7 +3382,7 @@ static void user_list_indicator_removed_cb (UserList* self, IndicatorObject* obj
 		_g_list_free0 (child_collection);
 	}
 	_tmp10_ = entry;
-	g_warning ("user-list.vala:782: Indicator object %p not in menubar", _tmp10_);
+	g_warning ("user-list.vala:774: Indicator object %p not in menubar", _tmp10_);
 }
 
 
@@ -3635,17 +3470,19 @@ void user_list_add_entry (UserList* self, const gchar* name, const gchar* label,
 	UserEntry* _tmp2_;
 	UserEntry* _tmp9_;
 	const gchar* _tmp10_;
-	gchar* _tmp11_;
+	PangoLayout* _tmp11_ = NULL;
 	UserEntry* _tmp12_;
-	const gchar* _tmp13_;
-	Background* _tmp14_ = NULL;
-	UserEntry* _tmp15_;
-	Background* _tmp16_;
-	UserEntry* _tmp17_;
-	gboolean _tmp18_;
+	PangoLayout* _tmp13_;
+	PangoFontDescription* _tmp14_ = NULL;
+	PangoFontDescription* _tmp15_;
+	UserEntry* _tmp16_;
+	const gchar* _tmp17_;
+	Background* _tmp18_ = NULL;
 	UserEntry* _tmp19_;
-	UserEntry* _tmp20_;
-	GList* _tmp22_;
+	Background* _tmp20_;
+	UserEntry* _tmp21_;
+	gboolean _tmp22_;
+	UserEntry* _tmp23_;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (label != NULL);
 	g_return_if_fail (background != NULL);
@@ -3674,52 +3511,35 @@ void user_list_add_entry (UserList* self, const gchar* name, const gchar* label,
 	}
 	_tmp9_ = e;
 	_tmp10_ = label;
-	_tmp11_ = g_strdup (_tmp10_);
-	_g_free0 (_tmp9_->label);
-	_tmp9_->label = _tmp11_;
+	_tmp11_ = gtk_widget_create_pango_layout ((GtkWidget*) self, _tmp10_);
+	_g_object_unref0 (_tmp9_->layout);
+	_tmp9_->layout = _tmp11_;
 	_tmp12_ = e;
-	_tmp13_ = background;
-	_tmp14_ = user_list_make_background (self, _tmp13_);
-	_background_unref0 (_tmp12_->background);
-	_tmp12_->background = _tmp14_;
-	_tmp15_ = e;
-	_tmp16_ = _tmp15_->background;
-	g_signal_connect_object (_tmp16_, "loaded", (GCallback) _user_list_background_loaded_cb_background_loaded, self, 0);
-	_tmp17_ = e;
-	_tmp18_ = is_active;
-	_tmp17_->is_active = _tmp18_;
+	_tmp13_ = _tmp12_->layout;
+	_tmp14_ = pango_font_description_from_string ("Ubuntu 16");
+	_tmp15_ = _tmp14_;
+	pango_layout_set_font_description (_tmp13_, _tmp15_);
+	_pango_font_description_free0 (_tmp15_);
+	_tmp16_ = e;
+	_tmp17_ = background;
+	_tmp18_ = user_list_make_background (self, _tmp17_);
+	_background_unref0 (_tmp16_->background);
+	_tmp16_->background = _tmp18_;
 	_tmp19_ = e;
-	_tmp19_->width = (gdouble) 5;
-	_tmp20_ = self->priv->selected_entry;
-	if (_tmp20_ == NULL) {
-		UserEntry* _tmp21_;
-		_tmp21_ = e;
-		user_list_select_entry (self, _tmp21_);
-	}
-	_tmp22_ = self->priv->entries;
-	{
-		GList* entry_collection = NULL;
-		GList* entry_it = NULL;
-		entry_collection = _tmp22_;
-		for (entry_it = entry_collection; entry_it != NULL; entry_it = entry_it->next) {
-			UserEntry* _tmp23_;
-			UserEntry* entry = NULL;
-			_tmp23_ = _user_entry_ref0 ((UserEntry*) entry_it->data);
-			entry = _tmp23_;
-			{
-				UserEntry* _tmp24_;
-				UserEntry* _tmp25_;
-				UserEntry* _tmp26_;
-				gdouble _tmp27_;
-				_tmp24_ = entry;
-				user_list_update_entry_location (self, _tmp24_);
-				_tmp25_ = entry;
-				_tmp26_ = entry;
-				_tmp27_ = _tmp26_->target_y;
-				_tmp25_->y = _tmp27_;
-				_user_entry_unref0 (entry);
-			}
-		}
+	_tmp20_ = _tmp19_->background;
+	g_signal_connect_object (_tmp20_, "loaded", (GCallback) _user_list_background_loaded_cb_background_loaded, self, 0);
+	_tmp21_ = e;
+	_tmp22_ = is_active;
+	_tmp21_->is_active = _tmp22_;
+	_tmp23_ = self->priv->selected_entry;
+	if (_tmp23_ == NULL) {
+		UserEntry* _tmp24_;
+		_tmp24_ = e;
+		user_list_select_entry (self, _tmp24_, 1.0);
+	} else {
+		UserEntry* _tmp25_;
+		_tmp25_ = self->priv->selected_entry;
+		user_list_select_entry (self, _tmp25_, 1.0);
 	}
 	gtk_widget_queue_draw ((GtkWidget*) self);
 	_user_entry_unref0 (e);
@@ -3731,7 +3551,6 @@ void user_list_set_active_entry (UserList* self, const gchar* name) {
 	UserEntry* _tmp1_ = NULL;
 	UserEntry* e;
 	UserEntry* _tmp2_;
-	GList* _tmp4_;
 	g_return_if_fail (self != NULL);
 	_tmp0_ = name;
 	_tmp1_ = user_list_find_entry (self, _tmp0_);
@@ -3740,32 +3559,7 @@ void user_list_set_active_entry (UserList* self, const gchar* name) {
 	if (_tmp2_ != NULL) {
 		UserEntry* _tmp3_;
 		_tmp3_ = e;
-		user_list_select_entry (self, _tmp3_);
-	}
-	_tmp4_ = self->priv->entries;
-	{
-		GList* entry_collection = NULL;
-		GList* entry_it = NULL;
-		entry_collection = _tmp4_;
-		for (entry_it = entry_collection; entry_it != NULL; entry_it = entry_it->next) {
-			UserEntry* _tmp5_;
-			UserEntry* entry = NULL;
-			_tmp5_ = _user_entry_ref0 ((UserEntry*) entry_it->data);
-			entry = _tmp5_;
-			{
-				UserEntry* _tmp6_;
-				UserEntry* _tmp7_;
-				UserEntry* _tmp8_;
-				gdouble _tmp9_;
-				_tmp6_ = entry;
-				user_list_update_entry_location (self, _tmp6_);
-				_tmp7_ = entry;
-				_tmp8_ = entry;
-				_tmp9_ = _tmp8_->target_y;
-				_tmp7_->y = _tmp9_;
-				_user_entry_unref0 (entry);
-			}
-		}
+		user_list_select_entry (self, _tmp3_, 1.0);
 	}
 	_user_entry_unref0 (e);
 }
@@ -3783,7 +3577,6 @@ void user_list_remove_entry (UserList* self, const gchar* name) {
 	UserEntry* _tmp6_;
 	UserEntry* _tmp7_;
 	UserEntry* _tmp8_;
-	GList* _tmp16_;
 	g_return_if_fail (self != NULL);
 	_tmp0_ = name;
 	_tmp1_ = user_list_find_entry (self, _tmp0_);
@@ -3819,25 +3612,7 @@ void user_list_remove_entry (UserList* self, const gchar* name) {
 		_tmp13_ = self->priv->entries;
 		_tmp14_ = index;
 		_tmp15_ = g_list_nth_data (_tmp13_, (guint) _tmp14_);
-		user_list_select_entry (self, (UserEntry*) _tmp15_);
-	}
-	_tmp16_ = self->priv->entries;
-	{
-		GList* e_collection = NULL;
-		GList* e_it = NULL;
-		e_collection = _tmp16_;
-		for (e_it = e_collection; e_it != NULL; e_it = e_it->next) {
-			UserEntry* _tmp17_;
-			UserEntry* e = NULL;
-			_tmp17_ = _user_entry_ref0 ((UserEntry*) e_it->data);
-			e = _tmp17_;
-			{
-				UserEntry* _tmp18_;
-				_tmp18_ = e;
-				user_list_update_entry_location (self, _tmp18_);
-				_user_entry_unref0 (e);
-			}
-		}
+		user_list_select_entry (self, (UserEntry*) _tmp15_, -1.0);
 	}
 	gtk_widget_queue_draw ((GtkWidget*) self);
 	_user_entry_unref0 (entry);
@@ -3865,7 +3640,7 @@ static void user_list_login_button_clicked_cb (UserList* self) {
 	g_return_if_fail (self != NULL);
 	_tmp0_ = self->priv->selected_entry;
 	_tmp1_ = _tmp0_->name;
-	g_debug ("user-list.vala:891: Start session for %s", _tmp1_);
+	g_debug ("user-list.vala:871: Start session for %s", _tmp1_);
 	g_signal_emit_by_name (self, "start-session");
 }
 
@@ -3935,263 +3710,97 @@ static void user_list_options_button_clicked_cb (UserList* self) {
 }
 
 
-static void user_list_update_entry_location (UserList* self, UserEntry* entry) {
-	GList* _tmp0_;
-	UserEntry* _tmp1_;
-	gint _tmp2_ = 0;
-	GList* _tmp3_;
-	UserEntry* _tmp4_;
-	gint _tmp5_ = 0;
-	gint offset;
-	gint _tmp6_;
-	guint _tmp7_;
-	guint _tmp8_;
-	UserEntry* _tmp18_;
-	gint _tmp19_;
-	UserEntry* _tmp20_;
-	gdouble _tmp21_;
-	UserEntry* _tmp22_;
-	gdouble _tmp23_;
-	g_return_if_fail (self != NULL);
-	g_return_if_fail (entry != NULL);
-	_tmp0_ = self->priv->entries;
-	_tmp1_ = entry;
-	_tmp2_ = g_list_index (_tmp0_, _tmp1_);
-	_tmp3_ = self->priv->entries;
-	_tmp4_ = self->priv->selected_entry;
-	_tmp5_ = g_list_index (_tmp3_, _tmp4_);
-	offset = _tmp2_ - _tmp5_;
-	_tmp6_ = offset;
-	_tmp7_ = user_list_get_n_below (self);
-	_tmp8_ = _tmp7_;
-	if (_tmp6_ > ((gint) _tmp8_)) {
-		gint _tmp9_;
-		GList* _tmp10_;
-		guint _tmp11_ = 0U;
-		_tmp9_ = offset;
-		_tmp10_ = self->priv->entries;
-		_tmp11_ = g_list_length (_tmp10_);
-		offset = _tmp9_ - ((gint) _tmp11_);
-	} else {
-		gint _tmp12_;
-		guint _tmp13_;
-		guint _tmp14_;
-		_tmp12_ = offset;
-		_tmp13_ = user_list_get_n_above (self);
-		_tmp14_ = _tmp13_;
-		if (_tmp12_ < (-((gint) _tmp14_))) {
-			gint _tmp15_;
-			GList* _tmp16_;
-			guint _tmp17_ = 0U;
-			_tmp15_ = offset;
-			_tmp16_ = self->priv->entries;
-			_tmp17_ = g_list_length (_tmp16_);
-			offset = _tmp15_ + ((gint) _tmp17_);
-		}
-	}
-	_tmp18_ = entry;
-	_tmp19_ = offset;
-	_tmp18_->target_y = (gdouble) _tmp19_;
-	_tmp20_ = entry;
-	_tmp21_ = _tmp20_->target_y;
-	_tmp22_ = entry;
-	_tmp23_ = _tmp22_->y;
-	if (_tmp21_ >= _tmp23_) {
-		UserEntry* _tmp24_;
-		_tmp24_ = entry;
-		_tmp24_->direction = 1.0;
-	} else {
-		UserEntry* _tmp25_;
-		_tmp25_ = entry;
-		_tmp25_->direction = -1.0;
-	}
-}
-
-
 static void user_list_scroll_animate_cb (UserList* self, gdouble timestep) {
-	gboolean animating;
-	GList* _tmp0_;
-	gboolean _tmp61_;
+	gdouble _tmp0_;
+	gdouble _tmp1_;
+	gdouble _tmp26_;
+	gdouble _tmp27_;
 	g_return_if_fail (self != NULL);
-	animating = FALSE;
-	_tmp0_ = self->priv->entries;
-	{
-		GList* entry_collection = NULL;
-		GList* entry_it = NULL;
-		entry_collection = _tmp0_;
-		for (entry_it = entry_collection; entry_it != NULL; entry_it = entry_it->next) {
-			UserEntry* _tmp1_;
-			UserEntry* entry = NULL;
-			_tmp1_ = _user_entry_ref0 ((UserEntry*) entry_it->data);
-			entry = _tmp1_;
-			{
-				UserEntry* _tmp2_;
-				gdouble _tmp3_;
-				UserEntry* _tmp4_;
-				gdouble _tmp5_;
-				UserEntry* _tmp58_;
-				gboolean _tmp59_;
-				gboolean _tmp60_;
-				_tmp2_ = entry;
-				_tmp3_ = _tmp2_->y;
-				_tmp4_ = entry;
-				_tmp5_ = _tmp4_->target_y;
-				if (_tmp3_ != _tmp5_) {
-					gdouble speed;
-					gdouble _tmp6_;
-					gdouble _tmp7_;
-					gdouble delta;
-					GList* _tmp8_;
-					guint _tmp9_ = 0U;
-					gint _tmp10_;
-					gint h;
-					UserEntry* _tmp11_;
-					gdouble _tmp12_;
-					UserEntry* _tmp13_;
-					gdouble _tmp14_;
-					gdouble step;
-					UserEntry* _tmp15_;
-					gdouble _tmp16_;
-					gdouble _tmp18_;
-					gdouble _tmp21_;
-					gdouble _tmp22_;
-					speed = 5.0;
-					_tmp6_ = timestep;
-					_tmp7_ = speed;
-					delta = _tmp6_ * _tmp7_;
-					_tmp8_ = self->priv->entries;
-					_tmp9_ = g_list_length (_tmp8_);
-					_tmp10_ = self->priv->box_height;
-					h = (((gint) _tmp9_) - 1) + _tmp10_;
-					_tmp11_ = entry;
-					_tmp12_ = _tmp11_->target_y;
-					_tmp13_ = entry;
-					_tmp14_ = _tmp13_->y;
-					step = _tmp12_ - _tmp14_;
-					_tmp15_ = entry;
-					_tmp16_ = _tmp15_->direction;
-					if (_tmp16_ < ((gdouble) 0)) {
-						gdouble _tmp17_;
-						_tmp17_ = step;
-						step = -_tmp17_;
-					}
-					_tmp18_ = step;
-					if (_tmp18_ < ((gdouble) 0)) {
-						gdouble _tmp19_;
-						gint _tmp20_;
-						_tmp19_ = step;
-						_tmp20_ = h;
-						step = _tmp19_ + _tmp20_;
-					}
-					_tmp21_ = step;
-					_tmp22_ = delta;
-					if (_tmp21_ <= _tmp22_) {
-						UserEntry* _tmp23_;
-						UserEntry* _tmp24_;
-						gdouble _tmp25_;
-						_tmp23_ = entry;
-						_tmp24_ = entry;
-						_tmp25_ = _tmp24_->target_y;
-						_tmp23_->y = _tmp25_;
-					} else {
-						UserEntry* _tmp26_;
-						UserEntry* _tmp27_;
-						gdouble _tmp28_;
-						gdouble _tmp29_;
-						UserEntry* _tmp30_;
-						gdouble _tmp31_;
-						gboolean _tmp32_ = FALSE;
-						UserEntry* _tmp33_;
-						gdouble _tmp34_;
-						gboolean _tmp39_;
-						gboolean _tmp45_ = FALSE;
-						UserEntry* _tmp46_;
-						gdouble _tmp47_;
-						gboolean _tmp52_;
-						_tmp26_ = entry;
-						_tmp27_ = entry;
-						_tmp28_ = _tmp27_->y;
-						_tmp29_ = delta;
-						_tmp30_ = entry;
-						_tmp31_ = _tmp30_->direction;
-						_tmp27_->y = _tmp28_ + (_tmp29_ * _tmp31_);
-						_tmp33_ = entry;
-						_tmp34_ = _tmp33_->direction;
-						if (_tmp34_ < ((gdouble) 0)) {
-							UserEntry* _tmp35_;
-							gdouble _tmp36_;
-							guint _tmp37_;
-							guint _tmp38_;
-							_tmp35_ = entry;
-							_tmp36_ = _tmp35_->y;
-							_tmp37_ = user_list_get_n_above (self);
-							_tmp38_ = _tmp37_;
-							_tmp32_ = _tmp36_ < ((gdouble) (-((gint) _tmp38_)));
-						} else {
-							_tmp32_ = FALSE;
-						}
-						_tmp39_ = _tmp32_;
-						if (_tmp39_) {
-							UserEntry* _tmp40_;
-							UserEntry* _tmp41_;
-							gdouble _tmp42_;
-							GList* _tmp43_;
-							guint _tmp44_ = 0U;
-							_tmp40_ = entry;
-							_tmp41_ = entry;
-							_tmp42_ = _tmp41_->y;
-							_tmp43_ = self->priv->entries;
-							_tmp44_ = g_list_length (_tmp43_);
-							_tmp41_->y = _tmp42_ + _tmp44_;
-						}
-						_tmp46_ = entry;
-						_tmp47_ = _tmp46_->direction;
-						if (_tmp47_ > ((gdouble) 0)) {
-							UserEntry* _tmp48_;
-							gdouble _tmp49_;
-							guint _tmp50_;
-							guint _tmp51_;
-							_tmp48_ = entry;
-							_tmp49_ = _tmp48_->y;
-							_tmp50_ = user_list_get_n_below (self);
-							_tmp51_ = _tmp50_;
-							_tmp45_ = _tmp49_ >= ((gdouble) _tmp51_);
-						} else {
-							_tmp45_ = FALSE;
-						}
-						_tmp52_ = _tmp45_;
-						if (_tmp52_) {
-							UserEntry* _tmp53_;
-							UserEntry* _tmp54_;
-							gdouble _tmp55_;
-							GList* _tmp56_;
-							guint _tmp57_ = 0U;
-							_tmp53_ = entry;
-							_tmp54_ = entry;
-							_tmp55_ = _tmp54_->y;
-							_tmp56_ = self->priv->entries;
-							_tmp57_ = g_list_length (_tmp56_);
-							_tmp54_->y = _tmp55_ - _tmp57_;
-						}
-					}
-				}
-				_tmp58_ = entry;
-				_tmp59_ = user_entry_get_moving (_tmp58_);
-				_tmp60_ = _tmp59_;
-				if (_tmp60_) {
-					animating = TRUE;
-				}
-				_user_entry_unref0 (entry);
+	_tmp0_ = self->priv->scroll_location;
+	_tmp1_ = self->priv->scroll_target_location;
+	if (_tmp0_ != _tmp1_) {
+		gdouble speed;
+		gdouble _tmp2_;
+		gdouble _tmp3_;
+		gdouble delta;
+		GList* _tmp4_;
+		guint _tmp5_ = 0U;
+		gdouble h;
+		gdouble _tmp6_;
+		gdouble _tmp7_;
+		gdouble distance;
+		gdouble _tmp8_;
+		gdouble _tmp10_;
+		gdouble _tmp13_;
+		gdouble _tmp14_;
+		speed = 5.0;
+		_tmp2_ = timestep;
+		_tmp3_ = speed;
+		delta = _tmp2_ * _tmp3_;
+		_tmp4_ = self->priv->entries;
+		_tmp5_ = g_list_length (_tmp4_);
+		h = (gdouble) _tmp5_;
+		_tmp6_ = self->priv->scroll_target_location;
+		_tmp7_ = self->priv->scroll_location;
+		distance = _tmp6_ - _tmp7_;
+		_tmp8_ = self->priv->scroll_direction;
+		if (_tmp8_ < 0.0) {
+			gdouble _tmp9_;
+			_tmp9_ = distance;
+			distance = -_tmp9_;
+		}
+		_tmp10_ = distance;
+		if (_tmp10_ < ((gdouble) 0)) {
+			gdouble _tmp11_;
+			gdouble _tmp12_;
+			_tmp11_ = distance;
+			_tmp12_ = h;
+			distance = _tmp11_ + _tmp12_;
+		}
+		_tmp13_ = distance;
+		_tmp14_ = delta;
+		if (_tmp13_ <= _tmp14_) {
+			gdouble _tmp15_;
+			_tmp15_ = self->priv->scroll_target_location;
+			self->priv->scroll_location = _tmp15_;
+		} else {
+			gdouble _tmp16_;
+			gdouble _tmp17_;
+			gdouble _tmp18_;
+			gdouble _tmp19_;
+			gdouble _tmp20_;
+			gdouble _tmp23_;
+			_tmp16_ = self->priv->scroll_location;
+			_tmp17_ = delta;
+			_tmp18_ = self->priv->scroll_direction;
+			self->priv->scroll_location = _tmp16_ + (_tmp17_ * _tmp18_);
+			_tmp19_ = self->priv->scroll_location;
+			_tmp20_ = h;
+			if (_tmp19_ > _tmp20_) {
+				gdouble _tmp21_;
+				gdouble _tmp22_;
+				_tmp21_ = self->priv->scroll_location;
+				_tmp22_ = h;
+				self->priv->scroll_location = _tmp21_ - _tmp22_;
+			}
+			_tmp23_ = self->priv->scroll_location;
+			if (_tmp23_ < ((gdouble) 0)) {
+				gdouble _tmp24_;
+				gdouble _tmp25_;
+				_tmp24_ = self->priv->scroll_location;
+				_tmp25_ = h;
+				self->priv->scroll_location = _tmp24_ + _tmp25_;
 			}
 		}
+		gtk_widget_queue_draw ((GtkWidget*) self);
 	}
-	gtk_widget_queue_draw ((GtkWidget*) self);
-	_tmp61_ = animating;
-	if (!_tmp61_) {
-		AnimateTimer* _tmp62_;
-		g_debug ("user-list.vala:978: Stop scroll animation");
-		_tmp62_ = self->priv->scroll_timer;
-		animate_timer_stop (_tmp62_);
+	_tmp26_ = self->priv->scroll_location;
+	_tmp27_ = self->priv->scroll_target_location;
+	if (_tmp26_ == _tmp27_) {
+		AnimateTimer* _tmp28_;
+		g_debug ("user-list.vala:928: Stop scroll animation");
+		_tmp28_ = self->priv->scroll_timer;
+		animate_timer_stop (_tmp28_);
 	}
 }
 
@@ -4219,7 +3828,7 @@ static void user_list_background_animate_cb (UserList* self, gdouble timestep) {
 		Background* _tmp5_;
 		Background* _tmp6_;
 		AnimateTimer* _tmp7_;
-		g_debug ("user-list.vala:996: Stop background animation");
+		g_debug ("user-list.vala:946: Stop background animation");
 		_tmp5_ = self->priv->background;
 		_tmp6_ = _background_ref0 (_tmp5_);
 		_background_unref0 (self->priv->old_background);
@@ -4246,7 +3855,7 @@ static gboolean user_list_change_background_timeout_cb (UserList* self) {
 		UserEntry* _tmp6_;
 		Background* _tmp7_;
 		Background* _tmp8_;
-		g_debug ("user-list.vala:1006: Change background");
+		g_debug ("user-list.vala:956: Change background");
 		_tmp3_ = self->priv->frame_count;
 		if (_tmp3_ > 0) {
 			self->priv->background_alpha = 0.0;
@@ -4275,137 +3884,87 @@ static gboolean _user_list_change_background_timeout_cb_gsource_func (gpointer s
 }
 
 
-static void user_list_select_entry (UserList* self, UserEntry* entry) {
+static void user_list_select_entry (UserList* self, UserEntry* entry, gdouble direction) {
 	UserEntry* _tmp0_;
 	const gchar* _tmp1_;
-	gdouble direction;
-	gboolean _tmp2_ = FALSE;
+	UserEntry* _tmp2_;
 	UserEntry* _tmp3_;
-	gboolean _tmp8_;
-	UserEntry* _tmp9_;
+	GtkEntry* _tmp4_;
+	GtkButton* _tmp5_;
+	gint _tmp6_;
 	UserEntry* _tmp10_;
-	GtkEntry* _tmp11_;
-	GtkButton* _tmp12_;
-	gint _tmp13_;
-	UserEntry* _tmp17_;
-	const gchar* _tmp18_;
-	gboolean animate;
-	GList* _tmp19_;
-	gboolean _tmp31_ = FALSE;
-	gboolean _tmp32_;
-	gboolean _tmp36_;
+	const gchar* _tmp11_;
+	GList* _tmp12_;
+	UserEntry* _tmp13_;
+	gint _tmp14_ = 0;
+	gdouble _tmp15_;
+	gint _tmp16_;
+	gboolean _tmp18_ = FALSE;
+	gdouble _tmp19_;
+	gdouble _tmp20_;
+	gboolean _tmp24_;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (entry != NULL);
 	_tmp0_ = entry;
 	_tmp1_ = _tmp0_->name;
-	g_debug ("user-list.vala:1021: Select %s", _tmp1_);
-	direction = 1.0;
-	_tmp3_ = self->priv->selected_entry;
-	if (_tmp3_ != NULL) {
-		UserEntry* _tmp4_;
-		gdouble _tmp5_;
-		UserEntry* _tmp6_;
-		gdouble _tmp7_;
-		_tmp4_ = entry;
-		_tmp5_ = _tmp4_->y;
-		_tmp6_ = self->priv->selected_entry;
-		_tmp7_ = _tmp6_->y;
-		_tmp2_ = _tmp5_ > _tmp7_;
-	} else {
-		_tmp2_ = FALSE;
-	}
-	_tmp8_ = _tmp2_;
-	if (_tmp8_) {
-		direction = -1.0;
-	}
-	_tmp9_ = entry;
-	_tmp10_ = _user_entry_ref0 (_tmp9_);
+	g_debug ("user-list.vala:971: Select %s", _tmp1_);
+	_tmp2_ = entry;
+	_tmp3_ = _user_entry_ref0 (_tmp2_);
 	_user_entry_unref0 (self->priv->selected_entry);
-	self->priv->selected_entry = _tmp10_;
-	_tmp11_ = self->priv->prompt_entry;
-	gtk_widget_hide ((GtkWidget*) _tmp11_);
-	_tmp12_ = self->priv->login_button;
-	gtk_widget_hide ((GtkWidget*) _tmp12_);
-	_tmp13_ = self->priv->frame_count;
-	if (_tmp13_ > 0) {
-		guint _tmp14_;
-		guint _tmp16_ = 0U;
-		_tmp14_ = self->priv->change_background_timeout;
-		if (_tmp14_ != ((guint) 0)) {
-			guint _tmp15_;
-			_tmp15_ = self->priv->change_background_timeout;
-			g_source_remove (_tmp15_);
+	self->priv->selected_entry = _tmp3_;
+	_tmp4_ = self->priv->prompt_entry;
+	gtk_widget_hide ((GtkWidget*) _tmp4_);
+	_tmp5_ = self->priv->login_button;
+	gtk_widget_hide ((GtkWidget*) _tmp5_);
+	_tmp6_ = self->priv->frame_count;
+	if (_tmp6_ > 0) {
+		guint _tmp7_;
+		guint _tmp9_ = 0U;
+		_tmp7_ = self->priv->change_background_timeout;
+		if (_tmp7_ != ((guint) 0)) {
+			guint _tmp8_;
+			_tmp8_ = self->priv->change_background_timeout;
+			g_source_remove (_tmp8_);
 		}
-		_tmp16_ = g_timeout_add_full (G_PRIORITY_DEFAULT, (guint) 200, _user_list_change_background_timeout_cb_gsource_func, g_object_ref (self), g_object_unref);
-		self->priv->change_background_timeout = _tmp16_;
+		_tmp9_ = g_timeout_add_full (G_PRIORITY_DEFAULT, (guint) 200, _user_list_change_background_timeout_cb_gsource_func, g_object_ref (self), g_object_unref);
+		self->priv->change_background_timeout = _tmp9_;
 	} else {
 		user_list_change_background_timeout_cb (self);
 	}
-	_tmp17_ = self->priv->selected_entry;
-	_tmp18_ = _tmp17_->name;
-	g_signal_emit_by_name (self, "user-selected", _tmp18_);
-	animate = FALSE;
-	_tmp19_ = self->priv->entries;
-	{
-		GList* e_collection = NULL;
-		GList* e_it = NULL;
-		e_collection = _tmp19_;
-		for (e_it = e_collection; e_it != NULL; e_it = e_it->next) {
-			UserEntry* _tmp20_;
-			UserEntry* e = NULL;
-			_tmp20_ = _user_entry_ref0 ((UserEntry*) e_it->data);
-			e = _tmp20_;
-			{
-				UserEntry* _tmp21_;
-				UserEntry* _tmp22_;
-				gdouble _tmp23_;
-				gint _tmp24_;
-				UserEntry* _tmp28_;
-				gboolean _tmp29_;
-				gboolean _tmp30_;
-				_tmp21_ = e;
-				user_list_update_entry_location (self, _tmp21_);
-				_tmp22_ = e;
-				_tmp23_ = direction;
-				_tmp22_->direction = _tmp23_;
-				_tmp24_ = self->priv->frame_count;
-				if (_tmp24_ == 0) {
-					UserEntry* _tmp25_;
-					UserEntry* _tmp26_;
-					gdouble _tmp27_;
-					_tmp25_ = e;
-					_tmp26_ = e;
-					_tmp27_ = _tmp26_->target_y;
-					_tmp25_->y = _tmp27_;
-				}
-				_tmp28_ = e;
-				_tmp29_ = user_entry_get_moving (_tmp28_);
-				_tmp30_ = _tmp29_;
-				if (_tmp30_) {
-					animate = TRUE;
-				}
-				_user_entry_unref0 (e);
-			}
-		}
+	_tmp10_ = self->priv->selected_entry;
+	_tmp11_ = _tmp10_->name;
+	g_signal_emit_by_name (self, "user-selected", _tmp11_);
+	_tmp12_ = self->priv->entries;
+	_tmp13_ = entry;
+	_tmp14_ = g_list_index (_tmp12_, _tmp13_);
+	self->priv->scroll_target_location = (gdouble) _tmp14_;
+	_tmp15_ = direction;
+	self->priv->scroll_direction = _tmp15_;
+	_tmp16_ = self->priv->frame_count;
+	if (_tmp16_ == 0) {
+		gdouble _tmp17_;
+		_tmp17_ = self->priv->scroll_target_location;
+		self->priv->scroll_location = _tmp17_;
 	}
-	_tmp32_ = animate;
-	if (_tmp32_) {
-		AnimateTimer* _tmp33_;
-		gboolean _tmp34_;
-		gboolean _tmp35_;
-		_tmp33_ = self->priv->scroll_timer;
-		_tmp34_ = animate_timer_get_is_running (_tmp33_);
-		_tmp35_ = _tmp34_;
-		_tmp31_ = !_tmp35_;
+	_tmp19_ = self->priv->scroll_location;
+	_tmp20_ = self->priv->scroll_target_location;
+	if (_tmp19_ != _tmp20_) {
+		AnimateTimer* _tmp21_;
+		gboolean _tmp22_;
+		gboolean _tmp23_;
+		_tmp21_ = self->priv->scroll_timer;
+		_tmp22_ = animate_timer_get_is_running (_tmp21_);
+		_tmp23_ = _tmp22_;
+		_tmp18_ = !_tmp23_;
 	} else {
-		_tmp31_ = FALSE;
+		_tmp18_ = FALSE;
 	}
-	_tmp36_ = _tmp31_;
-	if (_tmp36_) {
-		AnimateTimer* _tmp37_;
-		g_debug ("user-list.vala:1061: Start scroll animation");
-		_tmp37_ = self->priv->scroll_timer;
-		animate_timer_reset (_tmp37_);
+	_tmp24_ = _tmp18_;
+	if (_tmp24_) {
+		AnimateTimer* _tmp25_;
+		g_debug ("user-list.vala:998: Start scroll animation");
+		_tmp25_ = self->priv->scroll_timer;
+		animate_timer_reset (_tmp25_);
 	}
 }
 
@@ -4437,7 +3996,7 @@ static void user_list_select_prev_entry (UserList* self) {
 	_tmp7_ = self->priv->entries;
 	_tmp8_ = index;
 	_tmp9_ = g_list_nth_data (_tmp7_, (guint) _tmp8_);
-	user_list_select_entry (self, (UserEntry*) _tmp9_);
+	user_list_select_entry (self, (UserEntry*) _tmp9_, -1.0);
 }
 
 
@@ -4472,7 +4031,7 @@ static void user_list_select_next_entry (UserList* self) {
 	_tmp9_ = self->priv->entries;
 	_tmp10_ = index;
 	_tmp11_ = g_list_nth_data (_tmp9_, (guint) _tmp10_);
-	user_list_select_entry (self, (UserEntry*) _tmp11_);
+	user_list_select_entry (self, (UserEntry*) _tmp11_, 1.0);
 }
 
 
@@ -4713,53 +4272,47 @@ static void user_list_real_size_allocate (GtkWidget* base, GtkAllocation* alloca
 	gboolean resized;
 	GtkAllocation _tmp8_;
 	gboolean _tmp9_ = FALSE;
-	GtkAllocation _tmp19_;
-	gint _tmp20_;
-	gint _tmp21_;
-	GtkAllocation _tmp22_;
-	gint _tmp23_;
-	gint _tmp24_;
 	GtkRequisition natural_size = {0};
-	GtkMenuBar* _tmp25_;
-	GtkRequisition _tmp26_ = {0};
+	GtkMenuBar* _tmp19_;
+	GtkRequisition _tmp20_ = {0};
 	GtkAllocation child_allocation = {0};
-	gint _tmp27_ = 0;
-	GtkRequisition _tmp28_;
-	gint _tmp29_;
-	GtkRequisition _tmp30_;
-	gint _tmp31_;
-	GtkMenuBar* _tmp32_;
-	GtkAllocation _tmp33_;
+	gint _tmp21_ = 0;
+	GtkRequisition _tmp22_;
+	gint _tmp23_;
+	GtkRequisition _tmp24_;
+	gint _tmp25_;
+	GtkMenuBar* _tmp26_;
+	GtkAllocation _tmp27_;
 	gint base_x = 0;
 	gint base_y = 0;
-	gint _tmp34_ = 0;
-	gint _tmp35_ = 0;
+	gint _tmp28_ = 0;
+	gint _tmp29_ = 0;
+	gint _tmp30_;
+	gint _tmp31_;
+	gint _tmp32_;
+	gint _tmp33_;
+	gint _tmp34_;
+	gint _tmp35_;
 	gint _tmp36_;
 	gint _tmp37_;
-	gint _tmp38_;
-	gint _tmp39_;
-	gint _tmp40_;
-	gint _tmp41_;
+	GtkEntry* _tmp38_;
+	GtkAllocation _tmp39_;
+	GtkButton* _tmp40_;
+	GtkAllocation _tmp41_;
 	gint _tmp42_;
 	gint _tmp43_;
-	GtkEntry* _tmp44_;
-	GtkAllocation _tmp45_;
-	GtkButton* _tmp46_;
-	GtkAllocation _tmp47_;
+	gint _tmp44_;
+	gint _tmp45_;
+	gint _tmp46_;
+	gint _tmp47_;
 	gint _tmp48_;
 	gint _tmp49_;
 	gint _tmp50_;
-	gint _tmp51_;
-	gint _tmp52_;
-	gint _tmp53_;
-	gint _tmp54_;
-	gint _tmp55_;
-	gint _tmp56_;
-	GtkButton* _tmp57_;
-	GtkAllocation _tmp58_;
-	GtkButton* _tmp59_;
-	GtkSocket* _tmp60_;
-	gboolean _tmp67_;
+	GtkButton* _tmp51_;
+	GtkAllocation _tmp52_;
+	GtkButton* _tmp53_;
+	GtkSocket* _tmp54_;
+	gboolean _tmp61_;
 	self = (UserList*) base;
 	g_return_if_fail (allocation != NULL);
 	_tmp1_ = *allocation;
@@ -4802,227 +4355,184 @@ static void user_list_real_size_allocate (GtkWidget* base, GtkAllocation* alloca
 		_tmp18_ = _tmp17_.height;
 		gdk_window_move_resize (_tmp10_, _tmp12_, _tmp14_, _tmp16_, _tmp18_);
 	}
-	_tmp19_ = *allocation;
-	_tmp20_ = _tmp19_.width;
-	_tmp21_ = self->priv->grid_size;
-	self->priv->grid_x_offset = ((gint) (_tmp20_ % _tmp21_)) / 2;
-	_tmp22_ = *allocation;
-	_tmp23_ = _tmp22_.height;
-	_tmp24_ = self->priv->grid_size;
-	self->priv->grid_y_offset = ((gint) (_tmp23_ % _tmp24_)) / 2;
-	_tmp25_ = self->priv->menubar;
-	gtk_widget_get_preferred_size ((GtkWidget*) _tmp25_, NULL, &_tmp26_);
-	natural_size = _tmp26_;
+	_tmp19_ = self->priv->menubar;
+	gtk_widget_get_preferred_size ((GtkWidget*) _tmp19_, NULL, &_tmp20_);
+	natural_size = _tmp20_;
 	memset (&child_allocation, 0, sizeof (GtkAllocation));
 	natural_size.height = 32;
-	_tmp27_ = gtk_widget_get_allocated_width ((GtkWidget*) self);
-	natural_size.width = _tmp27_;
+	_tmp21_ = gtk_widget_get_allocated_width ((GtkWidget*) self);
+	natural_size.width = _tmp21_;
 	child_allocation.x = 0;
 	child_allocation.y = 0;
-	_tmp28_ = natural_size;
-	_tmp29_ = _tmp28_.width;
-	child_allocation.width = _tmp29_;
-	_tmp30_ = natural_size;
-	_tmp31_ = _tmp30_.height;
-	child_allocation.height = _tmp31_;
-	_tmp32_ = self->priv->menubar;
-	_tmp33_ = child_allocation;
-	gtk_widget_size_allocate ((GtkWidget*) _tmp32_, &_tmp33_);
-	user_list_get_selected_location (self, &_tmp34_, &_tmp35_);
-	base_x = _tmp34_;
-	base_y = _tmp35_;
-	_tmp36_ = base_x;
+	_tmp22_ = natural_size;
+	_tmp23_ = _tmp22_.width;
+	child_allocation.width = _tmp23_;
+	_tmp24_ = natural_size;
+	_tmp25_ = _tmp24_.height;
+	child_allocation.height = _tmp25_;
+	_tmp26_ = self->priv->menubar;
+	_tmp27_ = child_allocation;
+	gtk_widget_size_allocate ((GtkWidget*) _tmp26_, &_tmp27_);
+	user_list_get_selected_location (self, &_tmp28_, &_tmp29_);
+	base_x = _tmp28_;
+	base_y = _tmp29_;
+	_tmp30_ = base_x;
+	_tmp31_ = self->priv->grid_size;
+	child_allocation.x = _tmp30_ + (_tmp31_ / 2);
+	_tmp32_ = base_y;
+	_tmp33_ = self->priv->grid_size;
+	_tmp34_ = self->priv->grid_size;
+	child_allocation.y = (_tmp32_ + (_tmp33_ * 2)) - (_tmp34_ / 2);
+	_tmp35_ = self->priv->grid_size;
+	_tmp36_ = self->priv->box_width;
+	child_allocation.width = _tmp35_ * (_tmp36_ - 1);
 	_tmp37_ = self->priv->grid_size;
-	child_allocation.x = _tmp36_ + (_tmp37_ / 2);
-	_tmp38_ = base_y;
-	_tmp39_ = self->priv->grid_size;
-	_tmp40_ = self->priv->grid_size;
-	child_allocation.y = (_tmp38_ + (_tmp39_ * 2)) - (_tmp40_ / 2);
-	_tmp41_ = self->priv->grid_size;
-	_tmp42_ = self->priv->box_width;
-	child_allocation.width = _tmp41_ * (_tmp42_ - 1);
-	_tmp43_ = self->priv->grid_size;
-	child_allocation.height = _tmp43_;
-	_tmp44_ = self->priv->prompt_entry;
-	_tmp45_ = child_allocation;
-	gtk_widget_size_allocate ((GtkWidget*) _tmp44_, &_tmp45_);
-	_tmp46_ = self->priv->login_button;
-	_tmp47_ = child_allocation;
-	gtk_widget_size_allocate ((GtkWidget*) _tmp46_, &_tmp47_);
-	_tmp48_ = base_x;
-	_tmp49_ = self->priv->box_width;
+	child_allocation.height = _tmp37_;
+	_tmp38_ = self->priv->prompt_entry;
+	_tmp39_ = child_allocation;
+	gtk_widget_size_allocate ((GtkWidget*) _tmp38_, &_tmp39_);
+	_tmp40_ = self->priv->login_button;
+	_tmp41_ = child_allocation;
+	gtk_widget_size_allocate ((GtkWidget*) _tmp40_, &_tmp41_);
+	_tmp42_ = base_x;
+	_tmp43_ = self->priv->box_width;
+	_tmp44_ = self->priv->grid_size;
+	_tmp45_ = self->priv->grid_size;
+	_tmp46_ = self->priv->grid_size;
+	child_allocation.x = ((_tmp42_ + (_tmp43_ * _tmp44_)) - _tmp45_) - (_tmp46_ / 4);
+	_tmp47_ = base_y;
+	_tmp48_ = self->priv->grid_size;
+	child_allocation.y = _tmp47_ + (_tmp48_ / 4);
+	_tmp49_ = self->priv->grid_size;
+	child_allocation.width = _tmp49_;
 	_tmp50_ = self->priv->grid_size;
-	_tmp51_ = self->priv->grid_size;
-	_tmp52_ = self->priv->grid_size;
-	child_allocation.x = ((_tmp48_ + (_tmp49_ * _tmp50_)) - _tmp51_) - (_tmp52_ / 4);
-	_tmp53_ = base_y;
-	_tmp54_ = self->priv->grid_size;
-	child_allocation.y = _tmp53_ + (_tmp54_ / 4);
-	_tmp55_ = self->priv->grid_size;
-	child_allocation.width = _tmp55_;
-	_tmp56_ = self->priv->grid_size;
-	child_allocation.height = _tmp56_;
-	_tmp57_ = self->priv->options_button;
-	_tmp58_ = child_allocation;
-	gtk_widget_size_allocate ((GtkWidget*) _tmp57_, &_tmp58_);
-	_tmp59_ = self->priv->options_button;
-	gtk_widget_show ((GtkWidget*) _tmp59_);
-	_tmp60_ = self->priv->keyboard_socket;
-	if (_tmp60_ != NULL) {
-		GtkAllocation _tmp61_;
-		gint _tmp62_;
-		GtkAllocation _tmp63_;
-		gint _tmp64_;
-		GtkSocket* _tmp65_;
-		GtkAllocation _tmp66_;
+	child_allocation.height = _tmp50_;
+	_tmp51_ = self->priv->options_button;
+	_tmp52_ = child_allocation;
+	gtk_widget_size_allocate ((GtkWidget*) _tmp51_, &_tmp52_);
+	_tmp53_ = self->priv->options_button;
+	gtk_widget_show ((GtkWidget*) _tmp53_);
+	_tmp54_ = self->priv->keyboard_socket;
+	if (_tmp54_ != NULL) {
+		GtkAllocation _tmp55_;
+		gint _tmp56_;
+		GtkAllocation _tmp57_;
+		gint _tmp58_;
+		GtkSocket* _tmp59_;
+		GtkAllocation _tmp60_;
 		child_allocation.x = 0;
-		_tmp61_ = *allocation;
-		_tmp62_ = _tmp61_.height;
-		child_allocation.y = _tmp62_ - 200;
-		_tmp63_ = *allocation;
-		_tmp64_ = _tmp63_.width;
-		child_allocation.width = _tmp64_;
+		_tmp55_ = *allocation;
+		_tmp56_ = _tmp55_.height;
+		child_allocation.y = _tmp56_ - 200;
+		_tmp57_ = *allocation;
+		_tmp58_ = _tmp57_.width;
+		child_allocation.width = _tmp58_;
 		child_allocation.height = 200;
-		_tmp65_ = self->priv->keyboard_socket;
-		_tmp66_ = child_allocation;
-		gtk_widget_size_allocate ((GtkWidget*) _tmp65_, &_tmp66_);
+		_tmp59_ = self->priv->keyboard_socket;
+		_tmp60_ = child_allocation;
+		gtk_widget_size_allocate ((GtkWidget*) _tmp59_, &_tmp60_);
 	}
-	_tmp67_ = resized;
-	if (_tmp67_) {
-		GHashTable* _tmp68_;
-		g_debug ("user-list.vala:1199: Regenerating backgrounds");
-		_tmp68_ = self->priv->backgrounds;
-		g_hash_table_remove_all (_tmp68_);
+	_tmp61_ = resized;
+	if (_tmp61_) {
+		GHashTable* _tmp62_;
+		g_debug ("user-list.vala:1133: Regenerating backgrounds");
+		_tmp62_ = self->priv->backgrounds;
+		g_hash_table_remove_all (_tmp62_);
 	}
 }
 
 
-static void user_list_draw_entries (UserList* self, cairo_t* c) {
-	GList* _tmp0_;
+static void user_list_draw_entry (UserList* self, cairo_t* c, UserEntry* entry, gdouble alpha) {
+	cairo_t* _tmp0_;
+	UserEntry* _tmp1_;
+	gboolean _tmp2_;
+	gint _tmp11_;
+	gint _tmp12_;
+	cairo_pattern_t* _tmp13_;
+	cairo_pattern_t* mask;
+	gdouble left;
+	gdouble _tmp14_;
+	gint _tmp15_;
+	gint _tmp16_;
+	cairo_t* _tmp17_;
+	gint w = 0;
+	gint h = 0;
+	UserEntry* _tmp18_;
+	PangoLayout* _tmp19_;
+	gint _tmp20_ = 0;
+	gint _tmp21_ = 0;
+	cairo_t* _tmp22_;
+	gint _tmp23_;
+	gint _tmp24_;
+	gint _tmp25_;
+	cairo_t* _tmp26_;
+	cairo_t* _tmp27_;
+	UserEntry* _tmp28_;
+	PangoLayout* _tmp29_;
+	cairo_t* _tmp30_;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (c != NULL);
-	_tmp0_ = self->priv->entries;
-	{
-		GList* entry_collection = NULL;
-		GList* entry_it = NULL;
-		entry_collection = _tmp0_;
-		for (entry_it = entry_collection; entry_it != NULL; entry_it = entry_it->next) {
-			UserEntry* _tmp1_;
-			UserEntry* entry = NULL;
-			_tmp1_ = _user_entry_ref0 ((UserEntry*) entry_it->data);
-			entry = _tmp1_;
-			{
-				cairo_t* _tmp2_;
-				cairo_t* _tmp3_;
-				UserEntry* _tmp4_;
-				gdouble _tmp5_;
-				gint _tmp6_;
-				UserEntry* _tmp7_;
-				gboolean _tmp8_;
-				cairo_t* _tmp16_;
-				cairo_text_extents_t extents = {0};
-				cairo_t* _tmp17_;
-				UserEntry* _tmp18_;
-				const gchar* _tmp19_;
-				cairo_text_extents_t _tmp20_ = {0};
-				cairo_t* _tmp21_;
-				gint _tmp22_;
-				gint _tmp23_;
-				gint _tmp24_;
-				cairo_text_extents_t _tmp25_;
-				gdouble _tmp26_;
-				cairo_t* _tmp27_;
-				UserEntry* _tmp28_;
-				const gchar* _tmp29_;
-				gint _tmp30_;
-				gint _tmp31_;
-				cairo_pattern_t* _tmp32_;
-				cairo_pattern_t* mask;
-				gdouble left;
-				cairo_pattern_t* _tmp33_;
-				gdouble _tmp34_;
-				cairo_pattern_t* _tmp35_;
-				gdouble _tmp36_;
-				gint _tmp37_;
-				gint _tmp38_;
-				cairo_t* _tmp39_;
-				cairo_pattern_t* _tmp40_;
-				cairo_t* _tmp41_;
-				cairo_t* _tmp42_;
-				_tmp2_ = c;
-				cairo_save (_tmp2_);
-				_tmp3_ = c;
-				_tmp4_ = entry;
-				_tmp5_ = _tmp4_->y;
-				_tmp6_ = self->priv->grid_size;
-				cairo_translate (_tmp3_, (gdouble) 0, _tmp5_ * _tmp6_);
-				_tmp7_ = entry;
-				_tmp8_ = _tmp7_->is_active;
-				if (_tmp8_) {
-					cairo_t* _tmp9_;
-					gint _tmp10_;
-					cairo_t* _tmp11_;
-					cairo_t* _tmp12_;
-					cairo_t* _tmp13_;
-					cairo_t* _tmp14_;
-					cairo_t* _tmp15_;
-					_tmp9_ = c;
-					_tmp10_ = self->priv->grid_size;
-					cairo_move_to (_tmp9_, (gdouble) 8, ((_tmp10_ / 2) + 0.5) - 4);
-					_tmp11_ = c;
-					cairo_rel_line_to (_tmp11_, (gdouble) 5, (gdouble) 4);
-					_tmp12_ = c;
-					cairo_rel_line_to (_tmp12_, (gdouble) (-5), (gdouble) 4);
-					_tmp13_ = c;
-					cairo_close_path (_tmp13_);
-					_tmp14_ = c;
-					cairo_set_source_rgba (_tmp14_, 1.0, 1.0, 1.0, 0.5);
-					_tmp15_ = c;
-					cairo_fill (_tmp15_);
-				}
-				_tmp16_ = c;
-				cairo_set_font_size (_tmp16_, (gdouble) 21);
-				_tmp17_ = c;
-				_tmp18_ = entry;
-				_tmp19_ = _tmp18_->label;
-				cairo_text_extents (_tmp17_, _tmp19_, &_tmp20_);
-				extents = _tmp20_;
-				_tmp21_ = c;
-				_tmp22_ = self->priv->grid_size;
-				_tmp23_ = self->priv->grid_size;
-				_tmp24_ = self->priv->grid_size;
-				_tmp25_ = extents;
-				_tmp26_ = _tmp25_.height;
-				cairo_move_to (_tmp21_, (gdouble) (_tmp22_ / 2), _tmp23_ - ((_tmp24_ - _tmp26_) / 2));
-				_tmp27_ = c;
-				_tmp28_ = entry;
-				_tmp29_ = _tmp28_->label;
-				cairo_text_path (_tmp27_, _tmp29_);
-				_tmp30_ = self->priv->grid_size;
-				_tmp31_ = self->priv->box_width;
-				_tmp32_ = cairo_pattern_create_linear ((gdouble) 0, (gdouble) 0, (gdouble) (_tmp30_ * _tmp31_), (gdouble) 0);
-				mask = _tmp32_;
-				left = 1.0 - (2.0 / 7);
-				_tmp33_ = mask;
-				_tmp34_ = left;
-				cairo_pattern_add_color_stop_rgba (_tmp33_, _tmp34_, 1.0, 1.0, 1.0, 0.5);
-				_tmp35_ = mask;
-				_tmp36_ = left;
-				_tmp37_ = self->priv->grid_size;
-				_tmp38_ = self->priv->box_width;
-				cairo_pattern_add_color_stop_rgba (_tmp35_, _tmp36_ + (64.0 / (_tmp37_ * _tmp38_)), 1.0, 1.0, 1.0, 0.0);
-				_tmp39_ = c;
-				_tmp40_ = mask;
-				cairo_set_source (_tmp39_, _tmp40_);
-				_tmp41_ = c;
-				cairo_fill (_tmp41_);
-				_tmp42_ = c;
-				cairo_restore (_tmp42_);
-				_cairo_pattern_destroy0 (mask);
-				_user_entry_unref0 (entry);
-			}
-		}
+	g_return_if_fail (entry != NULL);
+	_tmp0_ = c;
+	cairo_save (_tmp0_);
+	alpha = 0.5;
+	_tmp1_ = entry;
+	_tmp2_ = _tmp1_->is_active;
+	if (_tmp2_) {
+		cairo_t* _tmp3_;
+		gint _tmp4_;
+		cairo_t* _tmp5_;
+		cairo_t* _tmp6_;
+		cairo_t* _tmp7_;
+		cairo_t* _tmp8_;
+		gdouble _tmp9_;
+		cairo_t* _tmp10_;
+		_tmp3_ = c;
+		_tmp4_ = self->priv->grid_size;
+		cairo_move_to (_tmp3_, (gdouble) 8, ((_tmp4_ / 2) + 0.5) - 4);
+		_tmp5_ = c;
+		cairo_rel_line_to (_tmp5_, (gdouble) 5, (gdouble) 4);
+		_tmp6_ = c;
+		cairo_rel_line_to (_tmp6_, (gdouble) (-5), (gdouble) 4);
+		_tmp7_ = c;
+		cairo_close_path (_tmp7_);
+		_tmp8_ = c;
+		_tmp9_ = alpha;
+		cairo_set_source_rgba (_tmp8_, 1.0, 1.0, 1.0, _tmp9_);
+		_tmp10_ = c;
+		cairo_fill (_tmp10_);
 	}
+	_tmp11_ = self->priv->grid_size;
+	_tmp12_ = self->priv->box_width;
+	_tmp13_ = cairo_pattern_create_linear ((gdouble) 0, (gdouble) 0, (gdouble) (_tmp11_ * _tmp12_), (gdouble) 0);
+	mask = _tmp13_;
+	left = 1.0 - (2.0 / 7);
+	_tmp14_ = alpha;
+	cairo_pattern_add_color_stop_rgba (mask, left, 1.0, 1.0, 1.0, _tmp14_);
+	_tmp15_ = self->priv->grid_size;
+	_tmp16_ = self->priv->box_width;
+	cairo_pattern_add_color_stop_rgba (mask, left + (64.0 / (_tmp15_ * _tmp16_)), 1.0, 1.0, 1.0, 0.0);
+	_tmp17_ = c;
+	cairo_set_source (_tmp17_, mask);
+	_tmp18_ = entry;
+	_tmp19_ = _tmp18_->layout;
+	pango_layout_get_pixel_size (_tmp19_, &_tmp20_, &_tmp21_);
+	w = _tmp20_;
+	h = _tmp21_;
+	_tmp22_ = c;
+	_tmp23_ = self->priv->grid_size;
+	_tmp24_ = self->priv->grid_size;
+	_tmp25_ = self->priv->grid_size;
+	cairo_translate (_tmp22_, (gdouble) (_tmp23_ / 2), (gdouble) ((_tmp24_ - ((_tmp25_ - h) / 2)) - h));
+	_tmp26_ = c;
+	cairo_move_to (_tmp26_, (gdouble) 0, (gdouble) 0);
+	_tmp27_ = c;
+	_tmp28_ = entry;
+	_tmp29_ = _tmp28_->layout;
+	pango_cairo_show_layout (_tmp27_, _tmp29_);
+	_tmp30_ = c;
+	cairo_restore (_tmp30_);
+	_cairo_pattern_destroy0 (mask);
 }
 
 
@@ -5191,7 +4701,7 @@ static void user_list_draw_background (UserList* self, cairo_t* c) {
 	_tmp10_ = _tmp0_;
 	if (_tmp10_) {
 		AnimateTimer* _tmp11_;
-		g_debug ("user-list.vala:1275: Start background animation");
+		g_debug ("user-list.vala:1208: Start background animation");
 		_tmp11_ = self->priv->background_timer;
 		animate_timer_reset (_tmp11_);
 	}
@@ -5264,7 +4774,7 @@ static gboolean user_list_draw_expire_cb (UserList* self) {
 	elapsed = _tmp1_;
 	_tmp2_ = self->priv->draw_count;
 	_tmp3_ = self->priv->draw_count;
-	g_debug ("user-list.vala:1303: Drew %d frames in %.1f seconds (%f fps)", _tmp2_, elapsed, _tmp3_ / elapsed);
+	g_debug ("user-list.vala:1236: Drew %d frames in %.1f seconds (%f fps)", _tmp2_, elapsed, _tmp3_ / elapsed);
 	_g_timer_destroy0 (self->priv->draw_timer);
 	self->priv->draw_timer = NULL;
 	self->priv->draw_count = 0;
@@ -5292,73 +4802,35 @@ static gboolean user_list_real_draw (GtkWidget* base, cairo_t* c) {
 	gint _tmp7_;
 	cairo_t* _tmp8_;
 	cairo_t* _tmp9_;
-	cairo_font_face_t* _tmp10_;
 	gint base_x = 0;
 	gint base_y = 0;
+	gint _tmp10_ = 0;
 	gint _tmp11_ = 0;
-	gint _tmp12_ = 0;
-	cairo_t* _tmp13_;
-	cairo_t* _tmp14_;
-	gint _tmp15_;
-	gint _tmp16_;
-	cairo_t* _tmp17_;
-	cairo_t* _tmp18_;
-	guint _tmp19_;
-	guint _tmp20_;
-	gint _tmp21_;
-	gint _tmp22_;
-	gint _tmp23_;
-	guint _tmp24_;
-	guint _tmp25_;
-	gint _tmp26_;
-	cairo_t* _tmp27_;
-	cairo_t* _tmp28_;
-	cairo_t* _tmp29_;
-	GList* _tmp30_;
-	guint _tmp31_ = 0U;
-	gint _tmp32_;
-	cairo_t* _tmp33_;
-	cairo_t* _tmp34_;
-	cairo_t* _tmp35_;
-	cairo_t* _tmp36_;
-	gint _tmp37_;
-	gint _tmp38_;
-	gint _tmp39_;
-	gint _tmp40_;
-	guint _tmp41_;
-	guint _tmp42_;
-	gint _tmp43_;
-	cairo_t* _tmp44_;
-	cairo_t* _tmp45_;
-	gint _tmp46_;
-	gint _tmp47_;
-	cairo_t* _tmp48_;
-	cairo_t* _tmp49_;
-	GList* _tmp50_;
-	guint _tmp51_ = 0U;
-	gint _tmp52_;
-	cairo_t* _tmp53_;
-	cairo_t* _tmp54_;
-	cairo_t* _tmp55_;
+	cairo_t* _tmp12_;
+	gint _tmp13_;
+	gint _tmp14_;
+	gint index;
+	GList* _tmp15_;
+	cairo_t* _tmp94_;
 	gint border;
-	cairo_t* _tmp56_;
-	gint _tmp57_;
-	gint _tmp58_;
-	cairo_t* _tmp59_;
-	cairo_pattern_t* _tmp60_;
-	cairo_t* _tmp61_;
-	cairo_t* _tmp62_;
-	UserEntry* _tmp63_;
-	gboolean _tmp106_ = FALSE;
-	const gchar* _tmp107_;
-	gboolean _tmp109_;
-	cairo_t* _tmp127_;
-	GList* _tmp128_;
+	cairo_t* _tmp95_;
+	gint _tmp96_;
+	gint _tmp97_;
+	cairo_t* _tmp98_;
+	cairo_pattern_t* _tmp99_;
+	cairo_t* _tmp100_;
+	cairo_t* _tmp101_;
+	UserEntry* _tmp102_;
+	gboolean _tmp143_ = FALSE;
+	const gchar* _tmp144_;
+	gboolean _tmp146_;
+	cairo_t* _tmp169_;
+	GList* _tmp170_;
 	self = (UserList*) base;
 	g_return_val_if_fail (c != NULL, FALSE);
 	_tmp0_ = self->priv->frame_count;
 	if (_tmp0_ == 0) {
-		g_debug ("user-list.vala:1315: Rendered first frame");
+		g_debug ("user-list.vala:1248: Rendered first frame");
 	}
 	_tmp1_ = self->priv->draw_timeout;
 	if (_tmp1_ != ((guint) 0)) {
@@ -5382,277 +4854,429 @@ static gboolean user_list_real_draw (GtkWidget* base, cairo_t* c) {
 	_tmp8_ = c;
 	user_list_draw_background (self, _tmp8_);
 	_tmp9_ = c;
-	_tmp10_ = self->priv->font_face;
-	cairo_set_font_face (_tmp9_, _tmp10_);
-	user_list_get_selected_location (self, &_tmp11_, &_tmp12_);
-	base_x = _tmp11_;
-	base_y = _tmp12_;
-	_tmp13_ = c;
-	cairo_save (_tmp13_);
-	_tmp14_ = c;
-	_tmp15_ = base_x;
-	_tmp16_ = base_y;
-	cairo_translate (_tmp14_, (gdouble) _tmp15_, (gdouble) _tmp16_);
-	_tmp17_ = c;
-	cairo_save (_tmp17_);
-	_tmp18_ = c;
-	_tmp19_ = user_list_get_n_above (self);
-	_tmp20_ = _tmp19_;
-	_tmp21_ = self->priv->grid_size;
-	_tmp22_ = self->priv->box_width;
-	_tmp23_ = self->priv->grid_size;
-	_tmp24_ = user_list_get_n_above (self);
-	_tmp25_ = _tmp24_;
-	_tmp26_ = self->priv->grid_size;
-	cairo_rectangle (_tmp18_, (gdouble) 0, (gdouble) ((-_tmp20_) * _tmp21_), (gdouble) (_tmp22_ * _tmp23_), (gdouble) (_tmp25_ * _tmp26_));
-	_tmp27_ = c;
-	cairo_clip (_tmp27_);
-	_tmp28_ = c;
-	user_list_draw_entries (self, _tmp28_);
-	_tmp29_ = c;
-	_tmp30_ = self->priv->entries;
-	_tmp31_ = g_list_length (_tmp30_);
-	_tmp32_ = self->priv->grid_size;
-	cairo_translate (_tmp29_, (gdouble) 0, (gdouble) ((-_tmp31_) * _tmp32_));
-	_tmp33_ = c;
-	user_list_draw_entries (self, _tmp33_);
-	_tmp34_ = c;
-	cairo_restore (_tmp34_);
-	_tmp35_ = c;
-	cairo_save (_tmp35_);
-	_tmp36_ = c;
-	_tmp37_ = self->priv->box_height;
-	_tmp38_ = self->priv->grid_size;
-	_tmp39_ = self->priv->box_width;
-	_tmp40_ = self->priv->grid_size;
-	_tmp41_ = user_list_get_n_below (self);
-	_tmp42_ = _tmp41_;
-	_tmp43_ = self->priv->grid_size;
-	cairo_rectangle (_tmp36_, (gdouble) 0, (gdouble) (_tmp37_ * _tmp38_), (gdouble) (_tmp39_ * _tmp40_), (gdouble) (_tmp42_ * _tmp43_));
-	_tmp44_ = c;
-	cairo_clip (_tmp44_);
-	_tmp45_ = c;
-	_tmp46_ = self->priv->box_height;
-	_tmp47_ = self->priv->grid_size;
-	cairo_translate (_tmp45_, (gdouble) 0, (gdouble) ((_tmp46_ - 1) * _tmp47_));
-	_tmp48_ = c;
-	user_list_draw_entries (self, _tmp48_);
-	_tmp49_ = c;
-	_tmp50_ = self->priv->entries;
-	_tmp51_ = g_list_length (_tmp50_);
-	_tmp52_ = self->priv->grid_size;
-	cairo_translate (_tmp49_, (gdouble) 0, (gdouble) (_tmp51_ * _tmp52_));
-	_tmp53_ = c;
-	user_list_draw_entries (self, _tmp53_);
-	_tmp54_ = c;
-	cairo_restore (_tmp54_);
-	_tmp55_ = c;
-	cairo_save (_tmp55_);
+	cairo_save (_tmp9_);
+	user_list_get_selected_location (self, &_tmp10_, &_tmp11_);
+	base_x = _tmp10_;
+	base_y = _tmp11_;
+	_tmp12_ = c;
+	_tmp13_ = base_x;
+	_tmp14_ = base_y;
+	cairo_translate (_tmp12_, (gdouble) _tmp13_, (gdouble) _tmp14_);
+	index = 0;
+	_tmp15_ = self->priv->entries;
+	{
+		GList* entry_collection = NULL;
+		GList* entry_it = NULL;
+		entry_collection = _tmp15_;
+		for (entry_it = entry_collection; entry_it != NULL; entry_it = entry_it->next) {
+			UserEntry* _tmp16_;
+			UserEntry* entry = NULL;
+			_tmp16_ = _user_entry_ref0 ((UserEntry*) entry_it->data);
+			entry = _tmp16_;
+			{
+				guint _tmp17_;
+				guint _tmp18_;
+				gint _tmp19_;
+				gdouble h_above;
+				cairo_t* _tmp20_;
+				cairo_t* _tmp21_;
+				gdouble _tmp22_;
+				gint _tmp23_;
+				gint _tmp24_;
+				gdouble _tmp25_;
+				cairo_t* _tmp26_;
+				cairo_t* _tmp27_;
+				gint _tmp28_;
+				gint _tmp29_;
+				gdouble _tmp30_;
+				gint _tmp31_;
+				gdouble _tmp32_;
+				gint _tmp33_;
+				guint _tmp34_;
+				guint _tmp35_;
+				gdouble alpha;
+				cairo_t* _tmp36_;
+				UserEntry* _tmp37_;
+				gdouble _tmp38_;
+				cairo_t* _tmp39_;
+				GList* _tmp40_;
+				guint _tmp41_ = 0U;
+				gint _tmp42_;
+				gdouble _tmp43_;
+				gint _tmp44_;
+				GList* _tmp45_;
+				guint _tmp46_ = 0U;
+				guint _tmp47_;
+				guint _tmp48_;
+				cairo_t* _tmp49_;
+				UserEntry* _tmp50_;
+				gdouble _tmp51_;
+				cairo_t* _tmp52_;
+				guint _tmp53_;
+				guint _tmp54_;
+				gint _tmp55_;
+				gdouble h_below;
+				cairo_t* _tmp56_;
+				cairo_t* _tmp57_;
+				gint _tmp58_;
+				gint _tmp59_;
+				gint _tmp60_;
+				gint _tmp61_;
+				gdouble _tmp62_;
+				cairo_t* _tmp63_;
+				cairo_t* _tmp64_;
+				gint _tmp65_;
+				gint _tmp66_;
+				gdouble _tmp67_;
+				gint _tmp68_;
+				cairo_t* _tmp69_;
+				gint _tmp70_;
+				gint _tmp71_;
+				gint _tmp72_;
+				gdouble _tmp73_;
+				guint _tmp74_;
+				guint _tmp75_;
+				cairo_t* _tmp76_;
+				UserEntry* _tmp77_;
+				gdouble _tmp78_;
+				cairo_t* _tmp79_;
+				GList* _tmp80_;
+				guint _tmp81_ = 0U;
+				gint _tmp82_;
+				gint _tmp83_;
+				GList* _tmp84_;
+				guint _tmp85_ = 0U;
+				gdouble _tmp86_;
+				guint _tmp87_;
+				guint _tmp88_;
+				cairo_t* _tmp89_;
+				UserEntry* _tmp90_;
+				gdouble _tmp91_;
+				cairo_t* _tmp92_;
+				gint _tmp93_;
+				_tmp17_ = user_list_get_n_above (self);
+				_tmp18_ = _tmp17_;
+				_tmp19_ = self->priv->grid_size;
+				h_above = ((gdouble) _tmp18_) * _tmp19_;
+				_tmp20_ = c;
+				cairo_save (_tmp20_);
+				_tmp21_ = c;
+				_tmp22_ = h_above;
+				_tmp23_ = self->priv->box_width;
+				_tmp24_ = self->priv->grid_size;
+				_tmp25_ = h_above;
+				cairo_rectangle (_tmp21_, (gdouble) 0, -_tmp22_, (gdouble) (_tmp23_ * _tmp24_), _tmp25_);
+				_tmp26_ = c;
+				cairo_clip (_tmp26_);
+				_tmp27_ = c;
+				_tmp28_ = index;
+				_tmp29_ = self->priv->grid_size;
+				_tmp30_ = self->priv->scroll_location;
+				_tmp31_ = self->priv->grid_size;
+				cairo_translate (_tmp27_, (gdouble) 0, (_tmp28_ * _tmp29_) - (_tmp30_ * _tmp31_));
+				_tmp32_ = self->priv->scroll_location;
+				_tmp33_ = index;
+				_tmp34_ = user_list_get_n_above (self);
+				_tmp35_ = _tmp34_;
+				alpha = 1.0 - ((_tmp32_ - _tmp33_) / (_tmp35_ + 1));
+				_tmp36_ = c;
+				_tmp37_ = entry;
+				_tmp38_ = alpha;
+				user_list_draw_entry (self, _tmp36_, _tmp37_, _tmp38_);
+				_tmp39_ = c;
+				_tmp40_ = self->priv->entries;
+				_tmp41_ = g_list_length (_tmp40_);
+				_tmp42_ = self->priv->grid_size;
+				cairo_translate (_tmp39_, (gdouble) 0, (gdouble) ((-_tmp41_) * _tmp42_));
+				_tmp43_ = self->priv->scroll_location;
+				_tmp44_ = index;
+				_tmp45_ = self->priv->entries;
+				_tmp46_ = g_list_length (_tmp45_);
+				_tmp47_ = user_list_get_n_above (self);
+				_tmp48_ = _tmp47_;
+				alpha = 1.0 - ((_tmp43_ - (_tmp44_ - ((gint) _tmp46_))) / (_tmp48_ + 1));
+				_tmp49_ = c;
+				_tmp50_ = entry;
+				_tmp51_ = alpha;
+				user_list_draw_entry (self, _tmp49_, _tmp50_, _tmp51_);
+				_tmp52_ = c;
+				cairo_restore (_tmp52_);
+				_tmp53_ = user_list_get_n_below (self);
+				_tmp54_ = _tmp53_;
+				_tmp55_ = self->priv->grid_size;
+				h_below = ((gdouble) _tmp54_) * _tmp55_;
+				_tmp56_ = c;
+				cairo_save (_tmp56_);
+				_tmp57_ = c;
+				_tmp58_ = self->priv->box_height;
+				_tmp59_ = self->priv->grid_size;
+				_tmp60_ = self->priv->box_width;
+				_tmp61_ = self->priv->grid_size;
+				_tmp62_ = h_below;
+				cairo_rectangle (_tmp57_, (gdouble) 0, (gdouble) (_tmp58_ * _tmp59_), (gdouble) (_tmp60_ * _tmp61_), _tmp62_);
+				_tmp63_ = c;
+				cairo_clip (_tmp63_);
+				_tmp64_ = c;
+				_tmp65_ = index;
+				_tmp66_ = self->priv->grid_size;
+				_tmp67_ = self->priv->scroll_location;
+				_tmp68_ = self->priv->grid_size;
+				cairo_translate (_tmp64_, (gdouble) 0, (_tmp65_ * _tmp66_) - (_tmp67_ * _tmp68_));
+				_tmp69_ = c;
+				_tmp70_ = self->priv->box_height;
+				_tmp71_ = self->priv->grid_size;
+				cairo_translate (_tmp69_, (gdouble) 0, (gdouble) ((_tmp70_ - 1) * _tmp71_));
+				_tmp72_ = index;
+				_tmp73_ = self->priv->scroll_location;
+				_tmp74_ = user_list_get_n_below (self);
+				_tmp75_ = _tmp74_;
+				alpha = 1.0 - ((_tmp72_ - _tmp73_) / (_tmp75_ + 1));
+				_tmp76_ = c;
+				_tmp77_ = entry;
+				_tmp78_ = alpha;
+				user_list_draw_entry (self, _tmp76_, _tmp77_, _tmp78_);
+				_tmp79_ = c;
+				_tmp80_ = self->priv->entries;
+				_tmp81_ = g_list_length (_tmp80_);
+				_tmp82_ = self->priv->grid_size;
+				cairo_translate (_tmp79_, (gdouble) 0, (gdouble) (_tmp81_ * _tmp82_));
+				_tmp83_ = index;
+				_tmp84_ = self->priv->entries;
+				_tmp85_ = g_list_length (_tmp84_);
+				_tmp86_ = self->priv->scroll_location;
+				_tmp87_ = user_list_get_n_below (self);
+				_tmp88_ = _tmp87_;
+				alpha = 1.0 - (((_tmp83_ + ((gint) _tmp85_)) - _tmp86_) / (_tmp88_ + 1));
+				_tmp89_ = c;
+				_tmp90_ = entry;
+				_tmp91_ = alpha;
+				user_list_draw_entry (self, _tmp89_, _tmp90_, _tmp91_);
+				_tmp92_ = c;
+				cairo_restore (_tmp92_);
+				_tmp93_ = index;
+				index = _tmp93_ + 1;
+				_user_entry_unref0 (entry);
+			}
+		}
+	}
+	_tmp94_ = c;
+	cairo_save (_tmp94_);
 	border = 4;
-	_tmp56_ = c;
-	_tmp57_ = border;
-	_tmp58_ = border;
-	cairo_translate (_tmp56_, (gdouble) (-_tmp57_), (gdouble) (-_tmp58_));
-	_tmp59_ = c;
-	_tmp60_ = self->priv->box_pattern;
-	cairo_set_source (_tmp59_, _tmp60_);
-	_tmp61_ = c;
-	cairo_paint (_tmp61_);
-	_tmp62_ = c;
-	cairo_restore (_tmp62_);
-	_tmp63_ = self->priv->selected_entry;
-	if (_tmp63_ != NULL) {
-		cairo_text_extents_t extents = {0};
-		cairo_t* _tmp64_;
-		cairo_t* _tmp65_;
-		UserEntry* _tmp66_;
-		const gchar* _tmp67_;
-		cairo_text_extents_t _tmp68_ = {0};
-		gint _tmp69_;
-		gint _tmp70_;
-		gint _tmp71_;
-		cairo_text_extents_t _tmp72_;
-		gdouble _tmp73_;
-		gdouble text_y;
-		UserEntry* _tmp74_;
-		gboolean _tmp75_;
-		cairo_t* _tmp85_;
-		gint _tmp86_;
-		gdouble _tmp87_;
-		gint _tmp88_;
-		gint _tmp89_;
-		cairo_pattern_t* _tmp90_;
+	_tmp95_ = c;
+	_tmp96_ = border;
+	_tmp97_ = border;
+	cairo_translate (_tmp95_, (gdouble) (-_tmp96_), (gdouble) (-_tmp97_));
+	_tmp98_ = c;
+	_tmp99_ = self->priv->box_pattern;
+	cairo_set_source (_tmp98_, _tmp99_);
+	_tmp100_ = c;
+	cairo_paint (_tmp100_);
+	_tmp101_ = c;
+	cairo_restore (_tmp101_);
+	_tmp102_ = self->priv->selected_entry;
+	if (_tmp102_ != NULL) {
+		gint w = 0;
+		gint h = 0;
+		UserEntry* _tmp103_;
+		PangoLayout* _tmp104_;
+		gint _tmp105_ = 0;
+		gint _tmp106_ = 0;
+		gint _tmp107_;
+		gint _tmp108_;
+		gint _tmp109_;
+		gint _tmp110_;
+		gint _tmp111_;
+		gint text_y;
+		UserEntry* _tmp112_;
+		gboolean _tmp113_;
+		cairo_t* _tmp122_;
+		gint _tmp123_;
+		gint _tmp124_;
+		gint _tmp125_;
+		gint _tmp126_;
+		cairo_pattern_t* _tmp127_;
 		cairo_pattern_t* mask;
 		gdouble left;
-		cairo_pattern_t* _tmp91_;
-		gdouble _tmp92_;
-		cairo_pattern_t* _tmp93_;
-		gdouble _tmp94_;
-		gint _tmp95_;
-		gint _tmp96_;
-		cairo_pattern_t* _tmp97_;
-		gdouble _tmp98_;
-		gint _tmp99_;
-		gint _tmp100_;
-		cairo_t* _tmp101_;
-		cairo_pattern_t* _tmp102_;
-		cairo_t* _tmp103_;
-		UserEntry* _tmp104_;
-		const gchar* _tmp105_;
-		_tmp64_ = c;
-		cairo_set_font_size (_tmp64_, (gdouble) 21);
-		_tmp65_ = c;
-		_tmp66_ = self->priv->selected_entry;
-		_tmp67_ = _tmp66_->label;
-		cairo_text_extents (_tmp65_, _tmp67_, &_tmp68_);
-		extents = _tmp68_;
-		_tmp69_ = self->priv->grid_size;
-		_tmp70_ = self->priv->grid_size;
-		_tmp71_ = border;
-		_tmp72_ = extents;
-		_tmp73_ = _tmp72_.height;
-		text_y = _tmp69_ - (((_tmp70_ - _tmp71_) - _tmp73_) / 4);
-		_tmp74_ = self->priv->selected_entry;
-		_tmp75_ = _tmp74_->is_active;
-		if (_tmp75_) {
-			cairo_t* _tmp76_;
-			gdouble _tmp77_;
-			cairo_text_extents_t _tmp78_;
-			gdouble _tmp79_;
-			cairo_t* _tmp80_;
-			cairo_t* _tmp81_;
-			cairo_t* _tmp82_;
-			cairo_t* _tmp83_;
-			cairo_t* _tmp84_;
-			_tmp76_ = c;
-			_tmp77_ = text_y;
-			_tmp78_ = extents;
-			_tmp79_ = _tmp78_.height;
-			cairo_move_to (_tmp76_, (gdouble) 8, ((_tmp77_ - (_tmp79_ / 2)) + 0.5) - 4);
-			_tmp80_ = c;
-			cairo_rel_line_to (_tmp80_, (gdouble) 5, (gdouble) 4);
-			_tmp81_ = c;
-			cairo_rel_line_to (_tmp81_, (gdouble) (-5), (gdouble) 4);
-			_tmp82_ = c;
-			cairo_close_path (_tmp82_);
-			_tmp83_ = c;
-			cairo_set_source_rgb (_tmp83_, 1.0, 1.0, 1.0);
-			_tmp84_ = c;
-			cairo_fill (_tmp84_);
+		cairo_pattern_t* _tmp128_;
+		gdouble _tmp129_;
+		cairo_pattern_t* _tmp130_;
+		gdouble _tmp131_;
+		gint _tmp132_;
+		gint _tmp133_;
+		cairo_pattern_t* _tmp134_;
+		gdouble _tmp135_;
+		gint _tmp136_;
+		gint _tmp137_;
+		cairo_t* _tmp138_;
+		cairo_pattern_t* _tmp139_;
+		cairo_t* _tmp140_;
+		UserEntry* _tmp141_;
+		PangoLayout* _tmp142_;
+		_tmp103_ = self->priv->selected_entry;
+		_tmp104_ = _tmp103_->layout;
+		pango_layout_get_pixel_size (_tmp104_, &_tmp105_, &_tmp106_);
+		w = _tmp105_;
+		h = _tmp106_;
+		_tmp107_ = self->priv->grid_size;
+		_tmp108_ = self->priv->grid_size;
+		_tmp109_ = border;
+		_tmp110_ = h;
+		_tmp111_ = h;
+		text_y = (_tmp107_ - (((_tmp108_ - _tmp109_) - _tmp110_) / 4)) - _tmp111_;
+		_tmp112_ = self->priv->selected_entry;
+		_tmp113_ = _tmp112_->is_active;
+		if (_tmp113_) {
+			cairo_t* _tmp114_;
+			gint _tmp115_;
+			gint _tmp116_;
+			cairo_t* _tmp117_;
+			cairo_t* _tmp118_;
+			cairo_t* _tmp119_;
+			cairo_t* _tmp120_;
+			cairo_t* _tmp121_;
+			_tmp114_ = c;
+			_tmp115_ = text_y;
+			_tmp116_ = h;
+			cairo_move_to (_tmp114_, (gdouble) 8, ((_tmp115_ + (_tmp116_ / 2)) + 0.5) - 4);
+			_tmp117_ = c;
+			cairo_rel_line_to (_tmp117_, (gdouble) 5, (gdouble) 4);
+			_tmp118_ = c;
+			cairo_rel_line_to (_tmp118_, (gdouble) (-5), (gdouble) 4);
+			_tmp119_ = c;
+			cairo_close_path (_tmp119_);
+			_tmp120_ = c;
+			cairo_set_source_rgb (_tmp120_, 1.0, 1.0, 1.0);
+			_tmp121_ = c;
+			cairo_fill (_tmp121_);
 		}
-		_tmp85_ = c;
-		_tmp86_ = self->priv->grid_size;
-		_tmp87_ = text_y;
-		cairo_move_to (_tmp85_, (gdouble) (_tmp86_ / 2), _tmp87_);
-		_tmp88_ = self->priv->grid_size;
-		_tmp89_ = self->priv->box_width;
-		_tmp90_ = cairo_pattern_create_linear ((gdouble) 0, (gdouble) 0, (gdouble) (_tmp88_ * _tmp89_), (gdouble) 0);
-		mask = _tmp90_;
+		_tmp122_ = c;
+		_tmp123_ = self->priv->grid_size;
+		_tmp124_ = text_y;
+		cairo_move_to (_tmp122_, (gdouble) (_tmp123_ / 2), (gdouble) _tmp124_);
+		_tmp125_ = self->priv->grid_size;
+		_tmp126_ = self->priv->box_width;
+		_tmp127_ = cairo_pattern_create_linear ((gdouble) 0, (gdouble) 0, (gdouble) (_tmp125_ * _tmp126_), (gdouble) 0);
+		mask = _tmp127_;
 		left = 1.0 - (2.0 / 7);
-		_tmp91_ = mask;
-		_tmp92_ = left;
-		cairo_pattern_add_color_stop_rgba (_tmp91_, _tmp92_, 1.0, 1.0, 1.0, 1.0);
-		_tmp93_ = mask;
-		_tmp94_ = left;
-		_tmp95_ = self->priv->grid_size;
-		_tmp96_ = self->priv->box_width;
-		cairo_pattern_add_color_stop_rgba (_tmp93_, _tmp94_ + (5.4 / (_tmp95_ * _tmp96_)), 1.0, 1.0, 1.0, 0.5);
-		_tmp97_ = mask;
-		_tmp98_ = left;
-		_tmp99_ = self->priv->grid_size;
-		_tmp100_ = self->priv->box_width;
-		cairo_pattern_add_color_stop_rgba (_tmp97_, _tmp98_ + (27.0 / (_tmp99_ * _tmp100_)), 1.0, 1.0, 1.0, 0.0);
-		_tmp101_ = c;
-		_tmp102_ = mask;
-		cairo_set_source (_tmp101_, _tmp102_);
-		_tmp103_ = c;
-		_tmp104_ = self->priv->selected_entry;
-		_tmp105_ = _tmp104_->label;
-		cairo_show_text (_tmp103_, _tmp105_);
+		_tmp128_ = mask;
+		_tmp129_ = left;
+		cairo_pattern_add_color_stop_rgba (_tmp128_, _tmp129_, 1.0, 1.0, 1.0, 1.0);
+		_tmp130_ = mask;
+		_tmp131_ = left;
+		_tmp132_ = self->priv->grid_size;
+		_tmp133_ = self->priv->box_width;
+		cairo_pattern_add_color_stop_rgba (_tmp130_, _tmp131_ + (5.4 / (_tmp132_ * _tmp133_)), 1.0, 1.0, 1.0, 0.5);
+		_tmp134_ = mask;
+		_tmp135_ = left;
+		_tmp136_ = self->priv->grid_size;
+		_tmp137_ = self->priv->box_width;
+		cairo_pattern_add_color_stop_rgba (_tmp134_, _tmp135_ + (27.0 / (_tmp136_ * _tmp137_)), 1.0, 1.0, 1.0, 0.0);
+		_tmp138_ = c;
+		_tmp139_ = mask;
+		cairo_set_source (_tmp138_, _tmp139_);
+		_tmp140_ = c;
+		_tmp141_ = self->priv->selected_entry;
+		_tmp142_ = _tmp141_->layout;
+		pango_cairo_show_layout (_tmp140_, _tmp142_);
 		_cairo_pattern_destroy0 (mask);
 	}
-	_tmp107_ = self->priv->error;
-	if (_tmp107_ != NULL) {
-		_tmp106_ = TRUE;
+	_tmp144_ = self->priv->error;
+	if (_tmp144_ != NULL) {
+		_tmp143_ = TRUE;
 	} else {
-		const gchar* _tmp108_;
-		_tmp108_ = self->priv->message;
-		_tmp106_ = _tmp108_ != NULL;
+		const gchar* _tmp145_;
+		_tmp145_ = self->priv->message;
+		_tmp143_ = _tmp145_ != NULL;
 	}
-	_tmp109_ = _tmp106_;
-	if (_tmp109_) {
-		cairo_text_extents_t extents = {0};
+	_tmp146_ = _tmp143_;
+	if (_tmp146_) {
 		gchar* text = NULL;
-		const gchar* _tmp110_;
-		cairo_t* _tmp115_;
-		cairo_t* _tmp116_;
-		const gchar* _tmp117_;
-		cairo_text_extents_t _tmp118_ = {0};
-		cairo_t* _tmp119_;
-		gint _tmp120_;
-		gint _tmp121_;
-		const gchar* _tmp122_;
-		cairo_t* _tmp125_;
-		const gchar* _tmp126_;
-		_tmp110_ = self->priv->error;
-		if (_tmp110_ == NULL) {
-			const gchar* _tmp111_;
-			gchar* _tmp112_;
-			_tmp111_ = self->priv->message;
-			_tmp112_ = g_strdup (_tmp111_);
+		const gchar* _tmp147_;
+		const gchar* _tmp152_;
+		PangoLayout* _tmp153_ = NULL;
+		PangoLayout* layout;
+		PangoLayout* _tmp154_;
+		PangoFontDescription* _tmp155_ = NULL;
+		PangoFontDescription* _tmp156_;
+		gint w = 0;
+		gint h = 0;
+		PangoLayout* _tmp157_;
+		gint _tmp158_ = 0;
+		gint _tmp159_ = 0;
+		cairo_t* _tmp160_;
+		gint _tmp161_;
+		gint _tmp162_;
+		gint _tmp163_;
+		const gchar* _tmp164_;
+		cairo_t* _tmp167_;
+		PangoLayout* _tmp168_;
+		_tmp147_ = self->priv->error;
+		if (_tmp147_ == NULL) {
+			const gchar* _tmp148_;
+			gchar* _tmp149_;
+			_tmp148_ = self->priv->message;
+			_tmp149_ = g_strdup (_tmp148_);
 			_g_free0 (text);
-			text = _tmp112_;
+			text = _tmp149_;
 		} else {
-			const gchar* _tmp113_;
-			gchar* _tmp114_;
-			_tmp113_ = self->priv->error;
-			_tmp114_ = g_strdup (_tmp113_);
+			const gchar* _tmp150_;
+			gchar* _tmp151_;
+			_tmp150_ = self->priv->error;
+			_tmp151_ = g_strdup (_tmp150_);
 			_g_free0 (text);
-			text = _tmp114_;
+			text = _tmp151_;
 		}
-		_tmp115_ = c;
-		cairo_set_font_size (_tmp115_, (gdouble) 12);
-		_tmp116_ = c;
-		_tmp117_ = text;
-		cairo_text_extents (_tmp116_, _tmp117_, &_tmp118_);
-		extents = _tmp118_;
-		_tmp119_ = c;
-		_tmp120_ = self->priv->grid_size;
-		_tmp121_ = self->priv->grid_size;
-		cairo_move_to (_tmp119_, (gdouble) (_tmp120_ / 2), _tmp121_ * 1.25);
-		_tmp122_ = self->priv->error;
-		if (_tmp122_ != NULL) {
-			cairo_t* _tmp123_;
-			_tmp123_ = c;
-			cairo_set_source_rgb (_tmp123_, 1.0, 0.0, 0.0);
+		_tmp152_ = text;
+		_tmp153_ = gtk_widget_create_pango_layout ((GtkWidget*) self, _tmp152_);
+		layout = _tmp153_;
+		_tmp154_ = layout;
+		_tmp155_ = pango_font_description_from_string ("Ubuntu 10");
+		_tmp156_ = _tmp155_;
+		pango_layout_set_font_description (_tmp154_, _tmp156_);
+		_pango_font_description_free0 (_tmp156_);
+		_tmp157_ = layout;
+		pango_layout_get_pixel_size (_tmp157_, &_tmp158_, &_tmp159_);
+		w = _tmp158_;
+		h = _tmp159_;
+		_tmp160_ = c;
+		_tmp161_ = self->priv->grid_size;
+		_tmp162_ = self->priv->grid_size;
+		_tmp163_ = h;
+		cairo_move_to (_tmp160_, (gdouble) (_tmp161_ / 2), (_tmp162_ * 1.25) - _tmp163_);
+		_tmp164_ = self->priv->error;
+		if (_tmp164_ != NULL) {
+			cairo_t* _tmp165_;
+			_tmp165_ = c;
+			cairo_set_source_rgb (_tmp165_, 1.0, 0.0, 0.0);
 		} else {
-			cairo_t* _tmp124_;
-			_tmp124_ = c;
-			cairo_set_source_rgb (_tmp124_, 1.0, 1.0, 1.0);
+			cairo_t* _tmp166_;
+			_tmp166_ = c;
+			cairo_set_source_rgb (_tmp166_, 1.0, 1.0, 1.0);
 		}
-		_tmp125_ = c;
-		_tmp126_ = text;
-		cairo_show_text (_tmp125_, _tmp126_);
+		_tmp167_ = c;
+		_tmp168_ = layout;
+		pango_cairo_show_layout (_tmp167_, _tmp168_);
+		_g_object_unref0 (layout);
 		_g_free0 (text);
 	}
-	_tmp127_ = c;
-	cairo_restore (_tmp127_);
-	_tmp128_ = self->priv->children;
+	_tmp169_ = c;
+	cairo_restore (_tmp169_);
+	_tmp170_ = self->priv->children;
 	{
 		GList* child_collection = NULL;
 		GList* child_it = NULL;
-		child_collection = _tmp128_;
+		child_collection = _tmp170_;
 		for (child_it = child_collection; child_it != NULL; child_it = child_it->next) {
-			GtkWidget* _tmp129_;
+			GtkWidget* _tmp171_;
 			GtkWidget* child = NULL;
-			_tmp129_ = _g_object_ref0 ((GtkWidget*) child_it->data);
-			child = _tmp129_;
+			_tmp171_ = _g_object_ref0 ((GtkWidget*) child_it->data);
+			child = _tmp171_;
 			{
-				GtkWidget* _tmp130_;
-				cairo_t* _tmp131_;
-				_tmp130_ = child;
-				_tmp131_ = c;
-				gtk_container_propagate_draw ((GtkContainer*) self, _tmp130_, _tmp131_);
+				GtkWidget* _tmp172_;
+				cairo_t* _tmp173_;
+				_tmp172_ = child;
+				_tmp173_ = c;
+				gtk_container_propagate_draw ((GtkContainer*) self, _tmp172_, _tmp173_);
 				_g_object_unref0 (child);
 			}
 		}
@@ -5674,13 +5298,13 @@ static gboolean user_list_real_key_press_event (GtkWidget* base, GdkEventKey* ev
 	switch (_tmp1_) {
 		case GDK_KEY_Up:
 		{
-			g_debug ("user-list.vala:1422: Up pressed");
+			g_debug ("user-list.vala:1374: Up pressed");
 			user_list_select_prev_entry (self);
 			break;
 		}
 		case GDK_KEY_Down:
 		{
-			g_debug ("user-list.vala:1426: Down pressed");
+			g_debug ("user-list.vala:1378: Down pressed");
 			user_list_select_next_entry (self);
 			break;
 		}
@@ -5695,6 +5319,83 @@ static gboolean user_list_real_key_press_event (GtkWidget* base, GdkEventKey* ev
 }
 
 
+static gboolean user_list_inside_entry (UserList* self, gdouble x, gdouble y, gdouble entry_y, UserEntry* entry) {
+	gboolean result = FALSE;
+	gint w = 0;
+	gint h = 0;
+	UserEntry* _tmp0_;
+	PangoLayout* _tmp1_;
+	gint _tmp2_ = 0;
+	gint _tmp3_ = 0;
+	gint _tmp4_;
+	gint _tmp5_;
+	gint _tmp6_;
+	gint _tmp7_;
+	gint _tmp8_;
+	gint _tmp9_;
+	gint _tmp10_;
+	gboolean _tmp11_ = FALSE;
+	gboolean _tmp12_ = FALSE;
+	gboolean _tmp13_ = FALSE;
+	gdouble _tmp14_;
+	gboolean _tmp17_;
+	gboolean _tmp20_;
+	gboolean _tmp24_;
+	g_return_val_if_fail (self != NULL, FALSE);
+	g_return_val_if_fail (entry != NULL, FALSE);
+	_tmp0_ = entry;
+	_tmp1_ = _tmp0_->layout;
+	pango_layout_get_pixel_size (_tmp1_, &_tmp2_, &_tmp3_);
+	w = _tmp2_;
+	h = _tmp3_;
+	_tmp4_ = w;
+	_tmp5_ = self->priv->grid_size;
+	w = _tmp4_ + (_tmp5_ / 2);
+	_tmp6_ = self->priv->grid_size;
+	h = _tmp6_;
+	_tmp7_ = w;
+	_tmp8_ = self->priv->grid_size;
+	_tmp9_ = self->priv->grid_size;
+	_tmp10_ = self->priv->grid_size;
+	w = (((gint) (_tmp7_ + _tmp8_)) / _tmp9_) * _tmp10_;
+	_tmp14_ = x;
+	if (_tmp14_ >= ((gdouble) 0)) {
+		gdouble _tmp15_;
+		gint _tmp16_;
+		_tmp15_ = x;
+		_tmp16_ = w;
+		_tmp13_ = _tmp15_ <= ((gdouble) _tmp16_);
+	} else {
+		_tmp13_ = FALSE;
+	}
+	_tmp17_ = _tmp13_;
+	if (_tmp17_) {
+		gdouble _tmp18_;
+		gdouble _tmp19_;
+		_tmp18_ = y;
+		_tmp19_ = entry_y;
+		_tmp12_ = _tmp18_ >= _tmp19_;
+	} else {
+		_tmp12_ = FALSE;
+	}
+	_tmp20_ = _tmp12_;
+	if (_tmp20_) {
+		gdouble _tmp21_;
+		gdouble _tmp22_;
+		gint _tmp23_;
+		_tmp21_ = y;
+		_tmp22_ = entry_y;
+		_tmp23_ = h;
+		_tmp11_ = _tmp21_ <= (_tmp22_ + _tmp23_);
+	} else {
+		_tmp11_ = FALSE;
+	}
+	_tmp24_ = _tmp11_;
+	result = _tmp24_;
+	return result;
+}
+
+
 static gboolean user_list_real_button_release_event (GtkWidget* base, GdkEventButton* event) {
 	UserList * self;
 	gboolean result = FALSE;
@@ -5702,108 +5403,198 @@ static gboolean user_list_real_button_release_event (GtkWidget* base, GdkEventBu
 	gint base_y = 0;
 	gint _tmp0_ = 0;
 	gint _tmp1_ = 0;
-	GList* _tmp2_;
+	GdkEventButton _tmp2_;
+	gdouble _tmp3_;
+	gint _tmp4_;
+	gdouble x;
+	GdkEventButton _tmp5_;
+	gdouble _tmp6_;
+	gint _tmp7_;
+	gdouble y;
+	GList* _tmp8_;
+	guint _tmp9_ = 0U;
+	gint _tmp10_;
+	gdouble h;
+	gdouble offset;
+	GList* _tmp11_;
 	self = (UserList*) base;
 	g_return_val_if_fail (event != NULL, FALSE);
 	user_list_get_selected_location (self, &_tmp0_, &_tmp1_);
 	base_x = _tmp0_;
 	base_y = _tmp1_;
-	_tmp2_ = self->priv->entries;
+	_tmp2_ = *event;
+	_tmp3_ = _tmp2_.x;
+	_tmp4_ = base_x;
+	x = _tmp3_ - _tmp4_;
+	_tmp5_ = *event;
+	_tmp6_ = _tmp5_.y;
+	_tmp7_ = base_y;
+	y = _tmp6_ - _tmp7_;
+	_tmp8_ = self->priv->entries;
+	_tmp9_ = g_list_length (_tmp8_);
+	_tmp10_ = self->priv->grid_size;
+	h = ((gdouble) _tmp9_) * _tmp10_;
+	offset = 0.0;
+	_tmp11_ = self->priv->entries;
 	{
 		GList* entry_collection = NULL;
 		GList* entry_it = NULL;
-		entry_collection = _tmp2_;
+		entry_collection = _tmp11_;
 		for (entry_it = entry_collection; entry_it != NULL; entry_it = entry_it->next) {
-			UserEntry* _tmp3_;
+			UserEntry* _tmp12_;
 			UserEntry* entry = NULL;
-			_tmp3_ = _user_entry_ref0 ((UserEntry*) entry_it->data);
-			entry = _tmp3_;
+			_tmp12_ = _user_entry_ref0 ((UserEntry*) entry_it->data);
+			entry = _tmp12_;
 			{
-				UserEntry* _tmp4_;
-				gdouble _tmp5_;
-				gdouble y;
-				gdouble _tmp6_;
-				gboolean _tmp9_ = FALSE;
-				gboolean _tmp10_ = FALSE;
-				gboolean _tmp11_ = FALSE;
-				GdkEventButton _tmp12_;
 				gdouble _tmp13_;
 				gint _tmp14_;
-				gboolean _tmp21_;
-				gboolean _tmp27_;
-				gboolean _tmp33_;
-				_tmp4_ = entry;
-				_tmp5_ = _tmp4_->y;
-				y = _tmp5_;
-				_tmp6_ = y;
-				if (_tmp6_ > ((gdouble) 0)) {
-					gdouble _tmp7_;
-					gint _tmp8_;
-					_tmp7_ = y;
-					_tmp8_ = self->priv->box_height;
-					y = _tmp7_ + (_tmp8_ - 1);
-				}
-				_tmp12_ = *event;
-				_tmp13_ = _tmp12_.x;
-				_tmp14_ = base_x;
-				if (_tmp13_ >= ((gdouble) _tmp14_)) {
-					GdkEventButton _tmp15_;
-					gdouble _tmp16_;
-					gint _tmp17_;
-					UserEntry* _tmp18_;
-					gdouble _tmp19_;
-					gint _tmp20_;
-					_tmp15_ = *event;
-					_tmp16_ = _tmp15_.x;
-					_tmp17_ = base_x;
-					_tmp18_ = entry;
-					_tmp19_ = _tmp18_->width;
-					_tmp20_ = self->priv->grid_size;
-					_tmp11_ = _tmp16_ <= (_tmp17_ + (_tmp19_ * _tmp20_));
+				gdouble _tmp15_;
+				gdouble entry_y;
+				guint _tmp16_;
+				guint _tmp17_;
+				gint _tmp18_;
+				gdouble h_above;
+				gboolean _tmp19_ = FALSE;
+				gdouble _tmp20_;
+				gboolean _tmp23_;
+				gdouble _tmp38_;
+				gint _tmp39_;
+				gint _tmp40_;
+				gdouble below_y;
+				guint _tmp41_;
+				guint _tmp42_;
+				gint _tmp43_;
+				gdouble h_below;
+				gboolean _tmp44_ = FALSE;
+				gdouble _tmp45_;
+				gboolean _tmp48_;
+				gdouble _tmp65_;
+				gint _tmp66_;
+				_tmp13_ = self->priv->scroll_location;
+				_tmp14_ = self->priv->grid_size;
+				_tmp15_ = offset;
+				entry_y = ((-_tmp13_) * _tmp14_) + _tmp15_;
+				_tmp16_ = user_list_get_n_above (self);
+				_tmp17_ = _tmp16_;
+				_tmp18_ = self->priv->grid_size;
+				h_above = ((gdouble) _tmp17_) * _tmp18_;
+				_tmp20_ = y;
+				if (_tmp20_ < ((gdouble) 0)) {
+					gdouble _tmp21_;
+					gdouble _tmp22_;
+					_tmp21_ = y;
+					_tmp22_ = h_above;
+					_tmp19_ = _tmp21_ > (-_tmp22_);
 				} else {
-					_tmp11_ = FALSE;
+					_tmp19_ = FALSE;
 				}
-				_tmp21_ = _tmp11_;
-				if (_tmp21_) {
-					GdkEventButton _tmp22_;
-					gdouble _tmp23_;
-					gint _tmp24_;
+				_tmp23_ = _tmp19_;
+				if (_tmp23_) {
+					gboolean _tmp24_ = FALSE;
 					gdouble _tmp25_;
-					gint _tmp26_;
-					_tmp22_ = *event;
-					_tmp23_ = _tmp22_.y;
-					_tmp24_ = base_y;
-					_tmp25_ = y;
-					_tmp26_ = self->priv->grid_size;
-					_tmp10_ = _tmp23_ >= (_tmp24_ + (_tmp25_ * _tmp26_));
+					gdouble _tmp26_;
+					gdouble _tmp27_;
+					UserEntry* _tmp28_;
+					gboolean _tmp29_ = FALSE;
+					gboolean _tmp36_;
+					_tmp25_ = x;
+					_tmp26_ = y;
+					_tmp27_ = entry_y;
+					_tmp28_ = entry;
+					_tmp29_ = user_list_inside_entry (self, _tmp25_, _tmp26_, _tmp27_, _tmp28_);
+					if (_tmp29_) {
+						_tmp24_ = TRUE;
+					} else {
+						gdouble _tmp30_;
+						gdouble _tmp31_;
+						gdouble _tmp32_;
+						gdouble _tmp33_;
+						UserEntry* _tmp34_;
+						gboolean _tmp35_ = FALSE;
+						_tmp30_ = x;
+						_tmp31_ = y;
+						_tmp32_ = entry_y;
+						_tmp33_ = h;
+						_tmp34_ = entry;
+						_tmp35_ = user_list_inside_entry (self, _tmp30_, _tmp31_, _tmp32_ - _tmp33_, _tmp34_);
+						_tmp24_ = _tmp35_;
+					}
+					_tmp36_ = _tmp24_;
+					if (_tmp36_) {
+						UserEntry* _tmp37_;
+						_tmp37_ = entry;
+						user_list_select_entry (self, _tmp37_, -1.0);
+						result = TRUE;
+						_user_entry_unref0 (entry);
+						return result;
+					}
+				}
+				_tmp38_ = y;
+				_tmp39_ = self->priv->box_height;
+				_tmp40_ = self->priv->grid_size;
+				below_y = _tmp38_ - (_tmp39_ * _tmp40_);
+				_tmp41_ = user_list_get_n_below (self);
+				_tmp42_ = _tmp41_;
+				_tmp43_ = self->priv->grid_size;
+				h_below = ((gdouble) _tmp42_) * _tmp43_;
+				_tmp45_ = below_y;
+				if (_tmp45_ > ((gdouble) 0)) {
+					gdouble _tmp46_;
+					gdouble _tmp47_;
+					_tmp46_ = below_y;
+					_tmp47_ = h_below;
+					_tmp44_ = _tmp46_ < _tmp47_;
 				} else {
-					_tmp10_ = FALSE;
+					_tmp44_ = FALSE;
 				}
-				_tmp27_ = _tmp10_;
-				if (_tmp27_) {
-					GdkEventButton _tmp28_;
-					gdouble _tmp29_;
-					gint _tmp30_;
-					gdouble _tmp31_;
-					gint _tmp32_;
-					_tmp28_ = *event;
-					_tmp29_ = _tmp28_.y;
-					_tmp30_ = base_y;
-					_tmp31_ = y;
-					_tmp32_ = self->priv->grid_size;
-					_tmp9_ = _tmp29_ <= (_tmp30_ + ((_tmp31_ + 1) * _tmp32_));
-				} else {
-					_tmp9_ = FALSE;
+				_tmp48_ = _tmp44_;
+				if (_tmp48_) {
+					gboolean _tmp49_ = FALSE;
+					gdouble _tmp50_;
+					gdouble _tmp51_;
+					gdouble _tmp52_;
+					gint _tmp53_;
+					UserEntry* _tmp54_;
+					gboolean _tmp55_ = FALSE;
+					gboolean _tmp63_;
+					_tmp50_ = x;
+					_tmp51_ = below_y;
+					_tmp52_ = entry_y;
+					_tmp53_ = self->priv->grid_size;
+					_tmp54_ = entry;
+					_tmp55_ = user_list_inside_entry (self, _tmp50_, _tmp51_, _tmp52_ - _tmp53_, _tmp54_);
+					if (_tmp55_) {
+						_tmp49_ = TRUE;
+					} else {
+						gdouble _tmp56_;
+						gdouble _tmp57_;
+						gdouble _tmp58_;
+						gint _tmp59_;
+						gdouble _tmp60_;
+						UserEntry* _tmp61_;
+						gboolean _tmp62_ = FALSE;
+						_tmp56_ = x;
+						_tmp57_ = below_y;
+						_tmp58_ = entry_y;
+						_tmp59_ = self->priv->grid_size;
+						_tmp60_ = h;
+						_tmp61_ = entry;
+						_tmp62_ = user_list_inside_entry (self, _tmp56_, _tmp57_, (_tmp58_ - _tmp59_) + _tmp60_, _tmp61_);
+						_tmp49_ = _tmp62_;
+					}
+					_tmp63_ = _tmp49_;
+					if (_tmp63_) {
+						UserEntry* _tmp64_;
+						_tmp64_ = entry;
+						user_list_select_entry (self, _tmp64_, 1.0);
+						result = TRUE;
+						_user_entry_unref0 (entry);
+						return result;
+					}
 				}
-				_tmp33_ = _tmp9_;
-				if (_tmp33_) {
-					UserEntry* _tmp34_;
-					_tmp34_ = entry;
-					user_list_select_entry (self, _tmp34_);
-					result = TRUE;
-					_user_entry_unref0 (entry);
-					return result;
-				}
+				_tmp65_ = offset;
+				_tmp66_ = self->priv->grid_size;
+				offset = _tmp65_ + _tmp66_;
 				_user_entry_unref0 (entry);
 			}
 		}
@@ -5993,7 +5784,6 @@ static void user_list_finalize (GObject* obj) {
 	_g_object_unref0 (self->priv->keyboard_socket);
 	_g_free0 (self->priv->error);
 	_g_free0 (self->priv->message);
-	_cairo_font_face_destroy0 (self->priv->font_face);
 	_cairo_surface_destroy0 (self->priv->logo_surface);
 	_cairo_pattern_destroy0 (self->priv->logo_pattern);
 	_cairo_surface_destroy0 (self->priv->box_surface);

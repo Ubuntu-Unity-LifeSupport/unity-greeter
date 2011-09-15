@@ -1,3 +1,13 @@
+unity-greeter (0.0.8-0ubuntu1) oneiric; urgency=low
+
+  * New upstream release:
+    - Fix grid offset
+    - Fix non-latin names being displayed incorrectly (LP: #840868)
+    - Change asynchronous indicator loader code, suspect it is causing a race
+      condition?
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Thu, 15 Sep 2011 15:00:50 +1000
+
 unity-greeter (0.0.7-0ubuntu1) oneiric; urgency=low
 
   * New upstream release: (LP: #843621)

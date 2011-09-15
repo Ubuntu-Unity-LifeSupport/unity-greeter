@@ -117,7 +117,7 @@ public class UnityGreeter
 
         if (test_mode)
         {
-            user_list.add_entry ("alice", "Alice User", "/usr/share/backgrounds/Berries_by_Orb9220.jpg", true);
+            user_list.add_entry ("alice", "가나다라마", "/usr/share/backgrounds/Berries_by_Orb9220.jpg", true);
             user_list.add_entry ("bob", "Bob User", "/usr/share/backgrounds/White_flowers_by_Garuna_bor-bor.jpg");
             user_list.add_entry ("carol", "Carol User", "/usr/share/backgrounds/Bird_by_Magnus.jpg");
             user_list.add_entry ("*guest", _("Guest Session"), default_background, true);

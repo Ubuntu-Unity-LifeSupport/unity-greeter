@@ -55,23 +55,17 @@ private class AnimateTimer
 
 private class UserEntry
 {
+    /* Unique name for this entry */
     public string? name;
 
     /* Label to display */
-    public string label;
+    public Pango.Layout layout;
 
+    /* Background for this user */
     public Background background;
-    public double y;
-    public double target_y;
-    public double direction;
-    public double width;
 
+    /* True if should be marked as active */
     public bool is_active;
-
-    public bool moving
-    {
-        get { return y != target_y; }
-    }
 }
 
 private class IndicatorMenuItem : Gtk.MenuItem
@@ -335,6 +329,10 @@ public class UserList : Gtk.Container
 
     private List<UserEntry> entries = null;
     private UserEntry? selected_entry = null;
+    
+    private double scroll_target_location;
+    private double scroll_location;
+    private double scroll_direction;
 
     private AnimateTimer scroll_timer;
 
@@ -353,7 +351,6 @@ public class UserList : Gtk.Container
     private string? error;
     private string? message;
 
-    private Cairo.FontFace font_face;
     private Cairo.ImageSurface? logo_surface = null;
     private Cairo.Pattern? logo_pattern;
 
@@ -405,14 +402,11 @@ public class UserList : Gtk.Container
     {
         this.width = width;
         this.height = height;
+        grid_x_offset = (int) (width % grid_size) / 2;
+        grid_y_offset = (int) (height % grid_size) / 2;
+
         can_focus = false;
         background_alpha = 1.0;
-
-        FreeType.Library library;
-        FreeType.init (out library);
-        FreeType.Face face;
-        FreeType.new_face (library, "/usr/share/fonts/truetype/ubuntu-font-family/Ubuntu-R.ttf", 0, out face);
-        font_face = Cairo.ft_font_face_create_for_ft_face (face, 0);
 
         Gtk.Settings.get_default ().get ("gtk-theme-name", out default_theme_name);
 
@@ -513,7 +507,7 @@ public class UserList : Gtk.Container
         return false;
     }
 
-    async void greeter_set_env (string key, string val)
+    void greeter_set_env (string key, string val)
     {
         GLib.Environment.set_variable (key, val, true);
 
@@ -531,9 +525,7 @@ public class UserList : Gtk.Container
             var builder = new GLib.VariantBuilder (GLib.VariantType.ARRAY);
             builder.add ("{ss}", key, val);
 
-            yield proxy.call ("UpdateActivationEnvironment",
-                              new GLib.Variant ("(a{ss})", builder),
-                              GLib.DBusCallFlags.NONE, -1, null);
+            proxy.call ("UpdateActivationEnvironment", new GLib.Variant ("(a{ss})", builder), GLib.DBusCallFlags.NONE, -1, null);
         }
         catch (Error e)
         {
@@ -542,7 +534,7 @@ public class UserList : Gtk.Container
         }
     }
 
-    async void setup_indicators ()
+    void setup_indicators ()
     {
         /* Set indicators to run with reduced functionality */
         greeter_set_env ("INDICATOR_GREETER_MODE", "1");
@@ -650,7 +642,7 @@ public class UserList : Gtk.Container
         prompt_entry.visibility = !secret;
         var accessible = prompt_entry.get_accessible ();
         if (selected_entry.name != null)
-            accessible.set_name (_("Enter password for %s").printf (selected_entry.label));
+            accessible.set_name (_("Enter password for %s").printf (selected_entry.layout.get_text ()));
         else
         {
             if (prompt_entry.visibility)
@@ -668,7 +660,7 @@ public class UserList : Gtk.Container
         message = "";
         login_button.show ();
         var accessible = login_button.get_accessible ();
-        accessible.set_name (_("Login as %s").printf (selected_entry.label));
+        accessible.set_name (_("Login as %s").printf (selected_entry.layout.get_text ()));
         login_button.grab_focus ();
         queue_draw ();
     }
@@ -828,20 +820,16 @@ public class UserList : Gtk.Container
             entries.append (e);
             e.name = name;
         }
-        e.label = label;
+        e.layout = create_pango_layout (label);
+        e.layout.set_font_description (Pango.FontDescription.from_string ("Ubuntu 16"));
         e.background = make_background (background);
         e.background.loaded.connect (background_loaded_cb);
         e.is_active = is_active;
-        e.width = 5;
 
         if (selected_entry == null)
-            select_entry (e);
-
-        foreach (var entry in entries)
-        {
-            update_entry_location (entry);
-            entry.y = entry.target_y;
-        }
+            select_entry (e, 1.0);
+        else
+            select_entry (selected_entry, 1.0);
 
         queue_draw ();
     }
@@ -850,13 +838,7 @@ public class UserList : Gtk.Container
     {
         var e = find_entry (name);
         if (e != null)
-            select_entry (e);
-
-        foreach (var entry in entries)
-        {
-            update_entry_location (entry);
-            entry.y = entry.target_y;
-        }
+            select_entry (e, 1.0);
     }
 
     public void remove_entry (string? name)
@@ -872,11 +854,9 @@ public class UserList : Gtk.Container
         {
             if (index >= entries.length ())
                 index--;
-            select_entry (entries.nth_data (index));
+            select_entry (entries.nth_data (index), -1.0);
         }
 
-        foreach (var e in entries)
-            update_entry_location (e);
         queue_draw ();
     }
 
@@ -908,72 +888,42 @@ public class UserList : Gtk.Container
         options_menu.popup (null, null, options_menu_position_cb, 0, Gtk.get_current_event_time ());
     }
 
-    private void update_entry_location (UserEntry entry)
-    {
-        /* Get the number of steps below the selected item */
-        var offset = entries.index (entry) - entries.index (selected_entry);
-
-        /* If above then place before box */
-        if (offset > (int) n_below)
-            offset -= (int) entries.length ();
-        /* If below then place after box */
-        else if (offset < - (int) n_above)
-            offset += (int) entries.length ();
-
-        entry.target_y = offset;
-
-        /* Move towards new location */
-        if (entry.target_y >= entry.y)
-            entry.direction = 1.0;
-        else
-            entry.direction = -1.0;
-    }
-
     private void scroll_animate_cb (double timestep)
     {
-        var animating = false;
-        foreach (var entry in entries)
+        if (scroll_location != scroll_target_location)
         {
-            if (entry.y != entry.target_y)
+            var speed = 5.0;
+
+            var delta = timestep * speed;
+
+            /* Total height of list */
+            var h = (double) entries.length ();
+
+            var distance = scroll_target_location - scroll_location;
+            if (scroll_direction < 0.0)
+                distance = -distance;
+            if (distance < 0)
+                distance += h;
+
+            /* If close enough finish moving */
+            if (distance <= delta)
+                scroll_location = scroll_target_location;
+            else
             {
-                var speed = 5.0;
+                scroll_location += delta * scroll_direction;
 
-                var delta = timestep * speed;
+                /* Wrap around */
+                if (scroll_location > h)
+                    scroll_location -= h;
+                if (scroll_location < 0)
+                    scroll_location += h;
+             }
 
-                /* Total height of the box and entries */
-                var h = ((int) entries.length () - 1) + box_height;
-
-                var step = entry.target_y - entry.y;
-                if (entry.direction < 0)
-                    step = -step;
-                if (step < 0)
-                    step += h;
-
-                /* If close enough finish moving */
-                if (step <= delta)
-                    entry.y = entry.target_y;
-                else
-                {
-                    entry.y += delta * entry.direction;
-
-                    /* Wrap around */
-                    if (entry.direction < 0 && entry.y < - (int) n_above)
-                        entry.y += entries.length ();
-                    if (entry.direction > 0 && entry.y >= n_below)
-                        entry.y -= entries.length ();
-
-                }
-            }
-
-            if (entry.moving)
-                animating = true;
+            queue_draw ();
         }
 
-        // FIXME: Should just redraw box
-        queue_draw ();
-
-        /* Stop when we get there */
-        if (!animating)
+        /* Stop when we get there */        
+        if (scroll_location == scroll_target_location)
         {
             debug ("Stop scroll animation");
             scroll_timer.stop ();
@@ -1016,14 +966,9 @@ public class UserList : Gtk.Container
         return false;
     }
 
-    private void select_entry (UserEntry entry)
+    private void select_entry (UserEntry entry, double direction)
     {
         debug ("Select %s", entry.name);
-
-        /* Roll everything in the same direction */
-        var direction = 1.0;
-        if (selected_entry != null && entry.y > selected_entry.y)
-           direction = -1.0;
 
         selected_entry = entry;
 
@@ -1042,21 +987,13 @@ public class UserList : Gtk.Container
 
         user_selected (selected_entry.name);
 
-        var animate = false;
-        foreach (var e in entries)
-        {
-            update_entry_location (e);
-            e.direction = direction;
+        scroll_target_location = entries.index (entry);
+        scroll_direction = direction;
+        /* Move straight there if not drawn yet */
+        if (frame_count == 0)
+            scroll_location = scroll_target_location;
 
-            /* Move straight there if not drawn yet */
-            if (frame_count == 0)
-                e.y = e.target_y;
-
-            if (e.moving)
-                animate = true;
-        }
-
-        if (animate && !scroll_timer.is_running)
+        if (scroll_location != scroll_target_location && !scroll_timer.is_running)
         {
             debug ("Start scroll animation");
             scroll_timer.reset ();
@@ -1068,7 +1005,7 @@ public class UserList : Gtk.Container
         var index = entries.index (selected_entry) - 1;
         if (index < 0)
             index += (int) entries.length ();
-        select_entry (entries.nth_data (index));
+        select_entry (entries.nth_data (index), -1.0);
     }
 
     private void select_next_entry ()
@@ -1076,7 +1013,7 @@ public class UserList : Gtk.Container
         var index = entries.index (selected_entry) + 1;
         if (index >= (int) entries.length ())
             index -= (int) entries.length ();
-        select_entry (entries.nth_data (index));
+        select_entry (entries.nth_data (index), 1.0);
     }
 
     private void get_selected_location (out int x, out int y)
@@ -1152,9 +1089,6 @@ public class UserList : Gtk.Container
         if (get_realized ())
             get_window ().move_resize (allocation.x, allocation.y, allocation.width, allocation.height);
 
-        grid_x_offset = (int) (allocation.width % grid_size) / 2;
-        grid_y_offset = (int) (allocation.height % grid_size) / 2;
-
         Gtk.Requisition natural_size;
         menubar.get_preferred_size (null, out natural_size);
         var child_allocation = Gtk.Allocation ();
@@ -1201,37 +1135,36 @@ public class UserList : Gtk.Container
         }
     }
 
-    private void draw_entries (Cairo.Context c)
+    private void draw_entry (Cairo.Context c, UserEntry entry, double alpha = 0.5)
     {
-        foreach (var entry in entries)
+        c.save ();
+        
+        // Disable carousel fading - it will need a FFE
+        alpha = 0.5;
+
+        if (entry.is_active)
         {
-            c.save ();
-            c.translate (0, entry.y * grid_size);
-
-            if (entry.is_active)
-            {
-                c.move_to (8, grid_size / 2 + 0.5 - 4);
-                c.rel_line_to (5, 4);
-                c.rel_line_to (-5, 4);
-                c.close_path ();
-                c.set_source_rgba (1.0, 1.0, 1.0, 0.5);
-                c.fill ();
-            }
-
-            c.set_font_size (21);
-            Cairo.TextExtents extents;
-            c.text_extents (entry.label, out extents);
-            c.move_to (grid_size / 2, grid_size - (grid_size - (extents.height)) / 2);
-            c.text_path (entry.label);
-            var mask = new Cairo.Pattern.linear (0, 0, grid_size * box_width, 0);
-            var left = 1.0 - 2.0 / 7;
-            mask.add_color_stop_rgba (left, 1.0, 1.0, 1.0, 0.5);
-            mask.add_color_stop_rgba (left + 64.0 / (grid_size * box_width), 1.0, 1.0, 1.0, 0.0);
-            c.set_source (mask);
+            c.move_to (8, grid_size / 2 + 0.5 - 4);
+            c.rel_line_to (5, 4);
+            c.rel_line_to (-5, 4);
+            c.close_path ();
+            c.set_source_rgba (1.0, 1.0, 1.0, alpha);
             c.fill ();
-
-            c.restore ();
         }
+
+        var mask = new Cairo.Pattern.linear (0, 0, grid_size * box_width, 0);
+        var left = 1.0 - 2.0 / 7;
+        mask.add_color_stop_rgba (left, 1.0, 1.0, 1.0, alpha);
+        mask.add_color_stop_rgba (left + 64.0 / (grid_size * box_width), 1.0, 1.0, 1.0, 0.0);
+        c.set_source (mask);
+
+        int w, h;
+        entry.layout.get_pixel_size (out w, out h);
+        c.translate (grid_size / 2, grid_size - (grid_size - (h)) / 2 - h);
+        c.move_to (0, 0);
+        Pango.cairo_show_layout (c, entry.layout);
+
+        c.restore ();
     }
 
     private void background_loaded_cb (Background b)
@@ -1325,31 +1258,50 @@ public class UserList : Gtk.Container
 
         draw_background (c);
 
-        c.set_font_face (font_face);
+        c.save ();
+
         int base_x, base_y;
         get_selected_location (out base_x, out base_y);
-
-        c.save ();
         c.translate (base_x, base_y);
 
-        /* Draw entries above the box */
-        c.save ();
-        c.rectangle (0, -n_above * grid_size, box_width * grid_size, n_above * grid_size);
-        c.clip ();
-        draw_entries (c);
-        c.translate (0, -entries.length () * grid_size);
-        draw_entries (c);
-        c.restore ();
+        var index = 0;
+        foreach (var entry in entries)
+        {
+            /* Draw entries above the box */
+            var h_above = (double) n_above * grid_size;
+            c.save ();
+            c.rectangle (0, -h_above, box_width * grid_size, h_above);
+            c.clip ();
 
-        /* Draw entries below the box */
-        c.save ();
-        c.rectangle (0, box_height * grid_size, box_width * grid_size, n_below * grid_size);
-        c.clip ();
-        c.translate (0, (box_height - 1) * grid_size);
-        draw_entries (c);
-        c.translate (0, entries.length () * grid_size);
-        draw_entries (c);
-        c.restore ();
+            c.translate (0, index * grid_size - scroll_location * grid_size);
+            var alpha = 1.0 - (scroll_location - index) / (n_above + 1);
+            draw_entry (c, entry, alpha);
+
+            c.translate (0, -entries.length () * grid_size);
+            alpha = 1.0 - ((scroll_location - (index - (int) entries.length ())) / (n_above + 1));
+            draw_entry (c, entry, alpha);
+
+            c.restore ();
+
+            /* Draw entries below the box */
+            var h_below = (double) n_below * grid_size;
+            c.save ();
+            c.rectangle (0, box_height * grid_size, box_width * grid_size, h_below);
+            c.clip ();
+
+            c.translate (0, index * grid_size - scroll_location * grid_size);
+            c.translate (0, (box_height - 1) * grid_size);
+            alpha = 1.0 - (index - scroll_location) / (n_below + 1);
+            draw_entry (c, entry, alpha);
+
+            c.translate (0, entries.length () * grid_size);
+            alpha = 1.0 - ((index + (int) entries.length ()) - scroll_location) / (n_below + 1);
+            draw_entry (c, entry, alpha);
+
+            c.restore ();
+
+            index++;
+        }
 
         /* Draw box */
         c.save ();
@@ -1362,20 +1314,20 @@ public class UserList : Gtk.Container
         /* Selected item */
         if (selected_entry != null)
         {
-            Cairo.TextExtents extents;
-            c.set_font_size (21);
-            c.text_extents (selected_entry.label, out extents);
-            var text_y = grid_size - (grid_size - border - extents.height) / 4;
+            int w, h;
+            selected_entry.layout.get_pixel_size (out w, out h);
+            var text_y = grid_size - (grid_size - border - h) / 4 - h;
 
             if (selected_entry.is_active)
             {
-                c.move_to (8, text_y - extents.height / 2 + 0.5 - 4);
+                c.move_to (8, text_y + h / 2 + 0.5 - 4);
                 c.rel_line_to (5, 4);
                 c.rel_line_to (-5, 4);
                 c.close_path ();
                 c.set_source_rgb (1.0, 1.0, 1.0);
                 c.fill ();
             }
+
             c.move_to (grid_size / 2, text_y);
             var mask = new Cairo.Pattern.linear (0, 0, grid_size * box_width, 0);
             var left = 1.0 - 2.0 / 7;
@@ -1383,27 +1335,27 @@ public class UserList : Gtk.Container
             mask.add_color_stop_rgba (left + 5.4 / (grid_size * box_width), 1.0, 1.0, 1.0, 0.5);
             mask.add_color_stop_rgba (left + 27.0 / (grid_size * box_width), 1.0, 1.0, 1.0, 0.0);
             c.set_source (mask);
-            c.show_text (selected_entry.label);
+            Pango.cairo_show_layout (c, selected_entry.layout);
         }
 
         if (error != null || message != null)
         {
-            Cairo.TextExtents extents;
-
             string text;
             if (error == null)
                 text = message;
             else
                 text = error;
 
-            c.set_font_size (12);
-            c.text_extents (text, out extents);
-            c.move_to (grid_size / 2, grid_size * 1.25);
+            var layout = create_pango_layout (text);
+            layout.set_font_description (Pango.FontDescription.from_string ("Ubuntu 10"));
+            int w, h;
+            layout.get_pixel_size (out w, out h);
+            c.move_to (grid_size / 2, grid_size * 1.25 - h);
             if (error != null)
                 c.set_source_rgb (1.0, 0.0, 0.0);
             else
                 c.set_source_rgb (1.0, 1.0, 1.0);
-            c.show_text (text);
+            Pango.cairo_show_layout (c, layout);
         }
 
         c.restore ();
@@ -1433,24 +1385,63 @@ public class UserList : Gtk.Container
         return true;
     }
 
+    private bool inside_entry (double x, double y, double entry_y, UserEntry entry)
+    {
+        int w, h;
+        entry.layout.get_pixel_size (out w, out h);
+
+        /* Allow space to the left of the entry */
+        w += grid_size / 2;
+
+        /* Round up to whole grid sizes */
+        h = grid_size;
+        w = ((int) (w + grid_size) / grid_size) * grid_size;
+
+        return x >= 0 && x <= w && y >= entry_y && y <= entry_y + h;
+    }
+
     public override bool button_release_event (Gdk.EventButton event)
     {
         int base_x, base_y;
         get_selected_location (out base_x, out base_y);
+
+        var x = event.x - base_x;
+        var y = event.y - base_y;
+
+        /* Total height of list */        
+        var h = (double) entries.length () * grid_size;
+
+        var offset = 0.0;
         foreach (var entry in entries)
         {
-            var y = entry.y;
-            if (y > 0)
-                y += box_height - 1;
+            var entry_y = -scroll_location * grid_size + offset;
 
-            if (event.x >= base_x &&
-                event.x <= base_x + entry.width * grid_size &&
-                event.y >= base_y + y * grid_size &&
-                event.y <= base_y + (y + 1) * grid_size)
+            /* Check entry above the box */
+            var h_above = (double) n_above * grid_size;
+            if (y < 0 && y > -h_above)
             {
-                select_entry (entry);
-                return true;
+                if (inside_entry (x, y, entry_y, entry) ||
+                    inside_entry (x, y, entry_y - h, entry))
+                {
+                    select_entry (entry, -1.0);
+                    return true;
+                }
             }
+
+            /* Check entry below the box */
+            var below_y = y - box_height * grid_size;
+            var h_below = (double) n_below * grid_size;
+            if (below_y > 0 && below_y < h_below)
+            {
+                if (inside_entry (x, below_y, entry_y - grid_size, entry) ||
+                    inside_entry (x, below_y, entry_y - grid_size + h, entry))
+                {
+                    select_entry (entry, 1.0);
+                    return true;
+                }
+            }
+
+            offset += grid_size;
         }
 
         return false;

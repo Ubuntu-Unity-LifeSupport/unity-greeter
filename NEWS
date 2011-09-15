@@ -1,3 +1,10 @@
+Overview of changes in unity-greeter 0.0.8
+
+    * Fix grid offset
+    * Fix non-latin names being displayed incorrectly
+    * Change asynchronous indicator loader code, suspect it is causing a race
+      condition?
+
 Overview of changes in unity-greeter 0.0.7
 
     * Show caps-lock warning in password field
