@@ -1,3 +1,31 @@
+unity-greeter (0.1.0-0ubuntu1) oneiric; urgency=low
+
+  * New upstream release:
+    - Fix greeter running in loop when greeter-hide-users=true (LP: #851477)
+    - Remember the last selected user between logins (LP: #827898)
+    - Select correct session when logging in manually
+    - Fix non-translation of password prompt
+    - Resize background when resizing window
+    - Move/resize window when monitors changed
+    - Disable xrandr gnome-settings-daemon plugin - always mirror the displays  
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Tue, 27 Sep 2011 14:19:02 +1000
+
+unity-greeter (0.0.9-0ubuntu1) oneiric; urgency=low
+
+  * New upstream release:
+    - Set background color of window to "dark aubergine" so boot delays
+      don't cause a white flash
+    - Kill onboard on exit to stop window showing up
+    - Don't give the onscreen keyboard focus, this makes it work (LP: #851565)
+    - Load indicators sequentially, they seem to crash loading in parallel
+    - Fix translations not being used (LP: #831026)
+    - Show authentication messages as well as prompts
+    - Disable the text entry after text has been entered
+    - Don't start authentication as each user is added to the user list
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Thu, 22 Sep 2011 16:39:58 +1000
+
 unity-greeter (0.0.8-0ubuntu1) oneiric; urgency=low
 
   * New upstream release:

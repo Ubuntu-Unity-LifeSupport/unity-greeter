@@ -16,6 +16,15 @@
  * Authored by: Robert Ancell <robert.ancell@canonical.com>
  */
 
+private int grid_size = 42;
+private Cairo.Surface? logo_surface = null;
+private const string default_background = "#2C001E";
+
+private int get_grid_offset (int size)
+{
+    return (int) (size % grid_size) / 2;
+}
+
 private class AnimateTimer
 {
     private Timer timer;
@@ -56,13 +65,13 @@ private class AnimateTimer
 private class UserEntry
 {
     /* Unique name for this entry */
-    public string? name;
+    public string name;
 
     /* Label to display */
     public Pango.Layout layout;
 
     /* Background for this user */
-    public Background background;
+    public string background;
 
     /* True if should be marked as active */
     public bool is_active;
@@ -120,38 +129,29 @@ private class SessionMenuItem : Gtk.RadioMenuItem
 
 public class Background
 {
-    public string filename;
-    public int width;
-    public int height;
-    public int grid_size;
-    public int grid_x_offset;
-    public int grid_y_offset;
-    public Cairo.Surface logo_surface;
-    public Cairo.Pattern logo_pattern;
-
-    public Cairo.Pattern pattern;
-
+    private string filename;
+    private int width;
+    private int height;
     private unowned Thread<Cairo.Pattern> thread;
-    
+
+    public Cairo.Pattern? pattern = null;
+
     public signal void loaded ();
     
-    public Background (string filename)
+    public Background (string filename, int width, int height)
     {
         this.filename = filename;
+        this.width = width;
+        this.height = height;
     }
 
     public bool load ()
     {
+        /* Already loaded */
         if (pattern != null)
             return true;
 
-        Gdk.Color color;
-        if (Gdk.Color.parse (filename, out color))
-        {
-            pattern = new Cairo.Pattern.rgb (color.red / 65535.0, color.green / 65535.0, color.blue / 65535.0);
-            return true;
-        }
-
+        /* Currently loading */
         if (thread != null)
             return false;
 
@@ -174,44 +174,54 @@ public class Background
         debug ("Render of background %s at %dx%d complete", filename, width, height);
 
         pattern = thread.join ();
+        thread = null;
+
         loaded ();
 
         return false;
     }
 
     private Cairo.Pattern render ()
-    {
-        Gdk.Pixbuf orig_image;
-        try
+    {    
+        Gdk.Color color;
+        Gdk.Pixbuf orig_image = null;
+        if (!Gdk.Color.parse (filename, out color))
         {
-            orig_image = new Gdk.Pixbuf.from_file (filename);
-        }
-        catch (Error e)
-        {
-            debug ("Error loading background: %s", e.message);
-            var pattern = new Cairo.Pattern.rgb (0, 0, 0);
-            Gdk.threads_add_idle (ready_cb);
-            return pattern;
-        }
-
-        var target_aspect = (double) width / height;
-        var aspect = (double) orig_image.width / orig_image.height;
-        double scale, offset_x = 0, offset_y = 0;
-        if (aspect > target_aspect)
-        {
-            /* Fit height and trim sides */
-            scale = (double) height / orig_image.height;
-            offset_x = (orig_image.width * scale - width) / 2;
-        }
-        else
-        {
-            /* Fit width and trim top and bottom */
-            scale = (double) width / orig_image.width;
-            offset_y = (orig_image.height * scale - height) / 2;
+            try
+            {
+                orig_image = new Gdk.Pixbuf.from_file (filename);
+            }
+            catch (Error e)
+            {
+                debug ("Error loading background: %s", e.message);
+            }
         }
 
-        var image = new Gdk.Pixbuf (orig_image.colorspace, orig_image.has_alpha, orig_image.bits_per_sample, width, height);
-        orig_image.scale (image, 0, 0, width, height, -offset_x, -offset_y, scale, scale, Gdk.InterpType.BILINEAR);
+        Gdk.Pixbuf? image = null;
+        if (orig_image != null)
+        {
+            var target_aspect = (double) width / height;
+            var aspect = (double) orig_image.width / orig_image.height;
+            double scale, offset_x = 0, offset_y = 0;
+            if (aspect > target_aspect)
+            {
+                /* Fit height and trim sides */
+                scale = (double) height / orig_image.height;
+                offset_x = (orig_image.width * scale - width) / 2;
+            }
+            else
+            {
+                /* Fit width and trim top and bottom */
+                scale = (double) width / orig_image.width;
+                offset_y = (orig_image.height * scale - height) / 2;
+            }
+
+            image = new Gdk.Pixbuf (orig_image.colorspace, orig_image.has_alpha, orig_image.bits_per_sample, width, height);
+            orig_image.scale (image, 0, 0, width, height, -offset_x, -offset_y, scale, scale, Gdk.InterpType.BILINEAR);
+        }
+
+        var grid_x_offset = get_grid_offset (width);
+        var grid_y_offset = get_grid_offset (height);
 
         /* Overlay grid */
         var overlay_surface = new Cairo.ImageSurface (Cairo.Format.ARGB32, grid_size, grid_size);
@@ -231,7 +241,10 @@ public class Background
         /* Create background */
         var surface = new Cairo.ImageSurface (Cairo.Format.RGB24, width, height);
         var bc = new Cairo.Context (surface);
-        Gdk.cairo_set_source_pixbuf (bc, image, 0, 0);
+        if (image != null)
+            Gdk.cairo_set_source_pixbuf (bc, image, 0, 0);
+        else
+            Gdk.cairo_set_source_color (bc, color);
         bc.paint ();
 
         /* Draw overlay */
@@ -245,7 +258,7 @@ public class Background
             bc.save ();
             var y = (int) (height / grid_size - 2) * grid_size + grid_y_offset;
             bc.translate (grid_x_offset, y);
-            bc.set_source (logo_pattern);
+            bc.set_source_surface (logo_surface, 0, 0);
             bc.paint_with_alpha (0.5);
             bc.restore ();
         }
@@ -261,25 +274,25 @@ public class Background
 
 private class IndicatorLoader
 {
-    public Indicator.Object indicator_object;
+    public List<Indicator.Object> indicator_objects;
 
-    private string filename;
-    private unowned Thread<Indicator.Object> thread;
+    private string[] filenames;
+    private unowned Thread<List<Indicator.Object>> thread;
 
     public signal void loaded ();
 
-    public IndicatorLoader (string filename)
+    public IndicatorLoader (string[] filenames)
     {
-        this.filename = filename;
+        this.filenames = filenames;
     }
 
     public void load ()
     {
-        debug ("Loading indicator %s", filename);
+        debug ("Loading indicators %s", string.joinv (",", filenames));
         
         try
         {
-            thread = Thread<Indicator.Object>.create<Indicator.Object> (load_indicator, true);
+            thread = Thread<List<Indicator.Object>>.create<List<Indicator.Object>> (load_indicators, true);
         }
         catch (ThreadError e)
         {
@@ -288,19 +301,26 @@ private class IndicatorLoader
     
     private bool ready_cb ()
     {
-        debug ("Indicator %s loaded", filename);
+        debug ("Indicators loaded");
 
-        indicator_object = thread.join ();
+        indicator_objects = thread.join ();
         loaded ();
 
         return false;
     }
 
-    private Indicator.Object load_indicator ()
+    private List<Indicator.Object> load_indicators ()
     {
-        var o = new Indicator.Object.from_file (filename);
+        List<Indicator.Object> indicators = null;
+
+        foreach (var filename in filenames)
+        {
+            var o = new Indicator.Object.from_file (filename);
+            indicators.append (o);
+        }
+
         Gdk.threads_add_idle (ready_cb);
-        return o;
+        return indicators;
     }
 }
 
@@ -314,12 +334,6 @@ public class UserList : Gtk.Container
     private uint draw_timeout = 0;
     private int draw_count = 0;
     
-    private int width;
-    private int height;
-
-    private int grid_size = 42;
-    private int grid_x_offset;
-    private int grid_y_offset;
     private int box_width = 7;
 
     private HashTable<string, Background> backgrounds;
@@ -343,16 +357,14 @@ public class UserList : Gtk.Container
 
     private Gtk.MenuBar menubar;
     private Cairo.Context menubar_cairo_context;
-    private List<IndicatorLoader> indicators = null;
+    private IndicatorLoader indicator_loader;
     private Gtk.CheckMenuItem high_contrast_item;
 
-    private Gtk.Socket? keyboard_socket = null;
+    private Pid keyboard_pid = 0;
+    private Gtk.Window? keyboard_window = null;
 
     private string? error;
     private string? message;
-
-    private Cairo.ImageSurface? logo_surface = null;
-    private Cairo.Pattern? logo_pattern;
 
     private Cairo.ImageSurface? box_surface = null;
     private Cairo.Pattern? box_pattern;
@@ -398,13 +410,8 @@ public class UserList : Gtk.Container
         }
     }
 
-    public UserList (int width, int height)
+    public UserList ()
     {
-        this.width = width;
-        this.height = height;
-        grid_x_offset = (int) (width % grid_size) / 2;
-        grid_y_offset = (int) (height % grid_size) / 2;
-
         can_focus = false;
         background_alpha = 1.0;
 
@@ -468,7 +475,6 @@ public class UserList : Gtk.Container
         box_pattern = new Cairo.Pattern.for_surface (box_surface);
 
         backgrounds = new HashTable<string?, Background> (str_hash, str_equal);
-        old_background = background = new Background ("#000000");
 
         scroll_timer = new AnimateTimer ();
         scroll_timer.animate.connect (scroll_animate_cb);
@@ -479,16 +485,16 @@ public class UserList : Gtk.Container
     }
 
     public void set_logo (string logo_path)
-    {
+    {       
         if (FileUtils.test (logo_path, FileTest.EXISTS))
         {
+            debug ("Using logo %s", logo_path);
             logo_surface = new Cairo.ImageSurface.from_png (logo_path);
-            logo_pattern = new Cairo.Pattern.for_surface (logo_surface);
         }
         else
         {
+            debug ("Can't use logo %s, it does not exist", logo_path);
             logo_surface = null;
-            logo_pattern = null;
         }
     }
 
@@ -500,6 +506,10 @@ public class UserList : Gtk.Container
     private bool menubar_draw_cb (Cairo.Context c)
     {
         draw_background (c);
+
+        // Disable indicator background fading - it will need a FFE
+        //c.set_source_rgb (0, 0, 0);
+        //c.paint_with_alpha (0.25);
 
         menubar_cairo_context = c;
         menubar.forall (draw_child_cb);
@@ -569,17 +579,32 @@ public class UserList : Gtk.Container
         a11y_item.submenu.append (item);
         menubar.insert (a11y_item, (int) menubar.get_children ().length () - 1);
 
-        load_indicator ("/usr/lib/indicators3/6/libsession.so");
-        load_indicator ("/usr/lib/indicators3/6/libdatetime.so");
-        load_indicator ("/usr/lib/indicators3/6/libpower.so");
-        load_indicator ("/usr/lib/indicators3/6/libsoundmenu.so");
+        string[] filenames = {"/usr/lib/indicators3/6/libsession.so",
+                              "/usr/lib/indicators3/6/libdatetime.so",
+                              "/usr/lib/indicators3/6/libpower.so",
+                              "/usr/lib/indicators3/6/libsoundmenu.so"};
+        indicator_loader = new IndicatorLoader (filenames);
+        indicator_loader.loaded.connect (indicator_loaded_cb);
+        indicator_loader.load ();
+    }
+
+    private void indicator_loaded_cb (IndicatorLoader loader)
+    {
+        foreach (var io in loader.indicator_objects)
+        {
+            io.entry_added.connect (indicator_added_cb);
+            io.entry_removed.connect (indicator_removed_cb);
+            foreach (var entry in io.get_entries ())
+                indicator_added_cb (io, entry);
+        }
     }
 
     private void keyboard_toggled_cb (Gtk.CheckMenuItem item)
     {
-        if (keyboard_socket == null)
+        if (keyboard_window == null)
         {
-            Pid onboard_pid;
+            int id;
+
             try
             {
                 string[] argv;
@@ -591,28 +616,36 @@ public class UserList : Gtk.Container
                                                 null,
                                                 SpawnFlags.SEARCH_PATH,
                                                 null,
-                                                out onboard_pid,
+                                                out keyboard_pid,
                                                 null,
                                                 out onboard_stdout_fd,
                                                 null);
                 var f = FileStream.fdopen (onboard_stdout_fd, "r");
                 var stdout_text = new char[1024];
                 f.gets (stdout_text);
-                var id = int.parse ((string) stdout_text);
+                id = int.parse ((string) stdout_text);
 
-                keyboard_socket = new Gtk.Socket ();
-                add (keyboard_socket);
-                keyboard_socket.set_size_request (800, 200);
-                Gtk.socket_add_id (keyboard_socket, id);
             }
             catch (Error e)
             {
                 warning ("Error setting up keyboard: %s", e.message);
+                return;
             }
+
+            var keyboard_socket = new Gtk.Socket ();
+            keyboard_socket.show ();
+            keyboard_window = new Gtk.Window ();
+            keyboard_window.accept_focus = false;
+            keyboard_window.focus_on_map = false;
+            keyboard_window.add (keyboard_socket);
+            Gtk.socket_add_id (keyboard_socket, id);
+
+            /* Put keyboard at the bottom of the screen */
+            keyboard_window.move (0, get_allocated_height () - 200);
+            keyboard_window.resize (get_allocated_width (), 200);
         }
 
-        if (keyboard_socket != null)
-            keyboard_socket.visible = item.active;
+        keyboard_window.visible = item.active;
     }
 
     private void high_contrast_toggled_cb (Gtk.CheckMenuItem item)
@@ -622,6 +655,7 @@ public class UserList : Gtk.Container
             settings.set ("gtk-theme-name", "HighContrastInverse");
         else
             settings.set ("gtk-theme-name", default_theme_name);
+        change_background ();
         queue_draw ();
     }
 
@@ -633,11 +667,18 @@ public class UserList : Gtk.Container
         settings.set_boolean ("toolkit-accessibility", item.active);
     }
 
+    public void show_message (string text, bool error = false)
+    {
+        message = text;
+        queue_draw ();
+    }
+
     public void show_prompt (string text, bool secret = false)
     {
         login_button.hide ();
         message = text;
         prompt_entry.text = "";
+        prompt_entry.sensitive = true;
         prompt_entry.show ();
         prompt_entry.visibility = !secret;
         var accessible = prompt_entry.get_accessible ();
@@ -685,31 +726,13 @@ public class UserList : Gtk.Container
         queue_draw ();
     }
 
-    private void load_indicator (string filename)
-    {
-        var loader = new IndicatorLoader (filename);
-        indicators.append (loader);
-        loader.loaded.connect (indicator_loaded_cb);
-        loader.load ();
-    }
-
-    private void indicator_loaded_cb (IndicatorLoader loader)
-    {
-        var io = loader.indicator_object;
-
-        io.entry_added.connect (indicator_added_cb);
-        io.entry_removed.connect (indicator_removed_cb);
-        foreach (var entry in io.get_entries ())
-            indicator_added_cb (io, entry);
-    }
-
     private uint get_indicator_index (Indicator.Object object)
     {
         uint index = 0;
 
-        foreach (var loader in indicators)
+        foreach (var io in indicator_loader.indicator_objects)
         {
-            if (loader.indicator_object == object)
+            if (io == object)
                 return index;
             index++;
         }
@@ -719,15 +742,12 @@ public class UserList : Gtk.Container
 
     private Indicator.Object? get_indicator_object_from_entry (Indicator.ObjectEntry entry)
     {
-        foreach (var loader in indicators)
+        foreach (var io in indicator_loader.indicator_objects)
         {
-            if (loader.indicator_object == null)
-                continue;
-
-            foreach (var e in loader.indicator_object.get_entries ())
+            foreach (var e in io.get_entries ())
             {
                 if (e == entry)
-                    return loader.indicator_object;
+                    return io;
             }
         }
 
@@ -800,7 +820,7 @@ public class UserList : Gtk.Container
         session_group = (GLib.SList<SessionMenuItem>) item.get_group ();
     }
 
-    private UserEntry? find_entry (string? name)
+    private UserEntry? find_entry (string name)
     {
         foreach (var entry in entries)
         {
@@ -811,7 +831,7 @@ public class UserList : Gtk.Container
         return null;
     }
 
-    public void add_entry (string? name, string label, string background, bool is_active = false)
+    public void add_entry (string name, string label, string background, bool is_active = false)
     {
         var e = find_entry (name);
         if (e == null)
@@ -822,8 +842,7 @@ public class UserList : Gtk.Container
         }
         e.layout = create_pango_layout (label);
         e.layout.set_font_description (Pango.FontDescription.from_string ("Ubuntu 16"));
-        e.background = make_background (background);
-        e.background.loaded.connect (background_loaded_cb);
+        e.background = background;
         e.is_active = is_active;
 
         if (selected_entry == null)
@@ -864,6 +883,7 @@ public class UserList : Gtk.Container
     {
         respond_to_prompt (prompt_entry.text);
         prompt_entry.text = "";
+        prompt_entry.sensitive = false;
     }
 
     private void login_button_clicked_cb ()
@@ -951,14 +971,20 @@ public class UserList : Gtk.Container
     
     private bool change_background_timeout_cb ()
     {
-        if (background != selected_entry.background)
+        Background new_background;
+        if (high_contrast_item.active)
+            new_background = make_background (default_background);
+        else
+            new_background = make_background (selected_entry.background);
+
+        if (background != new_background)
         {
             debug ("Change background");
 
             if (frame_count > 0)
                 background_alpha = 0.0;
             old_background = background;
-            background = selected_entry.background;
+            background = new_background;
             queue_draw ();
         }
 
@@ -966,15 +992,8 @@ public class UserList : Gtk.Container
         return false;
     }
 
-    private void select_entry (UserEntry entry, double direction)
+    private void change_background ()
     {
-        debug ("Select %s", entry.name);
-
-        selected_entry = entry;
-
-        prompt_entry.hide ();
-        login_button.hide ();
-
         /* Set background after user stops scrolling */
         if (frame_count > 0)
         {
@@ -984,10 +1003,26 @@ public class UserList : Gtk.Container
         }
         else
             change_background_timeout_cb ();
+    }
 
-        user_selected (selected_entry.name);
+    private void select_entry (UserEntry entry, double direction)
+    {
+        if (selected_entry != entry)
+        {
+            selected_entry = entry;
 
-        scroll_target_location = entries.index (entry);
+            prompt_entry.hide ();
+            login_button.hide ();
+
+            if (get_realized ())
+            {
+                debug ("Select %s", entry.name);
+                change_background ();
+                user_selected (selected_entry.name);
+            }
+        }
+
+        scroll_target_location = entries.index (selected_entry);
         scroll_direction = direction;
         /* Move straight there if not drawn yet */
         if (frame_count == 0)
@@ -1018,9 +1053,9 @@ public class UserList : Gtk.Container
 
     private void get_selected_location (out int x, out int y)
     {
-        x = grid_x_offset + grid_size;
+        x = get_grid_offset (get_allocated_width ()) + grid_size;
         var row = (int) (get_allocated_height () / grid_size - box_height) / 2;
-        y = grid_y_offset + row * grid_size;
+        y = get_grid_offset (get_allocated_height ()) + row * grid_size;
     }
 
     public override void add (Gtk.Widget widget)
@@ -1045,6 +1080,9 @@ public class UserList : Gtk.Container
 
     public override void realize ()
     {
+        background = old_background = make_background (default_background);
+        change_background ();
+
         set_realized (true);
 
         Gtk.Allocation allocation;
@@ -1083,11 +1121,15 @@ public class UserList : Gtk.Container
     public override void size_allocate (Gtk.Allocation allocation)
     {
         var resized = allocation.height != get_allocated_height () || allocation.width != get_allocated_width ();
-
         set_allocation (allocation);
+       
+        if (!get_realized ())
+            return;
 
-        if (get_realized ())
-            get_window ().move_resize (allocation.x, allocation.y, allocation.width, allocation.height);
+        get_window ().move_resize (allocation.x, allocation.y, allocation.width, allocation.height);
+
+        if (resized)
+            debug ("Resized to %dx%d", get_allocated_width (), get_allocated_height ());
 
         Gtk.Requisition natural_size;
         menubar.get_preferred_size (null, out natural_size);
@@ -1117,21 +1159,12 @@ public class UserList : Gtk.Container
         options_button.size_allocate (child_allocation);
         options_button.show ();
 
-        /* Put keyboard at the bottom of the screen */
-        if (keyboard_socket != null)
-        {
-            child_allocation.x = 0;
-            child_allocation.y = allocation.height - 200;
-            child_allocation.width = allocation.width;
-            child_allocation.height = 200;
-            keyboard_socket.size_allocate (child_allocation);
-        }
-
         /* Regenerate backgrounds */
         if (resized)
         {
             debug ("Regenerating backgrounds");
             backgrounds.remove_all ();
+            change_background ();
         }
     }
 
@@ -1141,6 +1174,9 @@ public class UserList : Gtk.Container
         
         // Disable carousel fading - it will need a FFE
         alpha = 0.5;
+
+        if (high_contrast_item.active)
+            alpha = 1.0;
 
         if (entry.is_active)
         {
@@ -1169,6 +1205,7 @@ public class UserList : Gtk.Container
 
     private void background_loaded_cb (Background b)
     {
+        change_background ();
         queue_draw ();
     }
 
@@ -1177,15 +1214,8 @@ public class UserList : Gtk.Container
         var b = backgrounds.lookup (filename);
         if (b == null)
         {
-            b = new Background (filename);
-            b.width = width;
-            b.height = height;
-            b.grid_size = grid_size;
-            b.grid_x_offset = grid_x_offset;
-            b.grid_y_offset = grid_y_offset;
-            b.logo_surface = logo_surface;
-            b.logo_pattern = logo_pattern;
-
+            b = new Background (filename, get_allocated_width (), get_allocated_height ());
+            b.loaded.connect (background_loaded_cb);
             backgrounds.insert (filename, b);
         }
 
@@ -1195,9 +1225,9 @@ public class UserList : Gtk.Container
     public Background get_background ()
     {
         if (selected_entry != null)
-            return selected_entry.background;
+            return make_background (selected_entry.background);
         else
-            return make_background ("#000000");
+            return make_background (default_background);
     }
 
     private void draw_background (Cairo.Context c)
@@ -1209,10 +1239,7 @@ public class UserList : Gtk.Container
             background_timer.reset ();
         }
 
-        c.set_source_rgb (0, 0, 0);
-
-        if (high_contrast_item.active)
-            c.paint ();
+        c.set_source_rgb (0x2C, 0x00, 0x1E);
 
         /* Draw old background */
         if (background_alpha < 1.0)
@@ -1269,6 +1296,7 @@ public class UserList : Gtk.Container
         {
             /* Draw entries above the box */
             var h_above = (double) n_above * grid_size;
+            // FIXME: When using carousel fading: var h_above = (double) (n_above + 1) * grid_size;
             c.save ();
             c.rectangle (0, -h_above, box_width * grid_size, h_above);
             c.clip ();
@@ -1285,6 +1313,7 @@ public class UserList : Gtk.Container
 
             /* Draw entries below the box */
             var h_below = (double) n_below * grid_size;
+            // FIXME: When using carousel fading: var h_below = (double) (n_below + 1) * grid_size;
             c.save ();
             c.rectangle (0, box_height * grid_size, box_width * grid_size, h_below);
             c.clip ();
@@ -1445,5 +1474,15 @@ public class UserList : Gtk.Container
         }
 
         return false;
+    }
+
+    public override void unrealize ()
+    {
+        if (keyboard_pid != 0)
+        {
+            Posix.kill (keyboard_pid, Posix.SIGKILL);
+            int status;
+            Posix.waitpid (keyboard_pid, out status, 0);
+        }
     }
 }

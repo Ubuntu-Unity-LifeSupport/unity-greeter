@@ -1,3 +1,25 @@
+Overview of changes in unity-greeter 0.1.0
+
+    * Fix greeter running in loop when greeter-hide-users=true
+    * Remember the last selected user between logins
+    * Select correct session when logging in manually
+    * Fix non-translation of password prompt
+    * Resize background when resizing window
+    * Move/resize window when monitors changed
+    * Disable xrandr gnome-settings-daemon plugin - always mirror the displays
+
+Overview of changes in unity-greeter 0.0.9
+
+    * Set background color of window to "dark aubergine" so boot delays
+      don't cause a white flash
+    * Kill onboard on exit to stop window showing up
+    * Don't give the onscreen keyboard focus, this makes it work
+    * Load indicators sequentially, they seem to crash loading in parallel
+    * Fix translations not being used
+    * Show authentication messages as well as prompts
+    * Disable the text entry after text has been entered
+    * Don't start authentication as each user is added to the user list
+
 Overview of changes in unity-greeter 0.0.8
 
     * Fix grid offset

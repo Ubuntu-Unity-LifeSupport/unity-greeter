@@ -34,17 +34,21 @@ public class UnityGreeter
     private static Timer log_timer;
 
     private static KeyFile config;
-    
+
+    private File state_file;
+    private KeyFile state;
+
     private static Cairo.Surface background_surface;
 
     private SettingsDaemon settings_daemon;
 
     private string default_background;
-    private UserList user_list;
+    public UserList user_list;
 
     private Gtk.Window main_window;
     private LightDM.Greeter greeter;
     private bool prompted = false;
+    private bool have_session = false;
 
     /* User to authenticate against */
     private string ?authenticate_user = null;
@@ -77,35 +81,47 @@ public class UnityGreeter
             settings_daemon.start ();
         }
 
-        default_background = get_config_value ("greeter", "background", "#000000");
+        var state_dir = Path.build_filename (Environment.get_user_cache_dir (), "unity-greeter");
+        DirUtils.create_with_parents (state_dir, 0775);
+
+        state_file = File.new_for_path (Path.build_filename (state_dir, "state"));
+        state = new KeyFile ();
+        try
+        {
+            state.load_from_file (state_file.get_path (), KeyFileFlags.NONE);
+        }
+        catch (Error e)
+        {
+            if (!(e is FileError.NOENT))
+                warning ("Failed to load state from %s: %s\n", state_file.get_path (), e.message);
+        }
+        var last_user = "";
+        try
+        {
+            last_user = state.get_value ("greeter", "last-user");
+        }
+        catch (Error e) {}
+
+        default_background = get_config_value ("greeter", "background", "#2C001E");
 
         main_window = new Gtk.Window ();
+        var bg_color = Gdk.Color ();
+        Gdk.Color.parse ("#2C001E", out bg_color);
+        main_window.modify_bg (Gtk.StateType.NORMAL, bg_color);
         main_window.get_accessible ().set_name (_("Login Screen"));
         main_window.has_resize_grip = false;
 
-        var x = 0;
-        var y = 0;
-        var width = 1024;
-        var height = 600;
-        if (!test_mode)
+        if (test_mode)
+            main_window.resize (1024, 600);
+        else
         {
-            Gdk.Rectangle geometry;
             var screen = main_window.get_screen ();
-            screen.get_monitor_geometry (screen.get_primary_monitor (), out geometry);
-            debug ("Monitor is %dx%d pixels at %d,%d", geometry.width, geometry.height, geometry.x, geometry.y);
-            x = geometry.x;
-            y = geometry.y;
-            width = geometry.width;
-            height = geometry.height;
+            screen.monitors_changed.connect (monitors_changed_cb);
+            monitors_changed_cb (screen);
         }
-        main_window.set_default_size (width, height);
-        main_window.move (x, y);
 
-        user_list = new UserList (width, height);
+        user_list = new UserList ();
         main_window.add (user_list);
-        user_list.user_selected.connect (user_selected_cb);
-        user_list.respond_to_prompt.connect (respond_to_prompt_cb);
-        user_list.start_session.connect (start_session_cb);
         user_list.set_logo (get_config_value ("greeter", "logo", Path.build_filename (Config.PKGDATADIR, "logo.png", null)));
         user_list.show ();
 
@@ -121,14 +137,14 @@ public class UnityGreeter
             user_list.add_entry ("bob", "Bob User", "/usr/share/backgrounds/White_flowers_by_Garuna_bor-bor.jpg");
             user_list.add_entry ("carol", "Carol User", "/usr/share/backgrounds/Bird_by_Magnus.jpg");
             user_list.add_entry ("*guest", _("Guest Session"), default_background, true);
-            user_list.add_entry (null, _("Other..."), default_background);
+            user_list.add_entry ("*other", _("Other..."), default_background);
 
             user_list.add_session ("gnome", "Ubuntu");
             user_list.add_session ("gnome-shell", "GNOME");
             user_list.add_session ("kde", "KDE");
-            user_list.session = "gnome";
 
-            user_list.set_active_entry ("bob");
+            if (last_user != null)
+                user_list.set_active_entry (last_user);
         }
         else
         {
@@ -148,11 +164,30 @@ public class UnityGreeter
                 user_list.add_entry ("*guest", _("Guest Session"), default_background);
             }
 
-            user_list.add_entry (null, _("Other..."), default_background);
+            debug ("Adding other entry");
+            user_list.add_entry ("*other", _("Other..."), default_background);
 
             if (greeter.select_user_hint != null)
                 user_list.set_active_entry (greeter.select_user_hint);
+            else if (last_user != null)
+                user_list.set_active_entry (last_user);
         }
+
+        user_list.user_selected.connect (user_selected_cb);
+        user_list.respond_to_prompt.connect (respond_to_prompt_cb);
+        user_list.start_session.connect (start_session_cb);
+        user_selected_cb (user_list.selected);
+    }
+    
+    private void monitors_changed_cb (Gdk.Screen screen)
+    {
+        Gdk.Rectangle geometry;
+        screen.get_monitor_geometry (screen.get_primary_monitor (), out geometry);
+
+        debug ("Monitor is %dx%d pixels at %d,%d", geometry.width, geometry.height, geometry.x, geometry.y);
+
+        main_window.resize (geometry.width, geometry.height);
+        main_window.move (geometry.x, geometry.y);
     }
 
     private void user_added_cb (LightDM.User user)
@@ -171,42 +206,77 @@ public class UnityGreeter
         user_list.remove_entry (user.name);
     }
 
-    private void background_loaded_cb (Background background)
+    public void show ()
     {
         debug ("Showing main window");
         main_window.show ();
-
-        /* Explicitly give this window focus, don't know why we need this but
-         * the Gtk.Entry cursors don't blink wihtout it */
-        var event = new Gdk.Event (Gdk.EventType.FOCUS_CHANGE);
-        event.focus_change.type = Gdk.EventType.FOCUS_CHANGE;
-        event.focus_change.in = 1;
-        event.focus_change.window = main_window.get_window ();
-        if (event.focus_change.window != null)
-            event.focus_change.window.ref ();
-        main_window.send_focus_change (event);
+        main_window.get_window ().focus (Gdk.CURRENT_TIME);
     }
 
-    public void show ()
+    private void update_session ()
     {
-        /* Load the background */
-        var background = user_list.get_background ();
-        background.loaded.connect (background_loaded_cb);
-        if (background.load ())
-            background_loaded_cb (background);
+        if (have_session)
+            return;
+
+        if (test_mode)
+        {
+            if (test_username == null)
+                return;
+
+            switch (test_username)
+            {
+            case "alice":
+                user_list.session = "ubuntu";
+                break;
+            case "bob":
+                user_list.session = "gnome-shell";
+                break;
+            case "carol":
+                user_list.session = "kde";
+                break;
+            default:
+                return;
+            }
+            have_session = true;
+            return;
+        }
+        else
+        {
+            if (greeter.authentication_user == null)
+                return;
+
+            var user = LightDM.UserList.get_instance ().get_user_by_name (greeter.authentication_user);
+            if (user == null)
+            {
+                user_list.session = greeter.default_session_hint;
+                return;
+            }
+
+            user_list.session = user.session;
+            have_session = true;
+        }
     }
 
     private void show_message_cb (string text, LightDM.MessageType type)
     {
+        update_session ();
+        user_list.show_message (text, type == LightDM.MessageType.ERROR);
     }
 
     private void show_prompt_cb (string text, LightDM.PromptType type)
     {
+        update_session ();
+        update_other_label ();
+
         prompted = true;
+        if (text == "Password: ")
+            text = _("Password:");
+        if (text == "login:")
+            text = _("Username:");
         user_list.show_prompt (text, type == LightDM.PromptType.SECRET);
     }
 
-    private void background_loaded2_cb (Background background)
+    private void background_loaded_cb (Background background)
     {
         /* Set the background */
         var c = new Cairo.Context (background_surface);
@@ -227,6 +297,9 @@ public class UnityGreeter
 
     private void authentication_complete_cb ()
     {
+        update_session ();
+        update_other_label ();
+
         bool is_authenticated;
         if (test_mode)
             is_authenticated = test_is_authenticated;
@@ -244,9 +317,9 @@ public class UnityGreeter
                 else
                 {
                     var background = user_list.get_background ();
-                    background.loaded.connect (background_loaded2_cb);
+                    background.loaded.connect (background_loaded_cb);
                     if (background.load ())
-                        background_loaded2_cb (background);
+                        background_loaded_cb (background);
                 }
             }
             else
@@ -272,19 +345,23 @@ public class UnityGreeter
 
     private void user_selected_cb (string? username)
     {
-        debug ("start authentication %s", username);
-        // FIXME: Need to handle unprompted login where username comes later
-        if (!test_mode)
+        state.set_value ("greeter", "last-user", username);
+        var data = state.to_data ();
+        try
         {
-            user_list.session = greeter.default_session_hint;
-            if (username != null)
-            {
-                var user = LightDM.UserList.get_instance ().get_user_by_name (username);
-                if (user != null)
-                    user_list.session = user.session;
-            }
+            state_file.replace_contents (data, data.length, null, false, FileCreateFlags.NONE, null);
         }
+        catch (Error e)
+        {
+            debug ("Failed to write state: %s", e.message);
+        }
+
+        debug ("Start authentication %s", username);
         user_list.set_error (null);
+        if (test_mode)
+            user_list.session = "ubuntu";
+        else
+            user_list.session = greeter.default_session_hint;        
         start_authentication ();
     }
 
@@ -293,32 +370,32 @@ public class UnityGreeter
         if (!greeter.hide_users_hint)
             return;
 
-        var text = _("User");
-        
+        var text = _("Other...");
         if (test_mode)
         {
-            if (user_list.selected == null && test_username != null)
+            if (user_list.selected == "*other" && test_username != null)
                 text = test_username;
         }
         else
         {
-            if (user_list.selected == null && greeter.authentication_user != null)
+            if (user_list.selected == "*other" && greeter.authentication_user != null)
                 text = greeter.authentication_user;
         }
 
-        user_list.add_entry (null, text, default_background);
+        user_list.add_entry ("*other", text, default_background);
     }
-   
+
     private void start_authentication ()
     {
         prompted = false;
+        have_session = false;
 
         if (test_mode)
         {
             test_username = null;
             test_is_authenticated = false;
 
-            if (user_list.selected == null)
+            if (user_list.selected == "*other")
             {
                 if (authenticate_user != null)
                 {
@@ -329,9 +406,15 @@ public class UnityGreeter
                 else
                     show_prompt_cb (_("Username:"), LightDM.PromptType.QUESTION);
             }
-            else if (user_list.selected == "*guest" || user_list.selected == "bob")
+            else if (user_list.selected == "*guest")
             {
                 test_is_authenticated = true;
+                authentication_complete_cb ();
+            }
+            else if (user_list.selected == "bob")
+            {
+                test_is_authenticated = true;
+                test_username = user_list.selected;
                 authentication_complete_cb ();
             }
             else
@@ -342,7 +425,7 @@ public class UnityGreeter
         }
         else
         {
-            if (user_list.selected == null)
+            if (user_list.selected == "*other")
             {
                 greeter.authenticate (authenticate_user);
                 authenticate_user = null;
@@ -353,6 +436,7 @@ public class UnityGreeter
                 greeter.authenticate (user_list.selected);
         }
 
+        update_session ();
         update_other_label ();
     }
 
@@ -377,8 +461,6 @@ public class UnityGreeter
         }
         else
             greeter.respond (text);
-
-        update_other_label ();
     }
 
     private void start_session_cb ()
@@ -488,6 +570,7 @@ public class UnityGreeter
         Environment.unset_variable ("UBUNTU_MENUPROXY");
 
         /* Initialize i18n */
+        Intl.setlocale (LocaleCategory.ALL, "");
         Intl.bindtextdomain (Config.GETTEXT_PACKAGE, Config.LOCALEDIR);
         Intl.bind_textdomain_codeset (Config.GETTEXT_PACKAGE, "UTF-8");
         Intl.textdomain (Config.GETTEXT_PACKAGE);
