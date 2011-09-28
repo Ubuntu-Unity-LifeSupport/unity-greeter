@@ -580,7 +580,7 @@ public class UnityGreeter
         log_timer = new Timer ();
         Log.set_default_handler (log_cb);
 
-        debug ("Starting unity-greeter %s", Config.VERSION);
+        debug ("Starting unity-greeter %s UID=%d LANG=%s", Config.VERSION, (int) Posix.getuid (), Environment.get_variable ("LANG"));
 
         /* Set the cursor to not be the crap default */
         debug ("Setting cursor");

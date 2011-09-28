@@ -38,6 +38,7 @@
 #include <cairo-xlib.h>
 #include <stdio.h>
 #include <locale.h>
+#include <unistd.h>
 #include <float.h>
 #include <math.h>
 #include <gobject/gvaluecollector.h>
@@ -1855,41 +1856,43 @@ static gdouble double_parse (const gchar* str) {
 gint unity_greeter_main (gchar** args, int args_length1) {
 	gint result = 0;
 	GTimer* _tmp0_;
-	GdkWindow* _tmp1_ = NULL;
-	GdkCursor* _tmp2_;
-	GdkCursor* _tmp3_;
-	GdkScreen* _tmp4_ = NULL;
-	cairo_surface_t* _tmp5_ = NULL;
-	const gchar* _tmp6_ = NULL;
-	GOptionContext* _tmp7_;
-	GOptionContext* c;
-	GOptionContext* _tmp8_;
+	uid_t _tmp1_ = {0};
+	const gchar* _tmp2_ = NULL;
+	GdkWindow* _tmp3_ = NULL;
+	GdkCursor* _tmp4_;
+	GdkCursor* _tmp5_;
+	GdkScreen* _tmp6_ = NULL;
+	cairo_surface_t* _tmp7_ = NULL;
+	const gchar* _tmp8_ = NULL;
 	GOptionContext* _tmp9_;
-	GOptionGroup* _tmp10_ = NULL;
-	gboolean _tmp20_;
+	GOptionContext* c;
+	GOptionContext* _tmp10_;
+	GOptionContext* _tmp11_;
+	GOptionGroup* _tmp12_ = NULL;
 	gboolean _tmp22_;
-	GKeyFile* _tmp23_;
-	GtkSettings* _tmp28_ = NULL;
-	GtkSettings* _tmp29_;
+	gboolean _tmp24_;
+	GKeyFile* _tmp25_;
+	GtkSettings* _tmp30_ = NULL;
+	GtkSettings* _tmp31_;
 	GtkSettings* settings;
-	gchar* _tmp30_ = NULL;
+	gchar* _tmp32_ = NULL;
 	gchar* value;
-	const gchar* _tmp31_;
-	gchar* _tmp34_ = NULL;
-	const gchar* _tmp35_;
-	gchar* _tmp38_ = NULL;
-	const gchar* _tmp39_;
-	gchar* _tmp42_ = NULL;
-	const gchar* _tmp43_;
-	gchar* _tmp47_ = NULL;
-	const gchar* _tmp48_;
-	gchar* _tmp53_ = NULL;
-	const gchar* _tmp54_;
-	gchar* _tmp57_ = NULL;
-	const gchar* _tmp58_;
-	UnityGreeter* _tmp61_;
+	const gchar* _tmp33_;
+	gchar* _tmp36_ = NULL;
+	const gchar* _tmp37_;
+	gchar* _tmp40_ = NULL;
+	const gchar* _tmp41_;
+	gchar* _tmp44_ = NULL;
+	const gchar* _tmp45_;
+	gchar* _tmp49_ = NULL;
+	const gchar* _tmp50_;
+	gchar* _tmp55_ = NULL;
+	const gchar* _tmp56_;
+	gchar* _tmp59_ = NULL;
+	const gchar* _tmp60_;
+	UnityGreeter* _tmp63_;
 	UnityGreeter* greeter;
-	UnityGreeter* _tmp62_;
+	UnityGreeter* _tmp64_;
 	GError * _inner_error_ = NULL;
 	g_unsetenv ("UBUNTU_MENUPROXY");
 	setlocale (LC_ALL, "");
@@ -1901,31 +1904,33 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 	_g_timer_destroy0 (unity_greeter_log_timer);
 	unity_greeter_log_timer = _tmp0_;
 	g_log_set_default_handler (_unity_greeter_log_cb_glog_func, NULL);
-	g_debug ("unity-greeter.vala:583: Starting unity-greeter %s", VERSION);
+	_tmp1_ = getuid ();
+	_tmp2_ = g_getenv ("LANG");
+	g_debug ("unity-greeter.vala:583: Starting unity-greeter %s UID=%d LANG=%s", VERSION, (gint) _tmp1_, _tmp2_);
 	g_debug ("unity-greeter.vala:586: Setting cursor");
-	_tmp1_ = gdk_get_default_root_window ();
-	_tmp2_ = gdk_cursor_new (GDK_LEFT_PTR);
-	_tmp3_ = _tmp2_;
-	gdk_window_set_cursor (_tmp1_, _tmp3_);
-	_g_object_unref0 (_tmp3_);
+	_tmp3_ = gdk_get_default_root_window ();
+	_tmp4_ = gdk_cursor_new (GDK_LEFT_PTR);
+	_tmp5_ = _tmp4_;
+	gdk_window_set_cursor (_tmp3_, _tmp5_);
+	_g_object_unref0 (_tmp5_);
 	g_debug ("unity-greeter.vala:590: Creating background surface");
-	_tmp4_ = gdk_screen_get_default ();
-	_tmp5_ = unity_greeter_create_root_surface (_tmp4_);
+	_tmp6_ = gdk_screen_get_default ();
+	_tmp7_ = unity_greeter_create_root_surface (_tmp6_);
 	_cairo_surface_destroy0 (unity_greeter_background_surface);
-	unity_greeter_background_surface = _tmp5_;
+	unity_greeter_background_surface = _tmp7_;
 	g_debug ("unity-greeter.vala:593: Loading command line options");
-	_tmp6_ = _ ("- Unity Greeter");
-	_tmp7_ = g_option_context_new (_tmp6_);
-	c = _tmp7_;
-	_tmp8_ = c;
-	g_option_context_add_main_entries (_tmp8_, UNITY_GREETER_options, GETTEXT_PACKAGE);
-	_tmp9_ = c;
-	_tmp10_ = gtk_get_option_group (TRUE);
-	g_option_context_add_group (_tmp9_, _tmp10_);
+	_tmp8_ = _ ("- Unity Greeter");
+	_tmp9_ = g_option_context_new (_tmp8_);
+	c = _tmp9_;
+	_tmp10_ = c;
+	g_option_context_add_main_entries (_tmp10_, UNITY_GREETER_options, GETTEXT_PACKAGE);
+	_tmp11_ = c;
+	_tmp12_ = gtk_get_option_group (TRUE);
+	g_option_context_add_group (_tmp11_, _tmp12_);
 	{
-		GOptionContext* _tmp11_;
-		_tmp11_ = c;
-		g_option_context_parse (_tmp11_, &args_length1, &args, &_inner_error_);
+		GOptionContext* _tmp13_;
+		_tmp13_ = c;
+		g_option_context_parse (_tmp13_, &args_length1, &args, &_inner_error_);
 		if (_inner_error_ != NULL) {
 			goto __catch7_g_error;
 		}
@@ -1934,29 +1939,29 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 	__catch7_g_error:
 	{
 		GError* e = NULL;
-		FILE* _tmp12_;
-		GError* _tmp13_;
-		const gchar* _tmp14_;
-		FILE* _tmp15_;
-		const gchar* _tmp16_ = NULL;
-		gchar** _tmp17_;
-		gint _tmp17__length1;
-		const gchar* _tmp18_;
-		FILE* _tmp19_;
+		FILE* _tmp14_;
+		GError* _tmp15_;
+		const gchar* _tmp16_;
+		FILE* _tmp17_;
+		const gchar* _tmp18_ = NULL;
+		gchar** _tmp19_;
+		gint _tmp19__length1;
+		const gchar* _tmp20_;
+		FILE* _tmp21_;
 		e = _inner_error_;
 		_inner_error_ = NULL;
-		_tmp12_ = stderr;
-		_tmp13_ = e;
-		_tmp14_ = _tmp13_->message;
-		fprintf (_tmp12_, "%s\n", _tmp14_);
-		_tmp15_ = stderr;
-		_tmp16_ = _ ("Run '%s --help' to see a full list of available command line options.");
-		_tmp17_ = args;
-		_tmp17__length1 = args_length1;
-		_tmp18_ = _tmp17_[0];
-		fprintf (_tmp15_, _tmp16_, _tmp18_);
-		_tmp19_ = stderr;
-		fprintf (_tmp19_, "\n");
+		_tmp14_ = stderr;
+		_tmp15_ = e;
+		_tmp16_ = _tmp15_->message;
+		fprintf (_tmp14_, "%s\n", _tmp16_);
+		_tmp17_ = stderr;
+		_tmp18_ = _ ("Run '%s --help' to see a full list of available command line options.");
+		_tmp19_ = args;
+		_tmp19__length1 = args_length1;
+		_tmp20_ = _tmp19_[0];
+		fprintf (_tmp17_, _tmp18_, _tmp20_);
+		_tmp21_ = stderr;
+		fprintf (_tmp21_, "\n");
 		result = EXIT_FAILURE;
 		_g_error_free0 (e);
 		_g_option_context_free0 (c);
@@ -1969,27 +1974,27 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 		g_clear_error (&_inner_error_);
 		return 0;
 	}
-	_tmp20_ = unity_greeter_show_version;
-	if (_tmp20_) {
-		FILE* _tmp21_;
-		_tmp21_ = stderr;
-		fprintf (_tmp21_, "unity-greeter %s\n", VERSION);
+	_tmp22_ = unity_greeter_show_version;
+	if (_tmp22_) {
+		FILE* _tmp23_;
+		_tmp23_ = stderr;
+		fprintf (_tmp23_, "unity-greeter %s\n", VERSION);
 		result = EXIT_SUCCESS;
 		_g_option_context_free0 (c);
 		return result;
 	}
-	_tmp22_ = unity_greeter_test_mode;
-	if (_tmp22_) {
+	_tmp24_ = unity_greeter_test_mode;
+	if (_tmp24_) {
 		g_debug ("unity-greeter.vala:618: Running in test mode");
 	}
 	g_debug ("unity-greeter.vala:620: Loading configuration from %s", CONFIG_FILE);
-	_tmp23_ = g_key_file_new ();
+	_tmp25_ = g_key_file_new ();
 	_g_key_file_free0 (unity_greeter_config);
-	unity_greeter_config = _tmp23_;
+	unity_greeter_config = _tmp25_;
 	{
-		GKeyFile* _tmp24_;
-		_tmp24_ = unity_greeter_config;
-		g_key_file_load_from_file (_tmp24_, CONFIG_FILE, G_KEY_FILE_NONE, &_inner_error_);
+		GKeyFile* _tmp26_;
+		_tmp26_ = unity_greeter_config;
+		g_key_file_load_from_file (_tmp26_, CONFIG_FILE, G_KEY_FILE_NONE, &_inner_error_);
 		if (_inner_error_ != NULL) {
 			goto __catch8_g_error;
 		}
@@ -1998,16 +2003,16 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 	__catch8_g_error:
 	{
 		GError* e = NULL;
-		GError* _tmp25_;
+		GError* _tmp27_;
 		e = _inner_error_;
 		_inner_error_ = NULL;
-		_tmp25_ = e;
-		if (!g_error_matches (_tmp25_, G_FILE_ERROR, G_FILE_ERROR_NOENT)) {
-			GError* _tmp26_;
-			const gchar* _tmp27_;
-			_tmp26_ = e;
-			_tmp27_ = _tmp26_->message;
-			g_warning ("unity-greeter.vala:629: Failed to load configuration from %s: %s\n", CONFIG_FILE, _tmp27_);
+		_tmp27_ = e;
+		if (!g_error_matches (_tmp27_, G_FILE_ERROR, G_FILE_ERROR_NOENT)) {
+			GError* _tmp28_;
+			const gchar* _tmp29_;
+			_tmp28_ = e;
+			_tmp29_ = _tmp28_->message;
+			g_warning ("unity-greeter.vala:629: Failed to load configuration from %s: %s\n", CONFIG_FILE, _tmp29_);
 		}
 		_g_error_free0 (e);
 	}
@@ -2019,97 +2024,97 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 		return 0;
 	}
 	g_debug ("unity-greeter.vala:633: Setting GTK+ settings");
-	_tmp28_ = gtk_settings_get_default ();
-	_tmp29_ = _g_object_ref0 (_tmp28_);
-	settings = _tmp29_;
-	_tmp30_ = unity_greeter_get_config_value ("greeter", "theme-name", NULL);
-	value = _tmp30_;
-	_tmp31_ = value;
-	if (_tmp31_ != NULL) {
-		GtkSettings* _tmp32_;
-		const gchar* _tmp33_;
-		_tmp32_ = settings;
-		_tmp33_ = value;
-		g_object_set ((GObject*) _tmp32_, "gtk-theme-name", _tmp33_, NULL, NULL);
+	_tmp30_ = gtk_settings_get_default ();
+	_tmp31_ = _g_object_ref0 (_tmp30_);
+	settings = _tmp31_;
+	_tmp32_ = unity_greeter_get_config_value ("greeter", "theme-name", NULL);
+	value = _tmp32_;
+	_tmp33_ = value;
+	if (_tmp33_ != NULL) {
+		GtkSettings* _tmp34_;
+		const gchar* _tmp35_;
+		_tmp34_ = settings;
+		_tmp35_ = value;
+		g_object_set ((GObject*) _tmp34_, "gtk-theme-name", _tmp35_, NULL, NULL);
 	}
-	_tmp34_ = unity_greeter_get_config_value ("greeter", "icon-theme-name", NULL);
+	_tmp36_ = unity_greeter_get_config_value ("greeter", "icon-theme-name", NULL);
 	_g_free0 (value);
-	value = _tmp34_;
-	_tmp35_ = value;
-	if (_tmp35_ != NULL) {
-		GtkSettings* _tmp36_;
-		const gchar* _tmp37_;
-		_tmp36_ = settings;
-		_tmp37_ = value;
-		g_object_set ((GObject*) _tmp36_, "gtk-icon-theme-name", _tmp37_, NULL, NULL);
+	value = _tmp36_;
+	_tmp37_ = value;
+	if (_tmp37_ != NULL) {
+		GtkSettings* _tmp38_;
+		const gchar* _tmp39_;
+		_tmp38_ = settings;
+		_tmp39_ = value;
+		g_object_set ((GObject*) _tmp38_, "gtk-icon-theme-name", _tmp39_, NULL, NULL);
 	}
-	_tmp38_ = unity_greeter_get_config_value ("greeter", "font-name", NULL);
+	_tmp40_ = unity_greeter_get_config_value ("greeter", "font-name", NULL);
 	_g_free0 (value);
-	value = _tmp38_;
-	_tmp39_ = value;
-	if (_tmp39_ != NULL) {
-		GtkSettings* _tmp40_;
-		const gchar* _tmp41_;
-		_tmp40_ = settings;
-		_tmp41_ = value;
-		g_object_set ((GObject*) _tmp40_, "gtk-font-name", _tmp41_, NULL, NULL);
+	value = _tmp40_;
+	_tmp41_ = value;
+	if (_tmp41_ != NULL) {
+		GtkSettings* _tmp42_;
+		const gchar* _tmp43_;
+		_tmp42_ = settings;
+		_tmp43_ = value;
+		g_object_set ((GObject*) _tmp42_, "gtk-font-name", _tmp43_, NULL, NULL);
 	}
-	_tmp42_ = unity_greeter_get_config_value ("greeter", "xft-dpi", NULL);
+	_tmp44_ = unity_greeter_get_config_value ("greeter", "xft-dpi", NULL);
 	_g_free0 (value);
-	value = _tmp42_;
-	_tmp43_ = value;
-	if (_tmp43_ != NULL) {
-		GtkSettings* _tmp44_;
-		const gchar* _tmp45_;
-		gdouble _tmp46_ = 0.0;
-		_tmp44_ = settings;
-		_tmp45_ = value;
-		_tmp46_ = double_parse (_tmp45_);
-		g_object_set ((GObject*) _tmp44_, "gtk-xft-dpi", (gint) (1024 * _tmp46_), NULL, NULL);
+	value = _tmp44_;
+	_tmp45_ = value;
+	if (_tmp45_ != NULL) {
+		GtkSettings* _tmp46_;
+		const gchar* _tmp47_;
+		gdouble _tmp48_ = 0.0;
+		_tmp46_ = settings;
+		_tmp47_ = value;
+		_tmp48_ = double_parse (_tmp47_);
+		g_object_set ((GObject*) _tmp46_, "gtk-xft-dpi", (gint) (1024 * _tmp48_), NULL, NULL);
 	}
-	_tmp47_ = unity_greeter_get_config_value ("greeter", "xft-antialias", NULL);
+	_tmp49_ = unity_greeter_get_config_value ("greeter", "xft-antialias", NULL);
 	_g_free0 (value);
-	value = _tmp47_;
-	_tmp48_ = value;
-	if (_tmp48_ != NULL) {
-		GtkSettings* _tmp49_;
-		GCompareFunc _tmp50_;
-		const gchar* _tmp51_;
-		gint _tmp52_ = 0;
-		_tmp49_ = settings;
-		_tmp50_ = g_strcmp0;
-		_tmp51_ = value;
-		_tmp52_ = _tmp50_ (_tmp51_, "true");
-		g_object_set ((GObject*) _tmp49_, "gtk-xft-antialias", _tmp52_ == 0, NULL, NULL);
+	value = _tmp49_;
+	_tmp50_ = value;
+	if (_tmp50_ != NULL) {
+		GtkSettings* _tmp51_;
+		GCompareFunc _tmp52_;
+		const gchar* _tmp53_;
+		gint _tmp54_ = 0;
+		_tmp51_ = settings;
+		_tmp52_ = g_strcmp0;
+		_tmp53_ = value;
+		_tmp54_ = _tmp52_ (_tmp53_, "true");
+		g_object_set ((GObject*) _tmp51_, "gtk-xft-antialias", _tmp54_ == 0, NULL, NULL);
 	}
-	_tmp53_ = unity_greeter_get_config_value ("greeter", "xft-hintstyle", NULL);
+	_tmp55_ = unity_greeter_get_config_value ("greeter", "xft-hintstyle", NULL);
 	_g_free0 (value);
-	value = _tmp53_;
-	_tmp54_ = value;
-	if (_tmp54_ != NULL) {
-		GtkSettings* _tmp55_;
-		const gchar* _tmp56_;
-		_tmp55_ = settings;
-		_tmp56_ = value;
-		g_object_set ((GObject*) _tmp55_, "gtk-xft-hintstyle", _tmp56_, NULL, NULL);
+	value = _tmp55_;
+	_tmp56_ = value;
+	if (_tmp56_ != NULL) {
+		GtkSettings* _tmp57_;
+		const gchar* _tmp58_;
+		_tmp57_ = settings;
+		_tmp58_ = value;
+		g_object_set ((GObject*) _tmp57_, "gtk-xft-hintstyle", _tmp58_, NULL, NULL);
 	}
-	_tmp57_ = unity_greeter_get_config_value ("greeter", "xft-rgba", NULL);
+	_tmp59_ = unity_greeter_get_config_value ("greeter", "xft-rgba", NULL);
 	_g_free0 (value);
-	value = _tmp57_;
-	_tmp58_ = value;
-	if (_tmp58_ != NULL) {
-		GtkSettings* _tmp59_;
-		const gchar* _tmp60_;
-		_tmp59_ = settings;
-		_tmp60_ = value;
-		g_object_set ((GObject*) _tmp59_, "gtk-xft-rgba", _tmp60_, NULL, NULL);
+	value = _tmp59_;
+	_tmp60_ = value;
+	if (_tmp60_ != NULL) {
+		GtkSettings* _tmp61_;
+		const gchar* _tmp62_;
+		_tmp61_ = settings;
+		_tmp62_ = value;
+		g_object_set ((GObject*) _tmp61_, "gtk-xft-rgba", _tmp62_, NULL, NULL);
 	}
 	g_debug ("unity-greeter.vala:657: Creating Unity Greeter");
-	_tmp61_ = unity_greeter_new ();
-	greeter = _tmp61_;
+	_tmp63_ = unity_greeter_new ();
+	greeter = _tmp63_;
 	g_debug ("unity-greeter.vala:660: Showing greeter");
-	_tmp62_ = greeter;
-	unity_greeter_show (_tmp62_);
+	_tmp64_ = greeter;
+	unity_greeter_show (_tmp64_);
 	g_debug ("unity-greeter.vala:663: Starting main loop");
 	gtk_main ();
 	result = EXIT_SUCCESS;

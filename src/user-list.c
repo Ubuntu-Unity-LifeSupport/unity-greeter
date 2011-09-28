@@ -115,19 +115,6 @@ typedef struct _BackgroundPrivate BackgroundPrivate;
 #define _cairo_surface_destroy0(var) ((var == NULL) ? NULL : (var = (cairo_surface_destroy (var), NULL)))
 typedef struct _ParamSpecBackground ParamSpecBackground;
 
-#define TYPE_INDICATOR_LOADER (indicator_loader_get_type ())
-#define INDICATOR_LOADER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_INDICATOR_LOADER, IndicatorLoader))
-#define INDICATOR_LOADER_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_INDICATOR_LOADER, IndicatorLoaderClass))
-#define IS_INDICATOR_LOADER(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_INDICATOR_LOADER))
-#define IS_INDICATOR_LOADER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_INDICATOR_LOADER))
-#define INDICATOR_LOADER_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_INDICATOR_LOADER, IndicatorLoaderClass))
-
-typedef struct _IndicatorLoader IndicatorLoader;
-typedef struct _IndicatorLoaderClass IndicatorLoaderClass;
-typedef struct _IndicatorLoaderPrivate IndicatorLoaderPrivate;
-#define __g_list_free__g_object_unref0_0(var) ((var == NULL) ? NULL : (var = (_g_list_free__g_object_unref0_ (var), NULL)))
-typedef struct _ParamSpecIndicatorLoader ParamSpecIndicatorLoader;
-
 #define TYPE_USER_LIST (user_list_get_type ())
 #define USER_LIST(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_USER_LIST, UserList))
 #define USER_LIST_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_USER_LIST, UserListClass))
@@ -143,7 +130,7 @@ typedef struct _UserListPrivate UserListPrivate;
 #define __g_list_free__user_entry_unref0_0(var) ((var == NULL) ? NULL : (var = (_g_list_free__user_entry_unref0_ (var), NULL)))
 #define _user_entry_unref0(var) ((var == NULL) ? NULL : (var = (user_entry_unref (var), NULL)))
 #define _animate_timer_unref0(var) ((var == NULL) ? NULL : (var = (animate_timer_unref (var), NULL)))
-#define _indicator_loader_unref0(var) ((var == NULL) ? NULL : (var = (indicator_loader_unref (var), NULL)))
+#define __g_list_free__g_object_unref0_0(var) ((var == NULL) ? NULL : (var = (_g_list_free__g_object_unref0_ (var), NULL)))
 #define _g_variant_unref0(var) ((var == NULL) ? NULL : (var = (g_variant_unref (var), NULL)))
 #define _g_variant_builder_unref0(var) ((var == NULL) ? NULL : (var = (g_variant_builder_unref (var), NULL)))
 #define _g_list_free0(var) ((var == NULL) ? NULL : (var = (g_list_free (var), NULL)))
@@ -237,32 +224,10 @@ struct _ParamSpecBackground {
 	GParamSpec parent_instance;
 };
 
-struct _IndicatorLoader {
-	GTypeInstance parent_instance;
-	volatile int ref_count;
-	IndicatorLoaderPrivate * priv;
-	GList* indicator_objects;
-};
-
-struct _IndicatorLoaderClass {
-	GTypeClass parent_class;
-	void (*finalize) (IndicatorLoader *self);
-};
-
-struct _IndicatorLoaderPrivate {
-	gchar** filenames;
-	gint filenames_length1;
-	gint _filenames_size_;
-	GThread* thread;
-};
-
-struct _ParamSpecIndicatorLoader {
-	GParamSpec parent_instance;
-};
-
 struct _UserList {
 	GtkContainer parent_instance;
 	UserListPrivate * priv;
+	GList* indicator_objects;
 };
 
 struct _UserListClass {
@@ -291,7 +256,6 @@ struct _UserListPrivate {
 	GList* children;
 	GtkMenuBar* menubar;
 	cairo_t* menubar_cairo_context;
-	IndicatorLoader* indicator_loader;
 	GtkCheckMenuItem* high_contrast_item;
 	GPid keyboard_pid;
 	GtkWindow* keyboard_window;
@@ -318,7 +282,6 @@ static gpointer user_entry_parent_class = NULL;
 static gpointer indicator_menu_item_parent_class = NULL;
 static gpointer session_menu_item_parent_class = NULL;
 static gpointer background_parent_class = NULL;
-static gpointer indicator_loader_parent_class = NULL;
 static gpointer user_list_parent_class = NULL;
 
 #define default_background "#2C001E"
@@ -393,28 +356,6 @@ static gpointer _background_render_gthread_func (gpointer self);
 static gboolean background_ready_cb (Background* self);
 static gboolean _background_ready_cb_gsource_func (gpointer self);
 static void background_finalize (Background* obj);
-gpointer indicator_loader_ref (gpointer instance);
-void indicator_loader_unref (gpointer instance);
-GParamSpec* param_spec_indicator_loader (const gchar* name, const gchar* nick, const gchar* blurb, GType object_type, GParamFlags flags);
-void value_set_indicator_loader (GValue* value, gpointer v_object);
-void value_take_indicator_loader (GValue* value, gpointer v_object);
-gpointer value_get_indicator_loader (const GValue* value);
-GType indicator_loader_get_type (void) G_GNUC_CONST;
-#define INDICATOR_LOADER_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TYPE_INDICATOR_LOADER, IndicatorLoaderPrivate))
-enum  {
-	INDICATOR_LOADER_DUMMY_PROPERTY
-};
-static void _g_object_unref0_ (gpointer var);
-static void _g_list_free__g_object_unref0_ (GList* self);
-IndicatorLoader* indicator_loader_new (gchar** filenames, int filenames_length1);
-IndicatorLoader* indicator_loader_construct (GType object_type, gchar** filenames, int filenames_length1);
-static gchar** _vala_array_dup1 (gchar** self, int length);
-void indicator_loader_load (IndicatorLoader* self);
-static GList* indicator_loader_load_indicators (IndicatorLoader* self);
-static gpointer _indicator_loader_load_indicators_gthread_func (gpointer self);
-static gboolean indicator_loader_ready_cb (IndicatorLoader* self);
-static gboolean _indicator_loader_ready_cb_gsource_func (gpointer self);
-static void indicator_loader_finalize (IndicatorLoader* obj);
 GType user_list_get_type (void) G_GNUC_CONST;
 #define USER_LIST_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TYPE_USER_LIST, UserListPrivate))
 enum  {
@@ -424,6 +365,8 @@ enum  {
 };
 static void _user_entry_unref0_ (gpointer var);
 static void _g_list_free__user_entry_unref0_ (GList* self);
+static void _g_object_unref0_ (gpointer var);
+static void _g_list_free__g_object_unref0_ (GList* self);
 UserList* user_list_new (void);
 UserList* user_list_construct (GType object_type);
 static gboolean user_list_menubar_draw_cb (UserList* self, cairo_t* c);
@@ -452,8 +395,6 @@ static void user_list_high_contrast_toggled_cb (UserList* self, GtkCheckMenuItem
 static void _user_list_high_contrast_toggled_cb_gtk_check_menu_item_toggled (GtkCheckMenuItem* _sender, gpointer self);
 static void user_list_screen_reader_toggled_cb (UserList* self, GtkCheckMenuItem* item);
 static void _user_list_screen_reader_toggled_cb_gtk_check_menu_item_toggled (GtkCheckMenuItem* _sender, gpointer self);
-static void user_list_indicator_loaded_cb (UserList* self, IndicatorLoader* loader);
-static void _user_list_indicator_loaded_cb_indicator_loader_loaded (IndicatorLoader* _sender, gpointer self);
 static void user_list_indicator_added_cb (UserList* self, IndicatorObject* object, IndicatorObjectEntry* entry);
 static void _user_list_indicator_added_cb_indicator_object_entry_added (IndicatorObject* _sender, IndicatorObjectEntry* entry, gpointer self);
 static void user_list_indicator_removed_cb (UserList* self, IndicatorObject* object, IndicatorObjectEntry* entry);
@@ -1824,342 +1765,6 @@ void background_unref (gpointer instance) {
 }
 
 
-static void _g_object_unref0_ (gpointer var) {
-	(var == NULL) ? NULL : (var = (g_object_unref (var), NULL));
-}
-
-
-static void _g_list_free__g_object_unref0_ (GList* self) {
-	g_list_foreach (self, (GFunc) _g_object_unref0_, NULL);
-	g_list_free (self);
-}
-
-
-static gchar** _vala_array_dup1 (gchar** self, int length) {
-	gchar** result;
-	int i;
-	result = g_new0 (gchar*, length + 1);
-	for (i = 0; i < length; i++) {
-		gchar* _tmp0_;
-		_tmp0_ = g_strdup (self[i]);
-		result[i] = _tmp0_;
-	}
-	return result;
-}
-
-
-IndicatorLoader* indicator_loader_construct (GType object_type, gchar** filenames, int filenames_length1) {
-	IndicatorLoader* self = NULL;
-	gchar** _tmp0_;
-	gint _tmp0__length1;
-	gchar** _tmp1_;
-	gint _tmp1__length1;
-	self = (IndicatorLoader*) g_type_create_instance (object_type);
-	_tmp0_ = filenames;
-	_tmp0__length1 = filenames_length1;
-	_tmp1_ = (_tmp0_ != NULL) ? _vala_array_dup1 (_tmp0_, _tmp0__length1) : ((gpointer) _tmp0_);
-	_tmp1__length1 = _tmp0__length1;
-	self->priv->filenames = (_vala_array_free (self->priv->filenames, self->priv->filenames_length1, (GDestroyNotify) g_free), NULL);
-	self->priv->filenames = _tmp1_;
-	self->priv->filenames_length1 = _tmp1__length1;
-	self->priv->_filenames_size_ = self->priv->filenames_length1;
-	return self;
-}
-
-
-IndicatorLoader* indicator_loader_new (gchar** filenames, int filenames_length1) {
-	return indicator_loader_construct (TYPE_INDICATOR_LOADER, filenames, filenames_length1);
-}
-
-
-static gpointer _indicator_loader_load_indicators_gthread_func (gpointer self) {
-	gpointer result;
-	result = indicator_loader_load_indicators (self);
-	return result;
-}
-
-
-void indicator_loader_load (IndicatorLoader* self) {
-	gchar** _tmp0_;
-	gint _tmp0__length1;
-	gchar* _tmp1_ = NULL;
-	gchar* _tmp2_;
-	GError * _inner_error_ = NULL;
-	g_return_if_fail (self != NULL);
-	_tmp0_ = self->priv->filenames;
-	_tmp0__length1 = self->priv->filenames_length1;
-	_tmp1_ = g_strjoinv (",", _tmp0_);
-	_tmp2_ = _tmp1_;
-	g_debug ("user-list.vala:291: Loading indicators %s", _tmp2_);
-	_g_free0 (_tmp2_);
-	{
-		GThread* _tmp3_ = NULL;
-		GThread* _tmp4_;
-		_tmp3_ = g_thread_create (_indicator_loader_load_indicators_gthread_func, self, TRUE, &_inner_error_);
-		_tmp4_ = _tmp3_;
-		if (_inner_error_ != NULL) {
-			if (_inner_error_->domain == G_THREAD_ERROR) {
-				goto __catch11_g_thread_error;
-			}
-			g_critical ("file %s: line %d: unexpected error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
-			g_clear_error (&_inner_error_);
-			return;
-		}
-		self->priv->thread = _tmp4_;
-	}
-	goto __finally11;
-	__catch11_g_thread_error:
-	{
-		GError* e = NULL;
-		e = _inner_error_;
-		_inner_error_ = NULL;
-		_g_error_free0 (e);
-	}
-	__finally11:
-	if (_inner_error_ != NULL) {
-		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
-		g_clear_error (&_inner_error_);
-		return;
-	}
-}
-
-
-static gboolean indicator_loader_ready_cb (IndicatorLoader* self) {
-	gboolean result = FALSE;
-	GThread* _tmp0_;
-	gpointer _tmp1_ = NULL;
-	g_return_val_if_fail (self != NULL, FALSE);
-	g_debug ("user-list.vala:304: Indicators loaded");
-	_tmp0_ = self->priv->thread;
-	_tmp1_ = g_thread_join (_tmp0_);
-	__g_list_free__g_object_unref0_0 (self->indicator_objects);
-	self->indicator_objects = (GList*) _tmp1_;
-	g_signal_emit_by_name (self, "loaded");
-	result = FALSE;
-	return result;
-}
-
-
-static gpointer _g_object_ref0 (gpointer self) {
-	return self ? g_object_ref (self) : NULL;
-}
-
-
-static gboolean _indicator_loader_ready_cb_gsource_func (gpointer self) {
-	gboolean result;
-	result = indicator_loader_ready_cb (self);
-	return result;
-}
-
-
-static GList* indicator_loader_load_indicators (IndicatorLoader* self) {
-	GList* result = NULL;
-	GList* indicators;
-	gchar** _tmp0_;
-	gint _tmp0__length1;
-	g_return_val_if_fail (self != NULL, NULL);
-	indicators = NULL;
-	_tmp0_ = self->priv->filenames;
-	_tmp0__length1 = self->priv->filenames_length1;
-	{
-		gchar** filename_collection = NULL;
-		gint filename_collection_length1 = 0;
-		gint _filename_collection_size_ = 0;
-		gint filename_it = 0;
-		filename_collection = _tmp0_;
-		filename_collection_length1 = _tmp0__length1;
-		for (filename_it = 0; filename_it < _tmp0__length1; filename_it = filename_it + 1) {
-			gchar* _tmp1_;
-			gchar* filename = NULL;
-			_tmp1_ = g_strdup (filename_collection[filename_it]);
-			filename = _tmp1_;
-			{
-				const gchar* _tmp2_;
-				IndicatorObject* _tmp3_;
-				IndicatorObject* o;
-				IndicatorObject* _tmp4_;
-				IndicatorObject* _tmp5_;
-				_tmp2_ = filename;
-				_tmp3_ = indicator_object_new_from_file (_tmp2_);
-				o = _tmp3_;
-				_tmp4_ = o;
-				_tmp5_ = _g_object_ref0 (_tmp4_);
-				indicators = g_list_append (indicators, _tmp5_);
-				_g_object_unref0 (o);
-				_g_free0 (filename);
-			}
-		}
-	}
-	gdk_threads_add_idle (_indicator_loader_ready_cb_gsource_func, self);
-	result = indicators;
-	return result;
-}
-
-
-static void value_indicator_loader_init (GValue* value) {
-	value->data[0].v_pointer = NULL;
-}
-
-
-static void value_indicator_loader_free_value (GValue* value) {
-	if (value->data[0].v_pointer) {
-		indicator_loader_unref (value->data[0].v_pointer);
-	}
-}
-
-
-static void value_indicator_loader_copy_value (const GValue* src_value, GValue* dest_value) {
-	if (src_value->data[0].v_pointer) {
-		dest_value->data[0].v_pointer = indicator_loader_ref (src_value->data[0].v_pointer);
-	} else {
-		dest_value->data[0].v_pointer = NULL;
-	}
-}
-
-
-static gpointer value_indicator_loader_peek_pointer (const GValue* value) {
-	return value->data[0].v_pointer;
-}
-
-
-static gchar* value_indicator_loader_collect_value (GValue* value, guint n_collect_values, GTypeCValue* collect_values, guint collect_flags) {
-	if (collect_values[0].v_pointer) {
-		IndicatorLoader* object;
-		object = collect_values[0].v_pointer;
-		if (object->parent_instance.g_class == NULL) {
-			return g_strconcat ("invalid unclassed object pointer for value type `", G_VALUE_TYPE_NAME (value), "'", NULL);
-		} else if (!g_value_type_compatible (G_TYPE_FROM_INSTANCE (object), G_VALUE_TYPE (value))) {
-			return g_strconcat ("invalid object type `", g_type_name (G_TYPE_FROM_INSTANCE (object)), "' for value type `", G_VALUE_TYPE_NAME (value), "'", NULL);
-		}
-		value->data[0].v_pointer = indicator_loader_ref (object);
-	} else {
-		value->data[0].v_pointer = NULL;
-	}
-	return NULL;
-}
-
-
-static gchar* value_indicator_loader_lcopy_value (const GValue* value, guint n_collect_values, GTypeCValue* collect_values, guint collect_flags) {
-	IndicatorLoader** object_p;
-	object_p = collect_values[0].v_pointer;
-	if (!object_p) {
-		return g_strdup_printf ("value location for `%s' passed as NULL", G_VALUE_TYPE_NAME (value));
-	}
-	if (!value->data[0].v_pointer) {
-		*object_p = NULL;
-	} else if (collect_flags & G_VALUE_NOCOPY_CONTENTS) {
-		*object_p = value->data[0].v_pointer;
-	} else {
-		*object_p = indicator_loader_ref (value->data[0].v_pointer);
-	}
-	return NULL;
-}
-
-
-GParamSpec* param_spec_indicator_loader (const gchar* name, const gchar* nick, const gchar* blurb, GType object_type, GParamFlags flags) {
-	ParamSpecIndicatorLoader* spec;
-	g_return_val_if_fail (g_type_is_a (object_type, TYPE_INDICATOR_LOADER), NULL);
-	spec = g_param_spec_internal (G_TYPE_PARAM_OBJECT, name, nick, blurb, flags);
-	G_PARAM_SPEC (spec)->value_type = object_type;
-	return G_PARAM_SPEC (spec);
-}
-
-
-gpointer value_get_indicator_loader (const GValue* value) {
-	g_return_val_if_fail (G_TYPE_CHECK_VALUE_TYPE (value, TYPE_INDICATOR_LOADER), NULL);
-	return value->data[0].v_pointer;
-}
-
-
-void value_set_indicator_loader (GValue* value, gpointer v_object) {
-	IndicatorLoader* old;
-	g_return_if_fail (G_TYPE_CHECK_VALUE_TYPE (value, TYPE_INDICATOR_LOADER));
-	old = value->data[0].v_pointer;
-	if (v_object) {
-		g_return_if_fail (G_TYPE_CHECK_INSTANCE_TYPE (v_object, TYPE_INDICATOR_LOADER));
-		g_return_if_fail (g_value_type_compatible (G_TYPE_FROM_INSTANCE (v_object), G_VALUE_TYPE (value)));
-		value->data[0].v_pointer = v_object;
-		indicator_loader_ref (value->data[0].v_pointer);
-	} else {
-		value->data[0].v_pointer = NULL;
-	}
-	if (old) {
-		indicator_loader_unref (old);
-	}
-}
-
-
-void value_take_indicator_loader (GValue* value, gpointer v_object) {
-	IndicatorLoader* old;
-	g_return_if_fail (G_TYPE_CHECK_VALUE_TYPE (value, TYPE_INDICATOR_LOADER));
-	old = value->data[0].v_pointer;
-	if (v_object) {
-		g_return_if_fail (G_TYPE_CHECK_INSTANCE_TYPE (v_object, TYPE_INDICATOR_LOADER));
-		g_return_if_fail (g_value_type_compatible (G_TYPE_FROM_INSTANCE (v_object), G_VALUE_TYPE (value)));
-		value->data[0].v_pointer = v_object;
-	} else {
-		value->data[0].v_pointer = NULL;
-	}
-	if (old) {
-		indicator_loader_unref (old);
-	}
-}
-
-
-static void indicator_loader_class_init (IndicatorLoaderClass * klass) {
-	indicator_loader_parent_class = g_type_class_peek_parent (klass);
-	INDICATOR_LOADER_CLASS (klass)->finalize = indicator_loader_finalize;
-	g_type_class_add_private (klass, sizeof (IndicatorLoaderPrivate));
-	g_signal_new ("loaded", TYPE_INDICATOR_LOADER, G_SIGNAL_RUN_LAST, 0, NULL, NULL, g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
-}
-
-
-static void indicator_loader_instance_init (IndicatorLoader * self) {
-	self->priv = INDICATOR_LOADER_GET_PRIVATE (self);
-	self->ref_count = 1;
-}
-
-
-static void indicator_loader_finalize (IndicatorLoader* obj) {
-	IndicatorLoader * self;
-	self = INDICATOR_LOADER (obj);
-	__g_list_free__g_object_unref0_0 (self->indicator_objects);
-	self->priv->filenames = (_vala_array_free (self->priv->filenames, self->priv->filenames_length1, (GDestroyNotify) g_free), NULL);
-}
-
-
-GType indicator_loader_get_type (void) {
-	static volatile gsize indicator_loader_type_id__volatile = 0;
-	if (g_once_init_enter (&indicator_loader_type_id__volatile)) {
-		static const GTypeValueTable g_define_type_value_table = { value_indicator_loader_init, value_indicator_loader_free_value, value_indicator_loader_copy_value, value_indicator_loader_peek_pointer, "p", value_indicator_loader_collect_value, "p", value_indicator_loader_lcopy_value };
-		static const GTypeInfo g_define_type_info = { sizeof (IndicatorLoaderClass), (GBaseInitFunc) NULL, (GBaseFinalizeFunc) NULL, (GClassInitFunc) indicator_loader_class_init, (GClassFinalizeFunc) NULL, NULL, sizeof (IndicatorLoader), 0, (GInstanceInitFunc) indicator_loader_instance_init, &g_define_type_value_table };
-		static const GTypeFundamentalInfo g_define_type_fundamental_info = { (G_TYPE_FLAG_CLASSED | G_TYPE_FLAG_INSTANTIATABLE | G_TYPE_FLAG_DERIVABLE | G_TYPE_FLAG_DEEP_DERIVABLE) };
-		GType indicator_loader_type_id;
-		indicator_loader_type_id = g_type_register_fundamental (g_type_fundamental_next (), "IndicatorLoader", &g_define_type_info, &g_define_type_fundamental_info, 0);
-		g_once_init_leave (&indicator_loader_type_id__volatile, indicator_loader_type_id);
-	}
-	return indicator_loader_type_id__volatile;
-}
-
-
-gpointer indicator_loader_ref (gpointer instance) {
-	IndicatorLoader* self;
-	self = instance;
-	g_atomic_int_inc (&self->ref_count);
-	return instance;
-}
-
-
-void indicator_loader_unref (gpointer instance) {
-	IndicatorLoader* self;
-	self = instance;
-	if (g_atomic_int_dec_and_test (&self->ref_count)) {
-		INDICATOR_LOADER_GET_CLASS (self)->finalize (self);
-		g_type_free_instance ((GTypeInstance *) self);
-	}
-}
-
-
 static void _user_entry_unref0_ (gpointer var) {
 	(var == NULL) ? NULL : (var = (user_entry_unref (var), NULL));
 }
@@ -2167,6 +1772,17 @@ static void _user_entry_unref0_ (gpointer var) {
 
 static void _g_list_free__user_entry_unref0_ (GList* self) {
 	g_list_foreach (self, (GFunc) _user_entry_unref0_, NULL);
+	g_list_free (self);
+}
+
+
+static void _g_object_unref0_ (gpointer var) {
+	(var == NULL) ? NULL : (var = (g_object_unref (var), NULL));
+}
+
+
+static void _g_list_free__g_object_unref0_ (GList* self) {
+	g_list_foreach (self, (GFunc) _g_object_unref0_, NULL);
 	g_list_free (self);
 }
 
@@ -2470,7 +2086,7 @@ void user_list_set_logo (UserList* self, const gchar* logo_path) {
 		const gchar* _tmp3_;
 		cairo_surface_t* _tmp4_;
 		_tmp2_ = logo_path;
-		g_debug ("user-list.vala:491: Using logo %s", _tmp2_);
+		g_debug ("user-list.vala:439: Using logo %s", _tmp2_);
 		_tmp3_ = logo_path;
 		_tmp4_ = cairo_image_surface_create_from_png (_tmp3_);
 		_cairo_surface_destroy0 (logo_surface);
@@ -2478,7 +2094,7 @@ void user_list_set_logo (UserList* self, const gchar* logo_path) {
 	} else {
 		const gchar* _tmp5_;
 		_tmp5_ = logo_path;
-		g_debug ("user-list.vala:496: Can't use logo %s, it does not exist", _tmp5_);
+		g_debug ("user-list.vala:444: Can't use logo %s, it does not exist", _tmp5_);
 		_cairo_surface_destroy0 (logo_surface);
 		logo_surface = NULL;
 	}
@@ -2513,17 +2129,23 @@ static gboolean user_list_menubar_draw_cb (UserList* self, cairo_t* c) {
 	cairo_t* _tmp0_;
 	cairo_t* _tmp1_;
 	cairo_t* _tmp2_;
-	GtkMenuBar* _tmp3_;
+	cairo_t* _tmp3_;
+	cairo_t* _tmp4_;
+	GtkMenuBar* _tmp5_;
 	g_return_val_if_fail (self != NULL, FALSE);
 	g_return_val_if_fail (c != NULL, FALSE);
 	_tmp0_ = c;
 	user_list_draw_background (self, _tmp0_);
 	_tmp1_ = c;
-	_tmp2_ = _cairo_reference0 (_tmp1_);
+	cairo_set_source_rgb (_tmp1_, (gdouble) 0, (gdouble) 0, (gdouble) 0);
+	_tmp2_ = c;
+	cairo_paint_with_alpha (_tmp2_, 0.25);
+	_tmp3_ = c;
+	_tmp4_ = _cairo_reference0 (_tmp3_);
 	_cairo_destroy0 (self->priv->menubar_cairo_context);
-	self->priv->menubar_cairo_context = _tmp2_;
-	_tmp3_ = self->priv->menubar;
-	gtk_container_forall ((GtkContainer*) _tmp3_, _user_list_draw_child_cb_gtk_callback, self);
+	self->priv->menubar_cairo_context = _tmp4_;
+	_tmp5_ = self->priv->menubar;
+	gtk_container_forall ((GtkContainer*) _tmp5_, _user_list_draw_child_cb_gtk_callback, self);
 	result = FALSE;
 	return result;
 }
@@ -2555,7 +2177,7 @@ static void user_list_greeter_set_env (UserList* self, const gchar* key, const g
 		_tmp2_ = g_dbus_proxy_new_for_bus_sync (G_BUS_TYPE_SESSION, G_DBUS_PROXY_FLAGS_NONE, NULL, "org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus", NULL, &_inner_error_);
 		proxy = _tmp2_;
 		if (_inner_error_ != NULL) {
-			goto __catch12_g_error;
+			goto __catch11_g_error;
 		}
 		_tmp3_ = G_VARIANT_TYPE_ARRAY;
 		_tmp4_ = g_variant_builder_new (_tmp3_);
@@ -2573,8 +2195,8 @@ static void user_list_greeter_set_env (UserList* self, const gchar* key, const g
 		_g_variant_builder_unref0 (builder);
 		_g_object_unref0 (proxy);
 	}
-	goto __finally12;
-	__catch12_g_error:
+	goto __finally11;
+	__catch11_g_error:
 	{
 		GError* e = NULL;
 		GError* _tmp12_;
@@ -2583,11 +2205,11 @@ static void user_list_greeter_set_env (UserList* self, const gchar* key, const g
 		_inner_error_ = NULL;
 		_tmp12_ = e;
 		_tmp13_ = _tmp12_->message;
-		g_warning ("user-list.vala:542: Could not get set environment for indicators: %s", _tmp13_);
+		g_warning ("user-list.vala:489: Could not get set environment for indicators: %s", _tmp13_);
 		_g_error_free0 (e);
 		return;
 	}
-	__finally12:
+	__finally11:
 	if (_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
@@ -2611,163 +2233,8 @@ static void _user_list_screen_reader_toggled_cb_gtk_check_menu_item_toggled (Gtk
 }
 
 
-static void _user_list_indicator_loaded_cb_indicator_loader_loaded (IndicatorLoader* _sender, gpointer self) {
-	user_list_indicator_loaded_cb (self, _sender);
-}
-
-
-static void user_list_setup_indicators (UserList* self) {
-	GtkMenuItem* _tmp0_;
-	GtkMenuItem* _tmp1_;
-	GtkMenuItem* a11y_item;
-	GtkHBox* _tmp2_;
-	GtkHBox* _tmp3_;
-	GtkHBox* hbox;
-	gchar* _tmp4_ = NULL;
-	gchar* _tmp5_;
-	GtkImage* _tmp6_;
-	GtkImage* _tmp7_;
-	GtkImage* _tmp8_;
-	GtkImage* image;
-	GtkMenu* _tmp9_;
-	GtkMenu* _tmp10_;
-	const gchar* _tmp11_ = NULL;
-	GtkCheckMenuItem* _tmp12_;
-	GtkCheckMenuItem* _tmp13_;
-	GtkCheckMenuItem* item;
-	GtkCheckMenuItem* _tmp14_;
-	GtkCheckMenuItem* _tmp15_;
-	GtkMenu* _tmp16_;
-	GtkMenu* _tmp17_;
-	GtkCheckMenuItem* _tmp18_;
-	const gchar* _tmp19_ = NULL;
-	GtkCheckMenuItem* _tmp20_;
-	GtkCheckMenuItem* _tmp21_;
-	GtkCheckMenuItem* _tmp22_;
-	GtkCheckMenuItem* _tmp23_;
-	GtkMenu* _tmp24_;
-	GtkMenu* _tmp25_;
-	GtkCheckMenuItem* _tmp26_;
-	const gchar* _tmp27_ = NULL;
-	GtkCheckMenuItem* _tmp28_;
-	GtkCheckMenuItem* _tmp29_;
-	GtkCheckMenuItem* _tmp30_;
-	GtkCheckMenuItem* _tmp31_;
-	GtkMenu* _tmp32_;
-	GtkMenu* _tmp33_;
-	GtkCheckMenuItem* _tmp34_;
-	GtkMenuBar* _tmp35_;
-	GtkMenuBar* _tmp36_;
-	GList* _tmp37_ = NULL;
-	GList* _tmp38_;
-	guint _tmp39_ = 0U;
-	gchar* _tmp40_;
-	gchar* _tmp41_;
-	gchar* _tmp42_;
-	gchar* _tmp43_;
-	gchar** _tmp44_ = NULL;
-	gchar** filenames;
-	gint filenames_length1;
-	gint _filenames_size_;
-	IndicatorLoader* _tmp45_;
-	IndicatorLoader* _tmp46_;
-	IndicatorLoader* _tmp47_;
-	g_return_if_fail (self != NULL);
-	user_list_greeter_set_env (self, "INDICATOR_GREETER_MODE", "1");
-	user_list_greeter_set_env (self, "GIO_USE_VFS", "local");
-	user_list_greeter_set_env (self, "GVFS_DISABLE_FUSE", "1");
-	user_list_greeter_set_env (self, "RUNNING_UNDER_GDM", "1");
-	_tmp0_ = (GtkMenuItem*) gtk_menu_item_new ();
-	_tmp1_ = g_object_ref_sink (_tmp0_);
-	a11y_item = _tmp1_;
-	_tmp2_ = (GtkHBox*) gtk_hbox_new (FALSE, 3);
-	_tmp3_ = g_object_ref_sink (_tmp2_);
-	hbox = _tmp3_;
-	gtk_widget_show ((GtkWidget*) hbox);
-	gtk_container_add ((GtkContainer*) a11y_item, (GtkWidget*) hbox);
-	_tmp4_ = g_build_filename (PKGDATADIR, "a11y.svg", NULL);
-	_tmp5_ = _tmp4_;
-	_tmp6_ = (GtkImage*) gtk_image_new_from_file (_tmp5_);
-	_tmp7_ = g_object_ref_sink (_tmp6_);
-	_tmp8_ = _tmp7_;
-	_g_free0 (_tmp5_);
-	image = _tmp8_;
-	gtk_widget_show ((GtkWidget*) image);
-	gtk_container_add ((GtkContainer*) hbox, (GtkWidget*) image);
-	gtk_widget_show ((GtkWidget*) a11y_item);
-	_tmp9_ = (GtkMenu*) gtk_menu_new ();
-	_tmp10_ = g_object_ref_sink (_tmp9_);
-	gtk_menu_item_set_submenu (a11y_item, _tmp10_);
-	_g_object_unref0 (_tmp10_);
-	_tmp11_ = _ ("Onscreen keyboard");
-	_tmp12_ = (GtkCheckMenuItem*) gtk_check_menu_item_new_with_label (_tmp11_);
-	_tmp13_ = g_object_ref_sink (_tmp12_);
-	item = _tmp13_;
-	_tmp14_ = item;
-	g_signal_connect_object (_tmp14_, "toggled", (GCallback) _user_list_keyboard_toggled_cb_gtk_check_menu_item_toggled, self, 0);
-	_tmp15_ = item;
-	gtk_widget_show ((GtkWidget*) _tmp15_);
-	_tmp16_ = gtk_menu_item_get_submenu (a11y_item);
-	_tmp17_ = _tmp16_;
-	_tmp18_ = item;
-	gtk_menu_shell_append ((GtkMenuShell*) _tmp17_, (GtkWidget*) ((GtkMenuItem*) _tmp18_));
-	_tmp19_ = _ ("High Contrast");
-	_tmp20_ = (GtkCheckMenuItem*) gtk_check_menu_item_new_with_label (_tmp19_);
-	_tmp21_ = g_object_ref_sink (_tmp20_);
-	_g_object_unref0 (self->priv->high_contrast_item);
-	self->priv->high_contrast_item = _tmp21_;
-	_tmp22_ = self->priv->high_contrast_item;
-	g_signal_connect_object (_tmp22_, "toggled", (GCallback) _user_list_high_contrast_toggled_cb_gtk_check_menu_item_toggled, self, 0);
-	_tmp23_ = self->priv->high_contrast_item;
-	gtk_widget_show ((GtkWidget*) _tmp23_);
-	_tmp24_ = gtk_menu_item_get_submenu (a11y_item);
-	_tmp25_ = _tmp24_;
-	_tmp26_ = self->priv->high_contrast_item;
-	gtk_menu_shell_append ((GtkMenuShell*) _tmp25_, (GtkWidget*) ((GtkMenuItem*) _tmp26_));
-	_tmp27_ = _ ("Screen Reader");
-	_tmp28_ = (GtkCheckMenuItem*) gtk_check_menu_item_new_with_label (_tmp27_);
-	_tmp29_ = g_object_ref_sink (_tmp28_);
-	_g_object_unref0 (item);
-	item = _tmp29_;
-	_tmp30_ = item;
-	g_signal_connect_object (_tmp30_, "toggled", (GCallback) _user_list_screen_reader_toggled_cb_gtk_check_menu_item_toggled, self, 0);
-	_tmp31_ = item;
-	gtk_widget_show ((GtkWidget*) _tmp31_);
-	_tmp32_ = gtk_menu_item_get_submenu (a11y_item);
-	_tmp33_ = _tmp32_;
-	_tmp34_ = item;
-	gtk_menu_shell_append ((GtkMenuShell*) _tmp33_, (GtkWidget*) ((GtkMenuItem*) _tmp34_));
-	_tmp35_ = self->priv->menubar;
-	_tmp36_ = self->priv->menubar;
-	_tmp37_ = gtk_container_get_children ((GtkContainer*) _tmp36_);
-	_tmp38_ = _tmp37_;
-	_tmp39_ = g_list_length (_tmp38_);
-	gtk_menu_shell_insert ((GtkMenuShell*) _tmp35_, (GtkWidget*) a11y_item, ((gint) _tmp39_) - 1);
-	_g_list_free0 (_tmp38_);
-	_tmp40_ = g_strdup ("/usr/lib/indicators3/6/libsession.so");
-	_tmp41_ = g_strdup ("/usr/lib/indicators3/6/libdatetime.so");
-	_tmp42_ = g_strdup ("/usr/lib/indicators3/6/libpower.so");
-	_tmp43_ = g_strdup ("/usr/lib/indicators3/6/libsoundmenu.so");
-	_tmp44_ = g_new0 (gchar*, 4 + 1);
-	_tmp44_[0] = _tmp40_;
-	_tmp44_[1] = _tmp41_;
-	_tmp44_[2] = _tmp42_;
-	_tmp44_[3] = _tmp43_;
-	filenames = _tmp44_;
-	filenames_length1 = 4;
-	_filenames_size_ = filenames_length1;
-	_tmp45_ = indicator_loader_new (filenames, filenames_length1);
-	_indicator_loader_unref0 (self->priv->indicator_loader);
-	self->priv->indicator_loader = _tmp45_;
-	_tmp46_ = self->priv->indicator_loader;
-	g_signal_connect_object (_tmp46_, "loaded", (GCallback) _user_list_indicator_loaded_cb_indicator_loader_loaded, self, 0);
-	_tmp47_ = self->priv->indicator_loader;
-	indicator_loader_load (_tmp47_);
-	filenames = (_vala_array_free (filenames, filenames_length1, (GDestroyNotify) g_free), NULL);
-	_g_object_unref0 (item);
-	_g_object_unref0 (image);
-	_g_object_unref0 (hbox);
-	_g_object_unref0 (a11y_item);
+static gpointer _g_object_ref0 (gpointer self) {
+	return self ? g_object_ref (self) : NULL;
 }
 
 
@@ -2781,54 +2248,242 @@ static void _user_list_indicator_removed_cb_indicator_object_entry_removed (Indi
 }
 
 
-static void user_list_indicator_loaded_cb (UserList* self, IndicatorLoader* loader) {
-	IndicatorLoader* _tmp0_;
-	GList* _tmp1_;
+static void user_list_setup_indicators (UserList* self) {
+	GtkMenuItem* _tmp0_;
+	GtkMenuItem* _tmp1_;
+	GtkMenuItem* a11y_item;
+	GtkHBox* _tmp2_;
+	GtkHBox* _tmp3_;
+	GtkHBox* hbox;
+	GtkHBox* _tmp4_;
+	GtkMenuItem* _tmp5_;
+	GtkHBox* _tmp6_;
+	gchar* _tmp7_ = NULL;
+	gchar* _tmp8_;
+	GtkImage* _tmp9_;
+	GtkImage* _tmp10_;
+	GtkImage* _tmp11_;
+	GtkImage* image;
+	GtkImage* _tmp12_;
+	GtkHBox* _tmp13_;
+	GtkImage* _tmp14_;
+	GtkMenuItem* _tmp15_;
+	GtkMenuItem* _tmp16_;
+	GtkMenu* _tmp17_;
+	GtkMenu* _tmp18_;
+	const gchar* _tmp19_ = NULL;
+	GtkCheckMenuItem* _tmp20_;
+	GtkCheckMenuItem* _tmp21_;
+	GtkCheckMenuItem* item;
+	GtkCheckMenuItem* _tmp22_;
+	GtkCheckMenuItem* _tmp23_;
+	GtkMenuItem* _tmp24_;
+	GtkMenu* _tmp25_;
+	GtkMenu* _tmp26_;
+	GtkCheckMenuItem* _tmp27_;
+	const gchar* _tmp28_ = NULL;
+	GtkCheckMenuItem* _tmp29_;
+	GtkCheckMenuItem* _tmp30_;
+	GtkCheckMenuItem* _tmp31_;
+	GtkCheckMenuItem* _tmp32_;
+	GtkMenuItem* _tmp33_;
+	GtkMenu* _tmp34_;
+	GtkMenu* _tmp35_;
+	GtkCheckMenuItem* _tmp36_;
+	const gchar* _tmp37_ = NULL;
+	GtkCheckMenuItem* _tmp38_;
+	GtkCheckMenuItem* _tmp39_;
+	GtkCheckMenuItem* _tmp40_;
+	GtkCheckMenuItem* _tmp41_;
+	GtkMenuItem* _tmp42_;
+	GtkMenu* _tmp43_;
+	GtkMenu* _tmp44_;
+	GtkCheckMenuItem* _tmp45_;
+	GtkMenuBar* _tmp46_;
+	GtkMenuItem* _tmp47_;
+	GtkMenuBar* _tmp48_;
+	GList* _tmp49_ = NULL;
+	GList* _tmp50_;
+	guint _tmp51_ = 0U;
+	const gchar* _tmp52_ = NULL;
+	const gchar* _tmp53_ = NULL;
+	gchar* _tmp54_;
+	gchar* _tmp55_;
+	gchar* _tmp56_;
+	gchar* _tmp57_;
+	gchar** _tmp58_ = NULL;
+	gchar** filenames;
+	gint filenames_length1;
+	gint _filenames_size_;
+	gchar** _tmp59_;
+	gint _tmp59__length1;
+	const gchar* _tmp71_ = NULL;
+	const gchar* _tmp72_ = NULL;
 	g_return_if_fail (self != NULL);
-	g_return_if_fail (loader != NULL);
-	_tmp0_ = loader;
-	_tmp1_ = _tmp0_->indicator_objects;
+	user_list_greeter_set_env (self, "INDICATOR_GREETER_MODE", "1");
+	user_list_greeter_set_env (self, "GIO_USE_VFS", "local");
+	user_list_greeter_set_env (self, "GVFS_DISABLE_FUSE", "1");
+	user_list_greeter_set_env (self, "RUNNING_UNDER_GDM", "1");
+	_tmp0_ = (GtkMenuItem*) gtk_menu_item_new ();
+	_tmp1_ = g_object_ref_sink (_tmp0_);
+	a11y_item = _tmp1_;
+	_tmp2_ = (GtkHBox*) gtk_hbox_new (FALSE, 3);
+	_tmp3_ = g_object_ref_sink (_tmp2_);
+	hbox = _tmp3_;
+	_tmp4_ = hbox;
+	gtk_widget_show ((GtkWidget*) _tmp4_);
+	_tmp5_ = a11y_item;
+	_tmp6_ = hbox;
+	gtk_container_add ((GtkContainer*) _tmp5_, (GtkWidget*) _tmp6_);
+	_tmp7_ = g_build_filename (PKGDATADIR, "a11y.svg", NULL);
+	_tmp8_ = _tmp7_;
+	_tmp9_ = (GtkImage*) gtk_image_new_from_file (_tmp8_);
+	_tmp10_ = g_object_ref_sink (_tmp9_);
+	_tmp11_ = _tmp10_;
+	_g_free0 (_tmp8_);
+	image = _tmp11_;
+	_tmp12_ = image;
+	gtk_widget_show ((GtkWidget*) _tmp12_);
+	_tmp13_ = hbox;
+	_tmp14_ = image;
+	gtk_container_add ((GtkContainer*) _tmp13_, (GtkWidget*) _tmp14_);
+	_tmp15_ = a11y_item;
+	gtk_widget_show ((GtkWidget*) _tmp15_);
+	_tmp16_ = a11y_item;
+	_tmp17_ = (GtkMenu*) gtk_menu_new ();
+	_tmp18_ = g_object_ref_sink (_tmp17_);
+	gtk_menu_item_set_submenu (_tmp16_, _tmp18_);
+	_g_object_unref0 (_tmp18_);
+	_tmp19_ = _ ("Onscreen keyboard");
+	_tmp20_ = (GtkCheckMenuItem*) gtk_check_menu_item_new_with_label (_tmp19_);
+	_tmp21_ = g_object_ref_sink (_tmp20_);
+	item = _tmp21_;
+	_tmp22_ = item;
+	g_signal_connect_object (_tmp22_, "toggled", (GCallback) _user_list_keyboard_toggled_cb_gtk_check_menu_item_toggled, self, 0);
+	_tmp23_ = item;
+	gtk_widget_show ((GtkWidget*) _tmp23_);
+	_tmp24_ = a11y_item;
+	_tmp25_ = gtk_menu_item_get_submenu (_tmp24_);
+	_tmp26_ = _tmp25_;
+	_tmp27_ = item;
+	gtk_menu_shell_append ((GtkMenuShell*) _tmp26_, (GtkWidget*) ((GtkMenuItem*) _tmp27_));
+	_tmp28_ = _ ("High Contrast");
+	_tmp29_ = (GtkCheckMenuItem*) gtk_check_menu_item_new_with_label (_tmp28_);
+	_tmp30_ = g_object_ref_sink (_tmp29_);
+	_g_object_unref0 (self->priv->high_contrast_item);
+	self->priv->high_contrast_item = _tmp30_;
+	_tmp31_ = self->priv->high_contrast_item;
+	g_signal_connect_object (_tmp31_, "toggled", (GCallback) _user_list_high_contrast_toggled_cb_gtk_check_menu_item_toggled, self, 0);
+	_tmp32_ = self->priv->high_contrast_item;
+	gtk_widget_show ((GtkWidget*) _tmp32_);
+	_tmp33_ = a11y_item;
+	_tmp34_ = gtk_menu_item_get_submenu (_tmp33_);
+	_tmp35_ = _tmp34_;
+	_tmp36_ = self->priv->high_contrast_item;
+	gtk_menu_shell_append ((GtkMenuShell*) _tmp35_, (GtkWidget*) ((GtkMenuItem*) _tmp36_));
+	_tmp37_ = _ ("Screen Reader");
+	_tmp38_ = (GtkCheckMenuItem*) gtk_check_menu_item_new_with_label (_tmp37_);
+	_tmp39_ = g_object_ref_sink (_tmp38_);
+	_g_object_unref0 (item);
+	item = _tmp39_;
+	_tmp40_ = item;
+	g_signal_connect_object (_tmp40_, "toggled", (GCallback) _user_list_screen_reader_toggled_cb_gtk_check_menu_item_toggled, self, 0);
+	_tmp41_ = item;
+	gtk_widget_show ((GtkWidget*) _tmp41_);
+	_tmp42_ = a11y_item;
+	_tmp43_ = gtk_menu_item_get_submenu (_tmp42_);
+	_tmp44_ = _tmp43_;
+	_tmp45_ = item;
+	gtk_menu_shell_append ((GtkMenuShell*) _tmp44_, (GtkWidget*) ((GtkMenuItem*) _tmp45_));
+	_tmp46_ = self->priv->menubar;
+	_tmp47_ = a11y_item;
+	_tmp48_ = self->priv->menubar;
+	_tmp49_ = gtk_container_get_children ((GtkContainer*) _tmp48_);
+	_tmp50_ = _tmp49_;
+	_tmp51_ = g_list_length (_tmp50_);
+	gtk_menu_shell_insert ((GtkMenuShell*) _tmp46_, (GtkWidget*) _tmp47_, ((gint) _tmp51_) - 1);
+	_g_list_free0 (_tmp50_);
+	_tmp52_ = g_getenv ("LANG");
+	_tmp53_ = g_getenv ("LANGUAGE");
+	g_debug ("user-list.vala:529: LANG=%s LANGUAGE=%s", _tmp52_, _tmp53_);
+	_tmp54_ = g_strdup ("/usr/lib/indicators3/6/libsession.so");
+	_tmp55_ = g_strdup ("/usr/lib/indicators3/6/libdatetime.so");
+	_tmp56_ = g_strdup ("/usr/lib/indicators3/6/libpower.so");
+	_tmp57_ = g_strdup ("/usr/lib/indicators3/6/libsoundmenu.so");
+	_tmp58_ = g_new0 (gchar*, 4 + 1);
+	_tmp58_[0] = _tmp54_;
+	_tmp58_[1] = _tmp55_;
+	_tmp58_[2] = _tmp56_;
+	_tmp58_[3] = _tmp57_;
+	filenames = _tmp58_;
+	filenames_length1 = 4;
+	_filenames_size_ = filenames_length1;
+	_tmp59_ = filenames;
+	_tmp59__length1 = filenames_length1;
 	{
-		GList* io_collection = NULL;
-		GList* io_it = NULL;
-		io_collection = _tmp1_;
-		for (io_it = io_collection; io_it != NULL; io_it = io_it->next) {
-			IndicatorObject* _tmp2_;
-			IndicatorObject* io = NULL;
-			_tmp2_ = _g_object_ref0 ((IndicatorObject*) io_it->data);
-			io = _tmp2_;
+		gchar** filename_collection = NULL;
+		gint filename_collection_length1 = 0;
+		gint _filename_collection_size_ = 0;
+		gint filename_it = 0;
+		filename_collection = _tmp59_;
+		filename_collection_length1 = _tmp59__length1;
+		for (filename_it = 0; filename_it < _tmp59__length1; filename_it = filename_it + 1) {
+			gchar* _tmp60_;
+			gchar* filename = NULL;
+			_tmp60_ = g_strdup (filename_collection[filename_it]);
+			filename = _tmp60_;
 			{
-				IndicatorObject* _tmp3_;
-				IndicatorObject* _tmp4_;
-				IndicatorObject* _tmp5_;
-				GList* _tmp6_ = NULL;
-				_tmp3_ = io;
-				g_signal_connect_object (_tmp3_, "entry-added", (GCallback) _user_list_indicator_added_cb_indicator_object_entry_added, self, 0);
-				_tmp4_ = io;
-				g_signal_connect_object (_tmp4_, "entry-removed", (GCallback) _user_list_indicator_removed_cb_indicator_object_entry_removed, self, 0);
-				_tmp5_ = io;
-				_tmp6_ = indicator_object_get_entries (_tmp5_);
+				const gchar* _tmp61_;
+				IndicatorObject* _tmp62_;
+				IndicatorObject* io;
+				IndicatorObject* _tmp63_;
+				IndicatorObject* _tmp64_;
+				IndicatorObject* _tmp65_;
+				IndicatorObject* _tmp66_;
+				IndicatorObject* _tmp67_;
+				GList* _tmp68_ = NULL;
+				_tmp61_ = filename;
+				_tmp62_ = indicator_object_new_from_file (_tmp61_);
+				io = _tmp62_;
+				_tmp63_ = io;
+				_tmp64_ = _g_object_ref0 (_tmp63_);
+				self->indicator_objects = g_list_append (self->indicator_objects, _tmp64_);
+				_tmp65_ = io;
+				g_signal_connect_object (_tmp65_, "entry-added", (GCallback) _user_list_indicator_added_cb_indicator_object_entry_added, self, 0);
+				_tmp66_ = io;
+				g_signal_connect_object (_tmp66_, "entry-removed", (GCallback) _user_list_indicator_removed_cb_indicator_object_entry_removed, self, 0);
+				_tmp67_ = io;
+				_tmp68_ = indicator_object_get_entries (_tmp67_);
 				{
 					GList* entry_collection = NULL;
 					GList* entry_it = NULL;
-					entry_collection = _tmp6_;
+					entry_collection = _tmp68_;
 					for (entry_it = entry_collection; entry_it != NULL; entry_it = entry_it->next) {
 						IndicatorObjectEntry* entry = NULL;
 						entry = (IndicatorObjectEntry*) entry_it->data;
 						{
-							IndicatorObject* _tmp7_;
-							IndicatorObjectEntry* _tmp8_;
-							_tmp7_ = io;
-							_tmp8_ = entry;
-							user_list_indicator_added_cb (self, _tmp7_, _tmp8_);
+							IndicatorObject* _tmp69_;
+							IndicatorObjectEntry* _tmp70_;
+							_tmp69_ = io;
+							_tmp70_ = entry;
+							user_list_indicator_added_cb (self, _tmp69_, _tmp70_);
 						}
 					}
 					_g_list_free0 (entry_collection);
 				}
 				_g_object_unref0 (io);
+				_g_free0 (filename);
 			}
 		}
 	}
+	_tmp71_ = g_getenv ("LANG");
+	_tmp72_ = g_getenv ("LANGUAGE");
+	g_debug ("user-list.vala:543: LANG=%s LANGUAGE=%s", _tmp71_, _tmp72_);
+	filenames = (_vala_array_free (filenames, filenames_length1, (GDestroyNotify) g_free), NULL);
+	_g_object_unref0 (item);
+	_g_object_unref0 (image);
+	_g_object_unref0 (hbox);
+	_g_object_unref0 (a11y_item);
 }
 
 
@@ -2891,7 +2546,7 @@ static void user_list_keyboard_toggled_cb (UserList* self, GtkCheckMenuItem* ite
 			_argv_size_ = argv_length1;
 			if (_inner_error_ != NULL) {
 				argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
-				goto __catch13_g_error;
+				goto __catch12_g_error;
 			}
 			_tmp3_ = argv;
 			_tmp3__length1 = argv_length1;
@@ -2900,7 +2555,7 @@ static void user_list_keyboard_toggled_cb (UserList* self, GtkCheckMenuItem* ite
 			onboard_stdout_fd = _tmp5_;
 			if (_inner_error_ != NULL) {
 				argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
-				goto __catch13_g_error;
+				goto __catch12_g_error;
 			}
 			_tmp6_ = onboard_stdout_fd;
 			_tmp7_ = fdopen (_tmp6_, "r");
@@ -2921,8 +2576,8 @@ static void user_list_keyboard_toggled_cb (UserList* self, GtkCheckMenuItem* ite
 			_fclose0 (f);
 			argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
 		}
-		goto __finally13;
-		__catch13_g_error:
+		goto __finally12;
+		__catch12_g_error:
 		{
 			GError* e = NULL;
 			GError* _tmp13_;
@@ -2931,11 +2586,11 @@ static void user_list_keyboard_toggled_cb (UserList* self, GtkCheckMenuItem* ite
 			_inner_error_ = NULL;
 			_tmp13_ = e;
 			_tmp14_ = _tmp13_->message;
-			g_warning ("user-list.vala:631: Error setting up keyboard: %s", _tmp14_);
+			g_warning ("user-list.vala:575: Error setting up keyboard: %s", _tmp14_);
 			_g_error_free0 (e);
 			return;
 		}
-		__finally13:
+		__finally12:
 		if (_inner_error_ != NULL) {
 			g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 			g_clear_error (&_inner_error_);
@@ -3217,35 +2872,33 @@ void user_list_set_error (UserList* self, const gchar* text) {
 static guint user_list_get_indicator_index (UserList* self, IndicatorObject* object) {
 	guint result = 0U;
 	guint index;
-	IndicatorLoader* _tmp0_;
-	GList* _tmp1_;
+	GList* _tmp0_;
 	g_return_val_if_fail (self != NULL, 0U);
 	g_return_val_if_fail (object != NULL, 0U);
 	index = (guint) 0;
-	_tmp0_ = self->priv->indicator_loader;
-	_tmp1_ = _tmp0_->indicator_objects;
+	_tmp0_ = self->indicator_objects;
 	{
 		GList* io_collection = NULL;
 		GList* io_it = NULL;
-		io_collection = _tmp1_;
+		io_collection = _tmp0_;
 		for (io_it = io_collection; io_it != NULL; io_it = io_it->next) {
-			IndicatorObject* _tmp2_;
+			IndicatorObject* _tmp1_;
 			IndicatorObject* io = NULL;
-			_tmp2_ = _g_object_ref0 ((IndicatorObject*) io_it->data);
-			io = _tmp2_;
+			_tmp1_ = _g_object_ref0 ((IndicatorObject*) io_it->data);
+			io = _tmp1_;
 			{
+				IndicatorObject* _tmp2_;
 				IndicatorObject* _tmp3_;
-				IndicatorObject* _tmp4_;
-				guint _tmp5_;
-				_tmp3_ = io;
-				_tmp4_ = object;
-				if (_tmp3_ == _tmp4_) {
+				guint _tmp4_;
+				_tmp2_ = io;
+				_tmp3_ = object;
+				if (_tmp2_ == _tmp3_) {
 					result = index;
 					_g_object_unref0 (io);
 					return result;
 				}
-				_tmp5_ = index;
-				index = _tmp5_ + 1;
+				_tmp4_ = index;
+				index = _tmp4_ + 1;
 				_g_object_unref0 (io);
 			}
 		}
@@ -3257,39 +2910,37 @@ static guint user_list_get_indicator_index (UserList* self, IndicatorObject* obj
 
 static IndicatorObject* user_list_get_indicator_object_from_entry (UserList* self, IndicatorObjectEntry* entry) {
 	IndicatorObject* result = NULL;
-	IndicatorLoader* _tmp0_;
-	GList* _tmp1_;
+	GList* _tmp0_;
 	g_return_val_if_fail (self != NULL, NULL);
 	g_return_val_if_fail (entry != NULL, NULL);
-	_tmp0_ = self->priv->indicator_loader;
-	_tmp1_ = _tmp0_->indicator_objects;
+	_tmp0_ = self->indicator_objects;
 	{
 		GList* io_collection = NULL;
 		GList* io_it = NULL;
-		io_collection = _tmp1_;
+		io_collection = _tmp0_;
 		for (io_it = io_collection; io_it != NULL; io_it = io_it->next) {
-			IndicatorObject* _tmp2_;
+			IndicatorObject* _tmp1_;
 			IndicatorObject* io = NULL;
-			_tmp2_ = _g_object_ref0 ((IndicatorObject*) io_it->data);
-			io = _tmp2_;
+			_tmp1_ = _g_object_ref0 ((IndicatorObject*) io_it->data);
+			io = _tmp1_;
 			{
-				IndicatorObject* _tmp3_;
-				GList* _tmp4_ = NULL;
-				_tmp3_ = io;
-				_tmp4_ = indicator_object_get_entries (_tmp3_);
+				IndicatorObject* _tmp2_;
+				GList* _tmp3_ = NULL;
+				_tmp2_ = io;
+				_tmp3_ = indicator_object_get_entries (_tmp2_);
 				{
 					GList* e_collection = NULL;
 					GList* e_it = NULL;
-					e_collection = _tmp4_;
+					e_collection = _tmp3_;
 					for (e_it = e_collection; e_it != NULL; e_it = e_it->next) {
 						IndicatorObjectEntry* e = NULL;
 						e = (IndicatorObjectEntry*) e_it->data;
 						{
+							IndicatorObjectEntry* _tmp4_;
 							IndicatorObjectEntry* _tmp5_;
-							IndicatorObjectEntry* _tmp6_;
-							_tmp5_ = e;
-							_tmp6_ = entry;
-							if (_tmp5_ == _tmp6_) {
+							_tmp4_ = e;
+							_tmp5_ = entry;
+							if (_tmp4_ == _tmp5_) {
 								result = io;
 								_g_list_free0 (e_collection);
 								return result;
@@ -3384,7 +3035,7 @@ static void user_list_indicator_added_cb (UserList* self, IndicatorObject* objec
 	}
 	_tmp15_ = entry;
 	_tmp16_ = pos;
-	g_debug ("user-list.vala:774: Adding indicator object %p at position %d", _tmp15_, _tmp16_);
+	g_debug ("user-list.vala:718: Adding indicator object %p at position %d", _tmp15_, _tmp16_);
 	_tmp17_ = entry;
 	_tmp18_ = indicator_menu_item_new (_tmp17_);
 	_tmp19_ = g_object_ref_sink (_tmp18_);
@@ -3405,7 +3056,7 @@ static void user_list_indicator_removed_cb (UserList* self, IndicatorObject* obj
 	g_return_if_fail (object != NULL);
 	g_return_if_fail (entry != NULL);
 	_tmp0_ = entry;
-	g_debug ("user-list.vala:782: Removing indicator object %p", _tmp0_);
+	g_debug ("user-list.vala:726: Removing indicator object %p", _tmp0_);
 	_tmp1_ = self->priv->menubar;
 	_tmp2_ = gtk_container_get_children ((GtkContainer*) _tmp1_);
 	{
@@ -3444,7 +3095,7 @@ static void user_list_indicator_removed_cb (UserList* self, IndicatorObject* obj
 		_g_list_free0 (child_collection);
 	}
 	_tmp10_ = entry;
-	g_warning ("user-list.vala:794: Indicator object %p not in menubar", _tmp10_);
+	g_warning ("user-list.vala:738: Indicator object %p not in menubar", _tmp10_);
 }
 
 
@@ -3697,7 +3348,7 @@ static void user_list_login_button_clicked_cb (UserList* self) {
 	g_return_if_fail (self != NULL);
 	_tmp0_ = self->priv->selected_entry;
 	_tmp1_ = _tmp0_->name;
-	g_debug ("user-list.vala:891: Start session for %s", _tmp1_);
+	g_debug ("user-list.vala:835: Start session for %s", _tmp1_);
 	g_signal_emit_by_name (self, "start-session");
 }
 
@@ -3855,7 +3506,7 @@ static void user_list_scroll_animate_cb (UserList* self, gdouble timestep) {
 	_tmp27_ = self->priv->scroll_target_location;
 	if (_tmp26_ == _tmp27_) {
 		AnimateTimer* _tmp28_;
-		g_debug ("user-list.vala:948: Stop scroll animation");
+		g_debug ("user-list.vala:892: Stop scroll animation");
 		_tmp28_ = self->priv->scroll_timer;
 		animate_timer_stop (_tmp28_);
 	}
@@ -3890,7 +3541,7 @@ static void user_list_background_animate_cb (UserList* self, gdouble timestep) {
 		Background* _tmp5_;
 		Background* _tmp6_;
 		AnimateTimer* _tmp7_;
-		g_debug ("user-list.vala:966: Stop background animation");
+		g_debug ("user-list.vala:910: Stop background animation");
 		_tmp5_ = self->priv->background;
 		_tmp6_ = _background_ref0 (_tmp5_);
 		_background_unref0 (self->priv->old_background);
@@ -3936,7 +3587,7 @@ static gboolean user_list_change_background_timeout_cb (UserList* self) {
 		Background* _tmp11_;
 		Background* _tmp12_;
 		Background* _tmp13_;
-		g_debug ("user-list.vala:982: Change background");
+		g_debug ("user-list.vala:926: Change background");
 		_tmp9_ = self->priv->frame_count;
 		if (_tmp9_ > 0) {
 			self->priv->background_alpha = 0.0;
@@ -4024,7 +3675,7 @@ static void user_list_select_entry (UserList* self, UserEntry* entry, gdouble di
 			const gchar* _tmp10_;
 			_tmp7_ = entry;
 			_tmp8_ = _tmp7_->name;
-			g_debug ("user-list.vala:1019: Select %s", _tmp8_);
+			g_debug ("user-list.vala:963: Select %s", _tmp8_);
 			user_list_change_background (self);
 			_tmp9_ = self->priv->selected_entry;
 			_tmp10_ = _tmp9_->name;
@@ -4059,7 +3710,7 @@ static void user_list_select_entry (UserList* self, UserEntry* entry, gdouble di
 	_tmp23_ = _tmp17_;
 	if (_tmp23_) {
 		AnimateTimer* _tmp24_;
-		g_debug ("user-list.vala:1033: Start scroll animation");
+		g_debug ("user-list.vala:977: Start scroll animation");
 		_tmp24_ = self->priv->scroll_timer;
 		animate_timer_reset (_tmp24_);
 	}
@@ -4474,7 +4125,7 @@ static void user_list_real_size_allocate (GtkWidget* base, GtkAllocation* alloca
 		gint _tmp21_ = 0;
 		_tmp20_ = gtk_widget_get_allocated_width ((GtkWidget*) self);
 		_tmp21_ = gtk_widget_get_allocated_height ((GtkWidget*) self);
-		g_debug ("user-list.vala:1132: Resized to %dx%d", _tmp20_, _tmp21_);
+		g_debug ("user-list.vala:1076: Resized to %dx%d", _tmp20_, _tmp21_);
 	}
 	_tmp22_ = self->priv->menubar;
 	gtk_widget_get_preferred_size ((GtkWidget*) _tmp22_, NULL, &_tmp23_);
@@ -4536,7 +4187,7 @@ static void user_list_real_size_allocate (GtkWidget* base, GtkAllocation* alloca
 	_tmp57_ = resized;
 	if (_tmp57_) {
 		GHashTable* _tmp58_;
-		g_debug ("user-list.vala:1165: Regenerating backgrounds");
+		g_debug ("user-list.vala:1109: Regenerating backgrounds");
 		_tmp58_ = self->priv->backgrounds;
 		g_hash_table_remove_all (_tmp58_);
 		user_list_change_background (self);
@@ -4580,7 +4231,6 @@ static void user_list_draw_entry (UserList* self, cairo_t* c, UserEntry* entry, 
 	g_return_if_fail (entry != NULL);
 	_tmp0_ = c;
 	cairo_save (_tmp0_);
-	alpha = 0.5;
 	_tmp1_ = self->priv->high_contrast_item;
 	_tmp2_ = gtk_check_menu_item_get_active (_tmp1_);
 	_tmp3_ = _tmp2_;
@@ -4771,7 +4421,7 @@ static void user_list_draw_background (UserList* self, cairo_t* c) {
 	_tmp10_ = _tmp0_;
 	if (_tmp10_) {
 		AnimateTimer* _tmp11_;
-		g_debug ("user-list.vala:1238: Start background animation");
+		g_debug ("user-list.vala:1179: Start background animation");
 		_tmp11_ = self->priv->background_timer;
 		animate_timer_reset (_tmp11_);
 	}
@@ -4836,7 +4486,7 @@ static gboolean user_list_draw_expire_cb (UserList* self) {
 	elapsed = _tmp1_;
 	_tmp2_ = self->priv->draw_count;
 	_tmp3_ = self->priv->draw_count;
-	g_debug ("user-list.vala:1263: Drew %d frames in %.1f seconds (%f fps)", _tmp2_, elapsed, _tmp3_ / elapsed);
+	g_debug ("user-list.vala:1204: Drew %d frames in %.1f seconds (%f fps)", _tmp2_, elapsed, _tmp3_ / elapsed);
 	_g_timer_destroy0 (self->priv->draw_timer);
 	self->priv->draw_timer = NULL;
 	self->priv->draw_count = 0;
@@ -4892,7 +4542,7 @@ static gboolean user_list_real_draw (GtkWidget* base, cairo_t* c) {
 	g_return_val_if_fail (c != NULL, FALSE);
 	_tmp0_ = self->priv->frame_count;
 	if (_tmp0_ == 0) {
-		g_debug ("user-list.vala:1275: Rendered first frame");
+		g_debug ("user-list.vala:1216: Rendered first frame");
 	}
 	_tmp1_ = self->priv->draw_timeout;
 	if (_tmp1_ != ((guint) 0)) {
@@ -5019,7 +4669,7 @@ static gboolean user_list_real_draw (GtkWidget* base, cairo_t* c) {
 				_tmp17_ = user_list_get_n_above (self);
 				_tmp18_ = _tmp17_;
 				_tmp19_ = grid_size;
-				h_above = ((gdouble) _tmp18_) * _tmp19_;
+				h_above = ((gdouble) (_tmp18_ + 1)) * _tmp19_;
 				_tmp20_ = c;
 				cairo_save (_tmp20_);
 				_tmp21_ = c;
@@ -5066,7 +4716,7 @@ static gboolean user_list_real_draw (GtkWidget* base, cairo_t* c) {
 				_tmp53_ = user_list_get_n_below (self);
 				_tmp54_ = _tmp53_;
 				_tmp55_ = grid_size;
-				h_below = ((gdouble) _tmp54_) * _tmp55_;
+				h_below = ((gdouble) (_tmp54_ + 1)) * _tmp55_;
 				_tmp56_ = c;
 				cairo_save (_tmp56_);
 				_tmp57_ = c;
@@ -5360,13 +5010,13 @@ static gboolean user_list_real_key_press_event (GtkWidget* base, GdkEventKey* ev
 	switch (_tmp1_) {
 		case GDK_KEY_Up:
 		{
-			g_debug ("user-list.vala:1403: Up pressed");
+			g_debug ("user-list.vala:1342: Up pressed");
 			user_list_select_prev_entry (self);
 			break;
 		}
 		case GDK_KEY_Down:
 		{
-			g_debug ("user-list.vala:1407: Down pressed");
+			g_debug ("user-list.vala:1346: Down pressed");
 			user_list_select_next_entry (self);
 			break;
 		}
@@ -5859,7 +5509,7 @@ static void user_list_finalize (GObject* obj) {
 	__g_list_free__g_object_unref0_0 (self->priv->children);
 	_g_object_unref0 (self->priv->menubar);
 	_cairo_destroy0 (self->priv->menubar_cairo_context);
-	_indicator_loader_unref0 (self->priv->indicator_loader);
+	__g_list_free__g_object_unref0_0 (self->indicator_objects);
 	_g_object_unref0 (self->priv->high_contrast_item);
 	_g_object_unref0 (self->priv->keyboard_window);
 	_g_free0 (self->priv->error);

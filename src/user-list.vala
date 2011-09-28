@@ -272,58 +272,6 @@ public class Background
     }
 }
 
-private class IndicatorLoader
-{
-    public List<Indicator.Object> indicator_objects;
-
-    private string[] filenames;
-    private unowned Thread<List<Indicator.Object>> thread;
-
-    public signal void loaded ();
-
-    public IndicatorLoader (string[] filenames)
-    {
-        this.filenames = filenames;
-    }
-
-    public void load ()
-    {
-        debug ("Loading indicators %s", string.joinv (",", filenames));
-        
-        try
-        {
-            thread = Thread<List<Indicator.Object>>.create<List<Indicator.Object>> (load_indicators, true);
-        }
-        catch (ThreadError e)
-        {
-        }
-    }
-    
-    private bool ready_cb ()
-    {
-        debug ("Indicators loaded");
-
-        indicator_objects = thread.join ();
-        loaded ();
-
-        return false;
-    }
-
-    private List<Indicator.Object> load_indicators ()
-    {
-        List<Indicator.Object> indicators = null;
-
-        foreach (var filename in filenames)
-        {
-            var o = new Indicator.Object.from_file (filename);
-            indicators.append (o);
-        }
-
-        Gdk.threads_add_idle (ready_cb);
-        return indicators;
-    }
-}
-
 public class UserList : Gtk.Container
 {
     private string default_theme_name;
@@ -357,7 +305,7 @@ public class UserList : Gtk.Container
 
     private Gtk.MenuBar menubar;
     private Cairo.Context menubar_cairo_context;
-    private IndicatorLoader indicator_loader;
+    public List<Indicator.Object> indicator_objects;
     private Gtk.CheckMenuItem high_contrast_item;
 
     private Pid keyboard_pid = 0;
@@ -507,9 +455,8 @@ public class UserList : Gtk.Container
     {
         draw_background (c);
 
-        // Disable indicator background fading - it will need a FFE
-        //c.set_source_rgb (0, 0, 0);
-        //c.paint_with_alpha (0.25);
+        c.set_source_rgb (0, 0, 0);
+        c.paint_with_alpha (0.25);
 
         menubar_cairo_context = c;
         menubar.forall (draw_child_cb);
@@ -579,24 +526,21 @@ public class UserList : Gtk.Container
         a11y_item.submenu.append (item);
         menubar.insert (a11y_item, (int) menubar.get_children ().length () - 1);
 
+        debug ("LANG=%s LANGUAGE=%s", Environment.get_variable ("LANG"), Environment.get_variable ("LANGUAGE"));
         string[] filenames = {"/usr/lib/indicators3/6/libsession.so",
                               "/usr/lib/indicators3/6/libdatetime.so",
                               "/usr/lib/indicators3/6/libpower.so",
                               "/usr/lib/indicators3/6/libsoundmenu.so"};
-        indicator_loader = new IndicatorLoader (filenames);
-        indicator_loader.loaded.connect (indicator_loaded_cb);
-        indicator_loader.load ();
-    }
-
-    private void indicator_loaded_cb (IndicatorLoader loader)
-    {
-        foreach (var io in loader.indicator_objects)
+        foreach (var filename in filenames)
         {
+            var io = new Indicator.Object.from_file (filename);
+            indicator_objects.append (io);
             io.entry_added.connect (indicator_added_cb);
             io.entry_removed.connect (indicator_removed_cb);
             foreach (var entry in io.get_entries ())
                 indicator_added_cb (io, entry);
         }
+        debug ("LANG=%s LANGUAGE=%s", Environment.get_variable ("LANG"), Environment.get_variable ("LANGUAGE"));
     }
 
     private void keyboard_toggled_cb (Gtk.CheckMenuItem item)
@@ -730,7 +674,7 @@ public class UserList : Gtk.Container
     {
         uint index = 0;
 
-        foreach (var io in indicator_loader.indicator_objects)
+        foreach (var io in indicator_objects)
         {
             if (io == object)
                 return index;
@@ -742,7 +686,7 @@ public class UserList : Gtk.Container
 
     private Indicator.Object? get_indicator_object_from_entry (Indicator.ObjectEntry entry)
     {
-        foreach (var io in indicator_loader.indicator_objects)
+        foreach (var io in indicator_objects)
         {
             foreach (var e in io.get_entries ())
             {
@@ -1172,9 +1116,6 @@ public class UserList : Gtk.Container
     {
         c.save ();
         
-        // Disable carousel fading - it will need a FFE
-        alpha = 0.5;
-
         if (high_contrast_item.active)
             alpha = 1.0;
 
@@ -1295,8 +1236,7 @@ public class UserList : Gtk.Container
         foreach (var entry in entries)
         {
             /* Draw entries above the box */
-            var h_above = (double) n_above * grid_size;
-            // FIXME: When using carousel fading: var h_above = (double) (n_above + 1) * grid_size;
+            var h_above = (double) (n_above + 1) * grid_size;
             c.save ();
             c.rectangle (0, -h_above, box_width * grid_size, h_above);
             c.clip ();
@@ -1312,8 +1252,7 @@ public class UserList : Gtk.Container
             c.restore ();
 
             /* Draw entries below the box */
-            var h_below = (double) n_below * grid_size;
-            // FIXME: When using carousel fading: var h_below = (double) (n_below + 1) * grid_size;
+            var h_below = (double) (n_below + 1) * grid_size;
             c.save ();
             c.rectangle (0, box_height * grid_size, box_width * grid_size, h_below);
             c.clip ();

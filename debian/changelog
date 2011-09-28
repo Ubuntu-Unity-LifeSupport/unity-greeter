@@ -1,3 +1,12 @@
+unity-greeter (0.1.1-0ubuntu1) oneiric; urgency=low
+
+  * New upstream release:
+    - Stop loading indicators in a thread - they don't seem thread safe
+    - Fade usernames so it looks more like a carousel (LP: #860246)
+    - Darken indicator background so they are easier to read (LP: #860243)
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Wed, 28 Sep 2011 15:34:50 +1000
+
 unity-greeter (0.1.0-0ubuntu1) oneiric; urgency=low
 
   * New upstream release:
