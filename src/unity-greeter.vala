@@ -1,4 +1,5 @@
-/*
+/* -*- Mode: Vala; indent-tabs-mode: nil; tab-width: 4 -*-
+ *
  * Copyright (C) 2011 Canonical Ltd
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,6 +16,8 @@
  *
  * Authored by: Robert Ancell <robert.ancell@canonical.com>
  */
+
+public const int grid_size = 40;
 
 public class UnityGreeter
 {
@@ -42,7 +45,6 @@ public class UnityGreeter
 
     private SettingsDaemon settings_daemon;
 
-    private string default_background;
     public UserList user_list;
 
     private Gtk.Window main_window;
@@ -62,18 +64,17 @@ public class UnityGreeter
         greeter.show_message.connect (show_message_cb);
         greeter.show_prompt.connect (show_prompt_cb);
         greeter.authentication_complete.connect (authentication_complete_cb);
-        if (!test_mode)
+        var connected = false;
+        try
         {
-            try
-            {
-                greeter.connect_sync ();
-            }
-            catch (Error e)
-            {
-                warning ("Failed to connect to LightDM daemon");
-                Posix.exit (Posix.EXIT_FAILURE);
-            }
+            connected = greeter.connect_sync ();
         }
+        catch (Error e)
+        {
+            warning ("Failed to connect to LightDM daemon");
+        }
+        if (!connected && !test_mode)
+            Posix.exit (Posix.EXIT_FAILURE);
 
         if (!test_mode)
         {
@@ -102,8 +103,6 @@ public class UnityGreeter
         }
         catch (Error e) {}
 
-        default_background = get_config_value ("greeter", "background", "#2C001E");
-
         main_window = new Gtk.Window ();
         var bg_color = Gdk.Color ();
         Gdk.Color.parse ("#2C001E", out bg_color);
@@ -121,9 +120,11 @@ public class UnityGreeter
         }
 
         user_list = new UserList ();
-        main_window.add (user_list);
-        user_list.set_logo (get_config_value ("greeter", "logo", Path.build_filename (Config.PKGDATADIR, "logo.png", null)));
+        user_list.background.draw_grid = get_config_value ("greeter", "draw-grid", "true") == "true";
+        user_list.background.default_background = get_config_value ("greeter", "background", "#2C001E");
+        user_list.background.set_logo (get_config_value ("greeter", "logo", Path.build_filename (Config.PKGDATADIR, "logo.png", null)));
         user_list.show ();
+        main_window.add (user_list);
 
         foreach (var session in LightDM.get_sessions ())
         {
@@ -133,11 +134,15 @@ public class UnityGreeter
 
         if (test_mode)
         {
-            user_list.add_entry ("alice", "가나다라마", "/usr/share/backgrounds/Berries_by_Orb9220.jpg", true);
-            user_list.add_entry ("bob", "Bob User", "/usr/share/backgrounds/White_flowers_by_Garuna_bor-bor.jpg");
-            user_list.add_entry ("carol", "Carol User", "/usr/share/backgrounds/Bird_by_Magnus.jpg");
-            user_list.add_entry ("*guest", _("Guest Session"), default_background, true);
-            user_list.add_entry ("*other", _("Other..."), default_background);
+            user_list.add_entry ("alice", "가나다라마", "/usr/share/backgrounds/Darkening_Clockwork_by_Matt_Katzenberger.jpg", get_layout_by_name ("cn"), true);
+            user_list.add_entry ("chris", "Christopher Halse Rogers!!!!!!!!!!!!!!!", "/usr/share/backgrounds/Darkening_Clockwork_by_Matt_Katzenberger.jpg", null, true);
+            user_list.add_entry ("jorge", "Jorge O Castro", "/usr/share/backgrounds/PurpleDancers_by_Emilio_Merlino.jpg", get_layout_by_name ("us"));
+            user_list.add_entry ("ken", "Ken VanDine", "/usr/share/backgrounds/Small_flowers_by_Dariusz_Duma.jpg", get_layout_by_name ("uk"));
+            user_list.add_entry ("matthew", "Matthew Paul Thomas", "/usr/share/backgrounds/Not_Alone_by_Deacon_MacMillan.jpg", get_layout_by_name ("uk"));
+            user_list.add_entry ("otto", "Otto Greenslade", "/usr/share/backgrounds/Mount_Snowdon,_Wales_by_Adam_Vellender.jpg", get_layout_by_name ("uk"));
+            user_list.add_entry ("pitti", "Martin Pitt", "/usr/share/backgrounds/Stalking_Ocelot_by_Sayantan_Chaudhuri.jpg", get_layout_by_name ("de"));
+            user_list.add_entry ("desrt", "Ryan Lortie", "/usr/share/backgrounds/Power_of_Words_by_Antonio_Litterio.jpg", get_layout_by_name ("ca"));
+            user_list.add_entry ("*guest", _("Guest Session"), null, null, true);
 
             user_list.add_session ("gnome", "Ubuntu");
             user_list.add_session ("gnome-shell", "GNOME");
@@ -148,7 +153,9 @@ public class UnityGreeter
         }
         else
         {
-            if (!greeter.hide_users_hint)
+            if (greeter.hide_users_hint)
+                user_list.add_entry ("*other", _("Login"), null, null);
+            else
             {
                 var users = LightDM.UserList.get_instance ();
                 users.user_added.connect (user_added_cb);
@@ -161,11 +168,8 @@ public class UnityGreeter
             if (greeter.has_guest_account_hint)
             {
                 debug ("Adding guest account entry");
-                user_list.add_entry ("*guest", _("Guest Session"), default_background);
+                user_list.add_entry ("*guest", _("Guest Session"), null, null);
             }
-
-            debug ("Adding other entry");
-            user_list.add_entry ("*other", _("Other..."), default_background);
 
             if (greeter.select_user_hint != null)
                 user_list.set_active_entry (greeter.select_user_hint);
@@ -177,8 +181,20 @@ public class UnityGreeter
         user_list.respond_to_prompt.connect (respond_to_prompt_cb);
         user_list.start_session.connect (start_session_cb);
         user_selected_cb (user_list.selected);
+
+        start_fake_wm ();
     }
-    
+
+    private LightDM.Layout? get_layout_by_name (string name)
+    {
+        foreach (var layout in LightDM.get_layouts ())
+        {
+            if (layout.name == name)
+                return layout;
+        }
+        return null;
+    }
+
     private void monitors_changed_cb (Gdk.Screen screen)
     {
         Gdk.Rectangle geometry;
@@ -197,7 +213,10 @@ public class UnityGreeter
         var label = user.real_name;
         if (user.real_name == "")
             label = user.name;
-        user_list.add_entry (user.name, label, default_background, user.logged_in);
+
+        var layout = get_layout_by_name (user.layout);
+
+        user_list.add_entry (user.name, label, user.background, layout, user.logged_in);
     }
 
     private void user_removed_cb (LightDM.User user)
@@ -276,12 +295,20 @@ public class UnityGreeter
         user_list.show_prompt (text, type == LightDM.PromptType.SECRET);
     }
 
-    private void background_loaded_cb (Background background)
+    private void background_loaded_cb (ParamSpec pspec)
+    {
+        if (user_list.background.alpha == 1.0)
+        {
+            user_list.background.notify["alpha"].disconnect (background_loaded_cb);
+            start_session ();
+        }
+    }
+
+    private void start_session ()
     {
         /* Set the background */
         var c = new Cairo.Context (background_surface);
-        c.set_source (background.pattern);
-        c.paint ();
+        user_list.background.draw (c);
         c = null;
         refresh_background (Gdk.Screen.get_default ());
 
@@ -312,14 +339,12 @@ public class UnityGreeter
             if (prompted)
             {
                 user_list.login_complete ();
-                if (test_mode)
-                    user_list.login_complete ();
-                else
+                if (!test_mode)
                 {
-                    var background = user_list.get_background ();
-                    background.loaded.connect (background_loaded_cb);
-                    if (background.load ())
-                        background_loaded_cb (background);
+                    if (user_list.background.alpha == 1.0)
+                        start_session ();
+                    else
+                        user_list.background.notify["alpha"].connect (background_loaded_cb);
                 }
             }
             else
@@ -356,7 +381,6 @@ public class UnityGreeter
             debug ("Failed to write state: %s", e.message);
         }
 
-        debug ("Start authentication %s", username);
         user_list.set_error (null);
         if (test_mode)
             user_list.session = "ubuntu";
@@ -382,7 +406,7 @@ public class UnityGreeter
                 text = greeter.authentication_user;
         }
 
-        user_list.add_entry ("*other", text, default_background);
+        user_list.add_entry ("*other", text, null, null);
     }
 
     private void start_authentication ()
@@ -476,6 +500,28 @@ public class UnityGreeter
             authentication_complete_cb ();
         else
             start_authentication ();
+    }
+
+    private static Gdk.FilterReturn focus_upon_map (X.Event xevent, Gdk.Event event)
+    {
+        if (xevent.type == X.EventType.MapNotify)
+        {
+            var display = Gdk.Display.get_default ();
+            var win = Gdk.X11Window.foreign_new_for_display (display, xevent.xmap.window);
+            win.focus(Gdk.CURRENT_TIME);
+        }
+        return Gdk.FilterReturn.CONTINUE;
+    }
+
+    private void start_fake_wm ()
+    {
+        /* We want new windows (e.g. the shutdown dialog) to gain focus.
+           We don't really need anything more than that (don't need alt-tab 
+           since any dialog should be "modal" or at least dealt with before
+           continuing even if not actually marked as modal) */
+        var root = Gdk.get_default_root_window ();
+        root.set_events (root.get_events () | Gdk.EventMask.SUBSTRUCTURE_MASK);
+        root.add_filter ((Gdk.FilterFunc) focus_upon_map);
     }
 
     public static string? get_config_value (string group_name, string key, string? default = null)

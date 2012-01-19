@@ -1,10 +1,12 @@
+# -*- Mode: m4; indent-tabs-mode: nil; tab-width: 4 -*-
+
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT(unity-greeter, 0.1.1)
+AC_INIT(unity-greeter, 0.2.0)
 AC_CONFIG_MACRO_DIR(m4)
 AM_INIT_AUTOMAKE
 AM_PROG_CC_C_O
-AM_PROG_VALAC([0.13.1])
+UG_PROG_VALAC([valac-0.14 valac], [0.13.1])
 AM_CONFIG_HEADER(config.h)
 AM_MAINTAINER_MODE
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES(yes)])

@@ -1,8 +1,31 @@
+Overview of changes in unity-greeter 0.2.0
+
+    * Improve scrolling animation
+    * Select menubar when F10 is pressed
+    * Fix Orca not starting when enabling screen reader
+    * Add a keyboard indicator
+    * Always focus new windows
+    * Check version of Vala when compiling
+    * Update logo for 12.04
+    * Use default invisible character in password dialog
+    * Darken indicator bar
+    * User smaller grid size
+    * Put end-stops on user list scrolling
+    * Only fade out user labels that can't fit in completely
+    * Center dots
+    * Add translator comments
+    * Add option to disable dots
+    * Only redraw parts of the screen that have changed
+    * Don't run the greeter if can't connect to daemon and not in test mode
+
 Overview of changes in unity-greeter 0.1.1
 
     * Stop loading indicators in a thread - they don't seem thread safe
     * Fade usernames so it looks more like a carousel
     * Darken indicator background so they are easier to read
+    * Fade out long messages
+    * Remove "Other" entry when using user list
+    * Don't run the greeter if can't connect to daemon and not in test mode
 
 Overview of changes in unity-greeter 0.1.0
 

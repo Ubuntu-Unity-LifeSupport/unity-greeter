@@ -1,3 +1,27 @@
+unity-greeter (0.2.0-0ubuntu1) precise; urgency=low
+
+  * New upstream release
+    - Improve scrolling animation (LP: #844050)
+    - Select menubar when F10 is pressed
+    - Fix Orca not starting when enabling screen reader (LP: #850554)
+    - Add a keyboard indicator (LP: #783827, LP: #834487)
+    - Always focus new windows
+    - Check version of Vala when compiling
+    - Update logo for 12.04 (LP: #892394)
+    - Use default invisible character in password dialog (LP: #834878)
+    - Darken indicator bar
+    - User smaller grid size
+    - Put end-stops on user list scrolling
+    - Only fade out user labels that can't fit in completely (LP: #883260)
+    - Center dots (LP: #872800)
+    - Add translator comments (LP: #855385)
+    - Add option to disable dots (LP: #883908)
+    - Only redraw parts of the screen that have changed
+    - Don't run the greeter if can't connect to daemon and not in test mode
+      (LP: #876754)
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Thu, 19 Jan 2012 14:56:21 +1100
+
 unity-greeter (0.1.1-0ubuntu1) oneiric; urgency=low
 
   * New upstream release:

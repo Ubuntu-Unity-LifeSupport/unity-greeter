@@ -1,9 +1,15 @@
+# -*- Mode: Automake; indent-tabs-mode: t; tab-width: 4 -*-
+
 sbin_PROGRAMS = unity-greeter
 
 unity_greeter_SOURCES = \
 	config.vapi \
 	fixes.vapi \
 	indicator.vapi \
+	animate-timer.vala \
+	background.vala \
+	dash-box.vala \
+	menubar.vala \
 	settings-daemon.vala \
 	unity-greeter.vala \
 	user-list.vala

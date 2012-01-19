@@ -15,6 +15,8 @@
 
 @SET_MAKE@
 
+# -*- Mode: Automake; indent-tabs-mode: t; tab-width: 4 -*-
+
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -35,10 +37,12 @@ POST_UNINSTALL = :
 sbin_PROGRAMS = unity-greeter$(EXEEXT)
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
+	animate-timer.c background.c dash-box.c menubar.c \
 	settings-daemon.c unity-greeter.c unity_greeter_vala.stamp \
 	user-list.c
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/configure.ac
+am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
+	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -47,7 +51,11 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(sbindir)"
 PROGRAMS = $(sbin_PROGRAMS)
-am_unity_greeter_OBJECTS = unity_greeter-settings-daemon.$(OBJEXT) \
+am_unity_greeter_OBJECTS = unity_greeter-animate-timer.$(OBJEXT) \
+	unity_greeter-background.$(OBJEXT) \
+	unity_greeter-dash-box.$(OBJEXT) \
+	unity_greeter-menubar.$(OBJEXT) \
+	unity_greeter-settings-daemon.$(OBJEXT) \
 	unity_greeter-unity-greeter.$(OBJEXT) \
 	unity_greeter-user-list.$(OBJEXT)
 unity_greeter_OBJECTS = $(am_unity_greeter_OBJECTS)
@@ -195,6 +203,10 @@ unity_greeter_SOURCES = \
 	config.vapi \
 	fixes.vapi \
 	indicator.vapi \
+	animate-timer.vala \
+	background.vala \
+	dash-box.vala \
+	menubar.vala \
 	settings-daemon.vala \
 	unity-greeter.vala \
 	user-list.vala
@@ -302,6 +314,10 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-animate-timer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-background.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-dash-box.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-menubar.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-settings-daemon.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-unity-greeter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-user-list.Po@am__quote@
@@ -321,6 +337,70 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
+
+unity_greeter-animate-timer.o: animate-timer.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-animate-timer.o -MD -MP -MF $(DEPDIR)/unity_greeter-animate-timer.Tpo -c -o unity_greeter-animate-timer.o `test -f 'animate-timer.c' || echo '$(srcdir)/'`animate-timer.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-animate-timer.Tpo $(DEPDIR)/unity_greeter-animate-timer.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='animate-timer.c' object='unity_greeter-animate-timer.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-animate-timer.o `test -f 'animate-timer.c' || echo '$(srcdir)/'`animate-timer.c
+
+unity_greeter-animate-timer.obj: animate-timer.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-animate-timer.obj -MD -MP -MF $(DEPDIR)/unity_greeter-animate-timer.Tpo -c -o unity_greeter-animate-timer.obj `if test -f 'animate-timer.c'; then $(CYGPATH_W) 'animate-timer.c'; else $(CYGPATH_W) '$(srcdir)/animate-timer.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-animate-timer.Tpo $(DEPDIR)/unity_greeter-animate-timer.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='animate-timer.c' object='unity_greeter-animate-timer.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-animate-timer.obj `if test -f 'animate-timer.c'; then $(CYGPATH_W) 'animate-timer.c'; else $(CYGPATH_W) '$(srcdir)/animate-timer.c'; fi`
+
+unity_greeter-background.o: background.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-background.o -MD -MP -MF $(DEPDIR)/unity_greeter-background.Tpo -c -o unity_greeter-background.o `test -f 'background.c' || echo '$(srcdir)/'`background.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-background.Tpo $(DEPDIR)/unity_greeter-background.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='background.c' object='unity_greeter-background.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-background.o `test -f 'background.c' || echo '$(srcdir)/'`background.c
+
+unity_greeter-background.obj: background.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-background.obj -MD -MP -MF $(DEPDIR)/unity_greeter-background.Tpo -c -o unity_greeter-background.obj `if test -f 'background.c'; then $(CYGPATH_W) 'background.c'; else $(CYGPATH_W) '$(srcdir)/background.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-background.Tpo $(DEPDIR)/unity_greeter-background.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='background.c' object='unity_greeter-background.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-background.obj `if test -f 'background.c'; then $(CYGPATH_W) 'background.c'; else $(CYGPATH_W) '$(srcdir)/background.c'; fi`
+
+unity_greeter-dash-box.o: dash-box.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-dash-box.o -MD -MP -MF $(DEPDIR)/unity_greeter-dash-box.Tpo -c -o unity_greeter-dash-box.o `test -f 'dash-box.c' || echo '$(srcdir)/'`dash-box.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-dash-box.Tpo $(DEPDIR)/unity_greeter-dash-box.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dash-box.c' object='unity_greeter-dash-box.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-dash-box.o `test -f 'dash-box.c' || echo '$(srcdir)/'`dash-box.c
+
+unity_greeter-dash-box.obj: dash-box.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-dash-box.obj -MD -MP -MF $(DEPDIR)/unity_greeter-dash-box.Tpo -c -o unity_greeter-dash-box.obj `if test -f 'dash-box.c'; then $(CYGPATH_W) 'dash-box.c'; else $(CYGPATH_W) '$(srcdir)/dash-box.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-dash-box.Tpo $(DEPDIR)/unity_greeter-dash-box.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dash-box.c' object='unity_greeter-dash-box.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-dash-box.obj `if test -f 'dash-box.c'; then $(CYGPATH_W) 'dash-box.c'; else $(CYGPATH_W) '$(srcdir)/dash-box.c'; fi`
+
+unity_greeter-menubar.o: menubar.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-menubar.o -MD -MP -MF $(DEPDIR)/unity_greeter-menubar.Tpo -c -o unity_greeter-menubar.o `test -f 'menubar.c' || echo '$(srcdir)/'`menubar.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-menubar.Tpo $(DEPDIR)/unity_greeter-menubar.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='menubar.c' object='unity_greeter-menubar.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-menubar.o `test -f 'menubar.c' || echo '$(srcdir)/'`menubar.c
+
+unity_greeter-menubar.obj: menubar.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-menubar.obj -MD -MP -MF $(DEPDIR)/unity_greeter-menubar.Tpo -c -o unity_greeter-menubar.obj `if test -f 'menubar.c'; then $(CYGPATH_W) 'menubar.c'; else $(CYGPATH_W) '$(srcdir)/menubar.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-menubar.Tpo $(DEPDIR)/unity_greeter-menubar.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='menubar.c' object='unity_greeter-menubar.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-menubar.obj `if test -f 'menubar.c'; then $(CYGPATH_W) 'menubar.c'; else $(CYGPATH_W) '$(srcdir)/menubar.c'; fi`
 
 unity_greeter-settings-daemon.o: settings-daemon.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-settings-daemon.o -MD -MP -MF $(DEPDIR)/unity_greeter-settings-daemon.Tpo -c -o unity_greeter-settings-daemon.o `test -f 'settings-daemon.c' || echo '$(srcdir)/'`settings-daemon.c
@@ -369,6 +449,26 @@ unity_greeter-user-list.obj: user-list.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='user-list.c' object='unity_greeter-user-list.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-user-list.obj `if test -f 'user-list.c'; then $(CYGPATH_W) 'user-list.c'; else $(CYGPATH_W) '$(srcdir)/user-list.c'; fi`
+$(srcdir)/animate-timer.c: $(srcdir)/unity_greeter_vala.stamp
+	@if test -f $@; then :; else \
+	  rm -f $(srcdir)/unity_greeter_vala.stamp; \
+	  $(am__cd) $(srcdir) && $(MAKE) $(AM_MAKEFLAGS) unity_greeter_vala.stamp; \
+	fi
+$(srcdir)/background.c: $(srcdir)/unity_greeter_vala.stamp
+	@if test -f $@; then :; else \
+	  rm -f $(srcdir)/unity_greeter_vala.stamp; \
+	  $(am__cd) $(srcdir) && $(MAKE) $(AM_MAKEFLAGS) unity_greeter_vala.stamp; \
+	fi
+$(srcdir)/dash-box.c: $(srcdir)/unity_greeter_vala.stamp
+	@if test -f $@; then :; else \
+	  rm -f $(srcdir)/unity_greeter_vala.stamp; \
+	  $(am__cd) $(srcdir) && $(MAKE) $(AM_MAKEFLAGS) unity_greeter_vala.stamp; \
+	fi
+$(srcdir)/menubar.c: $(srcdir)/unity_greeter_vala.stamp
+	@if test -f $@; then :; else \
+	  rm -f $(srcdir)/unity_greeter_vala.stamp; \
+	  $(am__cd) $(srcdir) && $(MAKE) $(AM_MAKEFLAGS) unity_greeter_vala.stamp; \
+	fi
 $(srcdir)/settings-daemon.c: $(srcdir)/unity_greeter_vala.stamp
 	@if test -f $@; then :; else \
 	  rm -f $(srcdir)/unity_greeter_vala.stamp; \
@@ -503,6 +603,10 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+	-rm -f animate-timer.c
+	-rm -f background.c
+	-rm -f dash-box.c
+	-rm -f menubar.c
 	-rm -f settings-daemon.c
 	-rm -f unity-greeter.c
 	-rm -f unity_greeter_vala.stamp

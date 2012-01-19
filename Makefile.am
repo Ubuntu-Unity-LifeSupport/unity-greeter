@@ -1,3 +1,5 @@
+# -*- Mode: Automake; indent-tabs-mode: t; tab-width: 4 -*-
+
 SUBDIRS = data po src
 
 EXTRA_DIST = \

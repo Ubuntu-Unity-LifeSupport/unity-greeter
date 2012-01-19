@@ -1,3 +1,7 @@
+src/animate-timer.c
+src/background.c
+src/dash-box.c
+src/menubar.c
 src/settings-daemon.c
 src/unity-greeter.c
 src/user-list.c

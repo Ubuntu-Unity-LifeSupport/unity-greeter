@@ -1,5 +1,9 @@
 # List of source files containing translatable strings.
 # Please keep this file sorted alphabetically.
+src/animate-timer.vala
+src/background.vala
+src/dash-box.vala
+src/menubar.vala
 src/settings-daemon.vala
 src/unity-greeter.vala
 src/user-list.vala
