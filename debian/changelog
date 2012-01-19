@@ -1,3 +1,10 @@
+unity-greeter (0.2.0-0ubuntu2) precise; urgency=low
+
+  [ Aurélien Gâteau ]
+  * Add dependency on gnome-settings-daemon (LP: #911826)
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Thu, 19 Jan 2012 15:22:04 +1100
+
 unity-greeter (0.2.0-0ubuntu1) precise; urgency=low
 
   * New upstream release

@@ -16,7 +16,8 @@ Vcs-Bzr: https://code.launchpad.net/~ubuntu-desktop/unity-greeter/ubuntu
 Package: unity-greeter
 Architecture: any
 Depends: ${misc:Depends},
-         ${shlibs:Depends}
+         ${shlibs:Depends},
+         gnome-settings-daemon
 Recommends: lightdm
 Provides: lightdm-greeter
 Description: Unity Greeter
