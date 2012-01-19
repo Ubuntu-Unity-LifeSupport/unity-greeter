@@ -1,3 +1,10 @@
+unity-greeter (0.2.0-0ubuntu3) precise; urgency=low
+
+  * Add versioned Breaks on edubuntu-artwork to allow edubuntu-artwork
+    to fix its unity-greeter.conf to match the new options.
+
+ -- Stéphane Graber <stgraber@ubuntu.com>  Thu, 19 Jan 2012 14:07:30 -0500
+
 unity-greeter (0.2.0-0ubuntu2) precise; urgency=low
 
   [ Aurélien Gâteau ]

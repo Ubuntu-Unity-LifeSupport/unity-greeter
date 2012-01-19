@@ -20,5 +20,6 @@ Depends: ${misc:Depends},
          gnome-settings-daemon
 Recommends: lightdm
 Provides: lightdm-greeter
+Breaks: edubuntu-artwork (<< 12.01.1~)
 Description: Unity Greeter
  The greeter for the Unity desktop.
