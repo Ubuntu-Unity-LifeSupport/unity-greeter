@@ -1,0 +1,46 @@
+Index: unity-greeter-0.2.0/src/menubar.vala
+===================================================================
+--- unity-greeter-0.2.0.orig/src/menubar.vala	2012-01-18 22:45:32.000000000 -0500
++++ unity-greeter-0.2.0/src/menubar.vala	2012-01-20 07:02:22.756502888 -0500
+@@ -75,12 +75,14 @@
+ 
+     public void set_layout (LightDM.Layout? layout)
+     {
++#if 0
+         if (layout == null)
+             layout = LightDM.get_layout (); /* default layout */
+ 
+         var item = layout.get_data<Gtk.RadioMenuItem> ("unity-greeter-radio");
+         if (item != null)
+             item.active = true; /* will trigger callback to do rest of work */
++#endif
+     }
+ 
+     public override bool draw (Cairo.Context c)
+@@ -199,6 +201,7 @@
+         return a11y_item;
+     }
+ 
++#if 0
+     private void layout_toggled_cb (Gtk.CheckMenuItem item)
+     {
+         if (!item.active)
+@@ -269,6 +272,7 @@
+ 
+         return keyboard_item;
+     }
++#endif
+ 
+     private void setup_indicators ()
+     {
+@@ -282,8 +286,10 @@
+         /* Hint to have gnome-settings-daemon run in greeter mode */
+         greeter_set_env ("RUNNING_UNDER_GDM", "1");
+ 
++#if 0
+         var keyboard_item = make_keyboard_indicator ();
+         insert (keyboard_item, (int) get_children ().length () - 1);
++#endif
+ 
+         var a11y_item = make_a11y_indicator ();
+         insert (a11y_item, (int) get_children ().length () - 1);

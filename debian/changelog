@@ -1,3 +1,11 @@
+unity-greeter (0.2.0-0ubuntu4) precise; urgency=low
+
+  * debian/patches/drop_keyboard_indicator.patch:
+    - Back out the keyboard layout indicator for now, until we can properly
+      fix the bugs with detecting user layouts.  (LP: #915468)
+
+ -- Michael Terry <mterry@ubuntu.com>  Fri, 20 Jan 2012 07:05:31 -0500
+
 unity-greeter (0.2.0-0ubuntu3) precise; urgency=low
 
   * Add versioned Breaks on edubuntu-artwork to allow edubuntu-artwork

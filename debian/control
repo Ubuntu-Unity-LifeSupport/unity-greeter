@@ -1,7 +1,8 @@
 Source: unity-greeter
 Section: x11
 Priority: optional
-Maintainer: Robert Ancell <robert.ancell@canonical.com>
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+XSBC-Original-Maintainer: Robert Ancell <robert.ancell@canonical.com>
 Standards-Version: 3.9.2
 Build-Depends: debhelper (>= 7.0.50~),
                dh-autoreconf,
