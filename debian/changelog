@@ -1,3 +1,11 @@
+unity-greeter (0.2.0-0ubuntu5) precise; urgency=low
+
+  * rebuild for libindicator7
+  * debian/patches/no_hardcoded_paths.patch
+    - don't hard code path to indicatordir
+
+ -- Ken VanDine <ken.vandine@canonical.com>  Wed, 25 Jan 2012 10:04:05 -0500
+
 unity-greeter (0.2.0-0ubuntu4) precise; urgency=low
 
   * debian/patches/drop_keyboard_indicator.patch:
