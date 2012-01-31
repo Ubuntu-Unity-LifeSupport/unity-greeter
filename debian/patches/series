@@ -1,3 +1,6 @@
 run_unity_support_test.patch
 drop_keyboard_indicator.patch
 no_hardcoded_paths.patch
+handle_missing_indicators.patch
+working_session_selector.patch
+

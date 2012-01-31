@@ -19,7 +19,11 @@ Architecture: any
 Depends: ${misc:Depends},
          ${shlibs:Depends},
          gnome-settings-daemon
-Recommends: lightdm
+Recommends: lightdm,
+            indicator-session,
+            indicator-datetime,
+            indicator-power,
+            indicator-sound
 Provides: lightdm-greeter
 Breaks: edubuntu-artwork (<< 12.01.1~)
 Description: Unity Greeter

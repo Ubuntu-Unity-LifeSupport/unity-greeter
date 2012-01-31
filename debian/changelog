@@ -1,3 +1,17 @@
+unity-greeter (0.2.0-0ubuntu6) precise; urgency=low
+
+  * debian/patches/handle_missing_indicators.patch:
+    - backported from trunk, handle missing indicators (lp: #921998)
+  * debian/patches/working_session_selector.patch:
+    - backported from trunk, make the session selector work (lp: #918657)
+  
+  [ Robert Ancell ]
+  * debian/control:
+    - Add recommends on indicator-session, indicator-datetime, indicator-power,
+      indicator-sound (LP: #921998)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Tue, 31 Jan 2012 18:59:57 +0100
+
 unity-greeter (0.2.0-0ubuntu5) precise; urgency=low
 
   * rebuild for libindicator7
