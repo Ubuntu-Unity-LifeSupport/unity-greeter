@@ -9,7 +9,13 @@ unity_greeter_SOURCES = \
 	animate-timer.vala \
 	background.vala \
 	dash-box.vala \
+	dash-button.vala \
+	dash-entry.vala \
+	fadable.vala \
+	main-window.vala \
+	menu.vala \
 	menubar.vala \
+	settings.vala \
 	settings-daemon.vala \
 	unity-greeter.vala \
 	user-list.vala
@@ -21,7 +27,8 @@ unity_greeter_CFLAGS = \
 	-DLOCALEDIR=\""$(localedir)"\" \
 	-DVERSION=\"$(VERSION)\" \
 	-DCONFIG_FILE=\""$(sysconfdir)/lightdm/unity-greeter.conf"\" \
-	-DPKGDATADIR=\""$(pkgdatadir)"\"
+	-DPKGDATADIR=\""$(pkgdatadir)"\" \
+	-DINDICATORDIR=\""$(INDICATORDIR)"\"
 
 unity_greeter_VALAFLAGS = \
 	--pkg posix \

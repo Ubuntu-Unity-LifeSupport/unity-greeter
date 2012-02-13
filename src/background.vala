@@ -271,7 +271,7 @@ public class Background : Gtk.Box
     {
         orientation = Gtk.Orientation.VERTICAL;
 
-        timer = new AnimateTimer (AnimateTimer.Speed.INSTANT);
+        timer = new AnimateTimer (AnimateTimer.INSTANT);
         timer.animate.connect (animate_cb);
 
         loaders = new HashTable<string?, BackgroundLoader> (str_hash, str_equal);

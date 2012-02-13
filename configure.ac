@@ -2,15 +2,16 @@
 
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT(unity-greeter, 0.2.0)
+AC_INIT(unity-greeter, 0.2.1)
 AC_CONFIG_MACRO_DIR(m4)
 AM_INIT_AUTOMAKE
 AM_PROG_CC_C_O
-UG_PROG_VALAC([valac-0.14 valac], [0.13.1])
+UG_PROG_VALAC([valac-0.16 valac], [0.15.1])
 AM_CONFIG_HEADER(config.h)
 AM_MAINTAINER_MODE
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES(yes)])
 
+GLIB_GSETTINGS
 GNOME_COMPILE_WARNINGS(maximum)
 
 dnl ###########################################################################
@@ -25,6 +26,9 @@ PKG_CHECK_MODULES(UNITY_GREETER, [
     freetype2
     cairo-ft
 ])
+
+INDICATORDIR=`$PKG_CONFIG --variable=indicatordir indicator3-0.4`
+AC_SUBST(INDICATORDIR)
 
 dnl ###########################################################################
 dnl Internationalization

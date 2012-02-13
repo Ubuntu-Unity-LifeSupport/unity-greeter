@@ -1,0 +1,53 @@
+/* -*- Mode: Vala; indent-tabs-mode: nil; tab-width: 4 -*-
+ *
+ * Copyright (C) 2011,2012 Canonical Ltd
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Authors: Robert Ancell <robert.ancell@canonical.com>
+ *          Michael Terry <michael.terry@canonical.com>
+ */
+
+public class UGSettings
+{
+    public static const string KEY_BACKGROUND = "background";
+    public static const string KEY_DRAW_GRID = "draw-grid";
+    public static const string KEY_LOGO = "logo";
+    public static const string KEY_THEME_NAME = "theme-name";
+    public static const string KEY_ICON_THEME_NAME = "icon-theme-name";
+    public static const string KEY_FONT_NAME = "font-name";
+    public static const string KEY_XFT_ANTIALIAS = "xft-antialias";
+    public static const string KEY_XFT_DPI = "xft-dpi";
+    public static const string KEY_XFT_HINTSTYLE = "xft-hintstyle";
+    public static const string KEY_XFT_RGBA = "xft-rgba";
+
+    public static bool get_boolean (string key)
+    {
+        var gsettings = new Settings (SCHEMA);
+        return gsettings.get_boolean (key);
+    }
+
+    public static double get_double (string key)
+    {
+        var gsettings = new Settings (SCHEMA);
+        return gsettings.get_double (key);
+    }
+
+    public static string get_string (string key)
+    {
+        var gsettings = new Settings (SCHEMA);
+        return gsettings.get_string (key);
+    }
+
+    private static const string SCHEMA = "com.canonical.unity-greeter";
+}

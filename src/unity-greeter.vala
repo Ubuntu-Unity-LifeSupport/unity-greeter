@@ -22,7 +22,7 @@ public const int grid_size = 40;
 public class UnityGreeter
 {
     static bool show_version = false;
-    static bool test_mode = false;
+    public static bool test_mode = false;
     public static const OptionEntry[] options =
     {
         { "version", 'v', 0, OptionArg.NONE, ref show_version,
@@ -36,8 +36,6 @@ public class UnityGreeter
 
     private static Timer log_timer;
 
-    private static KeyFile config;
-
     private File state_file;
     private KeyFile state;
 
@@ -45,9 +43,9 @@ public class UnityGreeter
 
     private SettingsDaemon settings_daemon;
 
+    private MainWindow main_window;
     public UserList user_list;
 
-    private Gtk.Window main_window;
     private LightDM.Greeter greeter;
     private bool prompted = false;
     private bool have_session = false;
@@ -103,28 +101,8 @@ public class UnityGreeter
         }
         catch (Error e) {}
 
-        main_window = new Gtk.Window ();
-        var bg_color = Gdk.Color ();
-        Gdk.Color.parse ("#2C001E", out bg_color);
-        main_window.modify_bg (Gtk.StateType.NORMAL, bg_color);
-        main_window.get_accessible ().set_name (_("Login Screen"));
-        main_window.has_resize_grip = false;
-
-        if (test_mode)
-            main_window.resize (1024, 600);
-        else
-        {
-            var screen = main_window.get_screen ();
-            screen.monitors_changed.connect (monitors_changed_cb);
-            monitors_changed_cb (screen);
-        }
-
-        user_list = new UserList ();
-        user_list.background.draw_grid = get_config_value ("greeter", "draw-grid", "true") == "true";
-        user_list.background.default_background = get_config_value ("greeter", "background", "#2C001E");
-        user_list.background.set_logo (get_config_value ("greeter", "logo", Path.build_filename (Config.PKGDATADIR, "logo.png", null)));
-        user_list.show ();
-        main_window.add (user_list);
+        main_window = new MainWindow ();
+        user_list = main_window.user_list;
 
         foreach (var session in LightDM.get_sessions ())
         {
@@ -134,14 +112,14 @@ public class UnityGreeter
 
         if (test_mode)
         {
-            user_list.add_entry ("alice", "가나다라마", "/usr/share/backgrounds/Darkening_Clockwork_by_Matt_Katzenberger.jpg", get_layout_by_name ("cn"), true);
+            user_list.add_entry ("alice", "가나다라마", "/usr/share/backgrounds/Darkening_Clockwork_by_Matt_Katzenberger.jpg", make_layout_list ("kr"), true);
             user_list.add_entry ("chris", "Christopher Halse Rogers!!!!!!!!!!!!!!!", "/usr/share/backgrounds/Darkening_Clockwork_by_Matt_Katzenberger.jpg", null, true);
-            user_list.add_entry ("jorge", "Jorge O Castro", "/usr/share/backgrounds/PurpleDancers_by_Emilio_Merlino.jpg", get_layout_by_name ("us"));
-            user_list.add_entry ("ken", "Ken VanDine", "/usr/share/backgrounds/Small_flowers_by_Dariusz_Duma.jpg", get_layout_by_name ("uk"));
-            user_list.add_entry ("matthew", "Matthew Paul Thomas", "/usr/share/backgrounds/Not_Alone_by_Deacon_MacMillan.jpg", get_layout_by_name ("uk"));
-            user_list.add_entry ("otto", "Otto Greenslade", "/usr/share/backgrounds/Mount_Snowdon,_Wales_by_Adam_Vellender.jpg", get_layout_by_name ("uk"));
-            user_list.add_entry ("pitti", "Martin Pitt", "/usr/share/backgrounds/Stalking_Ocelot_by_Sayantan_Chaudhuri.jpg", get_layout_by_name ("de"));
-            user_list.add_entry ("desrt", "Ryan Lortie", "/usr/share/backgrounds/Power_of_Words_by_Antonio_Litterio.jpg", get_layout_by_name ("ca"));
+            user_list.add_entry ("jorge", "Jorge O Castro", "/usr/share/backgrounds/PurpleDancers_by_Emilio_Merlino.jpg", make_layout_list ("us"));
+            user_list.add_entry ("ken", "Ken VanDine", "/usr/share/backgrounds/Small_flowers_by_Dariusz_Duma.jpg", make_layout_list ("uk;us"));
+            user_list.add_entry ("matthew", "Matthew Paul Thomas", "/usr/share/backgrounds/Not_Alone_by_Deacon_MacMillan.jpg", make_layout_list ("gb"));
+            user_list.add_entry ("otto", "Otto Greenslade", "/usr/share/backgrounds/Mount_Snowdon,_Wales_by_Adam_Vellender.jpg", make_layout_list ("gb"));
+            user_list.add_entry ("pitti", "Martin Pitt", "/usr/share/backgrounds/Stalking_Ocelot_by_Sayantan_Chaudhuri.jpg", make_layout_list ("de\tdvorak;us"));
+            user_list.add_entry ("desrt", "Ryan Lortie", "/usr/share/backgrounds/Power_of_Words_by_Antonio_Litterio.jpg", make_layout_list ("ca"));
             user_list.add_entry ("*guest", _("Guest Session"), null, null, true);
 
             user_list.add_session ("gnome", "Ubuntu");
@@ -185,6 +163,28 @@ public class UnityGreeter
         start_fake_wm ();
     }
 
+    public static void add_style_class (Gtk.Widget widget)
+    {
+        /* Add style context class lightdm-user-list */
+        var ctx = widget.get_style_context ();
+        ctx.add_class ("lightdm");
+    }
+
+    private List <LightDM.Layout> make_layout_list (string names)
+    {
+        var names_split = names.split (";");
+
+        var layouts = new List <LightDM.Layout> ();
+        foreach (var name in names_split)
+        {
+            var layout = get_layout_by_name (name);
+            if (layout != null)
+                layouts.append (layout);
+        }
+
+        return layouts;
+    }
+
     private LightDM.Layout? get_layout_by_name (string name)
     {
         foreach (var layout in LightDM.get_layouts ())
@@ -195,17 +195,6 @@ public class UnityGreeter
         return null;
     }
 
-    private void monitors_changed_cb (Gdk.Screen screen)
-    {
-        Gdk.Rectangle geometry;
-        screen.get_monitor_geometry (screen.get_primary_monitor (), out geometry);
-
-        debug ("Monitor is %dx%d pixels at %d,%d", geometry.width, geometry.height, geometry.x, geometry.y);
-
-        main_window.resize (geometry.width, geometry.height);
-        main_window.move (geometry.x, geometry.y);
-    }
-
     private void user_added_cb (LightDM.User user)
     {
         debug ("Adding/updating user %s (%s)", user.name, user.real_name);
@@ -214,9 +203,15 @@ public class UnityGreeter
         if (user.real_name == "")
             label = user.name;
 
-        var layout = get_layout_by_name (user.layout);
+        var layouts = new List <LightDM.Layout> ();
+        foreach (var name in user.get_layouts ())
+        {
+            var layout = get_layout_by_name (name);
+            if (layout != null)
+                layouts.append (layout);
+        }
 
-        user_list.add_entry (user.name, label, user.background, layout, user.logged_in);
+        user_list.add_entry (user.name, label, user.background, layouts, user.logged_in);
     }
 
     private void user_removed_cb (LightDM.User user)
@@ -374,7 +369,7 @@ public class UnityGreeter
         var data = state.to_data ();
         try
         {
-            state_file.replace_contents (data, data.length, null, false, FileCreateFlags.NONE, null);
+            state_file.replace_contents ((uint8[])data, null, false, FileCreateFlags.NONE, null);
         }
         catch (Error e)
         {
@@ -524,20 +519,6 @@ public class UnityGreeter
         root.add_filter ((Gdk.FilterFunc) focus_upon_map);
     }
 
-    public static string? get_config_value (string group_name, string key, string? default = null)
-    {
-        try
-        {
-            return config.get_value (group_name, key);
-        }
-        catch (Error e)
-        {
-            if (!(e is KeyFileError.KEY_NOT_FOUND || e is KeyFileError.GROUP_NOT_FOUND))
-                warning ("Error reading configuration item %s:%s: %s", group_name, key, e.message);
-            return default;
-        }
-    }
-
     private static Cairo.Surface? create_root_surface (Gdk.Screen screen)
     {
         var visual = screen.get_system_visual ();
@@ -663,41 +644,28 @@ public class UnityGreeter
         if (test_mode)
             debug ("Running in test mode");
 
-        debug ("Loading configuration from %s", Config.CONFIG_FILE);
-        config = new KeyFile ();
-        try
-        {
-            config.load_from_file (Config.CONFIG_FILE, KeyFileFlags.NONE);
-        }
-        catch (Error e)
-        {
-            if (!(e is FileError.NOENT))
-                warning ("Failed to load configuration from %s: %s\n", Config.CONFIG_FILE, e.message);
-        }
-
         /* Set GTK+ settings */
         debug ("Setting GTK+ settings");
         var settings = Gtk.Settings.get_default ();
-        var value = get_config_value ("greeter", "theme-name");
-        if (value != null)
+        var value = UGSettings.get_string (UGSettings.KEY_THEME_NAME);
+        if (value != "")
             settings.set ("gtk-theme-name", value, null);
-        value = get_config_value ("greeter", "icon-theme-name");
-        if (value != null)
+        value = UGSettings.get_string (UGSettings.KEY_ICON_THEME_NAME);
+        if (value != "")
             settings.set ("gtk-icon-theme-name", value, null);
-        value = get_config_value ("greeter", "font-name");
-        if (value != null)
+        value = UGSettings.get_string (UGSettings.KEY_FONT_NAME);
+        if (value != "")
             settings.set ("gtk-font-name", value, null);
-        value = get_config_value ("greeter", "xft-dpi");
-        if (value != null)
-            settings.set ("gtk-xft-dpi", (int) (1024 * double.parse (value)), null);
-        value = get_config_value ("greeter", "xft-antialias");
-        if (value != null)
-            settings.set ("gtk-xft-antialias", strcmp (value, "true") == 0, null);
-        value = get_config_value ("greeter", "xft-hintstyle");
-        if (value != null)
+        var double_value = UGSettings.get_double (UGSettings.KEY_XFT_DPI);
+        if (double_value != 0.0)
+            settings.set ("gtk-xft-dpi", (int) (1024 * double_value), null);
+        var boolean_value = UGSettings.get_boolean (UGSettings.KEY_XFT_ANTIALIAS);
+        settings.set ("gtk-xft-antialias", boolean_value, null);
+        value = UGSettings.get_string (UGSettings.KEY_XFT_HINTSTYLE);
+        if (value != "")
             settings.set ("gtk-xft-hintstyle", value, null);
-        value = get_config_value ("greeter", "xft-rgba");
-        if (value != null)
+        value = UGSettings.get_string (UGSettings.KEY_XFT_RGBA);
+        if (value != "")
             settings.set ("gtk-xft-rgba", value, null);
 
         debug ("Creating Unity Greeter");

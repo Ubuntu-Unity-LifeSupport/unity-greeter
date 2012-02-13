@@ -3,7 +3,13 @@
 src/animate-timer.vala
 src/background.vala
 src/dash-box.vala
+src/dash-button.vala
+src/dash-entry.vala
+src/fadable.vala
+src/main-window.vala
 src/menubar.vala
+src/menu.vala
+src/settings.vala
 src/settings-daemon.vala
 src/unity-greeter.vala
 src/user-list.vala

@@ -1,3 +1,18 @@
+Overview of changes in unity-greeter 0.2.1
+
+    * Fix session menu button not showing for first user
+    * Skip indicators that fail to load
+    * Distribute translations correctly
+    * Load indicators from location specified in pkg-config
+    * Use gsettings instead of /etc/lightdm/unity-greeter.conf
+    * Accept numpad arrow key presses
+    * Instead of showing all layouts in the system in the keyboard indicator,
+      only show the layouts a user has configured
+    * Don't crash if gnome-settings-daemon's gsettings schema isn't as expected
+    * Disable gnome-settings-daemon's new gsdwacom plugin as well as its older
+      wacom plugin
+    * Use vala-0.16 instead of valac-0.14
+
 Overview of changes in unity-greeter 0.2.0
 
     * Improve scrolling animation

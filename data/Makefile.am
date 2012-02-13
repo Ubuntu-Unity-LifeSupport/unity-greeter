@@ -5,8 +5,11 @@ dist_xgreeter_DATA = unity-greeter.desktop
 
 dist_pkgdata_DATA = a11y.svg cog.png logo.png
 
-configdir = $(sysconfdir)/lightdm
-dist_config_DATA = unity-greeter.conf
+@GSETTINGS_RULES@
+gsettings_SCHEMAS = com.canonical.unity-greeter.gschema.xml
+
+EXTRA_DIST = \
+	$(gsettings_SCHEMAS)
 
 DISTCLEANFILES = \
 	Makefile.in

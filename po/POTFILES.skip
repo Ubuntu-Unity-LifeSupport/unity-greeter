@@ -1,7 +1,13 @@
 src/animate-timer.c
 src/background.c
 src/dash-box.c
+src/dash-button.c
+src/dash-entry.c
+src/fadable.c
+src/main-window.c
 src/menubar.c
+src/menu.c
+src/settings.c
 src/settings-daemon.c
 src/unity-greeter.c
 src/user-list.c

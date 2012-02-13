@@ -23,7 +23,7 @@ private int get_grid_offset (int size)
     return (int) (size % grid_size) / 2;
 }
 
-private class UserEntry
+public class UserEntry
 {
     /* Unique name for this entry */
     public string name;
@@ -37,8 +37,8 @@ private class UserEntry
     /* True if should be marked as active */
     public bool is_active;
 
-    /* Keyboard layout to use for this user by default */
-    public LightDM.Layout keyboard_layout;
+    /* Keyboard layouts to use for this user by default */
+    public List <LightDM.Layout> keyboard_layouts;
 }
 
 private class SessionMenuItem : Gtk.RadioMenuItem
@@ -46,15 +46,13 @@ private class SessionMenuItem : Gtk.RadioMenuItem
     public string session_name;
 }
 
-public class UserList : Gtk.Container
+public class UserList : Gtk.EventBox
 {
-    private int frame_count = 0;
-
     public Background background;
-    private uint change_background_timeout = 0;
+    public MenuBar menubar;
+    public UserEntry? selected_entry {get; private set; default = null;}
 
     private List<UserEntry> entries = null;
-    private UserEntry? selected_entry = null;
     
     private double scroll_target_location;
     private double scroll_start_location;
@@ -63,28 +61,26 @@ public class UserList : Gtk.Container
 
     private AnimateTimer scroll_timer;
 
-    private List<Gtk.Widget> children;
-
-    private MenuBar menubar;
-
     private string? error;
     private string? message;
 
+    private Gtk.Fixed fixed;
     private Gtk.Box login_box;
-    private Gtk.Entry prompt_entry;
-    private Gtk.Button login_button;
-    private Gtk.Widget prompt_widget_to_show;
+    private DashEntry prompt_entry;
+    private DashButton login_button;
+    private Fadable prompt_widget_to_show;
     private Gtk.Button options_button;
-    private Gtk.Menu options_menu;
+    private Menu options_menu;
     private Gdk.Pixbuf options_pixbuf;
     unowned GLib.SList<SessionMenuItem> session_group = null;
 
     private bool complete = false;
-    
+
+    private int border = 4;
     private int box_width = 7;
 
-    private uint n_above = 3;
-    private uint n_below = 3;
+    private uint n_above = 4;
+    private uint n_below = 4;
 
     /* Box in the middle taking up three rows */
     private int box_height = 3;
@@ -104,6 +100,7 @@ public class UserList : Gtk.Container
     }
 
     public signal void user_selected (string? username);
+    public signal void user_displayed ();
     public signal void respond_to_prompt (string text);
     public signal void start_session ();
 
@@ -136,43 +133,35 @@ public class UserList : Gtk.Container
         }
     }
 
-    public UserList ()
+    public UserList (Background bg, MenuBar mb)
     {
+        background = bg;
+        menubar = mb;
         can_focus = false;
+        visible_window = false;
 
-        background = new Background ();
-        background.show ();
-        add (background);
-
-        menubar = new MenuBar (background);
-        menubar.notify["high-contrast"].connect (() => {change_background ();});
-        menubar.show ();
-        add (menubar);
+        fixed = new Gtk.Fixed ();
+        fixed.show ();
+        add (fixed);
 
         login_box = new DashBox (background);
         login_box.show ();
-        add (login_box);
+        add_with_class (login_box);
 
-        prompt_entry = new Gtk.Entry ();
+        prompt_entry = new DashEntry ();
         prompt_entry.caps_lock_warning = true;
-        prompt_entry.has_frame = false;
-        var b = Gtk.Border ();
-        b.left = 15;
-        b.right = 15;
-        b.top = 15;
-        b.bottom = 15;
-        prompt_entry.set_inner_border (b);
-        prompt_entry.activate.connect (prompt_entry_activate_cb);
-        add (prompt_entry);
 
-        login_button = new Gtk.Button ();
+        prompt_entry.activate.connect (prompt_entry_activate_cb);
+        add_with_class (prompt_entry);
+
+        login_button = new DashButton ();
         var label = new Gtk.Label ("<span font_size=\"large\">%s</span>".printf (/* 'Log In' here is the button for logging in. */
                                                                              _("Log In")));
         label.use_markup = true;
         label.show ();
         login_button.add (label);
         login_button.clicked.connect (login_button_clicked_cb);
-        add (login_button);
+        add_with_class (login_button);
 
         try {
             options_pixbuf = new Gdk.Pixbuf.from_file (Path.build_filename (Config.PKGDATADIR, "cog.png", null));
@@ -190,12 +179,52 @@ public class UserList : Gtk.Container
         options_button.add (image);
         options_button.clicked.connect (options_button_clicked_cb);
         options_button.show ();
-        add (options_button);
+        add_with_class (options_button);
 
-        options_menu = new Gtk.Menu ();
+        options_menu = new Menu (background);
+        UnityGreeter.add_style_class (options_menu);
 
-        scroll_timer = new AnimateTimer (AnimateTimer.Speed.FAST);
+        scroll_timer = new AnimateTimer (AnimateTimer.FAST);
         scroll_timer.animate.connect (scroll_animate_cb);
+    }
+
+    public enum ScrollTarget
+    {
+        START,
+        END,
+        UP,
+        DOWN,
+    }
+
+    public void scroll (ScrollTarget target)
+    {
+        switch (target)
+        {
+        case ScrollTarget.START:
+            select_entry (entries.nth_data (0), -1.0);
+            break;
+        case ScrollTarget.END:
+            select_entry (entries.nth_data (entries.length () - 1), 1.0);
+            break;
+        case ScrollTarget.UP:
+            var index = entries.index (selected_entry) - 1;
+            if (index < 0)
+                index = 0;
+            select_entry (entries.nth_data (index), -1.0);
+            break;
+        case ScrollTarget.DOWN:
+            var index = entries.index (selected_entry) + 1;
+            if (index >= (int) entries.length ())
+                index = (int) entries.length () - 1;
+            select_entry (entries.nth_data (index), 1.0);
+            break;
+        }
+    }
+
+    private void add_with_class (Gtk.Widget widget)
+    {
+        fixed.add (widget);
+        UnityGreeter.add_style_class (widget);
     }
 
     private void redraw_user_list ()
@@ -220,7 +249,23 @@ public class UserList : Gtk.Container
     {
         login_button.hide ();
         prompt_entry.hide ();
-        message = text;
+        if (text.contains ("\n"))
+        {
+            message = text;
+            prompt_entry.constant_placeholder_text = "";
+        }
+        else
+        {
+            /* Strip trailing colon if present (also handle CJK version) */
+            var placeholder = text;
+            if (placeholder.has_suffix (":") || placeholder.has_suffix ("："))
+            {
+                var len = placeholder.char_count ();
+                placeholder = placeholder.substring (0, placeholder.index_of_nth_char (len - 1));
+            }
+            message = "";
+            prompt_entry.constant_placeholder_text = placeholder;
+        }
         prompt_entry.text = "";
         prompt_entry.sensitive = true;
         prompt_entry.visibility = !secret;
@@ -299,7 +344,7 @@ public class UserList : Gtk.Container
         return null;
     }
 
-    public void add_entry (string name, string label, string? background, LightDM.Layout? keyboard_layout, bool is_active = false)
+    public void add_entry (string name, string label, string? background, List <LightDM.Layout>? keyboard_layouts, bool is_active = false)
     {
         var e = find_entry (name);
         if (e == null)
@@ -311,7 +356,7 @@ public class UserList : Gtk.Container
         e.layout = create_pango_layout (label);
         e.layout.set_font_description (Pango.FontDescription.from_string ("Ubuntu 16"));
         e.background = background;
-        e.keyboard_layout = keyboard_layout;
+        e.keyboard_layouts = keyboard_layouts.copy ();
         e.is_active = is_active;
 
         if (selected_entry == null)
@@ -405,175 +450,112 @@ public class UserList : Gtk.Container
             finished_animating ();
     }
 
-    private bool change_background_timeout_cb ()
-    {
-        string new_background_file;
-        if (menubar.high_contrast)
-            new_background_file = null;
-        else
-            new_background_file = selected_entry.background;
-
-        background.current_background = new_background_file;
-
-        change_background_timeout = 0;
-        return false;
-    }
-
-    private void change_background ()
-    {
-        /* Set background after user stops scrolling */
-        if (frame_count > 0)
-        {
-            if (change_background_timeout != 0)
-                Source.remove (change_background_timeout);
-            change_background_timeout = Timeout.add (200, change_background_timeout_cb);
-        }
-        else
-            change_background_timeout_cb ();
-    }
-
     private void finished_animating ()
     {
         if (prompt_widget_to_show != null) {
-          prompt_widget_to_show.show ();
-          prompt_widget_to_show = null;
+            prompt_widget_to_show.fade_in ();
+            prompt_widget_to_show = null;
         }
         options_button.show ();
+        user_displayed ();
     }
 
     private void select_entry (UserEntry entry, double direction)
     {
-        if (get_realized ())
+        if (!get_realized ())
         {
-            scroll_target_location = entries.index (entry);
-            scroll_start_location = scroll_location;
-            scroll_direction = direction;
-            if (scroll_location != scroll_target_location)
-                scroll_timer.reset ();
+            /* Just note it for the future if we haven't been realized yet */
+            selected_entry = entry;
+            return;
+        }
+
+        if (scroll_target_location != entries.index (entry))
+        {
+            var old_target = scroll_target_location;
+            var new_target = entries.index (entry);
+            var new_direction = direction;
+            var new_start = scroll_timer.is_running ? scroll_start_location : scroll_location;
+
+            if (scroll_timer.is_running && scroll_direction != new_direction)
+                return; /* ignore requests when we're already scrolling the opposite way */
+
+            if (scroll_location != new_target)
+            {
+                var new_distance = new_direction * (new_target - new_start);
+                if (scroll_timer.is_running)
+                {
+                    var old_distance = new_direction * (old_target - new_start);
+                    if (!scroll_timer.extend ((new_distance - old_distance) / old_distance))
+                        return;
+                }
+                else if (new_distance > 1)
+                    scroll_timer.reset (600);
+                else
+                    scroll_timer.reset (400);
+
+                if (prompt_entry.visible)
+                    prompt_widget_to_show = prompt_entry;
+                else if (login_button.visible)
+                    prompt_widget_to_show = login_button;
+
+                prompt_entry.hide ();
+                login_button.hide ();
+                options_button.hide ();
+            }
+
+            scroll_target_location = new_target;
+            scroll_direction = new_direction;
+            scroll_start_location = new_start;
         }
 
         if (selected_entry != entry)
         {
             selected_entry = entry;
+            user_selected (selected_entry.name);
 
-            prompt_entry.hide ();
-            login_button.hide ();
-            options_button.hide ();
-
-            if (get_realized ())
-            {
-                change_background ();
-                user_selected (selected_entry.name);
-            }
-
-            menubar.set_layout (selected_entry.keyboard_layout);
+            if (!scroll_timer.is_running)
+                user_displayed (); /* didn't need to move, make sure we trigger side effects */
         }
-    }
-
-    public override void add (Gtk.Widget widget)
-    {
-        children.append (widget);
-        if (get_realized ())
-            widget.set_parent_window (get_window ());
-        widget.set_parent (this);
-    }
-
-    public override void remove (Gtk.Widget widget)
-    {
-        widget.unparent ();
-        children.remove (widget);
-    }
-
-    public override void forall_internal (bool include_internal, Gtk.Callback callback)
-    {
-        foreach (var child in children)
-            callback (child);
     }
 
     public override void realize ()
     {
-        change_background ();
+        base.realize ();
 
-        set_realized (true);
-
-        select_entry (selected_entry, 1);
-
-        Gtk.Allocation allocation;
-        get_allocation (out allocation);
-
-        var attributes = Gdk.WindowAttr ();
-        attributes.window_type = Gdk.WindowType.CHILD;
-        attributes.x = allocation.x;
-        attributes.y = allocation.y;
-        attributes.width = allocation.width;
-        attributes.height = allocation.height;
-        attributes.wclass = Gdk.WindowWindowClass.OUTPUT;
-        attributes.visual = get_visual ();
-        attributes.event_mask = Gdk.EventMask.EXPOSURE_MASK | Gdk.EventMask.BUTTON_PRESS_MASK | Gdk.EventMask.BUTTON_RELEASE_MASK | Gdk.EventMask.KEY_PRESS_MASK;
-        int attributes_mask = Gdk.WindowAttributesType.X | Gdk.WindowAttributesType.Y | Gdk.WindowAttributesType.VISUAL;
-
-        var window = new Gdk.Window (get_parent_window (), attributes, attributes_mask);
-        set_window (window);
-        window.set_user_data (this);
-
-        foreach (var child in children)
-            child.set_parent_window (get_window ());
-    }
-
-    public override void map ()
-    {
-        set_mapped (true);
-
-        foreach (var child in children)
-            if (child.visible && !child.get_mapped ())
-                child.map ();
-
-        get_window ().show ();
+        var saved_entry = selected_entry;
+        selected_entry = null;
+        select_entry (saved_entry, 1);
     }
 
     public override void size_allocate (Gtk.Allocation allocation)
     {
         var resized = allocation.height != get_allocated_height () || allocation.width != get_allocated_width ();
-        set_allocation (allocation);
-       
+        base.size_allocate (allocation);
+
         if (!get_realized ())
             return;
-
-        get_window ().move_resize (allocation.x, allocation.y, allocation.width, allocation.height);
 
         if (resized)
             debug ("Resized to %dx%d", get_allocated_width (), get_allocated_height ());
 
         var child_allocation = Gtk.Allocation ();
 
-        child_allocation.x = 0;
-        child_allocation.y = 0;
-        child_allocation.width = allocation.width;
-        child_allocation.height = allocation.height;
-        background.size_allocate (child_allocation);
-
-        child_allocation.x = 0;
-        child_allocation.y = 0;
-        child_allocation.width = allocation.width;
-        child_allocation.height = 32;
-        menubar.size_allocate (child_allocation);
-
-        child_allocation.x = box_x + 6;
-        child_allocation.y = box_y + 6;
+        child_allocation.x = allocation.x + box_x + 6;
+        child_allocation.y = allocation.y + box_y + 6;
         child_allocation.width = grid_size * box_width - 12;
         child_allocation.height = grid_size * box_height - 12;
         login_box.size_allocate (child_allocation);
 
         /* Put prompt entry and login button inside login box */
-        child_allocation.x = box_x + grid_size / 2;
-        child_allocation.y = box_y + grid_size * 2 - grid_size / 2;
+        child_allocation.x = allocation.x + box_x + grid_size / 2;
+        child_allocation.y = allocation.y + box_y + grid_size * 2 - grid_size / 2;
         child_allocation.width = grid_size * (box_width - 1);
         child_allocation.height = grid_size;
         prompt_entry.size_allocate (child_allocation);
         login_button.size_allocate (child_allocation);
 
-        child_allocation.x = box_x + box_width * grid_size - grid_size - grid_size / 4;
-        child_allocation.y = box_y + grid_size / 4;
+        child_allocation.x = allocation.x + box_x + box_width * grid_size - grid_size - grid_size / 4;
+        child_allocation.y = allocation.y + box_y + grid_size / 4;
         child_allocation.width = grid_size;
         child_allocation.height = grid_size;
         options_button.size_allocate (child_allocation);
@@ -616,7 +598,7 @@ public class UserList : Gtk.Container
         else
             c.set_source_rgba (1.0, 1.0, 1.0, alpha);
 
-        c.translate (grid_size / 2, grid_size - (grid_size - (h)) / 2 - h);
+        c.translate (grid_size / 2, (grid_size - h) / 2 + border);
         c.move_to (0, 0);
         Pango.cairo_show_layout (c, entry.layout);
 
@@ -628,7 +610,7 @@ public class UserList : Gtk.Container
             c.save ();
             var xpadding = (grid_size - options_pixbuf.width) / 2;
             var ypadding = (grid_size - options_pixbuf.height) / 2;
-            c.translate (box_width * grid_size - grid_size - grid_size / 4 + xpadding, grid_size / 4 - ypadding);
+            c.translate (box_width * grid_size - grid_size - grid_size / 4 + xpadding, grid_size / 4 - ypadding - border);
             Gdk.cairo_set_source_pixbuf (c, options_pixbuf, 0, 0);
             c.paint ();
             c.restore ();
@@ -644,26 +626,20 @@ public class UserList : Gtk.Container
         if (position < 0)
             alpha = 1.0 + position / (n_above + 1);
         else
-            alpha = 1.0 - (position - 2) / (n_below + 1);        
+            alpha = 1.0 - (position - 2) / (n_below + 1);
         draw_entry (c, entry, alpha, in_box);
         c.restore ();
     }
 
     public override bool draw (Cairo.Context c)
     {
-        if (frame_count == 0)
-            debug ("Rendered first frame");
-
-        frame_count++;
-
-        foreach (var child in children)
-            propagate_draw (child, c);
+        c.save ();
+        base.draw (c);
+        c.restore ();
 
         c.save ();
 
         c.translate (box_x, box_y);
-
-        var border = 4;
 
         var index = 0;
         foreach (var entry in entries)
@@ -671,14 +647,17 @@ public class UserList : Gtk.Container
             var position = index - scroll_location;
 
             /* Draw entries above the box */
-            var h_above = (double) (n_above + 1) * grid_size;
-            c.save ();
+            if (position < 0)
+            {
+                var h_above = (double) (n_above + 1) * grid_size;
+                c.save ();
 
-            c.rectangle (0, -h_above, box_width * grid_size, h_above);
-            c.clip ();
-            draw_entry_at_position (c, entry, position);
+                c.rectangle (0, -h_above, box_width * grid_size, h_above);
+                c.clip ();
+                draw_entry_at_position (c, entry, position);
 
-            c.restore ();
+                c.restore ();
+            }
 
             /* Draw entries in the box */
             if (position > -1 && position < 1 && scroll_timer.is_running)
@@ -697,14 +676,17 @@ public class UserList : Gtk.Container
             }
 
             /* Draw entries below the box */
-            var h_below = (double) (n_below + 1) * grid_size;
-            c.save ();
+            if (position > 0)
+            {
+                var h_below = (double) (n_below + 1) * grid_size;
+                c.save ();
 
-            c.rectangle (0, box_height * grid_size, box_width * grid_size, h_below);
-            c.clip ();
-            draw_entry_at_position (c, entry, position + box_height - 1);
+                c.rectangle (0, box_height * grid_size, box_width * grid_size, h_below);
+                c.clip ();
+                draw_entry_at_position (c, entry, position + box_height - 1);
 
-            c.restore ();
+                c.restore ();
+            }
 
             index++;
         }
@@ -720,7 +702,7 @@ public class UserList : Gtk.Container
 
             c.save ();
             c.translate (0, text_y);
-            draw_entry (c, selected_entry, 1.0);
+            draw_entry (c, selected_entry, 1.0, true);
             c.restore ();
 
             c.restore();
@@ -739,7 +721,7 @@ public class UserList : Gtk.Container
             int w, h;
             layout.get_pixel_size (out w, out h);
 
-            c.move_to (grid_size / 2, grid_size * 1.25 - h);
+            c.move_to (grid_size / 2, grid_size * 1.25 - h + border);
 
             var r = 1.0;
             var g = 1.0;
@@ -768,38 +750,6 @@ public class UserList : Gtk.Container
         return false;
     }
 
-    public override bool key_press_event (Gdk.EventKey event)
-    {
-        switch (event.keyval)
-        {
-        case Gdk.KEY_Page_Up:
-            select_entry (entries.nth_data (0), -1.0);
-            break;
-        case Gdk.KEY_Up:
-            var index = entries.index (selected_entry) - 1;
-            if (index < 0)
-                index = 0;
-            select_entry (entries.nth_data (index), -1.0);
-            break;
-        case Gdk.KEY_Down:
-            var index = entries.index (selected_entry) + 1;
-            if (index >= (int) entries.length ())
-                index = (int) entries.length () - 1;
-            select_entry (entries.nth_data (index), 1.0);
-            break;
-        case Gdk.KEY_Page_Down:
-            select_entry (entries.nth_data (entries.length () - 1), 1.0);
-            break;
-        case Gdk.KEY_F10:
-            menubar.select_first (false);
-            break;
-        default:
-            return false;
-        }
-
-        return true;
-    }
-
     private bool inside_entry (double x, double y, double entry_y, UserEntry entry)
     {
         int w, h;
@@ -820,7 +770,7 @@ public class UserList : Gtk.Container
         var x = event.x - box_x;
         var y = event.y - box_y;
 
-        /* Total height of list */        
+        /* Total height of list */
         var h = (double) entries.length () * grid_size;
 
         var offset = 0.0;
@@ -830,7 +780,7 @@ public class UserList : Gtk.Container
 
             /* Check entry above the box */
             var h_above = (double) n_above * grid_size;
-            if (y < 0 && y > -h_above)
+            if (entry_y < 0 && y < 0 && y > -h_above)
             {
                 if (inside_entry (x, y, entry_y, entry) ||
                     inside_entry (x, y, entry_y - h, entry))
@@ -843,7 +793,7 @@ public class UserList : Gtk.Container
             /* Check entry below the box */
             var below_y = y - box_height * grid_size;
             var h_below = (double) n_below * grid_size;
-            if (below_y > 0 && below_y < h_below)
+            if (entry_y > 0 && below_y > 0 && below_y < h_below)
             {
                 if (inside_entry (x, below_y, entry_y - grid_size, entry) ||
                     inside_entry (x, below_y, entry_y - grid_size + h, entry))

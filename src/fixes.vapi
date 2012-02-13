@@ -13,11 +13,17 @@ namespace X
 namespace Gdk
 {
     public const int KEY_Home;
-    public const int KEY_Page_Up;
-    public const int KEY_Up;
     public const int KEY_End;
+    public const int KEY_Page_Up;
     public const int KEY_Page_Down;
+    public const int KEY_Up;
     public const int KEY_Down;
+    public const int KEY_KP_Home;
+    public const int KEY_KP_End;
+    public const int KEY_KP_Page_Up;
+    public const int KEY_KP_Page_Down;
+    public const int KEY_KP_Up;
+    public const int KEY_KP_Down;
     public const int KEY_F10;
 }
 

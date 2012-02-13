@@ -1,3 +1,25 @@
+unity-greeter (0.2.1-0ubuntu1) precise; urgency=low
+
+  * New upstream release
+    - Fix session menu button not showing for first user
+    - Skip indicators that fail to load
+    - Distribute translations correctly
+    - Load indicators from location specified in pkg-config
+    - Use gsettings instead of /etc/lightdm/unity-greeter.conf
+    - Accept numpad arrow key presses
+    - Instead of showing all layouts in the system in the keyboard indicator,
+      only show the layouts a user has configured
+    - Don't crash if gnome-settings-daemon's gsettings schema isn't as expected
+    - Disable gnome-settings-daemon's new gsdwacom plugin as well as its older
+      wacom plugin
+    - Use vala-0.16 instead of valac-0.14
+  * debian/control:
+    - Bump valac build-depend to valac-0.16
+    - Bump liblightdm-gobject build-depend to one that has backported
+      keyboard layout query functions
+
+ -- Michael Terry <mterry@ubuntu.com>  Mon, 13 Feb 2012 15:25:10 -0500
+
 unity-greeter (0.2.0-0ubuntu6) precise; urgency=low
 
   * debian/patches/handle_missing_indicators.patch:

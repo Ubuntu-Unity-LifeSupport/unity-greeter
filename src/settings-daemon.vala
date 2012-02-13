@@ -31,6 +31,7 @@ public class SettingsDaemon : Object
                              "org.gnome.settings-daemon.plugins.clipboard",
                              "org.gnome.settings-daemon.plugins.font",
                              "org.gnome.settings-daemon.plugins.gconf",
+                             "org.gnome.settings-daemon.plugins.gsdwacom",
                              "org.gnome.settings-daemon.plugins.housekeeping",
                              "org.gnome.settings-daemon.plugins.keybindings",
                              "org.gnome.settings-daemon.plugins.keyboard",
@@ -50,16 +51,10 @@ public class SettingsDaemon : Object
                              "org.gnome.settings-daemon.plugins.power"};
 
         foreach (var schema in disabled)
-        {
-            var settings = new Settings (schema);
-            settings.set_boolean ("active", false);
-        }
+            set_plugin_enabled (schema, false);
 
         foreach (var schema in enabled)
-        {
-            var settings = new Settings (schema);
-            settings.set_boolean ("active", true);
-        }
+            set_plugin_enabled (schema, true);
 
         /* We want to block the screensaver from being activated by g-s-d or
            any of the indicators.  So we own the name, preventing dbus
@@ -69,6 +64,17 @@ public class SettingsDaemon : Object
            require gnome-session and it's Presence DBus interface to be run. */
         GLib.Bus.own_name (GLib.BusType.SESSION, "org.gnome.ScreenSaver",
                            GLib.BusNameOwnerFlags.NONE);
+    }
+
+    private void set_plugin_enabled (string schema_name, bool enabled)
+    {
+        var source = SettingsSchemaSource.get_default ();
+        var schema = source.lookup (schema_name, false);
+        if (schema != null)
+        {
+            var settings = new Settings (schema_name);
+            settings.set_boolean ("active", enabled);
+        }
     }
 
     private async void run ()
