@@ -7,10 +7,11 @@ Standards-Version: 3.9.2
 Build-Depends: debhelper (>= 7.0.50~),
                dh-autoreconf,
                gnome-common,
-               valac-0.16,
-               liblightdm-gobject-1-dev (>= 1.1.3),
+               libcanberra-dev,
                libgtk-3-dev,
-               libindicator3-dev
+               libindicator3-dev,
+               liblightdm-gobject-1-dev (>= 1.1.3),
+               valac-0.16
 Homepage: https://launchpad.net/unity-greeter
 Vcs-Bzr: https://code.launchpad.net/~ubuntu-desktop/unity-greeter/ubuntu
 
@@ -19,11 +20,11 @@ Architecture: any
 Depends: ${misc:Depends},
          ${shlibs:Depends},
          gnome-settings-daemon
-Recommends: lightdm,
-            indicator-session,
-            indicator-datetime,
+Recommends: indicator-datetime,
             indicator-power,
-            indicator-sound
+            indicator-session,
+            indicator-sound,
+            lightdm
 Provides: lightdm-greeter
 Breaks: edubuntu-artwork (<< 12.01.1~)
 Description: Unity Greeter

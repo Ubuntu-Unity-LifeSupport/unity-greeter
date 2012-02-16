@@ -1,3 +1,11 @@
+unity-greeter (0.2.3-0ubuntu3) precise; urgency=low
+
+  * debian/control:
+    - Build-depend on libcanberra-dev
+    - Ran wrap-and-sort
+
+ -- Michael Terry <mterry@ubuntu.com>  Thu, 16 Feb 2012 14:34:43 -0500
+
 unity-greeter (0.2.3-0ubuntu2) precise; urgency=low
 
   * debian/control:
