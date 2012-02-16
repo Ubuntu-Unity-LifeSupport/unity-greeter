@@ -27,6 +27,7 @@
 #include <lightdm.h>
 #include <stdlib.h>
 #include <string.h>
+#include <canberra.h>
 #include <cairo.h>
 #include <glib/gi18n-lib.h>
 #include <gdk/gdk.h>
@@ -41,6 +42,9 @@
 #include <stdio.h>
 #include <locale.h>
 #include <unistd.h>
+#include <signal.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <gobject/gvaluecollector.h>
 
 
@@ -87,6 +91,7 @@ typedef struct _MainWindowClass MainWindowClass;
 #define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
 #define _g_key_file_free0(var) ((var == NULL) ? NULL : (var = (g_key_file_free (var), NULL)))
 #define _g_free0(var) (var = (g_free (var), NULL))
+#define _ca_context_destroy0(var) ((var == NULL) ? NULL : (var = (ca_context_destroy (var), NULL)))
 #define _g_error_free0(var) ((var == NULL) ? NULL : (var = (g_error_free (var), NULL)))
 typedef struct _MainWindowPrivate MainWindowPrivate;
 #define __g_list_free__g_object_unref0_0(var) ((var == NULL) ? NULL : (var = (_g_list_free__g_object_unref0_ (var), NULL)))
@@ -142,6 +147,7 @@ struct _UnityGreeterPrivate {
 	gchar* authenticate_user;
 	gchar* test_username;
 	gboolean test_is_authenticated;
+	ca_context* canberra_context;
 };
 
 struct _MainWindow {
@@ -210,7 +216,7 @@ void settings_daemon_start_finish (SettingsDaemon* self, GAsyncResult* _res_);
 MainWindow* main_window_new (void);
 MainWindow* main_window_construct (GType object_type);
 void user_list_add_session (UserList* self, const gchar* name, const gchar* label);
-void user_list_add_entry (UserList* self, const gchar* name, const gchar* label, const gchar* background, GList* keyboard_layouts, gboolean is_active);
+void user_list_add_entry (UserList* self, const gchar* name, const gchar* label, const gchar* background, GList* keyboard_layouts, gboolean is_active, gboolean has_messages);
 static GList* unity_greeter_make_layout_list (UnityGreeter* self, const gchar* names);
 static void _g_object_unref0_ (gpointer var);
 static void _g_list_free__g_object_unref0_ (GList* self);
@@ -228,6 +234,8 @@ static void unity_greeter_start_session_cb (UnityGreeter* self);
 static void _unity_greeter_start_session_cb_user_list_start_session (UserList* _sender, gpointer self);
 const gchar* user_list_get_selected (UserList* self);
 static void unity_greeter_start_fake_wm (UnityGreeter* self);
+static gboolean unity_greeter_ready_cb (UnityGreeter* self);
+static gboolean _unity_greeter_ready_cb_gsource_func (gpointer self);
 void unity_greeter_add_style_class (GtkWidget* widget);
 static LightDMLayout* unity_greeter_get_layout_by_name (UnityGreeter* self, const gchar* name);
 void user_list_remove_entry (UserList* self, const gchar* name);
@@ -332,6 +340,13 @@ static void _unity_greeter_start_session_cb_user_list_start_session (UserList* _
 }
 
 
+static gboolean _unity_greeter_ready_cb_gsource_func (gpointer self) {
+	gboolean result;
+	result = unity_greeter_ready_cb (self);
+	return result;
+}
+
+
 UnityGreeter* unity_greeter_construct (GType object_type) {
 	UnityGreeter* self = NULL;
 	LightDMGreeter* _tmp0_;
@@ -395,7 +410,7 @@ UnityGreeter* unity_greeter_construct (GType object_type) {
 		GError* e = NULL;
 		e = _inner_error_;
 		_inner_error_ = NULL;
-		g_warning ("unity-greeter.vala:72: Failed to connect to LightDM daemon");
+		g_warning ("unity-greeter.vala:73: Failed to connect to LightDM daemon");
 		_g_error_free0 (e);
 	}
 	__finally6:
@@ -473,7 +488,7 @@ UnityGreeter* unity_greeter_construct (GType object_type) {
 			_tmp27_ = _tmp26_;
 			_tmp28_ = e;
 			_tmp29_ = _tmp28_->message;
-			g_warning ("unity-greeter.vala:95: Failed to load state from %s: %s\n", _tmp27_, _tmp29_);
+			g_warning ("unity-greeter.vala:96: Failed to load state from %s: %s\n", _tmp27_, _tmp29_);
 			_g_free0 (_tmp27_);
 		}
 		_g_error_free0 (e);
@@ -553,7 +568,7 @@ UnityGreeter* unity_greeter_construct (GType object_type) {
 				_tmp43_ = session;
 				_tmp44_ = lightdm_session_get_name (_tmp43_);
 				_tmp45_ = _tmp44_;
-				g_debug ("unity-greeter.vala:109: Adding session %s (%s)", _tmp42_, _tmp45_);
+				g_debug ("unity-greeter.vala:110: Adding session %s (%s)", _tmp42_, _tmp45_);
 				_tmp46_ = self->user_list;
 				_tmp47_ = session;
 				_tmp48_ = lightdm_session_get_key (_tmp47_);
@@ -598,43 +613,43 @@ UnityGreeter* unity_greeter_construct (GType object_type) {
 		_tmp54_ = self->user_list;
 		_tmp55_ = unity_greeter_make_layout_list (self, "kr");
 		_tmp56_ = _tmp55_;
-		user_list_add_entry (_tmp54_, "alice", "가나다라마", "/usr/share/backgrounds/Darkening_Clockwork_by_Matt_Katzenberger.jpg", _tmp56_, TRUE);
+		user_list_add_entry (_tmp54_, "alice", "가나다라마", "/usr/share/backgrounds/Darkening_Clockwork_by_Matt_Katzenberger.jpg", _tmp56_, TRUE, FALSE);
 		__g_list_free__g_object_unref0_0 (_tmp56_);
 		_tmp57_ = self->user_list;
-		user_list_add_entry (_tmp57_, "chris", "Christopher Halse Rogers!!!!!!!!!!!!!!!", "/usr/share/backgrounds/Darkening_Clockwork_by_Matt_Katzenberger.jpg", NULL, TRUE);
+		user_list_add_entry (_tmp57_, "chris", "Christopher Halse Rogers!!!!!!!!!!!!!!!", "/usr/share/backgrounds/Darkening_Clockwork_by_Matt_Katzenberger.jpg", NULL, TRUE, FALSE);
 		_tmp58_ = self->user_list;
 		_tmp59_ = unity_greeter_make_layout_list (self, "us");
 		_tmp60_ = _tmp59_;
-		user_list_add_entry (_tmp58_, "jorge", "Jorge O Castro", "/usr/share/backgrounds/PurpleDancers_by_Emilio_Merlino.jpg", _tmp60_, FALSE);
+		user_list_add_entry (_tmp58_, "jorge", "Jorge O Castro", "/usr/share/backgrounds/PurpleDancers_by_Emilio_Merlino.jpg", _tmp60_, FALSE, FALSE);
 		__g_list_free__g_object_unref0_0 (_tmp60_);
 		_tmp61_ = self->user_list;
 		_tmp62_ = unity_greeter_make_layout_list (self, "uk;us");
 		_tmp63_ = _tmp62_;
-		user_list_add_entry (_tmp61_, "ken", "Ken VanDine", "/usr/share/backgrounds/Small_flowers_by_Dariusz_Duma.jpg", _tmp63_, FALSE);
+		user_list_add_entry (_tmp61_, "ken", "Ken VanDine", "/usr/share/backgrounds/Small_flowers_by_Dariusz_Duma.jpg", _tmp63_, FALSE, FALSE);
 		__g_list_free__g_object_unref0_0 (_tmp63_);
 		_tmp64_ = self->user_list;
 		_tmp65_ = unity_greeter_make_layout_list (self, "gb");
 		_tmp66_ = _tmp65_;
-		user_list_add_entry (_tmp64_, "matthew", "Matthew Paul Thomas", "/usr/share/backgrounds/Not_Alone_by_Deacon_MacMillan.jpg", _tmp66_, FALSE);
+		user_list_add_entry (_tmp64_, "matthew", "Matthew Paul Thomas", "/usr/share/backgrounds/Not_Alone_by_Deacon_MacMillan.jpg", _tmp66_, FALSE, TRUE);
 		__g_list_free__g_object_unref0_0 (_tmp66_);
 		_tmp67_ = self->user_list;
 		_tmp68_ = unity_greeter_make_layout_list (self, "gb");
 		_tmp69_ = _tmp68_;
-		user_list_add_entry (_tmp67_, "otto", "Otto Greenslade", "/usr/share/backgrounds/Mount_Snowdon,_Wales_by_Adam_Vellender.jpg", _tmp69_, FALSE);
+		user_list_add_entry (_tmp67_, "otto", "Otto Greenslade", "/usr/share/backgrounds/Mount_Snowdon,_Wales_by_Adam_Vellender.jpg", _tmp69_, FALSE, FALSE);
 		__g_list_free__g_object_unref0_0 (_tmp69_);
 		_tmp70_ = self->user_list;
 		_tmp71_ = unity_greeter_make_layout_list (self, "de\tdvorak;us");
 		_tmp72_ = _tmp71_;
-		user_list_add_entry (_tmp70_, "pitti", "Martin Pitt", "/usr/share/backgrounds/Stalking_Ocelot_by_Sayantan_Chaudhuri.jpg", _tmp72_, FALSE);
+		user_list_add_entry (_tmp70_, "pitti", "Martin Pitt", "/usr/share/backgrounds/Stalking_Ocelot_by_Sayantan_Chaudhuri.jpg", _tmp72_, FALSE, FALSE);
 		__g_list_free__g_object_unref0_0 (_tmp72_);
 		_tmp73_ = self->user_list;
 		_tmp74_ = unity_greeter_make_layout_list (self, "ca");
 		_tmp75_ = _tmp74_;
-		user_list_add_entry (_tmp73_, "desrt", "Ryan Lortie", "/usr/share/backgrounds/Power_of_Words_by_Antonio_Litterio.jpg", _tmp75_, FALSE);
+		user_list_add_entry (_tmp73_, "desrt", "Ryan Lortie", "/usr/share/backgrounds/Power_of_Words_by_Antonio_Litterio.jpg", _tmp75_, FALSE, TRUE);
 		__g_list_free__g_object_unref0_0 (_tmp75_);
 		_tmp76_ = self->user_list;
 		_tmp77_ = _ ("Guest Session");
-		user_list_add_entry (_tmp76_, "*guest", _tmp77_, NULL, NULL, TRUE);
+		user_list_add_entry (_tmp76_, "*guest", _tmp77_, NULL, NULL, TRUE, FALSE);
 		_tmp78_ = self->user_list;
 		user_list_add_session (_tmp78_, "gnome", "Ubuntu");
 		_tmp79_ = self->user_list;
@@ -667,7 +682,7 @@ UnityGreeter* unity_greeter_construct (GType object_type) {
 			const gchar* _tmp88_ = NULL;
 			_tmp87_ = self->user_list;
 			_tmp88_ = _ ("Login");
-			user_list_add_entry (_tmp87_, "*other", _tmp88_, NULL, NULL, FALSE);
+			user_list_add_entry (_tmp87_, "*other", _tmp88_, NULL, NULL, FALSE, FALSE);
 		} else {
 			LightDMUserList* _tmp89_ = NULL;
 			LightDMUserList* _tmp90_;
@@ -712,10 +727,10 @@ UnityGreeter* unity_greeter_construct (GType object_type) {
 		if (_tmp100_) {
 			UserList* _tmp101_;
 			const gchar* _tmp102_ = NULL;
-			g_debug ("unity-greeter.vala:148: Adding guest account entry");
+			g_debug ("unity-greeter.vala:149: Adding guest account entry");
 			_tmp101_ = self->user_list;
 			_tmp102_ = _ ("Guest Session");
-			user_list_add_entry (_tmp101_, "*guest", _tmp102_, NULL, NULL, FALSE);
+			user_list_add_entry (_tmp101_, "*guest", _tmp102_, NULL, NULL, FALSE, FALSE);
 		}
 		_tmp103_ = self->priv->greeter;
 		_tmp104_ = lightdm_greeter_get_select_user_hint (_tmp103_);
@@ -753,6 +768,7 @@ UnityGreeter* unity_greeter_construct (GType object_type) {
 	_tmp118_ = _tmp117_;
 	unity_greeter_user_selected_cb (self, _tmp118_);
 	unity_greeter_start_fake_wm (self);
+	gdk_threads_add_idle (_unity_greeter_ready_cb_gsource_func, self);
 	_g_free0 (last_user);
 	_g_free0 (state_dir);
 	return self;
@@ -877,6 +893,22 @@ static LightDMLayout* unity_greeter_get_layout_by_name (UnityGreeter* self, cons
 }
 
 
+static gboolean unity_greeter_ready_cb (UnityGreeter* self) {
+	gboolean result = FALSE;
+	ca_context* _tmp0_ = NULL;
+	ca_context* _tmp1_;
+	g_return_val_if_fail (self != NULL, FALSE);
+	g_debug ("unity-greeter.vala:202: starting system-ready sound");
+	ca_context_create (&_tmp0_);
+	_ca_context_destroy0 (self->priv->canberra_context);
+	self->priv->canberra_context = _tmp0_;
+	_tmp1_ = self->priv->canberra_context;
+	ca_context_play (_tmp1_, (guint32) 0, CA_PROP_CANBERRA_XDG_THEME_NAME, "ubuntu", CA_PROP_EVENT_ID, "system-ready", NULL);
+	result = FALSE;
+	return result;
+}
+
+
 static void unity_greeter_user_added_cb (UnityGreeter* self, LightDMUser* user) {
 	LightDMUser* _tmp0_;
 	const gchar* _tmp1_;
@@ -908,6 +940,9 @@ static void unity_greeter_user_added_cb (UnityGreeter* self, LightDMUser* user) 
 	LightDMUser* _tmp35_;
 	gboolean _tmp36_;
 	gboolean _tmp37_;
+	LightDMUser* _tmp38_;
+	gboolean _tmp39_;
+	gboolean _tmp40_;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (user != NULL);
 	_tmp0_ = user;
@@ -916,7 +951,7 @@ static void unity_greeter_user_added_cb (UnityGreeter* self, LightDMUser* user) 
 	_tmp3_ = user;
 	_tmp4_ = lightdm_user_get_real_name (_tmp3_);
 	_tmp5_ = _tmp4_;
-	g_debug ("unity-greeter.vala:200: Adding/updating user %s (%s)", _tmp2_, _tmp5_);
+	g_debug ("unity-greeter.vala:217: Adding/updating user %s (%s)", _tmp2_, _tmp5_);
 	_tmp6_ = user;
 	_tmp7_ = lightdm_user_get_real_name (_tmp6_);
 	_tmp8_ = _tmp7_;
@@ -985,7 +1020,10 @@ static void unity_greeter_user_added_cb (UnityGreeter* self, LightDMUser* user) 
 	_tmp35_ = user;
 	_tmp36_ = lightdm_user_get_logged_in (_tmp35_);
 	_tmp37_ = _tmp36_;
-	user_list_add_entry (_tmp26_, _tmp29_, _tmp30_, _tmp33_, _tmp34_, _tmp37_);
+	_tmp38_ = user;
+	_tmp39_ = lightdm_user_get_has_messages (_tmp38_);
+	_tmp40_ = _tmp39_;
+	user_list_add_entry (_tmp26_, _tmp29_, _tmp30_, _tmp33_, _tmp34_, _tmp37_, _tmp40_);
 	__g_list_free__g_object_unref0_0 (layouts);
 	_g_free0 (label);
 }
@@ -1004,7 +1042,7 @@ static void unity_greeter_user_removed_cb (UnityGreeter* self, LightDMUser* user
 	_tmp0_ = user;
 	_tmp1_ = lightdm_user_get_name (_tmp0_);
 	_tmp2_ = _tmp1_;
-	g_debug ("unity-greeter.vala:219: Removing user %s", _tmp2_);
+	g_debug ("unity-greeter.vala:236: Removing user %s", _tmp2_);
 	_tmp3_ = self->user_list;
 	_tmp4_ = user;
 	_tmp5_ = lightdm_user_get_name (_tmp4_);
@@ -1018,7 +1056,7 @@ void unity_greeter_show (UnityGreeter* self) {
 	MainWindow* _tmp1_;
 	GdkWindow* _tmp2_ = NULL;
 	g_return_if_fail (self != NULL);
-	g_debug ("unity-greeter.vala:225: Showing main window");
+	g_debug ("unity-greeter.vala:242: Showing main window");
 	_tmp0_ = self->priv->main_window;
 	gtk_widget_show ((GtkWidget*) _tmp0_);
 	_tmp1_ = self->priv->main_window;
@@ -1264,7 +1302,7 @@ static void unity_greeter_start_session (UnityGreeter* self) {
 		_inner_error_ = NULL;
 		_tmp10_ = e;
 		_tmp11_ = _tmp10_->message;
-		g_warning ("unity-greeter.vala:316: Failed to start session: %s", _tmp11_);
+		g_warning ("unity-greeter.vala:333: Failed to start session: %s", _tmp11_);
 		_g_error_free0 (e);
 	}
 	__finally9:
@@ -1392,7 +1430,7 @@ static void unity_greeter_user_selected_cb (UnityGreeter* self, const gchar* use
 		_inner_error_ = NULL;
 		_tmp5_ = e;
 		_tmp6_ = _tmp5_->message;
-		g_debug ("unity-greeter.vala:376: Failed to write state: %s", _tmp6_);
+		g_debug ("unity-greeter.vala:393: Failed to write state: %s", _tmp6_);
 		_g_error_free0 (e);
 	}
 	__finally10:
@@ -1507,7 +1545,7 @@ static void unity_greeter_update_other_label (UnityGreeter* self) {
 	}
 	_tmp26_ = self->user_list;
 	_tmp27_ = text;
-	user_list_add_entry (_tmp26_, "*other", _tmp27_, NULL, NULL, FALSE);
+	user_list_add_entry (_tmp26_, "*other", _tmp27_, NULL, NULL, FALSE, FALSE);
 	_g_free0 (text);
 }
 
@@ -1651,7 +1689,7 @@ static void unity_greeter_respond_to_prompt_cb (UnityGreeter* self, const gchar*
 		const gchar* _tmp2_;
 		const gchar* _tmp3_;
 		_tmp2_ = text;
-		g_debug ("unity-greeter.vala:468: response %s", _tmp2_);
+		g_debug ("unity-greeter.vala:485: response %s", _tmp2_);
 		_tmp3_ = self->priv->test_username;
 		if (_tmp3_ == NULL) {
 			const gchar* _tmp4_;
@@ -1659,7 +1697,7 @@ static void unity_greeter_respond_to_prompt_cb (UnityGreeter* self, const gchar*
 			gchar* _tmp6_;
 			const gchar* _tmp7_ = NULL;
 			_tmp4_ = text;
-			g_debug ("unity-greeter.vala:471: username=%s", _tmp4_);
+			g_debug ("unity-greeter.vala:488: username=%s", _tmp4_);
 			_tmp5_ = text;
 			_tmp6_ = g_strdup (_tmp5_);
 			_g_free0 (self->priv->test_username);
@@ -1825,7 +1863,7 @@ static cairo_surface_t* unity_greeter_create_root_surface (GdkScreen* screen) {
 	display = _tmp6_;
 	_tmp7_ = display;
 	if (_tmp7_ == NULL) {
-		g_warning ("unity-greeter.vala:531: Failed to create root pixmap");
+		g_warning ("unity-greeter.vala:548: Failed to create root pixmap");
 		result = NULL;
 		_XCloseDisplay0 (display);
 		_g_object_unref0 (visual);
@@ -1978,221 +2016,285 @@ static void _unity_greeter_log_cb_glog_func (const gchar* log_domain, GLogLevelF
 
 gint unity_greeter_main (gchar** args, int args_length1) {
 	gint result = 0;
-	GTimer* _tmp0_;
-	uid_t _tmp1_ = {0};
-	const gchar* _tmp2_ = NULL;
-	GdkWindow* _tmp3_ = NULL;
-	GdkCursor* _tmp4_;
-	GdkCursor* _tmp5_;
-	GdkScreen* _tmp6_ = NULL;
-	cairo_surface_t* _tmp7_ = NULL;
+	GPid atspi_pid;
+	GTimer* _tmp6_;
+	uid_t _tmp7_ = {0};
 	const gchar* _tmp8_ = NULL;
-	GOptionContext* _tmp9_;
+	GdkWindow* _tmp9_ = NULL;
+	GdkCursor* _tmp10_;
+	GdkCursor* _tmp11_;
+	GdkScreen* _tmp12_ = NULL;
+	cairo_surface_t* _tmp13_ = NULL;
+	const gchar* _tmp14_ = NULL;
+	GOptionContext* _tmp15_;
 	GOptionContext* c;
-	GOptionContext* _tmp10_;
-	GOptionContext* _tmp11_;
-	GOptionGroup* _tmp12_ = NULL;
-	gboolean _tmp22_;
-	gboolean _tmp24_;
-	GtkSettings* _tmp25_ = NULL;
-	GtkSettings* _tmp26_;
+	GOptionContext* _tmp16_;
+	GOptionContext* _tmp17_;
+	GOptionGroup* _tmp18_ = NULL;
+	gboolean _tmp28_;
+	gboolean _tmp30_;
+	GtkSettings* _tmp31_ = NULL;
+	GtkSettings* _tmp32_;
 	GtkSettings* settings;
-	gchar* _tmp27_ = NULL;
+	gchar* _tmp33_ = NULL;
 	gchar* value;
-	const gchar* _tmp28_;
-	gchar* _tmp31_ = NULL;
-	const gchar* _tmp32_;
-	gchar* _tmp35_ = NULL;
-	const gchar* _tmp36_;
-	gdouble _tmp39_ = 0.0;
+	const gchar* _tmp34_;
+	gchar* _tmp37_ = NULL;
+	const gchar* _tmp38_;
+	gchar* _tmp41_ = NULL;
+	const gchar* _tmp42_;
+	gdouble _tmp45_ = 0.0;
 	gdouble double_value;
-	gdouble _tmp40_;
-	gboolean _tmp43_ = FALSE;
+	gdouble _tmp46_;
+	gboolean _tmp49_ = FALSE;
 	gboolean boolean_value;
-	GtkSettings* _tmp44_;
-	gboolean _tmp45_;
-	gchar* _tmp46_ = NULL;
-	const gchar* _tmp47_;
-	gchar* _tmp50_ = NULL;
-	const gchar* _tmp51_;
-	UnityGreeter* _tmp54_;
+	GtkSettings* _tmp50_;
+	gboolean _tmp51_;
+	gchar* _tmp52_ = NULL;
+	const gchar* _tmp53_;
+	gchar* _tmp56_ = NULL;
+	const gchar* _tmp57_;
+	UnityGreeter* _tmp60_;
 	UnityGreeter* greeter;
-	UnityGreeter* _tmp55_;
+	UnityGreeter* _tmp61_;
+	GPid _tmp62_;
 	GError * _inner_error_ = NULL;
 	g_unsetenv ("UBUNTU_MENUPROXY");
 	setlocale (LC_ALL, "");
 	bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 	textdomain (GETTEXT_PACKAGE);
-	gtk_init (&args_length1, &args);
-	_tmp0_ = g_timer_new ();
-	_g_timer_destroy0 (unity_greeter_log_timer);
-	unity_greeter_log_timer = _tmp0_;
-	g_log_set_default_handler (_unity_greeter_log_cb_glog_func, NULL);
-	_tmp1_ = getuid ();
-	_tmp2_ = g_getenv ("LANG");
-	g_debug ("unity-greeter.vala:610: Starting unity-greeter %s UID=%d LANG=%s", VERSION, (gint) _tmp1_, _tmp2_);
-	g_debug ("unity-greeter.vala:613: Setting cursor");
-	_tmp3_ = gdk_get_default_root_window ();
-	_tmp4_ = gdk_cursor_new (GDK_LEFT_PTR);
-	_tmp5_ = _tmp4_;
-	gdk_window_set_cursor (_tmp3_, _tmp5_);
-	_g_object_unref0 (_tmp5_);
-	g_debug ("unity-greeter.vala:617: Creating background surface");
-	_tmp6_ = gdk_screen_get_default ();
-	_tmp7_ = unity_greeter_create_root_surface (_tmp6_);
-	_cairo_surface_destroy0 (unity_greeter_background_surface);
-	unity_greeter_background_surface = _tmp7_;
-	g_debug ("unity-greeter.vala:620: Loading command line options");
-	_tmp8_ = _ ("- Unity Greeter");
-	_tmp9_ = g_option_context_new (_tmp8_);
-	c = _tmp9_;
-	_tmp10_ = c;
-	g_option_context_add_main_entries (_tmp10_, UNITY_GREETER_options, GETTEXT_PACKAGE);
-	_tmp11_ = c;
-	_tmp12_ = gtk_get_option_group (TRUE);
-	g_option_context_add_group (_tmp11_, _tmp12_);
+	g_setenv ("GTK_MODULES", "atk-bridge", FALSE);
+	atspi_pid = (GPid) 0;
 	{
-		GOptionContext* _tmp13_;
-		_tmp13_ = c;
-		g_option_context_parse (_tmp13_, &args_length1, &args, &_inner_error_);
+		gchar** argv = NULL;
+		gint argv_length1 = 0;
+		gint _argv_size_ = 0;
+		gchar** _tmp0_ = NULL;
+		gint _tmp1_ = 0;
+		gchar** _tmp2_;
+		gint _tmp2__length1;
+		GPid _tmp3_ = 0;
+		g_shell_parse_argv ("/usr/lib/at-spi2-core/at-spi-bus-launcher --launch-immediately", &_tmp1_, &_tmp0_, &_inner_error_);
+		argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
+		argv = _tmp0_;
+		argv_length1 = _tmp1_;
+		_argv_size_ = argv_length1;
 		if (_inner_error_ != NULL) {
+			argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
 			goto __catch11_g_error;
 		}
+		_tmp2_ = argv;
+		_tmp2__length1 = argv_length1;
+		g_spawn_async (NULL, _tmp2_, NULL, G_SPAWN_SEARCH_PATH, NULL, NULL, &_tmp3_, &_inner_error_);
+		atspi_pid = _tmp3_;
+		if (_inner_error_ != NULL) {
+			argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
+			goto __catch11_g_error;
+		}
+		argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
 	}
 	goto __finally11;
 	__catch11_g_error:
 	{
 		GError* e = NULL;
-		FILE* _tmp14_;
-		GError* _tmp15_;
-		const gchar* _tmp16_;
-		FILE* _tmp17_;
-		const gchar* _tmp18_ = NULL;
-		gchar** _tmp19_;
-		gint _tmp19__length1;
-		const gchar* _tmp20_;
-		FILE* _tmp21_;
+		GError* _tmp4_;
+		const gchar* _tmp5_;
 		e = _inner_error_;
 		_inner_error_ = NULL;
-		_tmp14_ = stderr;
-		_tmp15_ = e;
-		_tmp16_ = _tmp15_->message;
-		fprintf (_tmp14_, "%s\n", _tmp16_);
-		_tmp17_ = stderr;
-		_tmp18_ = _ ("Run '%s --help' to see a full list of available command line options.");
-		_tmp19_ = args;
-		_tmp19__length1 = args_length1;
-		_tmp20_ = _tmp19_[0];
-		fprintf (_tmp17_, _tmp18_, _tmp20_);
-		_tmp21_ = stderr;
-		fprintf (_tmp21_, "\n");
+		_tmp4_ = e;
+		_tmp5_ = _tmp4_->message;
+		g_warning ("unity-greeter.vala:641: Error starting the at-spi registry: %s", _tmp5_);
+		_g_error_free0 (e);
+	}
+	__finally11:
+	if (_inner_error_ != NULL) {
+		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
+		g_clear_error (&_inner_error_);
+		return 0;
+	}
+	gtk_init (&args_length1, &args);
+	_tmp6_ = g_timer_new ();
+	_g_timer_destroy0 (unity_greeter_log_timer);
+	unity_greeter_log_timer = _tmp6_;
+	g_log_set_default_handler (_unity_greeter_log_cb_glog_func, NULL);
+	_tmp7_ = getuid ();
+	_tmp8_ = g_getenv ("LANG");
+	g_debug ("unity-greeter.vala:649: Starting unity-greeter %s UID=%d LANG=%s", VERSION, (gint) _tmp7_, _tmp8_);
+	g_debug ("unity-greeter.vala:652: Setting cursor");
+	_tmp9_ = gdk_get_default_root_window ();
+	_tmp10_ = gdk_cursor_new (GDK_LEFT_PTR);
+	_tmp11_ = _tmp10_;
+	gdk_window_set_cursor (_tmp9_, _tmp11_);
+	_g_object_unref0 (_tmp11_);
+	g_debug ("unity-greeter.vala:656: Creating background surface");
+	_tmp12_ = gdk_screen_get_default ();
+	_tmp13_ = unity_greeter_create_root_surface (_tmp12_);
+	_cairo_surface_destroy0 (unity_greeter_background_surface);
+	unity_greeter_background_surface = _tmp13_;
+	g_debug ("unity-greeter.vala:659: Loading command line options");
+	_tmp14_ = _ ("- Unity Greeter");
+	_tmp15_ = g_option_context_new (_tmp14_);
+	c = _tmp15_;
+	_tmp16_ = c;
+	g_option_context_add_main_entries (_tmp16_, UNITY_GREETER_options, GETTEXT_PACKAGE);
+	_tmp17_ = c;
+	_tmp18_ = gtk_get_option_group (TRUE);
+	g_option_context_add_group (_tmp17_, _tmp18_);
+	{
+		GOptionContext* _tmp19_;
+		_tmp19_ = c;
+		g_option_context_parse (_tmp19_, &args_length1, &args, &_inner_error_);
+		if (_inner_error_ != NULL) {
+			goto __catch12_g_error;
+		}
+	}
+	goto __finally12;
+	__catch12_g_error:
+	{
+		GError* e = NULL;
+		FILE* _tmp20_;
+		GError* _tmp21_;
+		const gchar* _tmp22_;
+		FILE* _tmp23_;
+		const gchar* _tmp24_ = NULL;
+		gchar** _tmp25_;
+		gint _tmp25__length1;
+		const gchar* _tmp26_;
+		FILE* _tmp27_;
+		e = _inner_error_;
+		_inner_error_ = NULL;
+		_tmp20_ = stderr;
+		_tmp21_ = e;
+		_tmp22_ = _tmp21_->message;
+		fprintf (_tmp20_, "%s\n", _tmp22_);
+		_tmp23_ = stderr;
+		_tmp24_ = _ ("Run '%s --help' to see a full list of available command line options.");
+		_tmp25_ = args;
+		_tmp25__length1 = args_length1;
+		_tmp26_ = _tmp25_[0];
+		fprintf (_tmp23_, _tmp24_, _tmp26_);
+		_tmp27_ = stderr;
+		fprintf (_tmp27_, "\n");
 		result = EXIT_FAILURE;
 		_g_error_free0 (e);
 		_g_option_context_free0 (c);
 		return result;
 	}
-	__finally11:
+	__finally12:
 	if (_inner_error_ != NULL) {
 		_g_option_context_free0 (c);
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
 		return 0;
 	}
-	_tmp22_ = unity_greeter_show_version;
-	if (_tmp22_) {
-		FILE* _tmp23_;
-		_tmp23_ = stderr;
-		fprintf (_tmp23_, "unity-greeter %s\n", VERSION);
+	_tmp28_ = unity_greeter_show_version;
+	if (_tmp28_) {
+		FILE* _tmp29_;
+		_tmp29_ = stderr;
+		fprintf (_tmp29_, "unity-greeter %s\n", VERSION);
 		result = EXIT_SUCCESS;
 		_g_option_context_free0 (c);
 		return result;
 	}
-	_tmp24_ = unity_greeter_test_mode;
-	if (_tmp24_) {
-		g_debug ("unity-greeter.vala:645: Running in test mode");
+	_tmp30_ = unity_greeter_test_mode;
+	if (_tmp30_) {
+		g_debug ("unity-greeter.vala:684: Running in test mode");
 	}
-	g_debug ("unity-greeter.vala:648: Setting GTK+ settings");
-	_tmp25_ = gtk_settings_get_default ();
-	_tmp26_ = _g_object_ref0 (_tmp25_);
-	settings = _tmp26_;
-	_tmp27_ = ug_settings_get_string (UG_SETTINGS_KEY_THEME_NAME);
-	value = _tmp27_;
-	_tmp28_ = value;
-	if (g_strcmp0 (_tmp28_, "") != 0) {
-		GtkSettings* _tmp29_;
-		const gchar* _tmp30_;
-		_tmp29_ = settings;
-		_tmp30_ = value;
-		g_object_set ((GObject*) _tmp29_, "gtk-theme-name", _tmp30_, NULL, NULL);
+	g_debug ("unity-greeter.vala:687: Setting GTK+ settings");
+	_tmp31_ = gtk_settings_get_default ();
+	_tmp32_ = _g_object_ref0 (_tmp31_);
+	settings = _tmp32_;
+	_tmp33_ = ug_settings_get_string (UG_SETTINGS_KEY_THEME_NAME);
+	value = _tmp33_;
+	_tmp34_ = value;
+	if (g_strcmp0 (_tmp34_, "") != 0) {
+		GtkSettings* _tmp35_;
+		const gchar* _tmp36_;
+		_tmp35_ = settings;
+		_tmp36_ = value;
+		g_object_set ((GObject*) _tmp35_, "gtk-theme-name", _tmp36_, NULL, NULL);
 	}
-	_tmp31_ = ug_settings_get_string (UG_SETTINGS_KEY_ICON_THEME_NAME);
+	_tmp37_ = ug_settings_get_string (UG_SETTINGS_KEY_ICON_THEME_NAME);
 	_g_free0 (value);
-	value = _tmp31_;
-	_tmp32_ = value;
-	if (g_strcmp0 (_tmp32_, "") != 0) {
-		GtkSettings* _tmp33_;
-		const gchar* _tmp34_;
-		_tmp33_ = settings;
-		_tmp34_ = value;
-		g_object_set ((GObject*) _tmp33_, "gtk-icon-theme-name", _tmp34_, NULL, NULL);
+	value = _tmp37_;
+	_tmp38_ = value;
+	if (g_strcmp0 (_tmp38_, "") != 0) {
+		GtkSettings* _tmp39_;
+		const gchar* _tmp40_;
+		_tmp39_ = settings;
+		_tmp40_ = value;
+		g_object_set ((GObject*) _tmp39_, "gtk-icon-theme-name", _tmp40_, NULL, NULL);
 	}
-	_tmp35_ = ug_settings_get_string (UG_SETTINGS_KEY_FONT_NAME);
+	_tmp41_ = ug_settings_get_string (UG_SETTINGS_KEY_FONT_NAME);
 	_g_free0 (value);
-	value = _tmp35_;
-	_tmp36_ = value;
-	if (g_strcmp0 (_tmp36_, "") != 0) {
-		GtkSettings* _tmp37_;
-		const gchar* _tmp38_;
-		_tmp37_ = settings;
-		_tmp38_ = value;
-		g_object_set ((GObject*) _tmp37_, "gtk-font-name", _tmp38_, NULL, NULL);
+	value = _tmp41_;
+	_tmp42_ = value;
+	if (g_strcmp0 (_tmp42_, "") != 0) {
+		GtkSettings* _tmp43_;
+		const gchar* _tmp44_;
+		_tmp43_ = settings;
+		_tmp44_ = value;
+		g_object_set ((GObject*) _tmp43_, "gtk-font-name", _tmp44_, NULL, NULL);
 	}
-	_tmp39_ = ug_settings_get_double (UG_SETTINGS_KEY_XFT_DPI);
-	double_value = _tmp39_;
-	_tmp40_ = double_value;
-	if (_tmp40_ != 0.0) {
-		GtkSettings* _tmp41_;
-		gdouble _tmp42_;
-		_tmp41_ = settings;
-		_tmp42_ = double_value;
-		g_object_set ((GObject*) _tmp41_, "gtk-xft-dpi", (gint) (1024 * _tmp42_), NULL, NULL);
+	_tmp45_ = ug_settings_get_double (UG_SETTINGS_KEY_XFT_DPI);
+	double_value = _tmp45_;
+	_tmp46_ = double_value;
+	if (_tmp46_ != 0.0) {
+		GtkSettings* _tmp47_;
+		gdouble _tmp48_;
+		_tmp47_ = settings;
+		_tmp48_ = double_value;
+		g_object_set ((GObject*) _tmp47_, "gtk-xft-dpi", (gint) (1024 * _tmp48_), NULL, NULL);
 	}
-	_tmp43_ = ug_settings_get_boolean (UG_SETTINGS_KEY_XFT_ANTIALIAS);
-	boolean_value = _tmp43_;
-	_tmp44_ = settings;
-	_tmp45_ = boolean_value;
-	g_object_set ((GObject*) _tmp44_, "gtk-xft-antialias", _tmp45_, NULL, NULL);
-	_tmp46_ = ug_settings_get_string (UG_SETTINGS_KEY_XFT_HINTSTYLE);
+	_tmp49_ = ug_settings_get_boolean (UG_SETTINGS_KEY_XFT_ANTIALIAS);
+	boolean_value = _tmp49_;
+	_tmp50_ = settings;
+	_tmp51_ = boolean_value;
+	g_object_set ((GObject*) _tmp50_, "gtk-xft-antialias", _tmp51_, NULL, NULL);
+	_tmp52_ = ug_settings_get_string (UG_SETTINGS_KEY_XFT_HINTSTYLE);
 	_g_free0 (value);
-	value = _tmp46_;
-	_tmp47_ = value;
-	if (g_strcmp0 (_tmp47_, "") != 0) {
-		GtkSettings* _tmp48_;
-		const gchar* _tmp49_;
-		_tmp48_ = settings;
-		_tmp49_ = value;
-		g_object_set ((GObject*) _tmp48_, "gtk-xft-hintstyle", _tmp49_, NULL, NULL);
+	value = _tmp52_;
+	_tmp53_ = value;
+	if (g_strcmp0 (_tmp53_, "") != 0) {
+		GtkSettings* _tmp54_;
+		const gchar* _tmp55_;
+		_tmp54_ = settings;
+		_tmp55_ = value;
+		g_object_set ((GObject*) _tmp54_, "gtk-xft-hintstyle", _tmp55_, NULL, NULL);
 	}
-	_tmp50_ = ug_settings_get_string (UG_SETTINGS_KEY_XFT_RGBA);
+	_tmp56_ = ug_settings_get_string (UG_SETTINGS_KEY_XFT_RGBA);
 	_g_free0 (value);
-	value = _tmp50_;
-	_tmp51_ = value;
-	if (g_strcmp0 (_tmp51_, "") != 0) {
-		GtkSettings* _tmp52_;
-		const gchar* _tmp53_;
-		_tmp52_ = settings;
-		_tmp53_ = value;
-		g_object_set ((GObject*) _tmp52_, "gtk-xft-rgba", _tmp53_, NULL, NULL);
+	value = _tmp56_;
+	_tmp57_ = value;
+	if (g_strcmp0 (_tmp57_, "") != 0) {
+		GtkSettings* _tmp58_;
+		const gchar* _tmp59_;
+		_tmp58_ = settings;
+		_tmp59_ = value;
+		g_object_set ((GObject*) _tmp58_, "gtk-xft-rgba", _tmp59_, NULL, NULL);
 	}
-	g_debug ("unity-greeter.vala:671: Creating Unity Greeter");
-	_tmp54_ = unity_greeter_new ();
-	greeter = _tmp54_;
-	g_debug ("unity-greeter.vala:674: Showing greeter");
-	_tmp55_ = greeter;
-	unity_greeter_show (_tmp55_);
-	g_debug ("unity-greeter.vala:677: Starting main loop");
+	g_debug ("unity-greeter.vala:710: Creating Unity Greeter");
+	_tmp60_ = unity_greeter_new ();
+	greeter = _tmp60_;
+	g_debug ("unity-greeter.vala:713: Showing greeter");
+	_tmp61_ = greeter;
+	unity_greeter_show (_tmp61_);
+	g_debug ("unity-greeter.vala:716: Starting main loop");
 	gtk_main ();
+	_tmp62_ = atspi_pid;
+	if (_tmp62_ != ((GPid) 0)) {
+		GPid _tmp63_;
+		gint status = 0;
+		GPid _tmp64_;
+		gint _tmp65_ = 0;
+		_tmp63_ = atspi_pid;
+		kill ((pid_t) _tmp63_, SIGKILL);
+		_tmp64_ = atspi_pid;
+		waitpid ((pid_t) _tmp64_, &_tmp65_, 0);
+		status = _tmp65_;
+		atspi_pid = (GPid) 0;
+	}
 	result = EXIT_SUCCESS;
 	_unity_greeter_unref0 (greeter);
 	_g_free0 (value);
@@ -2347,6 +2449,7 @@ static void unity_greeter_finalize (UnityGreeter* obj) {
 	_g_object_unref0 (self->priv->greeter);
 	_g_free0 (self->priv->authenticate_user);
 	_g_free0 (self->priv->test_username);
+	_ca_context_destroy0 (self->priv->canberra_context);
 }
 
 

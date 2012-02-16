@@ -42,9 +42,9 @@
 #include <math.h>
 #include <gio/gio.h>
 #include <glib/gi18n-lib.h>
+#include <gdk/gdk.h>
 #include <stdio.h>
 #include <gtk/gtkx.h>
-#include <gdk/gdk.h>
 #include <sys/utsname.h>
 
 
@@ -116,6 +116,7 @@ struct _MenuBarClass {
 struct _MenuBarPrivate {
 	Background* _background;
 	gboolean _high_contrast;
+	GtkAccelGroup* _accel_group;
 	gchar* default_theme_name;
 	GList* indicator_objects;
 	GtkMenuItem* keyboard_item;
@@ -153,12 +154,13 @@ GType background_get_type (void) G_GNUC_CONST;
 enum  {
 	MENU_BAR_DUMMY_PROPERTY,
 	MENU_BAR_BACKGROUND,
-	MENU_BAR_HIGH_CONTRAST
+	MENU_BAR_HIGH_CONTRAST,
+	MENU_BAR_ACCEL_GROUP
 };
 static void _g_object_unref0_ (gpointer var);
 static void _g_list_free__g_object_unref0_ (GList* self);
-MenuBar* menu_bar_new (Background* bg);
-MenuBar* menu_bar_construct (GType object_type, Background* bg);
+MenuBar* menu_bar_new (Background* bg, GtkAccelGroup* ag);
+MenuBar* menu_bar_construct (GType object_type, Background* bg, GtkAccelGroup* ag);
 void menu_bar_set_layouts (MenuBar* self, GList* layouts);
 static GtkRadioMenuItem* menu_bar_recreate_menu (MenuBar* self, GList* layouts_in);
 static void menu_bar_layout_toggled_cb (MenuBar* self, GtkCheckMenuItem* item);
@@ -170,10 +172,15 @@ static void menu_bar_greeter_set_env (MenuBar* self, const gchar* key, const gch
 static GtkWidget* menu_bar_make_a11y_indicator (MenuBar* self);
 static void menu_bar_keyboard_toggled_cb (MenuBar* self, GtkCheckMenuItem* item);
 static void _menu_bar_keyboard_toggled_cb_gtk_check_menu_item_toggled (GtkCheckMenuItem* _sender, gpointer self);
+gboolean ug_settings_get_boolean (const gchar* key);
+#define UG_SETTINGS_KEY_ONSCREEN_KEYBOARD "onscreen-keyboard"
 static void menu_bar_high_contrast_toggled_cb (MenuBar* self, GtkCheckMenuItem* item);
 static void _menu_bar_high_contrast_toggled_cb_gtk_check_menu_item_toggled (GtkCheckMenuItem* _sender, gpointer self);
+GtkAccelGroup* menu_bar_get_accel_group (MenuBar* self);
+#define UG_SETTINGS_KEY_HIGH_CONTRAST "high-contrast"
 static void menu_bar_screen_reader_toggled_cb (MenuBar* self, GtkCheckMenuItem* item);
 static void _menu_bar_screen_reader_toggled_cb_gtk_check_menu_item_toggled (GtkCheckMenuItem* _sender, gpointer self);
+#define UG_SETTINGS_KEY_SCREEN_READER "screen-reader"
 static gint menu_bar_cmp_layout (LightDMLayout* a, LightDMLayout* b);
 static GtkWidget* menu_bar_make_keyboard_indicator (MenuBar* self);
 static void menu_bar_setup_indicators (MenuBar* self);
@@ -181,13 +188,15 @@ static void menu_bar_indicator_added_cb (MenuBar* self, IndicatorObject* object,
 static void _menu_bar_indicator_added_cb_indicator_object_entry_added (IndicatorObject* _sender, IndicatorObjectEntry* entry, gpointer self);
 static void menu_bar_indicator_removed_cb (MenuBar* self, IndicatorObject* object, IndicatorObjectEntry* entry);
 static void _menu_bar_indicator_removed_cb_indicator_object_entry_removed (IndicatorObject* _sender, IndicatorObjectEntry* entry, gpointer self);
+gboolean ug_settings_set_boolean (const gchar* key, gboolean value);
 static gint _menu_bar_cmp_layout_gcompare_func (gconstpointer a, gconstpointer b);
 static void _menu_bar_layout_toggled_cb_gtk_check_menu_item_toggled (GtkCheckMenuItem* _sender, gpointer self);
 static void menu_bar_set_high_contrast (MenuBar* self, gboolean value);
+gboolean menu_bar_get_high_contrast (MenuBar* self);
 static guint menu_bar_get_indicator_index (MenuBar* self, IndicatorObject* object);
 static IndicatorObject* menu_bar_get_indicator_object_from_entry (MenuBar* self, IndicatorObjectEntry* entry);
 static void menu_bar_set_background (MenuBar* self, Background* value);
-gboolean menu_bar_get_high_contrast (MenuBar* self);
+static void menu_bar_set_accel_group (MenuBar* self, GtkAccelGroup* value);
 static GObject * menu_bar_constructor (GType type, guint n_construct_properties, GObjectConstructParam * construct_properties);
 static void menu_bar_finalize (GObject* obj);
 static void _vala_menu_bar_get_property (GObject * object, guint property_id, GValue * value, GParamSpec * pspec);
@@ -414,18 +423,21 @@ static void _g_list_free__g_object_unref0_ (GList* self) {
 }
 
 
-MenuBar* menu_bar_construct (GType object_type, Background* bg) {
+MenuBar* menu_bar_construct (GType object_type, Background* bg, GtkAccelGroup* ag) {
 	MenuBar * self = NULL;
 	Background* _tmp0_;
+	GtkAccelGroup* _tmp1_;
 	g_return_val_if_fail (bg != NULL, NULL);
+	g_return_val_if_fail (ag != NULL, NULL);
 	_tmp0_ = bg;
-	self = (MenuBar*) g_object_new (object_type, "background", _tmp0_, NULL);
+	_tmp1_ = ag;
+	self = (MenuBar*) g_object_new (object_type, "background", _tmp0_, "accel-group", _tmp1_, NULL);
 	return self;
 }
 
 
-MenuBar* menu_bar_new (Background* bg) {
-	return menu_bar_construct (TYPE_MENU_BAR, bg);
+MenuBar* menu_bar_new (Background* bg, GtkAccelGroup* ag) {
+	return menu_bar_construct (TYPE_MENU_BAR, bg, ag);
 }
 
 
@@ -594,7 +606,7 @@ static void menu_bar_greeter_set_env (MenuBar* self, const gchar* key, const gch
 		_inner_error_ = NULL;
 		_tmp12_ = e;
 		_tmp13_ = _tmp12_->message;
-		g_warning ("menubar.vala:181: Could not get set environment for indicators: %s", _tmp13_);
+		g_warning ("menubar.vala:183: Could not get set environment for indicators: %s", _tmp13_);
 		_g_error_free0 (e);
 		return;
 	}
@@ -647,22 +659,32 @@ static GtkWidget* menu_bar_make_a11y_indicator (MenuBar* self) {
 	GtkMenu* _tmp16_;
 	GtkMenu* _tmp17_;
 	GtkCheckMenuItem* _tmp18_;
-	const gchar* _tmp19_ = NULL;
-	GtkCheckMenuItem* _tmp20_;
-	GtkCheckMenuItem* _tmp21_;
+	GtkCheckMenuItem* _tmp19_;
+	gboolean _tmp20_ = FALSE;
+	const gchar* _tmp21_ = NULL;
 	GtkCheckMenuItem* _tmp22_;
 	GtkCheckMenuItem* _tmp23_;
-	GtkMenu* _tmp24_;
-	GtkMenu* _tmp25_;
-	GtkCheckMenuItem* _tmp26_;
-	const gchar* _tmp27_ = NULL;
-	GtkCheckMenuItem* _tmp28_;
-	GtkCheckMenuItem* _tmp29_;
+	GtkCheckMenuItem* _tmp24_;
+	GtkCheckMenuItem* _tmp25_;
+	GtkAccelGroup* _tmp26_;
+	GtkCheckMenuItem* _tmp27_;
+	GtkMenu* _tmp28_;
+	GtkMenu* _tmp29_;
 	GtkCheckMenuItem* _tmp30_;
 	GtkCheckMenuItem* _tmp31_;
-	GtkMenu* _tmp32_;
-	GtkMenu* _tmp33_;
+	gboolean _tmp32_ = FALSE;
+	const gchar* _tmp33_ = NULL;
 	GtkCheckMenuItem* _tmp34_;
+	GtkCheckMenuItem* _tmp35_;
+	GtkCheckMenuItem* _tmp36_;
+	GtkCheckMenuItem* _tmp37_;
+	GtkAccelGroup* _tmp38_;
+	GtkCheckMenuItem* _tmp39_;
+	GtkMenu* _tmp40_;
+	GtkMenu* _tmp41_;
+	GtkCheckMenuItem* _tmp42_;
+	GtkCheckMenuItem* _tmp43_;
+	gboolean _tmp44_ = FALSE;
 	g_return_val_if_fail (self != NULL, NULL);
 	_tmp0_ = (GtkMenuItem*) gtk_menu_item_new ();
 	_tmp1_ = g_object_ref_sink (_tmp0_);
@@ -698,32 +720,47 @@ static GtkWidget* menu_bar_make_a11y_indicator (MenuBar* self) {
 	_tmp17_ = _tmp16_;
 	_tmp18_ = item;
 	gtk_menu_shell_append ((GtkMenuShell*) _tmp17_, (GtkWidget*) ((GtkMenuItem*) _tmp18_));
-	_tmp19_ = _ ("High Contrast");
-	_tmp20_ = (GtkCheckMenuItem*) gtk_check_menu_item_new_with_label (_tmp19_);
-	_tmp21_ = g_object_ref_sink (_tmp20_);
+	_tmp19_ = item;
+	_tmp20_ = ug_settings_get_boolean (UG_SETTINGS_KEY_ONSCREEN_KEYBOARD);
+	gtk_check_menu_item_set_active (_tmp19_, _tmp20_);
+	_tmp21_ = _ ("High Contrast");
+	_tmp22_ = (GtkCheckMenuItem*) gtk_check_menu_item_new_with_label (_tmp21_);
+	_tmp23_ = g_object_ref_sink (_tmp22_);
 	_g_object_unref0 (self->priv->high_contrast_item);
-	self->priv->high_contrast_item = _tmp21_;
-	_tmp22_ = self->priv->high_contrast_item;
-	g_signal_connect_object (_tmp22_, "toggled", (GCallback) _menu_bar_high_contrast_toggled_cb_gtk_check_menu_item_toggled, self, 0);
-	_tmp23_ = self->priv->high_contrast_item;
-	gtk_widget_show ((GtkWidget*) _tmp23_);
-	_tmp24_ = gtk_menu_item_get_submenu (a11y_item);
-	_tmp25_ = _tmp24_;
-	_tmp26_ = self->priv->high_contrast_item;
-	gtk_menu_shell_append ((GtkMenuShell*) _tmp25_, (GtkWidget*) ((GtkMenuItem*) _tmp26_));
-	_tmp27_ = _ ("Screen Reader");
-	_tmp28_ = (GtkCheckMenuItem*) gtk_check_menu_item_new_with_label (_tmp27_);
-	_tmp29_ = g_object_ref_sink (_tmp28_);
+	self->priv->high_contrast_item = _tmp23_;
+	_tmp24_ = self->priv->high_contrast_item;
+	g_signal_connect_object (_tmp24_, "toggled", (GCallback) _menu_bar_high_contrast_toggled_cb_gtk_check_menu_item_toggled, self, 0);
+	_tmp25_ = self->priv->high_contrast_item;
+	_tmp26_ = self->priv->_accel_group;
+	gtk_widget_add_accelerator ((GtkWidget*) _tmp25_, "activate", _tmp26_, (guint) GDK_KEY_h, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+	_tmp27_ = self->priv->high_contrast_item;
+	gtk_widget_show ((GtkWidget*) _tmp27_);
+	_tmp28_ = gtk_menu_item_get_submenu (a11y_item);
+	_tmp29_ = _tmp28_;
+	_tmp30_ = self->priv->high_contrast_item;
+	gtk_menu_shell_append ((GtkMenuShell*) _tmp29_, (GtkWidget*) ((GtkMenuItem*) _tmp30_));
+	_tmp31_ = self->priv->high_contrast_item;
+	_tmp32_ = ug_settings_get_boolean (UG_SETTINGS_KEY_HIGH_CONTRAST);
+	gtk_check_menu_item_set_active (_tmp31_, _tmp32_);
+	_tmp33_ = _ ("Screen Reader");
+	_tmp34_ = (GtkCheckMenuItem*) gtk_check_menu_item_new_with_label (_tmp33_);
+	_tmp35_ = g_object_ref_sink (_tmp34_);
 	_g_object_unref0 (item);
-	item = _tmp29_;
-	_tmp30_ = item;
-	g_signal_connect_object (_tmp30_, "toggled", (GCallback) _menu_bar_screen_reader_toggled_cb_gtk_check_menu_item_toggled, self, 0);
-	_tmp31_ = item;
-	gtk_widget_show ((GtkWidget*) _tmp31_);
-	_tmp32_ = gtk_menu_item_get_submenu (a11y_item);
-	_tmp33_ = _tmp32_;
-	_tmp34_ = item;
-	gtk_menu_shell_append ((GtkMenuShell*) _tmp33_, (GtkWidget*) ((GtkMenuItem*) _tmp34_));
+	item = _tmp35_;
+	_tmp36_ = item;
+	g_signal_connect_object (_tmp36_, "toggled", (GCallback) _menu_bar_screen_reader_toggled_cb_gtk_check_menu_item_toggled, self, 0);
+	_tmp37_ = item;
+	_tmp38_ = self->priv->_accel_group;
+	gtk_widget_add_accelerator ((GtkWidget*) _tmp37_, "activate", _tmp38_, (guint) GDK_KEY_s, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+	_tmp39_ = item;
+	gtk_widget_show ((GtkWidget*) _tmp39_);
+	_tmp40_ = gtk_menu_item_get_submenu (a11y_item);
+	_tmp41_ = _tmp40_;
+	_tmp42_ = item;
+	gtk_menu_shell_append ((GtkMenuShell*) _tmp41_, (GtkWidget*) ((GtkMenuItem*) _tmp42_));
+	_tmp43_ = item;
+	_tmp44_ = ug_settings_get_boolean (UG_SETTINGS_KEY_SCREEN_READER);
+	gtk_check_menu_item_set_active (_tmp43_, _tmp44_);
 	result = (GtkWidget*) a11y_item;
 	_g_object_unref0 (item);
 	_g_object_unref0 (image);
@@ -822,7 +859,7 @@ static void menu_bar_layout_toggled_cb (MenuBar* self, GtkCheckMenuItem* item) {
 		_tmp26_ = layout;
 		_tmp27_ = lightdm_layout_get_name (_tmp26_);
 		_tmp28_ = _tmp27_;
-		g_debug ("menubar.vala:230: Setting layout to %s", _tmp28_);
+		g_debug ("menubar.vala:237: Setting layout to %s", _tmp28_);
 	} else {
 		LightDMLayout* _tmp29_;
 		_tmp29_ = layout;
@@ -1003,7 +1040,7 @@ static void menu_bar_setup_indicators (MenuBar* self) {
 	_g_list_free0 (_tmp8_);
 	_tmp10_ = g_getenv ("LANG");
 	_tmp11_ = g_getenv ("LANGUAGE");
-	g_debug ("menubar.vala:288: LANG=%s LANGUAGE=%s", _tmp10_, _tmp11_);
+	g_debug ("menubar.vala:295: LANG=%s LANGUAGE=%s", _tmp10_, _tmp11_);
 	_tmp12_ = g_build_filename (INDICATORDIR, "libsession.so", NULL);
 	_tmp13_ = g_build_filename (INDICATORDIR, "libdatetime.so", NULL);
 	_tmp14_ = g_build_filename (INDICATORDIR, "libpower.so", NULL);
@@ -1083,7 +1120,7 @@ static void menu_bar_setup_indicators (MenuBar* self) {
 	}
 	_tmp30_ = g_getenv ("LANG");
 	_tmp31_ = g_getenv ("LANGUAGE");
-	g_debug ("menubar.vala:305: LANG=%s LANGUAGE=%s", _tmp30_, _tmp31_);
+	g_debug ("menubar.vala:312: LANG=%s LANGUAGE=%s", _tmp30_, _tmp31_);
 	filenames = (_vala_array_free (filenames, filenames_length1, (GDestroyNotify) g_free), NULL);
 	_g_object_unref0 (a11y_item);
 	_g_object_unref0 (keyboard_item);
@@ -1091,107 +1128,114 @@ static void menu_bar_setup_indicators (MenuBar* self) {
 
 
 static void menu_bar_keyboard_toggled_cb (MenuBar* self, GtkCheckMenuItem* item) {
-	GtkWindow* _tmp0_;
-	GtkWindow* _tmp44_;
-	GtkCheckMenuItem* _tmp45_;
-	gboolean _tmp46_;
-	gboolean _tmp47_;
+	GtkCheckMenuItem* _tmp0_;
+	gboolean _tmp1_;
+	gboolean _tmp2_;
+	GtkWindow* _tmp3_;
+	GtkWindow* _tmp47_;
+	GtkCheckMenuItem* _tmp48_;
+	gboolean _tmp49_;
+	gboolean _tmp50_;
 	GError * _inner_error_ = NULL;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (item != NULL);
-	_tmp0_ = self->priv->keyboard_window;
-	if (_tmp0_ == NULL) {
+	_tmp0_ = item;
+	_tmp1_ = gtk_check_menu_item_get_active (_tmp0_);
+	_tmp2_ = _tmp1_;
+	ug_settings_set_boolean (UG_SETTINGS_KEY_ONSCREEN_KEYBOARD, _tmp2_);
+	_tmp3_ = self->priv->keyboard_window;
+	if (_tmp3_ == NULL) {
 		gint id = 0;
-		GtkSocket* _tmp15_;
-		GtkSocket* _tmp16_;
+		GtkSocket* _tmp18_;
+		GtkSocket* _tmp19_;
 		GtkSocket* keyboard_socket;
-		GtkSocket* _tmp17_;
-		GtkWindow* _tmp18_;
-		GtkWindow* _tmp19_;
-		GtkWindow* _tmp20_;
+		GtkSocket* _tmp20_;
 		GtkWindow* _tmp21_;
 		GtkWindow* _tmp22_;
-		GtkSocket* _tmp23_;
-		GtkSocket* _tmp24_;
-		gint _tmp25_;
-		GdkScreen* _tmp26_ = NULL;
-		GdkScreen* _tmp27_;
+		GtkWindow* _tmp23_;
+		GtkWindow* _tmp24_;
+		GtkWindow* _tmp25_;
+		GtkSocket* _tmp26_;
+		GtkSocket* _tmp27_;
+		gint _tmp28_;
+		GdkScreen* _tmp29_ = NULL;
+		GdkScreen* _tmp30_;
 		GdkScreen* screen;
-		GdkScreen* _tmp28_;
-		GdkWindow* _tmp29_ = NULL;
-		gint _tmp30_ = 0;
+		GdkScreen* _tmp31_;
+		GdkWindow* _tmp32_ = NULL;
+		gint _tmp33_ = 0;
 		gint monitor;
 		GdkRectangle geom = {0};
-		GdkScreen* _tmp31_;
-		gint _tmp32_;
-		GdkRectangle _tmp33_ = {0};
-		GtkWindow* _tmp34_;
-		GdkRectangle _tmp35_;
-		gint _tmp36_;
-		GdkRectangle _tmp37_;
-		gint _tmp38_;
-		GdkRectangle _tmp39_;
-		gint _tmp40_;
-		GtkWindow* _tmp41_;
+		GdkScreen* _tmp34_;
+		gint _tmp35_;
+		GdkRectangle _tmp36_ = {0};
+		GtkWindow* _tmp37_;
+		GdkRectangle _tmp38_;
+		gint _tmp39_;
+		GdkRectangle _tmp40_;
+		gint _tmp41_;
 		GdkRectangle _tmp42_;
 		gint _tmp43_;
+		GtkWindow* _tmp44_;
+		GdkRectangle _tmp45_;
+		gint _tmp46_;
 		{
 			gchar** argv = NULL;
 			gint argv_length1 = 0;
 			gint _argv_size_ = 0;
 			gint onboard_stdout_fd = 0;
-			gchar** _tmp1_ = NULL;
-			gint _tmp2_ = 0;
-			gchar** _tmp3_;
-			gint _tmp3__length1;
-			GPid _tmp4_ = 0;
+			gchar** _tmp4_ = NULL;
 			gint _tmp5_ = 0;
-			gint _tmp6_;
-			FILE* _tmp7_ = NULL;
+			gchar** _tmp6_;
+			gint _tmp6__length1;
+			GPid _tmp7_ = 0;
+			gint _tmp8_ = 0;
+			gint _tmp9_;
+			FILE* _tmp10_ = NULL;
 			FILE* f;
-			gchar* _tmp8_ = NULL;
+			gchar* _tmp11_ = NULL;
 			gchar* stdout_text;
 			gint stdout_text_length1;
 			gint _stdout_text_size_;
-			FILE* _tmp9_;
-			gchar* _tmp10_;
-			gint _tmp10__length1;
-			gchar* _tmp11_;
-			gint _tmp11__length1;
-			gint _tmp12_ = 0;
-			g_shell_parse_argv ("onboard --xid", &_tmp2_, &_tmp1_, &_inner_error_);
+			FILE* _tmp12_;
+			gchar* _tmp13_;
+			gint _tmp13__length1;
+			gchar* _tmp14_;
+			gint _tmp14__length1;
+			gint _tmp15_ = 0;
+			g_shell_parse_argv ("onboard --xid", &_tmp5_, &_tmp4_, &_inner_error_);
 			argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
-			argv = _tmp1_;
-			argv_length1 = _tmp2_;
+			argv = _tmp4_;
+			argv_length1 = _tmp5_;
 			_argv_size_ = argv_length1;
 			if (_inner_error_ != NULL) {
 				argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
 				goto __catch3_g_error;
 			}
-			_tmp3_ = argv;
-			_tmp3__length1 = argv_length1;
-			g_spawn_async_with_pipes (NULL, _tmp3_, NULL, G_SPAWN_SEARCH_PATH, NULL, NULL, &_tmp4_, NULL, &_tmp5_, NULL, &_inner_error_);
-			self->priv->keyboard_pid = _tmp4_;
-			onboard_stdout_fd = _tmp5_;
+			_tmp6_ = argv;
+			_tmp6__length1 = argv_length1;
+			g_spawn_async_with_pipes (NULL, _tmp6_, NULL, G_SPAWN_SEARCH_PATH, NULL, NULL, &_tmp7_, NULL, &_tmp8_, NULL, &_inner_error_);
+			self->priv->keyboard_pid = _tmp7_;
+			onboard_stdout_fd = _tmp8_;
 			if (_inner_error_ != NULL) {
 				argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
 				goto __catch3_g_error;
 			}
-			_tmp6_ = onboard_stdout_fd;
-			_tmp7_ = fdopen (_tmp6_, "r");
-			f = _tmp7_;
-			_tmp8_ = g_new0 (gchar, 1024);
-			stdout_text = _tmp8_;
+			_tmp9_ = onboard_stdout_fd;
+			_tmp10_ = fdopen (_tmp9_, "r");
+			f = _tmp10_;
+			_tmp11_ = g_new0 (gchar, 1024);
+			stdout_text = _tmp11_;
 			stdout_text_length1 = 1024;
 			_stdout_text_size_ = stdout_text_length1;
-			_tmp9_ = f;
-			_tmp10_ = stdout_text;
-			_tmp10__length1 = stdout_text_length1;
-			fgets (_tmp10_, _tmp10__length1, _tmp9_);
-			_tmp11_ = stdout_text;
-			_tmp11__length1 = stdout_text_length1;
-			_tmp12_ = atoi ((const gchar*) _tmp11_);
-			id = _tmp12_;
+			_tmp12_ = f;
+			_tmp13_ = stdout_text;
+			_tmp13__length1 = stdout_text_length1;
+			fgets (_tmp13_, _tmp13__length1, _tmp12_);
+			_tmp14_ = stdout_text;
+			_tmp14__length1 = stdout_text_length1;
+			_tmp15_ = atoi ((const gchar*) _tmp14_);
+			id = _tmp15_;
 			stdout_text = (g_free (stdout_text), NULL);
 			_fclose0 (f);
 			argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
@@ -1200,13 +1244,13 @@ static void menu_bar_keyboard_toggled_cb (MenuBar* self, GtkCheckMenuItem* item)
 		__catch3_g_error:
 		{
 			GError* e = NULL;
-			GError* _tmp13_;
-			const gchar* _tmp14_;
+			GError* _tmp16_;
+			const gchar* _tmp17_;
 			e = _inner_error_;
 			_inner_error_ = NULL;
-			_tmp13_ = e;
-			_tmp14_ = _tmp13_->message;
-			g_warning ("menubar.vala:343: Error setting up keyboard: %s", _tmp14_);
+			_tmp16_ = e;
+			_tmp17_ = _tmp16_->message;
+			g_warning ("menubar.vala:352: Error setting up keyboard: %s", _tmp17_);
 			_g_error_free0 (e);
 			return;
 		}
@@ -1216,56 +1260,56 @@ static void menu_bar_keyboard_toggled_cb (MenuBar* self, GtkCheckMenuItem* item)
 			g_clear_error (&_inner_error_);
 			return;
 		}
-		_tmp15_ = (GtkSocket*) gtk_socket_new ();
-		_tmp16_ = g_object_ref_sink (_tmp15_);
-		keyboard_socket = _tmp16_;
-		_tmp17_ = keyboard_socket;
-		gtk_widget_show ((GtkWidget*) _tmp17_);
-		_tmp18_ = (GtkWindow*) gtk_window_new (GTK_WINDOW_TOPLEVEL);
+		_tmp18_ = (GtkSocket*) gtk_socket_new ();
 		_tmp19_ = g_object_ref_sink (_tmp18_);
+		keyboard_socket = _tmp19_;
+		_tmp20_ = keyboard_socket;
+		gtk_widget_show ((GtkWidget*) _tmp20_);
+		_tmp21_ = (GtkWindow*) gtk_window_new (GTK_WINDOW_TOPLEVEL);
+		_tmp22_ = g_object_ref_sink (_tmp21_);
 		_g_object_unref0 (self->priv->keyboard_window);
-		self->priv->keyboard_window = _tmp19_;
-		_tmp20_ = self->priv->keyboard_window;
-		gtk_window_set_accept_focus (_tmp20_, FALSE);
-		_tmp21_ = self->priv->keyboard_window;
-		gtk_window_set_focus_on_map (_tmp21_, FALSE);
-		_tmp22_ = self->priv->keyboard_window;
-		_tmp23_ = keyboard_socket;
-		gtk_container_add ((GtkContainer*) _tmp22_, (GtkWidget*) _tmp23_);
-		_tmp24_ = keyboard_socket;
-		_tmp25_ = id;
-		gtk_socket_add_id (_tmp24_, _tmp25_);
-		_tmp26_ = gtk_widget_get_screen ((GtkWidget*) self);
-		_tmp27_ = _g_object_ref0 (_tmp26_);
-		screen = _tmp27_;
-		_tmp28_ = screen;
-		_tmp29_ = gtk_widget_get_window ((GtkWidget*) self);
-		_tmp30_ = gdk_screen_get_monitor_at_window (_tmp28_, _tmp29_);
-		monitor = _tmp30_;
+		self->priv->keyboard_window = _tmp22_;
+		_tmp23_ = self->priv->keyboard_window;
+		gtk_window_set_accept_focus (_tmp23_, FALSE);
+		_tmp24_ = self->priv->keyboard_window;
+		gtk_window_set_focus_on_map (_tmp24_, FALSE);
+		_tmp25_ = self->priv->keyboard_window;
+		_tmp26_ = keyboard_socket;
+		gtk_container_add ((GtkContainer*) _tmp25_, (GtkWidget*) _tmp26_);
+		_tmp27_ = keyboard_socket;
+		_tmp28_ = id;
+		gtk_socket_add_id (_tmp27_, _tmp28_);
+		_tmp29_ = gtk_widget_get_screen ((GtkWidget*) self);
+		_tmp30_ = _g_object_ref0 (_tmp29_);
+		screen = _tmp30_;
 		_tmp31_ = screen;
-		_tmp32_ = monitor;
-		gdk_screen_get_monitor_geometry (_tmp31_, _tmp32_, &_tmp33_);
-		geom = _tmp33_;
-		_tmp34_ = self->priv->keyboard_window;
-		_tmp35_ = geom;
-		_tmp36_ = _tmp35_.x;
-		_tmp37_ = geom;
-		_tmp38_ = _tmp37_.y;
-		_tmp39_ = geom;
-		_tmp40_ = _tmp39_.height;
-		gtk_window_move (_tmp34_, _tmp36_, (_tmp38_ + _tmp40_) - 200);
-		_tmp41_ = self->priv->keyboard_window;
+		_tmp32_ = gtk_widget_get_window ((GtkWidget*) self);
+		_tmp33_ = gdk_screen_get_monitor_at_window (_tmp31_, _tmp32_);
+		monitor = _tmp33_;
+		_tmp34_ = screen;
+		_tmp35_ = monitor;
+		gdk_screen_get_monitor_geometry (_tmp34_, _tmp35_, &_tmp36_);
+		geom = _tmp36_;
+		_tmp37_ = self->priv->keyboard_window;
+		_tmp38_ = geom;
+		_tmp39_ = _tmp38_.x;
+		_tmp40_ = geom;
+		_tmp41_ = _tmp40_.y;
 		_tmp42_ = geom;
-		_tmp43_ = _tmp42_.width;
-		gtk_window_resize (_tmp41_, _tmp43_, 200);
+		_tmp43_ = _tmp42_.height;
+		gtk_window_move (_tmp37_, _tmp39_, (_tmp41_ + _tmp43_) - 200);
+		_tmp44_ = self->priv->keyboard_window;
+		_tmp45_ = geom;
+		_tmp46_ = _tmp45_.width;
+		gtk_window_resize (_tmp44_, _tmp46_, 200);
 		_g_object_unref0 (screen);
 		_g_object_unref0 (keyboard_socket);
 	}
-	_tmp44_ = self->priv->keyboard_window;
-	_tmp45_ = item;
-	_tmp46_ = gtk_check_menu_item_get_active (_tmp45_);
-	_tmp47_ = _tmp46_;
-	gtk_widget_set_visible ((GtkWidget*) _tmp44_, _tmp47_);
+	_tmp47_ = self->priv->keyboard_window;
+	_tmp48_ = item;
+	_tmp49_ = gtk_check_menu_item_get_active (_tmp48_);
+	_tmp50_ = _tmp49_;
+	gtk_widget_set_visible ((GtkWidget*) _tmp47_, _tmp50_);
 }
 
 
@@ -1402,6 +1446,7 @@ static void menu_bar_high_contrast_toggled_cb (MenuBar* self, GtkCheckMenuItem* 
 	GtkCheckMenuItem* _tmp8_;
 	gboolean _tmp9_;
 	gboolean _tmp10_;
+	gboolean _tmp11_;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (item != NULL);
 	_tmp0_ = gtk_settings_get_default ();
@@ -1425,22 +1470,31 @@ static void menu_bar_high_contrast_toggled_cb (MenuBar* self, GtkCheckMenuItem* 
 	_tmp9_ = gtk_check_menu_item_get_active (_tmp8_);
 	_tmp10_ = _tmp9_;
 	menu_bar_set_high_contrast (self, _tmp10_);
+	_tmp11_ = self->priv->_high_contrast;
+	ug_settings_set_boolean (UG_SETTINGS_KEY_HIGH_CONTRAST, _tmp11_);
 	_g_object_unref0 (settings);
 }
 
 
 static void menu_bar_screen_reader_toggled_cb (MenuBar* self, GtkCheckMenuItem* item) {
+	GtkCheckMenuItem* _tmp0_;
+	gboolean _tmp1_;
+	gboolean _tmp2_;
 	GError * _inner_error_ = NULL;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (item != NULL);
+	_tmp0_ = item;
+	_tmp1_ = gtk_check_menu_item_get_active (_tmp0_);
+	_tmp2_ = _tmp1_;
+	ug_settings_set_boolean (UG_SETTINGS_KEY_SCREEN_READER, _tmp2_);
 	{
-		GtkCheckMenuItem* _tmp0_;
-		gboolean _tmp1_;
-		gboolean _tmp2_;
-		_tmp0_ = item;
-		_tmp1_ = gtk_check_menu_item_get_active (_tmp0_);
-		_tmp2_ = _tmp1_;
-		if (_tmp2_) {
+		GtkCheckMenuItem* _tmp3_;
+		gboolean _tmp4_;
+		gboolean _tmp5_;
+		_tmp3_ = item;
+		_tmp4_ = gtk_check_menu_item_get_active (_tmp3_);
+		_tmp5_ = _tmp4_;
+		if (_tmp5_) {
 			g_spawn_command_line_async ("orca --replace --no-setup --disable=splash-window --disable=main-windo" \
 "w", &_inner_error_);
 			if (_inner_error_ != NULL) {
@@ -1457,13 +1511,13 @@ static void menu_bar_screen_reader_toggled_cb (MenuBar* self, GtkCheckMenuItem* 
 	__catch4_g_error:
 	{
 		GError* e = NULL;
-		GError* _tmp3_;
-		const gchar* _tmp4_;
+		GError* _tmp6_;
+		const gchar* _tmp7_;
 		e = _inner_error_;
 		_inner_error_ = NULL;
-		_tmp3_ = e;
-		_tmp4_ = _tmp3_->message;
-		g_warning ("menubar.vala:427: Failed to run Orca: %s", _tmp4_);
+		_tmp6_ = e;
+		_tmp7_ = _tmp6_->message;
+		g_warning ("menubar.vala:439: Failed to run Orca: %s", _tmp7_);
 		_g_error_free0 (e);
 	}
 	__finally4:
@@ -1638,7 +1692,7 @@ static void menu_bar_indicator_added_cb (MenuBar* self, IndicatorObject* object,
 	}
 	_tmp14_ = entry;
 	_tmp15_ = pos;
-	g_debug ("menubar.vala:476: Adding indicator object %p at position %d", _tmp14_, _tmp15_);
+	g_debug ("menubar.vala:488: Adding indicator object %p at position %d", _tmp14_, _tmp15_);
 	_tmp16_ = entry;
 	_tmp17_ = indicator_menu_item_new (_tmp16_);
 	_tmp18_ = g_object_ref_sink (_tmp17_);
@@ -1657,7 +1711,7 @@ static void menu_bar_indicator_removed_cb (MenuBar* self, IndicatorObject* objec
 	g_return_if_fail (object != NULL);
 	g_return_if_fail (entry != NULL);
 	_tmp0_ = entry;
-	g_debug ("menubar.vala:484: Removing indicator object %p", _tmp0_);
+	g_debug ("menubar.vala:496: Removing indicator object %p", _tmp0_);
 	_tmp1_ = gtk_container_get_children ((GtkContainer*) self);
 	{
 		GList* child_collection = NULL;
@@ -1693,7 +1747,7 @@ static void menu_bar_indicator_removed_cb (MenuBar* self, IndicatorObject* objec
 		_g_list_free0 (child_collection);
 	}
 	_tmp8_ = entry;
-	g_warning ("menubar.vala:496: Indicator object %p not in menubar", _tmp8_);
+	g_warning ("menubar.vala:508: Indicator object %p not in menubar", _tmp8_);
 }
 
 
@@ -1735,6 +1789,28 @@ static void menu_bar_set_high_contrast (MenuBar* self, gboolean value) {
 	_tmp0_ = value;
 	self->priv->_high_contrast = _tmp0_;
 	g_object_notify ((GObject *) self, "high-contrast");
+}
+
+
+GtkAccelGroup* menu_bar_get_accel_group (MenuBar* self) {
+	GtkAccelGroup* result;
+	GtkAccelGroup* _tmp0_;
+	g_return_val_if_fail (self != NULL, NULL);
+	_tmp0_ = self->priv->_accel_group;
+	result = _tmp0_;
+	return result;
+}
+
+
+static void menu_bar_set_accel_group (MenuBar* self, GtkAccelGroup* value) {
+	GtkAccelGroup* _tmp0_;
+	GtkAccelGroup* _tmp1_;
+	g_return_if_fail (self != NULL);
+	_tmp0_ = value;
+	_tmp1_ = _g_object_ref0 (_tmp0_);
+	_g_object_unref0 (self->priv->_accel_group);
+	self->priv->_accel_group = _tmp1_;
+	g_object_notify ((GObject *) self, "accel-group");
 }
 
 
@@ -1819,6 +1895,7 @@ static void menu_bar_class_init (MenuBarClass * klass) {
 	G_OBJECT_CLASS (klass)->finalize = menu_bar_finalize;
 	g_object_class_install_property (G_OBJECT_CLASS (klass), MENU_BAR_BACKGROUND, g_param_spec_object ("background", "background", "background", TYPE_BACKGROUND, G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB | G_PARAM_READABLE | G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
 	g_object_class_install_property (G_OBJECT_CLASS (klass), MENU_BAR_HIGH_CONTRAST, g_param_spec_boolean ("high-contrast", "high-contrast", "high-contrast", FALSE, G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB | G_PARAM_READABLE));
+	g_object_class_install_property (G_OBJECT_CLASS (klass), MENU_BAR_ACCEL_GROUP, g_param_spec_object ("accel-group", "accel-group", "accel-group", GTK_TYPE_ACCEL_GROUP, G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB | G_PARAM_READABLE | G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
 }
 
 
@@ -1850,6 +1927,7 @@ static void menu_bar_finalize (GObject* obj) {
 		self->priv->keyboard_pid = (GPid) 0;
 	}
 	_g_object_unref0 (self->priv->_background);
+	_g_object_unref0 (self->priv->_accel_group);
 	_g_free0 (self->priv->default_theme_name);
 	__g_list_free__g_object_unref0_0 (self->priv->indicator_objects);
 	_g_object_unref0 (self->priv->keyboard_item);
@@ -1882,6 +1960,9 @@ static void _vala_menu_bar_get_property (GObject * object, guint property_id, GV
 		case MENU_BAR_HIGH_CONTRAST:
 		g_value_set_boolean (value, menu_bar_get_high_contrast (self));
 		break;
+		case MENU_BAR_ACCEL_GROUP:
+		g_value_set_object (value, menu_bar_get_accel_group (self));
+		break;
 		default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
 		break;
@@ -1898,6 +1979,9 @@ static void _vala_menu_bar_set_property (GObject * object, guint property_id, co
 		break;
 		case MENU_BAR_HIGH_CONTRAST:
 		menu_bar_set_high_contrast (self, g_value_get_boolean (value));
+		break;
+		case MENU_BAR_ACCEL_GROUP:
+		menu_bar_set_accel_group (self, g_value_get_object (value));
 		break;
 		default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);

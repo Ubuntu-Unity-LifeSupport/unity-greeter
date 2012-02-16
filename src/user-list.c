@@ -28,9 +28,9 @@
 #include <pango/pango.h>
 #include <lightdm.h>
 #include <gtk/gtk.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
 #include <float.h>
 #include <math.h>
-#include <gdk-pixbuf/gdk-pixbuf.h>
 #include <glib/gi18n-lib.h>
 #include <atk/atk.h>
 #include <gdk/gdk.h>
@@ -179,6 +179,7 @@ struct _UserEntry {
 	PangoLayout* layout;
 	gchar* background;
 	gboolean is_active;
+	gboolean has_messages;
 	GList* keyboard_layouts;
 };
 
@@ -221,6 +222,7 @@ struct _FadableIface {
 struct _UserListPrivate {
 	UserEntry* _selected_entry;
 	GList* entries;
+	GdkPixbuf* message_pixbuf;
 	gdouble scroll_target_location;
 	gdouble scroll_start_location;
 	gdouble scroll_location;
@@ -328,8 +330,8 @@ void user_list_scroll (UserList* self, UserListScrollTarget target);
 static void user_list_select_entry (UserList* self, UserEntry* entry, gdouble direction);
 UserEntry* user_list_get_selected_entry (UserList* self);
 static void user_list_redraw_user_list (UserList* self);
-static gint user_list_get_box_x (UserList* self);
 static gint user_list_get_box_y (UserList* self);
+static gint user_list_get_box_x (UserList* self);
 static void user_list_redraw_login_box (UserList* self);
 void user_list_show_message (UserList* self, const gchar* text, gboolean _error_);
 void user_list_show_prompt (UserList* self, const gchar* text, gboolean secret);
@@ -340,7 +342,7 @@ void user_list_login_complete (UserList* self);
 void user_list_set_error (UserList* self, const gchar* text);
 void user_list_add_session (UserList* self, const gchar* name, const gchar* label);
 static UserEntry* user_list_find_entry (UserList* self, const gchar* name);
-void user_list_add_entry (UserList* self, const gchar* name, const gchar* label, const gchar* background, GList* keyboard_layouts, gboolean is_active);
+void user_list_add_entry (UserList* self, const gchar* name, const gchar* label, const gchar* background, GList* keyboard_layouts, gboolean is_active, gboolean has_messages);
 void user_list_set_active_entry (UserList* self, const gchar* name);
 void user_list_remove_entry (UserList* self, const gchar* name);
 static void user_list_options_menu_position_cb (UserList* self, GtkMenu* menu, gint* x, gint* y, gboolean* push_in);
@@ -683,27 +685,27 @@ UserList* user_list_construct (GType object_type, Background* bg, MenuBar* mb) {
 	DashButton* _tmp26_;
 	DashButton* _tmp27_;
 	DashButton* _tmp28_;
-	GtkButton* _tmp36_;
-	GtkButton* _tmp37_;
-	GtkButton* _tmp38_;
-	GtkButton* _tmp39_;
-	AtkObject* _tmp40_ = NULL;
-	const gchar* _tmp41_ = NULL;
-	GdkPixbuf* _tmp42_;
-	GtkImage* _tmp43_;
-	GtkImage* _tmp44_;
-	GtkImage* image;
+	GtkButton* _tmp43_;
+	GtkButton* _tmp44_;
 	GtkButton* _tmp45_;
 	GtkButton* _tmp46_;
-	GtkButton* _tmp47_;
-	GtkButton* _tmp48_;
-	GtkButton* _tmp49_;
-	Background* _tmp50_;
-	Menu* _tmp51_;
-	Menu* _tmp52_;
-	Menu* _tmp53_;
-	AnimateTimer* _tmp54_;
-	AnimateTimer* _tmp55_;
+	AtkObject* _tmp47_ = NULL;
+	const gchar* _tmp48_ = NULL;
+	GdkPixbuf* _tmp49_;
+	GtkImage* _tmp50_;
+	GtkImage* _tmp51_;
+	GtkImage* image;
+	GtkButton* _tmp52_;
+	GtkButton* _tmp53_;
+	GtkButton* _tmp54_;
+	GtkButton* _tmp55_;
+	GtkButton* _tmp56_;
+	Background* _tmp57_;
+	Menu* _tmp58_;
+	Menu* _tmp59_;
+	Menu* _tmp60_;
+	AnimateTimer* _tmp61_;
+	AnimateTimer* _tmp62_;
 	GError * _inner_error_ = NULL;
 	g_return_val_if_fail (bg != NULL, NULL);
 	g_return_val_if_fail (mb != NULL, NULL);
@@ -771,20 +773,20 @@ UserList* user_list_construct (GType object_type, Background* bg, MenuBar* mb) {
 		GdkPixbuf* _tmp31_;
 		GdkPixbuf* _tmp32_;
 		GdkPixbuf* _tmp33_;
-		_tmp29_ = g_build_filename (PKGDATADIR, "cog.png", NULL, NULL);
+		_tmp29_ = g_build_filename (PKGDATADIR, "message.png", NULL, NULL);
 		_tmp30_ = _tmp29_;
 		_tmp31_ = gdk_pixbuf_new_from_file (_tmp30_, &_inner_error_);
 		_tmp32_ = _tmp31_;
 		_g_free0 (_tmp30_);
 		_tmp33_ = _tmp32_;
 		if (_inner_error_ != NULL) {
-			goto __catch12_g_error;
+			goto __catch13_g_error;
 		}
-		_g_object_unref0 (self->priv->options_pixbuf);
-		self->priv->options_pixbuf = _tmp33_;
+		_g_object_unref0 (self->priv->message_pixbuf);
+		self->priv->message_pixbuf = _tmp33_;
 	}
-	goto __finally12;
-	__catch12_g_error:
+	goto __finally13;
+	__catch13_g_error:
 	{
 		GError* e = NULL;
 		GError* _tmp34_;
@@ -793,53 +795,91 @@ UserList* user_list_construct (GType object_type, Background* bg, MenuBar* mb) {
 		_inner_error_ = NULL;
 		_tmp34_ = e;
 		_tmp35_ = _tmp34_->message;
-		g_debug ("user-list.vala:170: Error loading cog image: %s", _tmp35_);
+		g_debug ("user-list.vala:177: Error loading message image: %s", _tmp35_);
 		_g_error_free0 (e);
 	}
-	__finally12:
+	__finally13:
 	if (_inner_error_ != NULL) {
 		_g_object_unref0 (label);
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
 		return NULL;
 	}
-	_tmp36_ = (GtkButton*) gtk_button_new ();
-	_tmp37_ = g_object_ref_sink (_tmp36_);
-	_g_object_unref0 (self->priv->options_button);
-	self->priv->options_button = _tmp37_;
-	_tmp38_ = self->priv->options_button;
-	gtk_button_set_focus_on_click (_tmp38_, FALSE);
-	_tmp39_ = self->priv->options_button;
-	_tmp40_ = gtk_widget_get_accessible ((GtkWidget*) _tmp39_);
-	_tmp41_ = _ ("Session Options");
-	atk_object_set_name (_tmp40_, _tmp41_);
-	_tmp42_ = self->priv->options_pixbuf;
-	_tmp43_ = (GtkImage*) gtk_image_new_from_pixbuf (_tmp42_);
+	{
+		gchar* _tmp36_ = NULL;
+		gchar* _tmp37_;
+		GdkPixbuf* _tmp38_;
+		GdkPixbuf* _tmp39_;
+		GdkPixbuf* _tmp40_;
+		_tmp36_ = g_build_filename (PKGDATADIR, "cog.png", NULL, NULL);
+		_tmp37_ = _tmp36_;
+		_tmp38_ = gdk_pixbuf_new_from_file (_tmp37_, &_inner_error_);
+		_tmp39_ = _tmp38_;
+		_g_free0 (_tmp37_);
+		_tmp40_ = _tmp39_;
+		if (_inner_error_ != NULL) {
+			goto __catch14_g_error;
+		}
+		_g_object_unref0 (self->priv->options_pixbuf);
+		self->priv->options_pixbuf = _tmp40_;
+	}
+	goto __finally14;
+	__catch14_g_error:
+	{
+		GError* e = NULL;
+		GError* _tmp41_;
+		const gchar* _tmp42_;
+		e = _inner_error_;
+		_inner_error_ = NULL;
+		_tmp41_ = e;
+		_tmp42_ = _tmp41_->message;
+		g_debug ("user-list.vala:186: Error loading cog image: %s", _tmp42_);
+		_g_error_free0 (e);
+	}
+	__finally14:
+	if (_inner_error_ != NULL) {
+		_g_object_unref0 (label);
+		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
+		g_clear_error (&_inner_error_);
+		return NULL;
+	}
+	_tmp43_ = (GtkButton*) gtk_button_new ();
 	_tmp44_ = g_object_ref_sink (_tmp43_);
-	image = _tmp44_;
-	gtk_widget_show ((GtkWidget*) image);
+	_g_object_unref0 (self->priv->options_button);
+	self->priv->options_button = _tmp44_;
 	_tmp45_ = self->priv->options_button;
-	gtk_button_set_relief (_tmp45_, GTK_RELIEF_NONE);
+	gtk_button_set_focus_on_click (_tmp45_, FALSE);
 	_tmp46_ = self->priv->options_button;
-	gtk_container_add ((GtkContainer*) _tmp46_, (GtkWidget*) image);
-	_tmp47_ = self->priv->options_button;
-	g_signal_connect_object (_tmp47_, "clicked", (GCallback) _user_list_options_button_clicked_cb_gtk_button_clicked, self, 0);
-	_tmp48_ = self->priv->options_button;
-	gtk_widget_show ((GtkWidget*) _tmp48_);
-	_tmp49_ = self->priv->options_button;
-	user_list_add_with_class (self, (GtkWidget*) _tmp49_);
-	_tmp50_ = self->background;
-	_tmp51_ = menu_new (_tmp50_);
-	_tmp52_ = g_object_ref_sink (_tmp51_);
+	_tmp47_ = gtk_widget_get_accessible ((GtkWidget*) _tmp46_);
+	_tmp48_ = _ ("Session Options");
+	atk_object_set_name (_tmp47_, _tmp48_);
+	_tmp49_ = self->priv->options_pixbuf;
+	_tmp50_ = (GtkImage*) gtk_image_new_from_pixbuf (_tmp49_);
+	_tmp51_ = g_object_ref_sink (_tmp50_);
+	image = _tmp51_;
+	gtk_widget_show ((GtkWidget*) image);
+	_tmp52_ = self->priv->options_button;
+	gtk_button_set_relief (_tmp52_, GTK_RELIEF_NONE);
+	_tmp53_ = self->priv->options_button;
+	gtk_container_add ((GtkContainer*) _tmp53_, (GtkWidget*) image);
+	_tmp54_ = self->priv->options_button;
+	g_signal_connect_object (_tmp54_, "clicked", (GCallback) _user_list_options_button_clicked_cb_gtk_button_clicked, self, 0);
+	_tmp55_ = self->priv->options_button;
+	gtk_widget_show ((GtkWidget*) _tmp55_);
+	_tmp56_ = self->priv->options_button;
+	user_list_add_with_class (self, (GtkWidget*) _tmp56_);
+	_tmp57_ = self->background;
+	_tmp58_ = menu_new (_tmp57_);
+	_tmp59_ = g_object_ref_sink (_tmp58_);
 	_g_object_unref0 (self->priv->options_menu);
-	self->priv->options_menu = _tmp52_;
-	_tmp53_ = self->priv->options_menu;
-	unity_greeter_add_style_class ((GtkWidget*) _tmp53_);
-	_tmp54_ = animate_timer_new (ANIMATE_TIMER_FAST);
+	self->priv->options_menu = _tmp59_;
+	_tmp60_ = self->priv->options_menu;
+	unity_greeter_add_style_class ((GtkWidget*) _tmp60_);
+	_tmp61_ = animate_timer_new (ANIMATE_TIMER_FAST);
 	_g_object_unref0 (self->priv->scroll_timer);
-	self->priv->scroll_timer = _tmp54_;
-	_tmp55_ = self->priv->scroll_timer;
-	g_signal_connect_object (_tmp55_, "animate", (GCallback) _user_list_scroll_animate_cb_animate_timer_animate, self, 0);
+	self->priv->scroll_timer = _tmp61_;
+	_tmp62_ = self->priv->scroll_timer;
+	g_signal_connect_object (_tmp62_, "animate", (GCallback) _user_list_scroll_animate_cb_animate_timer_animate, self, 0);
 	_g_object_unref0 (image);
 	_g_object_unref0 (label);
 	return self;
@@ -957,42 +997,70 @@ static void user_list_add_with_class (UserList* self, GtkWidget* widget) {
 static void user_list_redraw_user_list (UserList* self) {
 	gint _tmp0_;
 	gint _tmp1_;
-	gint _tmp2_;
-	gint _tmp3_;
-	guint _tmp4_;
-	gint _tmp5_;
-	guint _tmp6_;
-	gint _tmp7_;
-	guint _tmp8_;
+	guint _tmp2_;
+	gint y;
+	guint _tmp3_;
+	gint _tmp4_;
+	guint _tmp5_;
+	gint height;
+	GtkAllocation allocation = {0};
+	GtkAllocation _tmp6_ = {0};
+	GtkAllocation _tmp7_;
+	gint _tmp8_;
+	gint _tmp9_;
+	gint _tmp10_;
+	GtkAllocation _tmp11_;
+	gint _tmp12_;
+	gint _tmp13_;
 	g_return_if_fail (self != NULL);
-	_tmp0_ = user_list_get_box_x (self);
+	_tmp0_ = user_list_get_box_y (self);
 	_tmp1_ = _tmp0_;
-	_tmp2_ = user_list_get_box_y (self);
-	_tmp3_ = _tmp2_;
-	_tmp4_ = self->priv->n_above;
-	_tmp5_ = self->priv->box_width;
-	_tmp6_ = self->priv->n_above;
-	_tmp7_ = self->priv->box_height;
-	_tmp8_ = self->priv->n_below;
-	gtk_widget_queue_draw_area ((GtkWidget*) self, _tmp1_, _tmp3_ - (((gint) (_tmp4_ + 1)) * grid_size), _tmp5_ * grid_size, ((gint) ((((_tmp6_ + 1) + _tmp7_) + _tmp8_) + 1)) * grid_size);
+	_tmp2_ = self->priv->n_above;
+	y = _tmp1_ - (((gint) (_tmp2_ + 1)) * grid_size);
+	_tmp3_ = self->priv->n_above;
+	_tmp4_ = self->priv->box_height;
+	_tmp5_ = self->priv->n_below;
+	height = ((gint) ((((_tmp3_ + 1) + _tmp4_) + _tmp5_) + 1)) * grid_size;
+	gtk_widget_get_allocation ((GtkWidget*) self, &_tmp6_);
+	allocation = _tmp6_;
+	_tmp7_ = allocation;
+	_tmp8_ = _tmp7_.x;
+	_tmp9_ = user_list_get_box_x (self);
+	_tmp10_ = _tmp9_;
+	_tmp11_ = allocation;
+	_tmp12_ = _tmp11_.y;
+	_tmp13_ = self->priv->box_width;
+	gtk_widget_queue_draw_area ((GtkWidget*) self, _tmp8_ + _tmp10_, _tmp12_ + y, _tmp13_ * grid_size, height);
 }
 
 
 static void user_list_redraw_login_box (UserList* self) {
-	gint _tmp0_;
-	gint _tmp1_;
+	GtkAllocation allocation = {0};
+	GtkAllocation _tmp0_ = {0};
+	GtkAllocation _tmp1_;
 	gint _tmp2_;
 	gint _tmp3_;
 	gint _tmp4_;
-	gint _tmp5_;
+	GtkAllocation _tmp5_;
+	gint _tmp6_;
+	gint _tmp7_;
+	gint _tmp8_;
+	gint _tmp9_;
+	gint _tmp10_;
 	g_return_if_fail (self != NULL);
-	_tmp0_ = user_list_get_box_x (self);
-	_tmp1_ = _tmp0_;
-	_tmp2_ = user_list_get_box_y (self);
-	_tmp3_ = _tmp2_;
-	_tmp4_ = self->priv->box_width;
-	_tmp5_ = self->priv->box_height;
-	gtk_widget_queue_draw_area ((GtkWidget*) self, _tmp1_, _tmp3_, _tmp4_ * grid_size, _tmp5_ * grid_size);
+	gtk_widget_get_allocation ((GtkWidget*) self, &_tmp0_);
+	allocation = _tmp0_;
+	_tmp1_ = allocation;
+	_tmp2_ = _tmp1_.x;
+	_tmp3_ = user_list_get_box_x (self);
+	_tmp4_ = _tmp3_;
+	_tmp5_ = allocation;
+	_tmp6_ = _tmp5_.y;
+	_tmp7_ = user_list_get_box_y (self);
+	_tmp8_ = _tmp7_;
+	_tmp9_ = self->priv->box_width;
+	_tmp10_ = self->priv->box_height;
+	gtk_widget_queue_draw_area ((GtkWidget*) self, _tmp2_ + _tmp4_, _tmp6_ + _tmp8_, _tmp9_ * grid_size, _tmp10_ * grid_size);
 }
 
 
@@ -1469,7 +1537,7 @@ static UserEntry* user_list_find_entry (UserList* self, const gchar* name) {
 }
 
 
-void user_list_add_entry (UserList* self, const gchar* name, const gchar* label, const gchar* background, GList* keyboard_layouts, gboolean is_active) {
+void user_list_add_entry (UserList* self, const gchar* name, const gchar* label, const gchar* background, GList* keyboard_layouts, gboolean is_active, gboolean has_messages) {
 	const gchar* _tmp0_;
 	UserEntry* _tmp1_ = NULL;
 	UserEntry* e;
@@ -1490,6 +1558,8 @@ void user_list_add_entry (UserList* self, const gchar* name, const gchar* label,
 	UserEntry* _tmp22_;
 	gboolean _tmp23_;
 	UserEntry* _tmp24_;
+	gboolean _tmp25_;
+	UserEntry* _tmp26_;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (name != NULL);
 	g_return_if_fail (label != NULL);
@@ -1540,15 +1610,18 @@ void user_list_add_entry (UserList* self, const gchar* name, const gchar* label,
 	_tmp22_ = e;
 	_tmp23_ = is_active;
 	_tmp22_->is_active = _tmp23_;
-	_tmp24_ = self->priv->_selected_entry;
-	if (_tmp24_ == NULL) {
-		UserEntry* _tmp25_;
-		_tmp25_ = e;
-		user_list_select_entry (self, _tmp25_, 1.0);
+	_tmp24_ = e;
+	_tmp25_ = has_messages;
+	_tmp24_->has_messages = _tmp25_;
+	_tmp26_ = self->priv->_selected_entry;
+	if (_tmp26_ == NULL) {
+		UserEntry* _tmp27_;
+		_tmp27_ = e;
+		user_list_select_entry (self, _tmp27_, 1.0);
 	} else {
-		UserEntry* _tmp26_;
-		_tmp26_ = self->priv->_selected_entry;
-		user_list_select_entry (self, _tmp26_, 1.0);
+		UserEntry* _tmp28_;
+		_tmp28_ = self->priv->_selected_entry;
+		user_list_select_entry (self, _tmp28_, 1.0);
 	}
 	user_list_redraw_user_list (self);
 	_user_entry_unref0 (e);
@@ -1652,7 +1725,7 @@ static void user_list_login_button_clicked_cb (UserList* self) {
 	g_return_if_fail (self != NULL);
 	_tmp0_ = self->priv->_selected_entry;
 	_tmp1_ = _tmp0_->name;
-	g_debug ("user-list.vala:405: Start session for %s", _tmp1_);
+	g_debug ("user-list.vala:426: Start session for %s", _tmp1_);
 	g_signal_emit_by_name (self, "start-session");
 }
 
@@ -2030,137 +2103,106 @@ static void user_list_real_realize (GtkWidget* base) {
 
 static void user_list_real_size_allocate (GtkWidget* base, GtkAllocation* allocation) {
 	UserList * self;
-	gboolean _tmp0_ = FALSE;
-	GtkAllocation _tmp1_;
-	gint _tmp2_;
-	gint _tmp3_ = 0;
-	gboolean _tmp7_;
-	gboolean resized;
-	GtkAllocation _tmp8_;
-	gboolean _tmp9_ = FALSE;
-	gboolean _tmp10_;
+	GtkAllocation _tmp0_;
+	gboolean _tmp1_ = FALSE;
 	GtkAllocation child_allocation = {0};
+	GtkAllocation _tmp2_;
+	gint _tmp3_;
+	gint _tmp4_;
+	gint _tmp5_;
+	GtkAllocation _tmp6_;
+	gint _tmp7_;
+	gint _tmp8_;
+	gint _tmp9_;
+	gint _tmp10_;
+	gint _tmp11_;
+	GtkBox* _tmp12_;
 	GtkAllocation _tmp13_;
-	gint _tmp14_;
+	GtkAllocation _tmp14_;
 	gint _tmp15_;
 	gint _tmp16_;
-	GtkAllocation _tmp17_;
-	gint _tmp18_;
+	gint _tmp17_;
+	GtkAllocation _tmp18_;
 	gint _tmp19_;
 	gint _tmp20_;
 	gint _tmp21_;
 	gint _tmp22_;
-	GtkBox* _tmp23_;
+	DashEntry* _tmp23_;
 	GtkAllocation _tmp24_;
-	GtkAllocation _tmp25_;
-	gint _tmp26_;
-	gint _tmp27_;
+	DashButton* _tmp25_;
+	GtkAllocation _tmp26_;
+	GtkAllocation _tmp27_;
 	gint _tmp28_;
-	GtkAllocation _tmp29_;
+	gint _tmp29_;
 	gint _tmp30_;
 	gint _tmp31_;
-	gint _tmp32_;
+	GtkAllocation _tmp32_;
 	gint _tmp33_;
-	DashEntry* _tmp34_;
-	GtkAllocation _tmp35_;
-	DashButton* _tmp36_;
+	gint _tmp34_;
+	gint _tmp35_;
+	GtkButton* _tmp36_;
 	GtkAllocation _tmp37_;
-	GtkAllocation _tmp38_;
-	gint _tmp39_;
-	gint _tmp40_;
-	gint _tmp41_;
-	gint _tmp42_;
-	GtkAllocation _tmp43_;
-	gint _tmp44_;
-	gint _tmp45_;
-	gint _tmp46_;
-	GtkButton* _tmp47_;
-	GtkAllocation _tmp48_;
 	self = (UserList*) base;
 	g_return_if_fail (allocation != NULL);
-	_tmp1_ = *allocation;
-	_tmp2_ = _tmp1_.height;
-	_tmp3_ = gtk_widget_get_allocated_height ((GtkWidget*) self);
-	if (_tmp2_ != _tmp3_) {
-		_tmp0_ = TRUE;
-	} else {
-		GtkAllocation _tmp4_;
-		gint _tmp5_;
-		gint _tmp6_ = 0;
-		_tmp4_ = *allocation;
-		_tmp5_ = _tmp4_.width;
-		_tmp6_ = gtk_widget_get_allocated_width ((GtkWidget*) self);
-		_tmp0_ = _tmp5_ != _tmp6_;
-	}
-	_tmp7_ = _tmp0_;
-	resized = _tmp7_;
-	_tmp8_ = *allocation;
-	GTK_WIDGET_CLASS (user_list_parent_class)->size_allocate ((GtkWidget*) GTK_EVENT_BOX (self), &_tmp8_);
-	_tmp9_ = gtk_widget_get_realized ((GtkWidget*) self);
-	if (!_tmp9_) {
+	_tmp0_ = *allocation;
+	GTK_WIDGET_CLASS (user_list_parent_class)->size_allocate ((GtkWidget*) GTK_EVENT_BOX (self), &_tmp0_);
+	_tmp1_ = gtk_widget_get_realized ((GtkWidget*) self);
+	if (!_tmp1_) {
 		return;
 	}
-	_tmp10_ = resized;
-	if (_tmp10_) {
-		gint _tmp11_ = 0;
-		gint _tmp12_ = 0;
-		_tmp11_ = gtk_widget_get_allocated_width ((GtkWidget*) self);
-		_tmp12_ = gtk_widget_get_allocated_height ((GtkWidget*) self);
-		g_debug ("user-list.vala:539: Resized to %dx%d", _tmp11_, _tmp12_);
-	}
 	memset (&child_allocation, 0, sizeof (GtkAllocation));
-	_tmp13_ = *allocation;
-	_tmp14_ = _tmp13_.x;
-	_tmp15_ = user_list_get_box_x (self);
-	_tmp16_ = _tmp15_;
-	child_allocation.x = (_tmp14_ + _tmp16_) + 6;
-	_tmp17_ = *allocation;
-	_tmp18_ = _tmp17_.y;
-	_tmp19_ = user_list_get_box_y (self);
-	_tmp20_ = _tmp19_;
-	child_allocation.y = (_tmp18_ + _tmp20_) + 6;
-	_tmp21_ = self->priv->box_width;
-	child_allocation.width = (grid_size * _tmp21_) - 12;
-	_tmp22_ = self->priv->box_height;
-	child_allocation.height = (grid_size * _tmp22_) - 12;
-	_tmp23_ = self->priv->login_box;
+	_tmp2_ = *allocation;
+	_tmp3_ = _tmp2_.x;
+	_tmp4_ = user_list_get_box_x (self);
+	_tmp5_ = _tmp4_;
+	child_allocation.x = (_tmp3_ + _tmp5_) + 6;
+	_tmp6_ = *allocation;
+	_tmp7_ = _tmp6_.y;
+	_tmp8_ = user_list_get_box_y (self);
+	_tmp9_ = _tmp8_;
+	child_allocation.y = (_tmp7_ + _tmp9_) + 6;
+	_tmp10_ = self->priv->box_width;
+	child_allocation.width = (grid_size * _tmp10_) - 12;
+	_tmp11_ = self->priv->box_height;
+	child_allocation.height = (grid_size * _tmp11_) - 12;
+	_tmp12_ = self->priv->login_box;
+	_tmp13_ = child_allocation;
+	gtk_widget_size_allocate ((GtkWidget*) _tmp12_, &_tmp13_);
+	_tmp14_ = *allocation;
+	_tmp15_ = _tmp14_.x;
+	_tmp16_ = user_list_get_box_x (self);
+	_tmp17_ = _tmp16_;
+	child_allocation.x = (_tmp15_ + _tmp17_) + (grid_size / 2);
+	_tmp18_ = *allocation;
+	_tmp19_ = _tmp18_.y;
+	_tmp20_ = user_list_get_box_y (self);
+	_tmp21_ = _tmp20_;
+	child_allocation.y = ((_tmp19_ + _tmp21_) + (grid_size * 2)) - (grid_size / 2);
+	_tmp22_ = self->priv->box_width;
+	child_allocation.width = grid_size * (_tmp22_ - 1);
+	child_allocation.height = grid_size;
+	_tmp23_ = self->priv->prompt_entry;
 	_tmp24_ = child_allocation;
 	gtk_widget_size_allocate ((GtkWidget*) _tmp23_, &_tmp24_);
-	_tmp25_ = *allocation;
-	_tmp26_ = _tmp25_.x;
-	_tmp27_ = user_list_get_box_x (self);
-	_tmp28_ = _tmp27_;
-	child_allocation.x = (_tmp26_ + _tmp28_) + (grid_size / 2);
-	_tmp29_ = *allocation;
-	_tmp30_ = _tmp29_.y;
-	_tmp31_ = user_list_get_box_y (self);
-	_tmp32_ = _tmp31_;
-	child_allocation.y = ((_tmp30_ + _tmp32_) + (grid_size * 2)) - (grid_size / 2);
-	_tmp33_ = self->priv->box_width;
-	child_allocation.width = grid_size * (_tmp33_ - 1);
-	child_allocation.height = grid_size;
-	_tmp34_ = self->priv->prompt_entry;
-	_tmp35_ = child_allocation;
-	gtk_widget_size_allocate ((GtkWidget*) _tmp34_, &_tmp35_);
-	_tmp36_ = self->priv->login_button;
-	_tmp37_ = child_allocation;
-	gtk_widget_size_allocate ((GtkWidget*) _tmp36_, &_tmp37_);
-	_tmp38_ = *allocation;
-	_tmp39_ = _tmp38_.x;
-	_tmp40_ = user_list_get_box_x (self);
-	_tmp41_ = _tmp40_;
-	_tmp42_ = self->priv->box_width;
-	child_allocation.x = (((_tmp39_ + _tmp41_) + (_tmp42_ * grid_size)) - grid_size) - (grid_size / 4);
-	_tmp43_ = *allocation;
-	_tmp44_ = _tmp43_.y;
-	_tmp45_ = user_list_get_box_y (self);
-	_tmp46_ = _tmp45_;
-	child_allocation.y = (_tmp44_ + _tmp46_) + (grid_size / 4);
+	_tmp25_ = self->priv->login_button;
+	_tmp26_ = child_allocation;
+	gtk_widget_size_allocate ((GtkWidget*) _tmp25_, &_tmp26_);
+	_tmp27_ = *allocation;
+	_tmp28_ = _tmp27_.x;
+	_tmp29_ = user_list_get_box_x (self);
+	_tmp30_ = _tmp29_;
+	_tmp31_ = self->priv->box_width;
+	child_allocation.x = (((_tmp28_ + _tmp30_) + (_tmp31_ * grid_size)) - grid_size) - (grid_size / 4);
+	_tmp32_ = *allocation;
+	_tmp33_ = _tmp32_.y;
+	_tmp34_ = user_list_get_box_y (self);
+	_tmp35_ = _tmp34_;
+	child_allocation.y = (_tmp33_ + _tmp35_) + (grid_size / 4);
 	child_allocation.width = grid_size;
 	child_allocation.height = grid_size;
-	_tmp47_ = self->priv->options_button;
-	_tmp48_ = child_allocation;
-	gtk_widget_size_allocate ((GtkWidget*) _tmp47_, &_tmp48_);
+	_tmp36_ = self->priv->options_button;
+	_tmp37_ = child_allocation;
+	gtk_widget_size_allocate ((GtkWidget*) _tmp36_, &_tmp37_);
 }
 
 
@@ -2175,30 +2217,32 @@ static void user_list_draw_entry (UserList* self, cairo_t* c, UserEntry* entry, 
 	gboolean _tmp8_;
 	gint w = 0;
 	gint h = 0;
-	UserEntry* _tmp16_;
-	PangoLayout* _tmp17_;
-	gint _tmp18_ = 0;
+	UserEntry* _tmp17_;
+	PangoLayout* _tmp18_;
 	gint _tmp19_ = 0;
-	gdouble _tmp20_ = 0.0;
-	gboolean _tmp21_;
-	gint _tmp22_;
-	gdouble _tmp23_;
+	gint _tmp20_ = 0;
+	gdouble _tmp21_ = 0.0;
+	gboolean _tmp22_;
+	gint _tmp23_;
+	gdouble _tmp24_;
 	gdouble bw;
-	gint _tmp24_;
-	gdouble _tmp25_;
-	cairo_t* _tmp41_;
-	gint _tmp42_;
+	gint _tmp25_;
+	gdouble _tmp26_;
+	cairo_t* _tmp42_;
 	gint _tmp43_;
-	cairo_t* _tmp44_;
+	gint _tmp44_;
 	cairo_t* _tmp45_;
-	UserEntry* _tmp46_;
-	PangoLayout* _tmp47_;
-	cairo_t* _tmp48_;
-	gboolean _tmp49_ = FALSE;
-	gboolean _tmp50_ = FALSE;
-	gboolean _tmp51_;
-	gboolean _tmp55_;
-	gboolean _tmp57_;
+	cairo_t* _tmp46_;
+	UserEntry* _tmp47_;
+	PangoLayout* _tmp48_;
+	UserEntry* _tmp49_;
+	gboolean _tmp50_;
+	cairo_t* _tmp65_;
+	gboolean _tmp66_ = FALSE;
+	gboolean _tmp67_ = FALSE;
+	gboolean _tmp68_;
+	gboolean _tmp72_;
+	gboolean _tmp74_;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (c != NULL);
 	g_return_if_fail (entry != NULL);
@@ -2222,162 +2266,200 @@ static void user_list_draw_entry (UserList* self, cairo_t* c, UserEntry* entry, 
 	_tmp8_ = _tmp7_->is_active;
 	if (_tmp8_) {
 		cairo_t* _tmp9_;
-		cairo_t* _tmp10_;
+		gint _tmp10_;
 		cairo_t* _tmp11_;
 		cairo_t* _tmp12_;
 		cairo_t* _tmp13_;
-		gdouble _tmp14_;
-		cairo_t* _tmp15_;
+		cairo_t* _tmp14_;
+		gdouble _tmp15_;
+		cairo_t* _tmp16_;
 		_tmp9_ = c;
-		cairo_move_to (_tmp9_, (gdouble) 8, ((grid_size / 2) + 0.5) - 4);
-		_tmp10_ = c;
-		cairo_rel_line_to (_tmp10_, (gdouble) 5, (gdouble) 4);
+		_tmp10_ = self->priv->border;
+		cairo_move_to (_tmp9_, (gdouble) 8, (((grid_size / 2) + 0.5) - 4) + _tmp10_);
 		_tmp11_ = c;
-		cairo_rel_line_to (_tmp11_, (gdouble) (-5), (gdouble) 4);
+		cairo_rel_line_to (_tmp11_, (gdouble) 5, (gdouble) 4);
 		_tmp12_ = c;
-		cairo_close_path (_tmp12_);
+		cairo_rel_line_to (_tmp12_, (gdouble) (-5), (gdouble) 4);
 		_tmp13_ = c;
-		_tmp14_ = alpha;
-		cairo_set_source_rgba (_tmp13_, 1.0, 1.0, 1.0, _tmp14_);
-		_tmp15_ = c;
-		cairo_fill (_tmp15_);
+		cairo_close_path (_tmp13_);
+		_tmp14_ = c;
+		_tmp15_ = alpha;
+		cairo_set_source_rgba (_tmp14_, 1.0, 1.0, 1.0, _tmp15_);
+		_tmp16_ = c;
+		cairo_fill (_tmp16_);
 	}
-	_tmp16_ = entry;
-	_tmp17_ = _tmp16_->layout;
-	pango_layout_get_pixel_size (_tmp17_, &_tmp18_, &_tmp19_);
-	w = _tmp18_;
-	h = _tmp19_;
-	_tmp21_ = in_box;
-	if (_tmp21_) {
-		_tmp20_ = 1.1;
+	_tmp17_ = entry;
+	_tmp18_ = _tmp17_->layout;
+	pango_layout_get_pixel_size (_tmp18_, &_tmp19_, &_tmp20_);
+	w = _tmp19_;
+	h = _tmp20_;
+	_tmp22_ = in_box;
+	if (_tmp22_) {
+		_tmp21_ = 1.1;
 	} else {
-		_tmp20_ = 0.5;
+		_tmp21_ = 0.5;
 	}
-	_tmp22_ = self->priv->box_width;
-	_tmp23_ = _tmp20_;
-	bw = (_tmp22_ - _tmp23_) * grid_size;
-	_tmp24_ = w;
-	_tmp25_ = bw;
-	if (((gdouble) _tmp24_) > _tmp25_) {
-		gdouble _tmp26_;
-		cairo_pattern_t* _tmp27_;
+	_tmp23_ = self->priv->box_width;
+	_tmp24_ = _tmp21_;
+	bw = (_tmp23_ - _tmp24_) * grid_size;
+	_tmp25_ = w;
+	_tmp26_ = bw;
+	if (((gdouble) _tmp25_) > _tmp26_) {
+		gdouble _tmp27_;
+		cairo_pattern_t* _tmp28_;
 		cairo_pattern_t* mask;
-		gboolean _tmp28_;
-		cairo_pattern_t* _tmp36_;
-		cairo_t* _tmp37_;
-		cairo_pattern_t* _tmp38_;
-		_tmp26_ = bw;
-		_tmp27_ = cairo_pattern_create_linear ((gdouble) 0, (gdouble) 0, _tmp26_, (gdouble) 0);
-		mask = _tmp27_;
-		_tmp28_ = in_box;
-		if (_tmp28_) {
-			cairo_pattern_t* _tmp29_;
-			gdouble _tmp30_;
-			cairo_pattern_t* _tmp31_;
-			gdouble _tmp32_;
-			_tmp29_ = mask;
-			_tmp30_ = bw;
-			cairo_pattern_add_color_stop_rgba (_tmp29_, 1.0 - (27.0 / _tmp30_), 1.0, 1.0, 1.0, 1.0);
-			_tmp31_ = mask;
-			_tmp32_ = bw;
-			cairo_pattern_add_color_stop_rgba (_tmp31_, 1.0 - (21.6 / _tmp32_), 1.0, 1.0, 1.0, 0.5);
+		gboolean _tmp29_;
+		cairo_pattern_t* _tmp37_;
+		cairo_t* _tmp38_;
+		cairo_pattern_t* _tmp39_;
+		_tmp27_ = bw;
+		_tmp28_ = cairo_pattern_create_linear ((gdouble) 0, (gdouble) 0, _tmp27_, (gdouble) 0);
+		mask = _tmp28_;
+		_tmp29_ = in_box;
+		if (_tmp29_) {
+			cairo_pattern_t* _tmp30_;
+			gdouble _tmp31_;
+			cairo_pattern_t* _tmp32_;
+			gdouble _tmp33_;
+			_tmp30_ = mask;
+			_tmp31_ = bw;
+			cairo_pattern_add_color_stop_rgba (_tmp30_, 1.0 - (27.0 / _tmp31_), 1.0, 1.0, 1.0, 1.0);
+			_tmp32_ = mask;
+			_tmp33_ = bw;
+			cairo_pattern_add_color_stop_rgba (_tmp32_, 1.0 - (21.6 / _tmp33_), 1.0, 1.0, 1.0, 0.5);
 		} else {
-			cairo_pattern_t* _tmp33_;
-			gdouble _tmp34_;
+			cairo_pattern_t* _tmp34_;
 			gdouble _tmp35_;
-			_tmp33_ = mask;
-			_tmp34_ = bw;
-			_tmp35_ = alpha;
-			cairo_pattern_add_color_stop_rgba (_tmp33_, 1.0 - (64.0 / _tmp34_), 1.0, 1.0, 1.0, _tmp35_);
+			gdouble _tmp36_;
+			_tmp34_ = mask;
+			_tmp35_ = bw;
+			_tmp36_ = alpha;
+			cairo_pattern_add_color_stop_rgba (_tmp34_, 1.0 - (64.0 / _tmp35_), 1.0, 1.0, 1.0, _tmp36_);
 		}
-		_tmp36_ = mask;
-		cairo_pattern_add_color_stop_rgba (_tmp36_, 1.0, 1.0, 1.0, 1.0, 0.0);
-		_tmp37_ = c;
-		_tmp38_ = mask;
-		cairo_set_source (_tmp37_, _tmp38_);
+		_tmp37_ = mask;
+		cairo_pattern_add_color_stop_rgba (_tmp37_, 1.0, 1.0, 1.0, 1.0, 0.0);
+		_tmp38_ = c;
+		_tmp39_ = mask;
+		cairo_set_source (_tmp38_, _tmp39_);
 		_cairo_pattern_destroy0 (mask);
 	} else {
-		cairo_t* _tmp39_;
-		gdouble _tmp40_;
-		_tmp39_ = c;
-		_tmp40_ = alpha;
-		cairo_set_source_rgba (_tmp39_, 1.0, 1.0, 1.0, _tmp40_);
+		cairo_t* _tmp40_;
+		gdouble _tmp41_;
+		_tmp40_ = c;
+		_tmp41_ = alpha;
+		cairo_set_source_rgba (_tmp40_, 1.0, 1.0, 1.0, _tmp41_);
 	}
-	_tmp41_ = c;
-	_tmp42_ = h;
-	_tmp43_ = self->priv->border;
-	cairo_translate (_tmp41_, (gdouble) (grid_size / 2), (gdouble) (((grid_size - _tmp42_) / 2) + _tmp43_));
-	_tmp44_ = c;
-	cairo_move_to (_tmp44_, (gdouble) 0, (gdouble) 0);
+	_tmp42_ = c;
+	_tmp43_ = h;
+	_tmp44_ = self->priv->border;
+	cairo_translate (_tmp42_, (gdouble) (grid_size / 2), (gdouble) (((grid_size - _tmp43_) / 2) + _tmp44_));
 	_tmp45_ = c;
-	_tmp46_ = entry;
-	_tmp47_ = _tmp46_->layout;
-	pango_cairo_show_layout (_tmp45_, _tmp47_);
-	_tmp48_ = c;
-	cairo_restore (_tmp48_);
-	_tmp51_ = in_box;
-	if (_tmp51_) {
-		AnimateTimer* _tmp52_;
-		gboolean _tmp53_;
-		gboolean _tmp54_;
-		_tmp52_ = self->priv->scroll_timer;
-		_tmp53_ = animate_timer_get_is_running (_tmp52_);
-		_tmp54_ = _tmp53_;
-		_tmp50_ = _tmp54_;
-	} else {
-		_tmp50_ = FALSE;
-	}
-	_tmp55_ = _tmp50_;
-	if (_tmp55_) {
-		GdkPixbuf* _tmp56_;
-		_tmp56_ = self->priv->options_pixbuf;
-		_tmp49_ = _tmp56_ != NULL;
-	} else {
-		_tmp49_ = FALSE;
-	}
-	_tmp57_ = _tmp49_;
-	if (_tmp57_) {
+	cairo_move_to (_tmp45_, (gdouble) 0, (gdouble) 0);
+	_tmp46_ = c;
+	_tmp47_ = entry;
+	_tmp48_ = _tmp47_->layout;
+	pango_cairo_show_layout (_tmp46_, _tmp48_);
+	_tmp49_ = entry;
+	_tmp50_ = _tmp49_->has_messages;
+	if (_tmp50_) {
+		cairo_t* _tmp51_;
+		gint _tmp52_;
+		gint _tmp53_;
+		GdkPixbuf* _tmp54_;
+		gint _tmp55_ = 0;
+		cairo_t* _tmp56_;
+		GdkPixbuf* _tmp57_;
 		cairo_t* _tmp58_;
 		GdkPixbuf* _tmp59_;
-		gint _tmp60_;
-		gint _tmp61_;
-		gint xpadding;
-		GdkPixbuf* _tmp62_;
-		gint _tmp63_;
-		gint _tmp64_;
-		gint ypadding;
-		cairo_t* _tmp65_;
-		gint _tmp66_;
-		gint _tmp67_;
-		gint _tmp68_;
-		gint _tmp69_;
-		cairo_t* _tmp70_;
-		GdkPixbuf* _tmp71_;
-		cairo_t* _tmp72_;
-		cairo_t* _tmp73_;
+		gint _tmp60_ = 0;
+		GdkPixbuf* _tmp61_;
+		gint _tmp62_ = 0;
+		cairo_t* _tmp63_;
+		gdouble _tmp64_;
+		_tmp51_ = c;
+		_tmp52_ = w;
+		_tmp53_ = h;
+		_tmp54_ = self->priv->message_pixbuf;
+		_tmp55_ = gdk_pixbuf_get_height (_tmp54_);
+		cairo_translate (_tmp51_, (gdouble) (_tmp52_ + 6), (gdouble) ((_tmp53_ - _tmp55_) / 2));
+		_tmp56_ = c;
+		_tmp57_ = self->priv->message_pixbuf;
+		gdk_cairo_set_source_pixbuf (_tmp56_, _tmp57_, (gdouble) 0, (gdouble) 0);
 		_tmp58_ = c;
-		cairo_save (_tmp58_);
-		_tmp59_ = self->priv->options_pixbuf;
+		_tmp59_ = self->priv->message_pixbuf;
 		_tmp60_ = gdk_pixbuf_get_width (_tmp59_);
-		_tmp61_ = _tmp60_;
-		xpadding = (grid_size - _tmp61_) / 2;
-		_tmp62_ = self->priv->options_pixbuf;
-		_tmp63_ = gdk_pixbuf_get_height (_tmp62_);
-		_tmp64_ = _tmp63_;
-		ypadding = (grid_size - _tmp64_) / 2;
-		_tmp65_ = c;
-		_tmp66_ = self->priv->box_width;
-		_tmp67_ = xpadding;
-		_tmp68_ = ypadding;
-		_tmp69_ = self->priv->border;
-		cairo_translate (_tmp65_, (gdouble) ((((_tmp66_ * grid_size) - grid_size) - (grid_size / 4)) + _tmp67_), (gdouble) (((grid_size / 4) - _tmp68_) - _tmp69_));
-		_tmp70_ = c;
-		_tmp71_ = self->priv->options_pixbuf;
-		gdk_cairo_set_source_pixbuf (_tmp70_, _tmp71_, (gdouble) 0, (gdouble) 0);
-		_tmp72_ = c;
-		cairo_paint (_tmp72_);
-		_tmp73_ = c;
-		cairo_restore (_tmp73_);
+		_tmp61_ = self->priv->message_pixbuf;
+		_tmp62_ = gdk_pixbuf_get_height (_tmp61_);
+		cairo_rectangle (_tmp58_, (gdouble) 0, (gdouble) 0, (gdouble) _tmp60_, (gdouble) _tmp62_);
+		_tmp63_ = c;
+		_tmp64_ = alpha;
+		cairo_paint_with_alpha (_tmp63_, _tmp64_);
+	}
+	_tmp65_ = c;
+	cairo_restore (_tmp65_);
+	_tmp68_ = in_box;
+	if (_tmp68_) {
+		AnimateTimer* _tmp69_;
+		gboolean _tmp70_;
+		gboolean _tmp71_;
+		_tmp69_ = self->priv->scroll_timer;
+		_tmp70_ = animate_timer_get_is_running (_tmp69_);
+		_tmp71_ = _tmp70_;
+		_tmp67_ = _tmp71_;
+	} else {
+		_tmp67_ = FALSE;
+	}
+	_tmp72_ = _tmp67_;
+	if (_tmp72_) {
+		GdkPixbuf* _tmp73_;
+		_tmp73_ = self->priv->options_pixbuf;
+		_tmp66_ = _tmp73_ != NULL;
+	} else {
+		_tmp66_ = FALSE;
+	}
+	_tmp74_ = _tmp66_;
+	if (_tmp74_) {
+		cairo_t* _tmp75_;
+		GdkPixbuf* _tmp76_;
+		gint _tmp77_;
+		gint _tmp78_;
+		gint xpadding;
+		GdkPixbuf* _tmp79_;
+		gint _tmp80_;
+		gint _tmp81_;
+		gint ypadding;
+		cairo_t* _tmp82_;
+		gint _tmp83_;
+		gint _tmp84_;
+		gint _tmp85_;
+		gint _tmp86_;
+		cairo_t* _tmp87_;
+		GdkPixbuf* _tmp88_;
+		cairo_t* _tmp89_;
+		cairo_t* _tmp90_;
+		_tmp75_ = c;
+		cairo_save (_tmp75_);
+		_tmp76_ = self->priv->options_pixbuf;
+		_tmp77_ = gdk_pixbuf_get_width (_tmp76_);
+		_tmp78_ = _tmp77_;
+		xpadding = (grid_size - _tmp78_) / 2;
+		_tmp79_ = self->priv->options_pixbuf;
+		_tmp80_ = gdk_pixbuf_get_height (_tmp79_);
+		_tmp81_ = _tmp80_;
+		ypadding = (grid_size - _tmp81_) / 2;
+		_tmp82_ = c;
+		_tmp83_ = self->priv->box_width;
+		_tmp84_ = xpadding;
+		_tmp85_ = ypadding;
+		_tmp86_ = self->priv->border;
+		cairo_translate (_tmp82_, (gdouble) ((((_tmp83_ * grid_size) - grid_size) - (grid_size / 4)) + _tmp84_), (gdouble) (((grid_size / 4) - _tmp85_) - _tmp86_));
+		_tmp87_ = c;
+		_tmp88_ = self->priv->options_pixbuf;
+		gdk_cairo_set_source_pixbuf (_tmp87_, _tmp88_, (gdouble) 0, (gdouble) 0);
+		_tmp89_ = c;
+		cairo_paint (_tmp89_);
+		_tmp90_ = c;
+		cairo_restore (_tmp90_);
 	}
 }
 
@@ -3298,6 +3380,7 @@ static void user_list_finalize (GObject* obj) {
 	_g_object_unref0 (self->menubar);
 	_user_entry_unref0 (self->priv->_selected_entry);
 	__g_list_free__user_entry_unref0_0 (self->priv->entries);
+	_g_object_unref0 (self->priv->message_pixbuf);
 	_g_object_unref0 (self->priv->scroll_timer);
 	_g_free0 (self->priv->error);
 	_g_free0 (self->priv->message);

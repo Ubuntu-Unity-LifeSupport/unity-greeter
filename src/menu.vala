@@ -31,11 +31,12 @@ public class Menu : Gtk.Menu
     {
         if (background != null)
         {
-            int x, y;
-            Gdk.Window window = get_window ();
-            window.get_origin (out x, out y);
+            int x, y, bg_x, bg_y;
+
+            background.get_window ().get_origin (out bg_x, out bg_y);
+            get_window ().get_origin (out x, out y);
             c.save ();
-            c.translate (-x, -y);
+            c.translate (bg_x - x, bg_y - y);
             background.draw_full (c, Background.DrawFlags.NONE);
             c.restore ();
         }

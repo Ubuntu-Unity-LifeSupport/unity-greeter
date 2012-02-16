@@ -23,6 +23,7 @@ public class UGSettings
     public static const string KEY_BACKGROUND = "background";
     public static const string KEY_DRAW_GRID = "draw-grid";
     public static const string KEY_LOGO = "logo";
+    public static const string KEY_BACKGROUND_LOGO = "background-logo";
     public static const string KEY_THEME_NAME = "theme-name";
     public static const string KEY_ICON_THEME_NAME = "icon-theme-name";
     public static const string KEY_FONT_NAME = "font-name";
@@ -30,6 +31,9 @@ public class UGSettings
     public static const string KEY_XFT_DPI = "xft-dpi";
     public static const string KEY_XFT_HINTSTYLE = "xft-hintstyle";
     public static const string KEY_XFT_RGBA = "xft-rgba";
+    public static const string KEY_ONSCREEN_KEYBOARD = "onscreen-keyboard";
+    public static const string KEY_HIGH_CONTRAST = "high-contrast";
+    public static const string KEY_SCREEN_READER = "screen-reader";
 
     public static bool get_boolean (string key)
     {
@@ -47,6 +51,12 @@ public class UGSettings
     {
         var gsettings = new Settings (SCHEMA);
         return gsettings.get_string (key);
+    }
+
+    public static bool set_boolean (string key, bool value)
+    {
+        var gsettings = new Settings (SCHEMA);
+        return gsettings.set_boolean (key, value);
     }
 
     private static const string SCHEMA = "com.canonical.unity-greeter";

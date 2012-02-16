@@ -25,6 +25,9 @@ namespace Gdk
     public const int KEY_KP_Up;
     public const int KEY_KP_Down;
     public const int KEY_F10;
+    public const int KEY_s;
+    public const int KEY_h;
+    public const int CONTROL_MASK;
 }
 
 namespace Gtk

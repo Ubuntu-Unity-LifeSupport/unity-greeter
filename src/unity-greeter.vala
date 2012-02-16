@@ -55,6 +55,7 @@ public class UnityGreeter
 
     private string? test_username = null;
     private bool test_is_authenticated = false;
+    private Canberra.Context canberra_context;
 
     public UnityGreeter ()
     {
@@ -116,10 +117,10 @@ public class UnityGreeter
             user_list.add_entry ("chris", "Christopher Halse Rogers!!!!!!!!!!!!!!!", "/usr/share/backgrounds/Darkening_Clockwork_by_Matt_Katzenberger.jpg", null, true);
             user_list.add_entry ("jorge", "Jorge O Castro", "/usr/share/backgrounds/PurpleDancers_by_Emilio_Merlino.jpg", make_layout_list ("us"));
             user_list.add_entry ("ken", "Ken VanDine", "/usr/share/backgrounds/Small_flowers_by_Dariusz_Duma.jpg", make_layout_list ("uk;us"));
-            user_list.add_entry ("matthew", "Matthew Paul Thomas", "/usr/share/backgrounds/Not_Alone_by_Deacon_MacMillan.jpg", make_layout_list ("gb"));
+            user_list.add_entry ("matthew", "Matthew Paul Thomas", "/usr/share/backgrounds/Not_Alone_by_Deacon_MacMillan.jpg", make_layout_list ("gb"), false, true);
             user_list.add_entry ("otto", "Otto Greenslade", "/usr/share/backgrounds/Mount_Snowdon,_Wales_by_Adam_Vellender.jpg", make_layout_list ("gb"));
             user_list.add_entry ("pitti", "Martin Pitt", "/usr/share/backgrounds/Stalking_Ocelot_by_Sayantan_Chaudhuri.jpg", make_layout_list ("de\tdvorak;us"));
-            user_list.add_entry ("desrt", "Ryan Lortie", "/usr/share/backgrounds/Power_of_Words_by_Antonio_Litterio.jpg", make_layout_list ("ca"));
+            user_list.add_entry ("desrt", "Ryan Lortie", "/usr/share/backgrounds/Power_of_Words_by_Antonio_Litterio.jpg", make_layout_list ("ca"), false, true);
             user_list.add_entry ("*guest", _("Guest Session"), null, null, true);
 
             user_list.add_session ("gnome", "Ubuntu");
@@ -161,6 +162,7 @@ public class UnityGreeter
         user_selected_cb (user_list.selected);
 
         start_fake_wm ();
+        Gdk.threads_add_idle (ready_cb); 
     }
 
     public static void add_style_class (Gtk.Widget widget)
@@ -195,6 +197,21 @@ public class UnityGreeter
         return null;
     }
 
+    private bool ready_cb ()
+    {
+        debug ("starting system-ready sound");
+
+        /* Launch canberra */
+        Canberra.Context.create (out canberra_context);
+        canberra_context.play (0,
+                               Canberra.PROP_CANBERRA_XDG_THEME_NAME,
+                               "ubuntu",
+                               Canberra.PROP_EVENT_ID,
+                               "system-ready");
+
+        return false;
+    }
+
     private void user_added_cb (LightDM.User user)
     {
         debug ("Adding/updating user %s (%s)", user.name, user.real_name);
@@ -211,7 +228,7 @@ public class UnityGreeter
                 layouts.append (layout);
         }
 
-        user_list.add_entry (user.name, label, user.background, layouts, user.logged_in);
+        user_list.add_entry (user.name, label, user.background, layouts, user.logged_in, user.has_messages);
     }
 
     private void user_removed_cb (LightDM.User user)
@@ -602,6 +619,28 @@ public class UnityGreeter
         Intl.bind_textdomain_codeset (Config.GETTEXT_PACKAGE, "UTF-8");
         Intl.textdomain (Config.GETTEXT_PACKAGE);
 
+        /* Set up the accessibility stack, in case the user needs it for screen reading etc. */
+        Environment.set_variable ("GTK_MODULES", "atk-bridge", false);
+
+        Pid atspi_pid = 0;
+
+        try
+            {
+                string[] argv;
+
+                Shell.parse_argv ("/usr/lib/at-spi2-core/at-spi-bus-launcher --launch-immediately", out argv);
+                Process.spawn_async (null,
+                                     argv,
+                                     null,
+                                     SpawnFlags.SEARCH_PATH,
+                                     null,
+                                     out atspi_pid);
+            }
+            catch (Error e)
+            {
+                warning ("Error starting the at-spi registry: %s", e.message);
+            }
+
         Gtk.init (ref args);
 
         log_timer = new Timer ();
@@ -676,6 +715,14 @@ public class UnityGreeter
 
         debug ("Starting main loop");
         Gtk.main ();
+
+        if (atspi_pid != 0)
+        {
+            Posix.kill (atspi_pid, Posix.SIGKILL);
+            int status;
+            Posix.waitpid (atspi_pid, out status, 0);
+            atspi_pid = 0;
+        }
 
         return Posix.EXIT_SUCCESS;
     }

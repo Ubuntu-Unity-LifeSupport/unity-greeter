@@ -108,57 +108,60 @@ Menu* menu_new (Background* bg) {
 }
 
 
-static gpointer _g_object_ref0 (gpointer self) {
-	return self ? g_object_ref (self) : NULL;
-}
-
-
 static gboolean menu_real_draw (GtkWidget* base, cairo_t* c) {
 	Menu * self;
 	gboolean result = FALSE;
 	Background* _tmp0_;
-	cairo_t* _tmp13_;
+	cairo_t* _tmp17_;
 	self = (Menu*) base;
 	g_return_val_if_fail (c != NULL, FALSE);
 	_tmp0_ = self->priv->_background;
 	if (_tmp0_ != NULL) {
 		gint x = 0;
 		gint y = 0;
-		GdkWindow* _tmp1_ = NULL;
-		GdkWindow* _tmp2_;
-		GdkWindow* window;
-		GdkWindow* _tmp3_;
+		gint bg_x = 0;
+		gint bg_y = 0;
+		Background* _tmp1_;
+		GdkWindow* _tmp2_ = NULL;
+		gint _tmp3_ = 0;
 		gint _tmp4_ = 0;
-		gint _tmp5_ = 0;
-		cairo_t* _tmp6_;
-		cairo_t* _tmp7_;
-		gint _tmp8_;
-		gint _tmp9_;
-		Background* _tmp10_;
-		cairo_t* _tmp11_;
-		cairo_t* _tmp12_;
-		_tmp1_ = gtk_widget_get_window ((GtkWidget*) self);
-		_tmp2_ = _g_object_ref0 (_tmp1_);
-		window = _tmp2_;
-		_tmp3_ = window;
-		gdk_window_get_origin (_tmp3_, &_tmp4_, &_tmp5_);
-		x = _tmp4_;
-		y = _tmp5_;
-		_tmp6_ = c;
-		cairo_save (_tmp6_);
-		_tmp7_ = c;
-		_tmp8_ = x;
-		_tmp9_ = y;
-		cairo_translate (_tmp7_, (gdouble) (-_tmp8_), (gdouble) (-_tmp9_));
-		_tmp10_ = self->priv->_background;
-		_tmp11_ = c;
-		background_draw_full (_tmp10_, _tmp11_, BACKGROUND_DRAW_FLAGS_NONE);
-		_tmp12_ = c;
-		cairo_restore (_tmp12_);
-		_g_object_unref0 (window);
+		GdkWindow* _tmp5_ = NULL;
+		gint _tmp6_ = 0;
+		gint _tmp7_ = 0;
+		cairo_t* _tmp8_;
+		cairo_t* _tmp9_;
+		gint _tmp10_;
+		gint _tmp11_;
+		gint _tmp12_;
+		gint _tmp13_;
+		Background* _tmp14_;
+		cairo_t* _tmp15_;
+		cairo_t* _tmp16_;
+		_tmp1_ = self->priv->_background;
+		_tmp2_ = gtk_widget_get_window ((GtkWidget*) _tmp1_);
+		gdk_window_get_origin (_tmp2_, &_tmp3_, &_tmp4_);
+		bg_x = _tmp3_;
+		bg_y = _tmp4_;
+		_tmp5_ = gtk_widget_get_window ((GtkWidget*) self);
+		gdk_window_get_origin (_tmp5_, &_tmp6_, &_tmp7_);
+		x = _tmp6_;
+		y = _tmp7_;
+		_tmp8_ = c;
+		cairo_save (_tmp8_);
+		_tmp9_ = c;
+		_tmp10_ = bg_x;
+		_tmp11_ = x;
+		_tmp12_ = bg_y;
+		_tmp13_ = y;
+		cairo_translate (_tmp9_, (gdouble) (_tmp10_ - _tmp11_), (gdouble) (_tmp12_ - _tmp13_));
+		_tmp14_ = self->priv->_background;
+		_tmp15_ = c;
+		background_draw_full (_tmp14_, _tmp15_, BACKGROUND_DRAW_FLAGS_NONE);
+		_tmp16_ = c;
+		cairo_restore (_tmp16_);
 	}
-	_tmp13_ = c;
-	GTK_WIDGET_CLASS (menu_parent_class)->draw ((GtkWidget*) GTK_MENU (self), _tmp13_);
+	_tmp17_ = c;
+	GTK_WIDGET_CLASS (menu_parent_class)->draw ((GtkWidget*) GTK_MENU (self), _tmp17_);
 	result = FALSE;
 	return result;
 }
@@ -171,6 +174,11 @@ Background* menu_get_background (Menu* self) {
 	_tmp0_ = self->priv->_background;
 	result = _tmp0_;
 	return result;
+}
+
+
+static gpointer _g_object_ref0 (gpointer self) {
+	return self ? g_object_ref (self) : NULL;
 }
 
 

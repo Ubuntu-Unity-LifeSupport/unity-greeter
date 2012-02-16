@@ -22,13 +22,20 @@ public class MainWindow : Gtk.Window
 {
     public UserList user_list;
 
+    private List<Monitor> monitors;
     private Background background;
     private MenuBar menubar;
+    private Gtk.Box login_box;
 
     private uint change_background_timeout = 0;
 
     construct
     {
+        events |= Gdk.EventMask.POINTER_MOTION_MASK;
+
+        var accel_group = new Gtk.AccelGroup ();
+        add_accel_group (accel_group);
+
         var bg_color = Gdk.Color ();
         Gdk.Color.parse ("#2C001E", out bg_color);
         modify_bg (Gtk.StateType.NORMAL, bg_color);
@@ -36,27 +43,22 @@ public class MainWindow : Gtk.Window
         has_resize_grip = false;
         UnityGreeter.add_style_class (this);
 
-        if (UnityGreeter.test_mode)
-            resize (1024, 600);
-        else
-        {
-            var screen = get_screen ();
-            screen.monitors_changed.connect (monitors_changed_cb);
-            monitors_changed_cb (screen);
-        }
-
         background = new Background ();
         background.draw_grid = UGSettings.get_boolean (UGSettings.KEY_DRAW_GRID);
         background.default_background = UGSettings.get_string (UGSettings.KEY_BACKGROUND);
-        background.set_logo (UGSettings.get_string (UGSettings.KEY_LOGO));
+        background.set_logo (UGSettings.get_string (UGSettings.KEY_LOGO), UGSettings.get_string (UGSettings.KEY_BACKGROUND_LOGO));
         background.show ();
         add (background);
         UnityGreeter.add_style_class (background);
 
-        menubar = new MenuBar (background);
+        login_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
+        login_box.show ();
+        background.add (login_box);
+
+        menubar = new MenuBar (background, accel_group);
         menubar.notify["high-contrast"].connect (() => {change_background ();});
         menubar.show ();
-        background.add (menubar);
+        login_box.add (menubar);
         UnityGreeter.add_style_class (menubar);
 
         user_list = new UserList (background, menubar);
@@ -66,19 +68,63 @@ public class MainWindow : Gtk.Window
             change_background ();
         });
         user_list.show ();
-        background.add (user_list);
+        login_box.add (user_list);
         UnityGreeter.add_style_class (user_list);
+
+        if (UnityGreeter.test_mode)
+        {
+            /* Simulate an 800x600 monitor to the left of a 640x480 monitor */
+            monitors = new List<Monitor> ();
+            monitors.append (new Monitor (0, 0, 800, 600));
+            monitors.append (new Monitor (800, 120, 640, 480));
+            background.set_monitors (monitors);
+            move_to_monitor (monitors.nth_data (0));
+            resize (800 + 640, 600);
+        }
+        else
+        {
+            var screen = get_screen ();
+            screen.monitors_changed.connect (monitors_changed_cb);
+            monitors_changed_cb (screen);
+        }
     }
 
     private void monitors_changed_cb (Gdk.Screen screen)
     {
-        Gdk.Rectangle geometry;
-        screen.get_monitor_geometry (screen.get_primary_monitor (), out geometry);
+        debug ("Screen is %dx%d pixels", screen.get_width (), screen.get_height ());
+        monitors = new List<Monitor> ();
+        for (var i = 0; i < screen.get_n_monitors (); i++)
+        {
+            Gdk.Rectangle geometry;
+            screen.get_monitor_geometry (i, out geometry);
+            debug ("Monitor %d is %dx%d pixels at %d,%d", i, geometry.width, geometry.height, geometry.x, geometry.y);
 
-        debug ("Monitor is %dx%d pixels at %d,%d", geometry.width, geometry.height, geometry.x, geometry.y);
+            if (monitor_is_unique_position (screen, i))
+                monitors.append (new Monitor (geometry.x, geometry.y, geometry.width, geometry.height));
+        }
 
-        resize (geometry.width, geometry.height);
-        move (geometry.x, geometry.y);
+        background.set_monitors (monitors);
+        resize (screen.get_width (), screen.get_height ());
+        move (0, 0);
+        move_to_monitor (monitors.nth_data (0));
+    }
+    
+    /* Check if a monitor has a unique position */
+    private bool monitor_is_unique_position (Gdk.Screen screen, int n)
+    {
+        Gdk.Rectangle g0;
+        screen.get_monitor_geometry (n, out g0);
+
+        for (var i = n + 1; i < screen.get_n_monitors (); i++)
+        {
+            Gdk.Rectangle g1;
+            screen.get_monitor_geometry (i, out g1);
+
+            if (g0.x == g1.x && g0.y == g1.y)
+                return false;
+        }
+
+        return true;
     }
 
     private bool change_background_timeout_cb ()
@@ -106,6 +152,42 @@ public class MainWindow : Gtk.Window
         }
         else
             change_background_timeout_cb ();
+    }
+
+    public override bool motion_notify_event (Gdk.EventMotion event)
+    {
+        var x = (int) (event.x + 0.5);
+        var y = (int) (event.y + 0.5);
+
+        /* Get motion event relative to this widget */
+        if (event.window != get_window ())
+        {
+            int w_x, w_y;
+            get_window ().get_origin (out w_x, out w_y);
+            x -= w_x;
+            y -= w_y;
+            event.window.get_origin (out w_x, out w_y);
+            x += w_x;
+            y += w_y;
+        }
+
+        foreach (var m in monitors)
+        {
+            if (x >= m.x && x <= m.x + m.width && y >= m.y && y <= m.y + m.height)
+            {
+                move_to_monitor (m);
+                break;
+            }
+        }
+
+        return false;
+    }
+
+    private void move_to_monitor (Monitor monitor)
+    {
+        login_box.set_size_request (monitor.width, monitor.height);
+        background.set_active_monitor (monitor);
+        background.move (login_box, monitor.x, monitor.y);
     }
 
     public override bool key_press_event (Gdk.EventKey event)

@@ -1,3 +1,16 @@
+Overview of changes in unity-greeter 0.2.3
+
+    * Play system-ready sound on startup
+    * Fix placement of user-is-logged-in arrow
+
+Overview of changes in unity-greeter 0.2.2
+
+    * Support multi-monitor
+    * Add messaging indicator
+    * Add a11y shortcuts
+    * Remember a11y settings
+    * Launch at-spi so Orca works
+
 Overview of changes in unity-greeter 0.2.1
 
     * Fix session menu button not showing for first user

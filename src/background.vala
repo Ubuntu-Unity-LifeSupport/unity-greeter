@@ -23,22 +23,22 @@ class BackgroundLoader
     public string filename {get; private set;}
     public Cairo.Surface logo {get; set;}
 
-    private int width;
-    private int height;
+    public int[] widths;
+    public int[] heights;
+    public Cairo.Pattern[] patterns;
     private bool draw_grid;
-    private unowned Thread<Cairo.Pattern?> thread;
+    private unowned Thread<void*> thread;
     private bool finished;
     private uint ready_id;
 
-    public Cairo.Pattern? pattern = null;
-
     public signal void loaded ();
-    
-    public BackgroundLoader (string filename, int width, int height, bool draw_grid)
+
+    public BackgroundLoader (string filename, int[] widths, int[] heights, bool draw_grid)
     {
         this.filename = filename;
-        this.width = width;
-        this.height = height;
+        this.widths = widths;
+        this.heights = heights;
+        patterns = new Cairo.Pattern[widths.length];
         this.draw_grid = draw_grid;
     }
 
@@ -52,10 +52,13 @@ class BackgroundLoader
         if (thread != null)
             return false;
 
-        debug ("Making background %s at %dx%d", filename, width, height);
+        var text = "Making background %s at %dx%d".printf (filename, widths[0], heights[0]);
+        for (var i = 1; i < widths.length; i++)
+            text += ",%dx%d".printf (widths[i], heights[i]);
+        debug (text);
         try
         {
-            thread = Thread<Cairo.Pattern?>.create<Cairo.Pattern?> (render, true);
+            thread = Thread<void*>.create<void*> (render, true);
         }
         catch (ThreadError e)
         {
@@ -64,6 +67,16 @@ class BackgroundLoader
         }
 
         return false;
+    }
+    
+    public Cairo.Pattern? get_pattern (int width, int height)
+    {
+        for (var i = 0; i < widths.length; i++)
+        {
+            if (widths[i] == width && heights[i] == height)
+                return patterns[i];
+        }
+        return null;
     }
 
     ~Background ()
@@ -75,9 +88,9 @@ class BackgroundLoader
 
     private bool ready_cb ()
     {
-        debug ("Render of background %s at %dx%d complete", filename, width, height);
+        debug ("Render of background %s complete", filename);
 
-        pattern = thread.join ();
+        thread.join ();
         thread = null;
         finished = true;
 
@@ -86,8 +99,18 @@ class BackgroundLoader
         return false;
     }
 
-    private Cairo.Pattern? render ()
-    {    
+    private void* render ()
+    {
+        for (var i = 0; i < widths.length; i++)
+            patterns[i] = render_size (widths[i], heights[i]);
+
+        ready_id = Gdk.threads_add_idle (ready_cb);
+
+        return null;
+    }
+    
+    private Cairo.Pattern? render_size (int width, int height)
+    {
         Gdk.Color color;
         Gdk.Pixbuf orig_image = null;
         if (!Gdk.Color.parse (filename, out color))
@@ -152,14 +175,28 @@ class BackgroundLoader
 
         var pattern = new Cairo.Pattern.for_surface (surface);
         pattern.set_extend (Cairo.Extend.REPEAT);
-
-        ready_id = Gdk.threads_add_idle (ready_cb);
-        
+       
         return pattern;
     }
 }
 
-public class Background : Gtk.Box
+public class Monitor
+{
+    public int x;
+    public int y;
+    public int width;
+    public int height;
+
+    public Monitor (int x, int y, int width, int height)
+    {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+    }
+}
+
+public class Background : Gtk.Fixed
 {
     public enum DrawFlags
     {
@@ -172,17 +209,40 @@ public class Background : Gtk.Box
     public bool draw_grid {get; set; default = true;}
     public double alpha {get; private set; default = 1.0;}
 
-    public void set_logo (string logo_path)
+    public void set_logo (string version_logo, string background_logo)
     {       
-        if (FileUtils.test (logo_path, FileTest.EXISTS))
+        if (FileUtils.test (version_logo, FileTest.EXISTS))
         {
-            logo_surface = new Cairo.ImageSurface.from_png (logo_path);
+            version_logo_surface = new Cairo.ImageSurface.from_png (version_logo);
         }
         else
         {
-            debug ("Can't use logo %s, it does not exist", logo_path);
-            logo_surface = null;
+            debug ("Can't use logo %s, it does not exist", version_logo);
+            version_logo_surface = null;
         }
+
+        if (FileUtils.test (background_logo, FileTest.EXISTS))
+        {
+            background_logo_surface = new Cairo.ImageSurface.from_png (background_logo);
+        }
+        else
+        {
+            debug ("Can't use background logo %s, it does not exist", background_logo);
+            background_logo_surface = null;
+        }
+    }
+
+    public void set_monitors (List<Monitor> monitors)
+    {
+        this.monitors = new List<Monitor> ();
+        foreach (var m in monitors)
+            this.monitors.append (m);
+        queue_draw ();
+    }
+    
+    public void set_active_monitor (Monitor? monitor)
+    {
+        active_monitor = monitor;
     }
 
     public override void size_allocate (Gtk.Allocation allocation)
@@ -215,7 +275,7 @@ public class Background : Gtk.Box
         c.save ();
 
         /* Test whether we ran into an error loading this background */
-        if (current == null || (current.load () && current.pattern == null))
+        if (current == null || (current.load () && current.patterns[0] == null))
         {
             /* We couldn't load it, so swap it out for the default background
                and remember that choice */
@@ -240,23 +300,62 @@ public class Background : Gtk.Box
         /* Draw old background */
         if (old != null && old.load () && (alpha < 1.0 || !current.load ()))
         {
-            c.set_source (old.pattern);
-            c.paint ();
+            draw_background (c, old, 1.0);
             old_painted = true;
         }
 
         /* Draw new background */
         if (current.load () && alpha > 0.0)
-        {
-            c.set_source (current.pattern);
-            c.paint_with_alpha (old_painted ? alpha : 1.0);
-        }
+            draw_background (c, current, old_painted ? alpha : 1.0);
 
         c.restore ();
 
         if ((flags & DrawFlags.GRID) != 0)
             overlay_grid (c);
     }
+    
+    private void draw_background (Cairo.Context c, BackgroundLoader background, double alpha)
+    {
+        foreach (var monitor in monitors)
+        {
+            var pattern = background.get_pattern (monitor.width, monitor.height);
+            if (pattern == null)
+                continue;
+
+            c.save ();
+            pattern = background.get_pattern (monitor.width, monitor.height);
+            var matrix = Cairo.Matrix.identity ();
+            matrix.translate (-monitor.x, -monitor.y);
+            pattern.set_matrix (matrix);
+            c.set_source (pattern);
+            c.rectangle (monitor.x, monitor.y, monitor.width, monitor.height);
+            c.clip ();
+            c.paint_with_alpha (alpha);
+            c.restore ();
+
+            if (monitor != active_monitor && background_logo_surface != null)
+            {
+                var width = background_logo_surface.get_width ();
+                var height = background_logo_surface.get_height ();
+
+                c.save ();
+                pattern = new Cairo.Pattern.for_surface (background_logo_surface);
+                matrix = Cairo.Matrix.identity ();
+                var x = monitor.x + (monitor.width - width) / 2;
+                var y = monitor.y + (monitor.height - height) / 2;
+                matrix.translate (-x, -y);
+                pattern.set_matrix (matrix);
+                c.set_source (pattern);
+                c.rectangle (x, y, width, height);
+                c.clip ();
+                c.paint_with_alpha (alpha);
+                c.restore ();
+            }
+        }
+    }
+
+    private List<Monitor> monitors = null;
+    private Monitor? active_monitor = null;
 
     private AnimateTimer timer;
 
@@ -265,12 +364,11 @@ public class Background : Gtk.Box
 
     private HashTable<string, BackgroundLoader> loaders;
 
-    private Cairo.Surface? logo_surface = null;
+    private Cairo.ImageSurface? version_logo_surface = null;
+    private Cairo.ImageSurface? background_logo_surface = null;
 
     construct
     {
-        orientation = Gtk.Orientation.VERTICAL;
-
         timer = new AnimateTimer (AnimateTimer.INSTANT);
         timer.animate.connect (animate_cb);
 
@@ -314,15 +412,42 @@ public class Background : Gtk.Box
         var b = loaders.lookup (filename);
         if (b == null)
         {
-            b = new BackgroundLoader (filename, get_allocated_width (),
-                                      get_allocated_height (), draw_grid);
-            b.logo = logo_surface;
+            /* Load required sizes to draw background */
+            var widths = new int[monitors.length ()];
+            var heights = new int[monitors.length ()];
+            var n_sizes = 0;
+            foreach (var monitor in monitors)
+            {
+                if (monitor_is_unique_size (monitor))
+                {
+                    widths[n_sizes] = monitor.width;
+                    heights[n_sizes] = monitor.height;
+                    n_sizes++;
+                }
+            }
+            widths.resize (n_sizes);
+            heights.resize (n_sizes);
+
+            b = new BackgroundLoader (filename, widths, heights, draw_grid);
+            b.logo = version_logo_surface;
             b.loaded.connect (() => {reload();});
             b.load ();
             loaders.insert (filename, b);
         }
 
         return b;
+    }
+
+    /* Check if a monitor has a unique size */
+    private bool monitor_is_unique_size (Monitor monitor)
+    {
+        foreach (var m in monitors)
+        {
+            if (m != monitor && m.width == monitor.width && m.height == monitor.height)
+                return false;
+        }
+
+        return true;
     }
 
     private void overlay_grid (Cairo.Context c)

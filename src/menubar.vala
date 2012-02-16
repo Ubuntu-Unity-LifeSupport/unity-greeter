@@ -68,9 +68,11 @@ public class MenuBar : Gtk.MenuBar
     public Background? background {get; construct; default = null;}
     public bool high_contrast {get; private set; default = false;}
 
-    public MenuBar (Background bg)
+    public Gtk.AccelGroup? accel_group {get; construct;}
+
+    public MenuBar (Background bg, Gtk.AccelGroup ag)
     {
-        Object (background: bg);
+        Object (background: bg, accel_group: ag);
     }
 
     public void set_layouts (List <LightDM.Layout> layouts)
@@ -198,14 +200,19 @@ public class MenuBar : Gtk.MenuBar
         item.toggled.connect (keyboard_toggled_cb);
         item.show ();
         a11y_item.submenu.append (item);
+        item.set_active (UGSettings.get_boolean (UGSettings.KEY_ONSCREEN_KEYBOARD));
         high_contrast_item = new Gtk.CheckMenuItem.with_label (_("High Contrast"));
         high_contrast_item.toggled.connect (high_contrast_toggled_cb);
+        high_contrast_item.add_accelerator ("activate", accel_group, Gdk.KEY_h, Gdk.ModifierType.CONTROL_MASK, Gtk.AccelFlags.VISIBLE);
         high_contrast_item.show ();
         a11y_item.submenu.append (high_contrast_item);
+        high_contrast_item.set_active (UGSettings.get_boolean (UGSettings.KEY_HIGH_CONTRAST));
         item = new Gtk.CheckMenuItem.with_label (_("Screen Reader"));
         item.toggled.connect (screen_reader_toggled_cb);
+        item.add_accelerator ("activate", accel_group, Gdk.KEY_s, Gdk.ModifierType.CONTROL_MASK, Gtk.AccelFlags.VISIBLE);
         item.show ();
         a11y_item.submenu.append (item);
+        item.set_active (UGSettings.get_boolean (UGSettings.KEY_SCREEN_READER));
         return a11y_item;
     }
 
@@ -313,6 +320,8 @@ public class MenuBar : Gtk.MenuBar
         /* var settings = new Settings ("org.gnome.desktop.a11y.applications");*/
         /*settings.set_boolean ("screen-keyboard-enabled", item.active);*/
 
+        UGSettings.set_boolean (UGSettings.KEY_ONSCREEN_KEYBOARD, item.active);
+
         if (keyboard_window == null)
         {
             int id;
@@ -404,6 +413,7 @@ public class MenuBar : Gtk.MenuBar
         else
             settings.set ("gtk-theme-name", default_theme_name);
         high_contrast = item.active;
+        UGSettings.set_boolean (UGSettings.KEY_HIGH_CONTRAST, high_contrast);
     }
 
     private void screen_reader_toggled_cb (Gtk.CheckMenuItem item)
@@ -413,6 +423,8 @@ public class MenuBar : Gtk.MenuBar
          * since we're not running gnome-session, we hardcode orca here.
         /*var settings = new Settings ("org.gnome.desktop.a11y.applications");*/
         /*settings.set_boolean ("screen-reader-enabled", item.active);*/
+
+        UGSettings.set_boolean (UGSettings.KEY_SCREEN_READER, item.active);
 
         /* Hardcoded orca: */
         try

@@ -35,7 +35,8 @@ unity_greeter_VALAFLAGS = \
 	--pkg gtk+-3.0 \
 	--pkg gdk-x11-3.0 \
 	--pkg x11 \
-	--pkg liblightdm-gobject-1
+	--pkg liblightdm-gobject-1 \
+	--pkg libcanberra
 
 unity_greeter_LDADD = \
 	$(UNITY_GREETER_LIBS)

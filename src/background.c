@@ -47,11 +47,23 @@ typedef struct _BackgroundLoaderClass BackgroundLoaderClass;
 typedef struct _BackgroundLoaderPrivate BackgroundLoaderPrivate;
 #define _g_free0(var) (var = (g_free (var), NULL))
 #define _cairo_surface_destroy0(var) ((var == NULL) ? NULL : (var = (cairo_surface_destroy (var), NULL)))
-#define _cairo_pattern_destroy0(var) ((var == NULL) ? NULL : (var = (cairo_pattern_destroy (var), NULL)))
 #define _g_error_free0(var) ((var == NULL) ? NULL : (var = (g_error_free (var), NULL)))
+#define _cairo_pattern_destroy0(var) ((var == NULL) ? NULL : (var = (cairo_pattern_destroy (var), NULL)))
 #define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
 #define _cairo_destroy0(var) ((var == NULL) ? NULL : (var = (cairo_destroy (var), NULL)))
 typedef struct _ParamSpecBackgroundLoader ParamSpecBackgroundLoader;
+
+#define TYPE_MONITOR (monitor_get_type ())
+#define MONITOR(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_MONITOR, Monitor))
+#define MONITOR_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_MONITOR, MonitorClass))
+#define IS_MONITOR(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_MONITOR))
+#define IS_MONITOR_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_MONITOR))
+#define MONITOR_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_MONITOR, MonitorClass))
+
+typedef struct _Monitor Monitor;
+typedef struct _MonitorClass MonitorClass;
+typedef struct _MonitorPrivate MonitorPrivate;
+typedef struct _ParamSpecMonitor ParamSpecMonitor;
 
 #define TYPE_BACKGROUND (background_get_type ())
 #define BACKGROUND(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_BACKGROUND, Background))
@@ -75,6 +87,8 @@ typedef struct _AnimateTimer AnimateTimer;
 typedef struct _AnimateTimerClass AnimateTimerClass;
 
 #define BACKGROUND_TYPE_DRAW_FLAGS (background_draw_flags_get_type ())
+#define __g_list_free__monitor_unref0_0(var) ((var == NULL) ? NULL : (var = (_g_list_free__monitor_unref0_ (var), NULL)))
+#define _monitor_unref0(var) ((var == NULL) ? NULL : (var = (monitor_unref (var), NULL)))
 #define _background_loader_unref0(var) ((var == NULL) ? NULL : (var = (background_loader_unref (var), NULL)))
 #define _g_hash_table_unref0(var) ((var == NULL) ? NULL : (var = (g_hash_table_unref (var), NULL)))
 
@@ -82,7 +96,15 @@ struct _BackgroundLoader {
 	GTypeInstance parent_instance;
 	volatile int ref_count;
 	BackgroundLoaderPrivate * priv;
-	cairo_pattern_t* pattern;
+	gint* widths;
+	gint widths_length1;
+	gint _widths_size_;
+	gint* heights;
+	gint heights_length1;
+	gint _heights_size_;
+	cairo_pattern_t** patterns;
+	gint patterns_length1;
+	gint _patterns_size_;
 };
 
 struct _BackgroundLoaderClass {
@@ -93,8 +115,6 @@ struct _BackgroundLoaderClass {
 struct _BackgroundLoaderPrivate {
 	gchar* _filename;
 	cairo_surface_t* _logo;
-	gint width;
-	gint height;
 	gboolean draw_grid;
 	GThread* thread;
 	gboolean finished;
@@ -105,13 +125,32 @@ struct _ParamSpecBackgroundLoader {
 	GParamSpec parent_instance;
 };
 
+struct _Monitor {
+	GTypeInstance parent_instance;
+	volatile int ref_count;
+	MonitorPrivate * priv;
+	gint x;
+	gint y;
+	gint width;
+	gint height;
+};
+
+struct _MonitorClass {
+	GTypeClass parent_class;
+	void (*finalize) (Monitor *self);
+};
+
+struct _ParamSpecMonitor {
+	GParamSpec parent_instance;
+};
+
 struct _Background {
-	GtkBox parent_instance;
+	GtkFixed parent_instance;
 	BackgroundPrivate * priv;
 };
 
 struct _BackgroundClass {
-	GtkBoxClass parent_class;
+	GtkFixedClass parent_class;
 };
 
 struct _BackgroundPrivate {
@@ -119,11 +158,14 @@ struct _BackgroundPrivate {
 	gchar* _current_background;
 	gboolean _draw_grid;
 	gdouble _alpha;
+	GList* monitors;
+	Monitor* active_monitor;
 	AnimateTimer* timer;
 	BackgroundLoader* current;
 	BackgroundLoader* old;
 	GHashTable* loaders;
-	cairo_surface_t* logo_surface;
+	cairo_surface_t* version_logo_surface;
+	cairo_surface_t* background_logo_surface;
 };
 
 typedef enum  {
@@ -133,6 +175,7 @@ typedef enum  {
 
 
 static gpointer background_loader_parent_class = NULL;
+static gpointer monitor_parent_class = NULL;
 static gpointer background_parent_class = NULL;
 
 gpointer background_loader_ref (gpointer instance);
@@ -146,20 +189,37 @@ GType background_loader_get_type (void) G_GNUC_CONST;
 enum  {
 	BACKGROUND_LOADER_DUMMY_PROPERTY
 };
-BackgroundLoader* background_loader_new (const gchar* filename, gint width, gint height, gboolean draw_grid);
-BackgroundLoader* background_loader_construct (GType object_type, const gchar* filename, gint width, gint height, gboolean draw_grid);
+BackgroundLoader* background_loader_new (const gchar* filename, gint* widths, int widths_length1, gint* heights, int heights_length1, gboolean draw_grid);
+BackgroundLoader* background_loader_construct (GType object_type, const gchar* filename, gint* widths, int widths_length1, gint* heights, int heights_length1, gboolean draw_grid);
 static void background_loader_set_filename (BackgroundLoader* self, const gchar* value);
+static gint* _vala_array_dup1 (gint* self, int length);
+static gint* _vala_array_dup2 (gint* self, int length);
 gboolean background_loader_load (BackgroundLoader* self);
 const gchar* background_loader_get_filename (BackgroundLoader* self);
-static cairo_pattern_t* background_loader_render (BackgroundLoader* self);
+static void* background_loader_render (BackgroundLoader* self);
 static gpointer _background_loader_render_gthread_func (gpointer self);
+cairo_pattern_t* background_loader_get_pattern (BackgroundLoader* self, gint width, gint height);
 static gboolean background_loader_ready_cb (BackgroundLoader* self);
+static cairo_pattern_t* background_loader_render_size (BackgroundLoader* self, gint width, gint height);
 static gboolean _background_loader_ready_cb_gsource_func (gpointer self);
 gint get_grid_offset (gint size);
 cairo_surface_t* background_loader_get_logo (BackgroundLoader* self);
 #define grid_size 40
 void background_loader_set_logo (BackgroundLoader* self, cairo_surface_t* value);
 static void background_loader_finalize (BackgroundLoader* obj);
+gpointer monitor_ref (gpointer instance);
+void monitor_unref (gpointer instance);
+GParamSpec* param_spec_monitor (const gchar* name, const gchar* nick, const gchar* blurb, GType object_type, GParamFlags flags);
+void value_set_monitor (GValue* value, gpointer v_object);
+void value_take_monitor (GValue* value, gpointer v_object);
+gpointer value_get_monitor (const GValue* value);
+GType monitor_get_type (void) G_GNUC_CONST;
+enum  {
+	MONITOR_DUMMY_PROPERTY
+};
+Monitor* monitor_new (gint x, gint y, gint width, gint height);
+Monitor* monitor_construct (GType object_type, gint x, gint y, gint width, gint height);
+static void monitor_finalize (Monitor* obj);
 GType background_get_type (void) G_GNUC_CONST;
 GType animate_timer_get_type (void) G_GNUC_CONST;
 #define BACKGROUND_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TYPE_BACKGROUND, BackgroundPrivate))
@@ -171,7 +231,11 @@ enum  {
 	BACKGROUND_ALPHA
 };
 GType background_draw_flags_get_type (void) G_GNUC_CONST;
-void background_set_logo (Background* self, const gchar* logo_path);
+static void _monitor_unref0_ (gpointer var);
+static void _g_list_free__monitor_unref0_ (GList* self);
+void background_set_logo (Background* self, const gchar* version_logo, const gchar* background_logo);
+void background_set_monitors (Background* self, GList* monitors);
+void background_set_active_monitor (Background* self, Monitor* monitor);
 static void background_real_size_allocate (GtkWidget* base, GtkAllocation* allocation);
 static BackgroundLoader* background_load_background (Background* self, const gchar* filename);
 static void background_reload (Background* self);
@@ -182,10 +246,12 @@ gboolean animate_timer_get_is_running (AnimateTimer* self);
 static void background_set_alpha (Background* self, gdouble value);
 void animate_timer_reset (AnimateTimer* self, gint temp_speed);
 gdouble background_get_alpha (Background* self);
+static void background_draw_background (Background* self, cairo_t* c, BackgroundLoader* background, gdouble alpha);
 static void background_overlay_grid (Background* self, cairo_t* c);
 static void background_animate_cb (Background* self, gdouble progress);
 const gchar* background_get_current_background (Background* self);
 const gchar* background_get_default_background (Background* self);
+static gboolean background_monitor_is_unique_size (Background* self, Monitor* monitor);
 static void ___lambda2_ (Background* self);
 static void ____lambda2__background_loader_loaded (BackgroundLoader* _sender, gpointer self);
 Background* background_new (void);
@@ -205,30 +271,70 @@ static void __background___lambda3__g_object_notify (GObject* _sender, GParamSpe
 static void background_finalize (GObject* obj);
 static void _vala_background_get_property (GObject * object, guint property_id, GValue * value, GParamSpec * pspec);
 static void _vala_background_set_property (GObject * object, guint property_id, const GValue * value, GParamSpec * pspec);
+static void _vala_array_destroy (gpointer array, gint array_length, GDestroyNotify destroy_func);
+static void _vala_array_free (gpointer array, gint array_length, GDestroyNotify destroy_func);
 
 
-BackgroundLoader* background_loader_construct (GType object_type, const gchar* filename, gint width, gint height, gboolean draw_grid) {
+static gint* _vala_array_dup1 (gint* self, int length) {
+	return g_memdup (self, length * sizeof (gint));
+}
+
+
+static gint* _vala_array_dup2 (gint* self, int length) {
+	return g_memdup (self, length * sizeof (gint));
+}
+
+
+BackgroundLoader* background_loader_construct (GType object_type, const gchar* filename, gint* widths, int widths_length1, gint* heights, int heights_length1, gboolean draw_grid) {
 	BackgroundLoader* self = NULL;
 	const gchar* _tmp0_;
-	gint _tmp1_;
-	gint _tmp2_;
-	gboolean _tmp3_;
+	gint* _tmp1_;
+	gint _tmp1__length1;
+	gint* _tmp2_;
+	gint _tmp2__length1;
+	gint* _tmp3_;
+	gint _tmp3__length1;
+	gint* _tmp4_;
+	gint _tmp4__length1;
+	gint* _tmp5_;
+	gint _tmp5__length1;
+	cairo_pattern_t** _tmp6_ = NULL;
+	gboolean _tmp7_;
 	g_return_val_if_fail (filename != NULL, NULL);
 	self = (BackgroundLoader*) g_type_create_instance (object_type);
 	_tmp0_ = filename;
 	background_loader_set_filename (self, _tmp0_);
-	_tmp1_ = width;
-	self->priv->width = _tmp1_;
-	_tmp2_ = height;
-	self->priv->height = _tmp2_;
-	_tmp3_ = draw_grid;
-	self->priv->draw_grid = _tmp3_;
+	_tmp1_ = widths;
+	_tmp1__length1 = widths_length1;
+	_tmp2_ = (_tmp1_ != NULL) ? _vala_array_dup1 (_tmp1_, _tmp1__length1) : ((gpointer) _tmp1_);
+	_tmp2__length1 = _tmp1__length1;
+	self->widths = (g_free (self->widths), NULL);
+	self->widths = _tmp2_;
+	self->widths_length1 = _tmp2__length1;
+	self->_widths_size_ = self->widths_length1;
+	_tmp3_ = heights;
+	_tmp3__length1 = heights_length1;
+	_tmp4_ = (_tmp3_ != NULL) ? _vala_array_dup2 (_tmp3_, _tmp3__length1) : ((gpointer) _tmp3_);
+	_tmp4__length1 = _tmp3__length1;
+	self->heights = (g_free (self->heights), NULL);
+	self->heights = _tmp4_;
+	self->heights_length1 = _tmp4__length1;
+	self->_heights_size_ = self->heights_length1;
+	_tmp5_ = widths;
+	_tmp5__length1 = widths_length1;
+	_tmp6_ = g_new0 (cairo_pattern_t*, _tmp5__length1 + 1);
+	self->patterns = (_vala_array_free (self->patterns, self->patterns_length1, (GDestroyNotify) cairo_pattern_destroy), NULL);
+	self->patterns = _tmp6_;
+	self->patterns_length1 = _tmp5__length1;
+	self->_patterns_size_ = self->patterns_length1;
+	_tmp7_ = draw_grid;
+	self->priv->draw_grid = _tmp7_;
 	return self;
 }
 
 
-BackgroundLoader* background_loader_new (const gchar* filename, gint width, gint height, gboolean draw_grid) {
-	return background_loader_construct (TYPE_BACKGROUND_LOADER, filename, width, height, draw_grid);
+BackgroundLoader* background_loader_new (const gchar* filename, gint* widths, int widths_length1, gint* heights, int heights_length1, gboolean draw_grid) {
+	return background_loader_construct (TYPE_BACKGROUND_LOADER, filename, widths, widths_length1, heights, heights_length1, draw_grid);
 }
 
 
@@ -244,8 +350,15 @@ gboolean background_loader_load (BackgroundLoader* self) {
 	gboolean _tmp0_;
 	GThread* _tmp1_;
 	const gchar* _tmp2_;
-	gint _tmp3_;
+	gint* _tmp3_;
+	gint _tmp3__length1;
 	gint _tmp4_;
+	gint* _tmp5_;
+	gint _tmp5__length1;
+	gint _tmp6_;
+	gchar* _tmp7_ = NULL;
+	gchar* text;
+	const gchar* _tmp23_;
 	GError * _inner_error_ = NULL;
 	g_return_val_if_fail (self != NULL, FALSE);
 	_tmp0_ = self->priv->finished;
@@ -259,23 +372,85 @@ gboolean background_loader_load (BackgroundLoader* self) {
 		return result;
 	}
 	_tmp2_ = self->priv->_filename;
-	_tmp3_ = self->priv->width;
-	_tmp4_ = self->priv->height;
-	g_debug ("background.vala:55: Making background %s at %dx%d", _tmp2_, _tmp3_, _tmp4_);
+	_tmp3_ = self->widths;
+	_tmp3__length1 = self->widths_length1;
+	_tmp4_ = _tmp3_[0];
+	_tmp5_ = self->heights;
+	_tmp5__length1 = self->heights_length1;
+	_tmp6_ = _tmp5_[0];
+	_tmp7_ = g_strdup_printf ("Making background %s at %dx%d", _tmp2_, _tmp4_, _tmp6_);
+	text = _tmp7_;
 	{
-		GThread* _tmp5_ = NULL;
-		GThread* _tmp6_;
-		_tmp5_ = g_thread_create (_background_loader_render_gthread_func, self, TRUE, &_inner_error_);
-		_tmp6_ = _tmp5_;
+		gint i;
+		i = 1;
+		{
+			gboolean _tmp8_;
+			_tmp8_ = TRUE;
+			while (TRUE) {
+				gboolean _tmp9_;
+				gint _tmp11_;
+				gint* _tmp12_;
+				gint _tmp12__length1;
+				const gchar* _tmp13_;
+				gint* _tmp14_;
+				gint _tmp14__length1;
+				gint _tmp15_;
+				gint _tmp16_;
+				gint* _tmp17_;
+				gint _tmp17__length1;
+				gint _tmp18_;
+				gint _tmp19_;
+				gchar* _tmp20_ = NULL;
+				gchar* _tmp21_;
+				gchar* _tmp22_;
+				_tmp9_ = _tmp8_;
+				if (!_tmp9_) {
+					gint _tmp10_;
+					_tmp10_ = i;
+					i = _tmp10_ + 1;
+				}
+				_tmp8_ = FALSE;
+				_tmp11_ = i;
+				_tmp12_ = self->widths;
+				_tmp12__length1 = self->widths_length1;
+				if (!(_tmp11_ < _tmp12__length1)) {
+					break;
+				}
+				_tmp13_ = text;
+				_tmp14_ = self->widths;
+				_tmp14__length1 = self->widths_length1;
+				_tmp15_ = i;
+				_tmp16_ = _tmp14_[_tmp15_];
+				_tmp17_ = self->heights;
+				_tmp17__length1 = self->heights_length1;
+				_tmp18_ = i;
+				_tmp19_ = _tmp17_[_tmp18_];
+				_tmp20_ = g_strdup_printf (",%dx%d", _tmp16_, _tmp19_);
+				_tmp21_ = _tmp20_;
+				_tmp22_ = g_strconcat (_tmp13_, _tmp21_, NULL);
+				_g_free0 (text);
+				text = _tmp22_;
+				_g_free0 (_tmp21_);
+			}
+		}
+	}
+	_tmp23_ = text;
+	g_debug ("background.vala:58: %s", _tmp23_);
+	{
+		GThread* _tmp24_ = NULL;
+		GThread* _tmp25_;
+		_tmp24_ = g_thread_create (_background_loader_render_gthread_func, self, TRUE, &_inner_error_);
+		_tmp25_ = _tmp24_;
 		if (_inner_error_ != NULL) {
 			if (_inner_error_->domain == G_THREAD_ERROR) {
 				goto __catch0_g_thread_error;
 			}
+			_g_free0 (text);
 			g_critical ("file %s: line %d: unexpected error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 			g_clear_error (&_inner_error_);
 			return FALSE;
 		}
-		self->priv->thread = _tmp6_;
+		self->priv->thread = _tmp25_;
 	}
 	goto __finally0;
 	__catch0_g_thread_error:
@@ -286,15 +461,100 @@ gboolean background_loader_load (BackgroundLoader* self) {
 		self->priv->finished = TRUE;
 		result = TRUE;
 		_g_error_free0 (e);
+		_g_free0 (text);
 		return result;
 	}
 	__finally0:
 	if (_inner_error_ != NULL) {
+		_g_free0 (text);
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
 		return FALSE;
 	}
 	result = FALSE;
+	_g_free0 (text);
+	return result;
+}
+
+
+static gpointer _cairo_pattern_reference0 (gpointer self) {
+	return self ? cairo_pattern_reference (self) : NULL;
+}
+
+
+cairo_pattern_t* background_loader_get_pattern (BackgroundLoader* self, gint width, gint height) {
+	cairo_pattern_t* result = NULL;
+	g_return_val_if_fail (self != NULL, NULL);
+	{
+		gint i;
+		i = 0;
+		{
+			gboolean _tmp0_;
+			_tmp0_ = TRUE;
+			while (TRUE) {
+				gboolean _tmp1_;
+				gint _tmp3_;
+				gint* _tmp4_;
+				gint _tmp4__length1;
+				gboolean _tmp5_ = FALSE;
+				gint* _tmp6_;
+				gint _tmp6__length1;
+				gint _tmp7_;
+				gint _tmp8_;
+				gint _tmp9_;
+				gboolean _tmp14_;
+				_tmp1_ = _tmp0_;
+				if (!_tmp1_) {
+					gint _tmp2_;
+					_tmp2_ = i;
+					i = _tmp2_ + 1;
+				}
+				_tmp0_ = FALSE;
+				_tmp3_ = i;
+				_tmp4_ = self->widths;
+				_tmp4__length1 = self->widths_length1;
+				if (!(_tmp3_ < _tmp4__length1)) {
+					break;
+				}
+				_tmp6_ = self->widths;
+				_tmp6__length1 = self->widths_length1;
+				_tmp7_ = i;
+				_tmp8_ = _tmp6_[_tmp7_];
+				_tmp9_ = width;
+				if (_tmp8_ == _tmp9_) {
+					gint* _tmp10_;
+					gint _tmp10__length1;
+					gint _tmp11_;
+					gint _tmp12_;
+					gint _tmp13_;
+					_tmp10_ = self->heights;
+					_tmp10__length1 = self->heights_length1;
+					_tmp11_ = i;
+					_tmp12_ = _tmp10_[_tmp11_];
+					_tmp13_ = height;
+					_tmp5_ = _tmp12_ == _tmp13_;
+				} else {
+					_tmp5_ = FALSE;
+				}
+				_tmp14_ = _tmp5_;
+				if (_tmp14_) {
+					cairo_pattern_t** _tmp15_;
+					gint _tmp15__length1;
+					gint _tmp16_;
+					cairo_pattern_t* _tmp17_;
+					cairo_pattern_t* _tmp18_;
+					_tmp15_ = self->patterns;
+					_tmp15__length1 = self->patterns_length1;
+					_tmp16_ = i;
+					_tmp17_ = _tmp15_[_tmp16_];
+					_tmp18_ = _cairo_pattern_reference0 (_tmp17_);
+					result = _tmp18_;
+					return result;
+				}
+			}
+		}
+	}
+	result = NULL;
 	return result;
 }
 
@@ -302,19 +562,12 @@ gboolean background_loader_load (BackgroundLoader* self) {
 static gboolean background_loader_ready_cb (BackgroundLoader* self) {
 	gboolean result = FALSE;
 	const gchar* _tmp0_;
-	gint _tmp1_;
-	gint _tmp2_;
-	GThread* _tmp3_;
-	gpointer _tmp4_ = NULL;
+	GThread* _tmp1_;
 	g_return_val_if_fail (self != NULL, FALSE);
 	_tmp0_ = self->priv->_filename;
-	_tmp1_ = self->priv->width;
-	_tmp2_ = self->priv->height;
-	g_debug ("background.vala:78: Render of background %s at %dx%d complete", _tmp0_, _tmp1_, _tmp2_);
-	_tmp3_ = self->priv->thread;
-	_tmp4_ = g_thread_join (_tmp3_);
-	_cairo_pattern_destroy0 (self->pattern);
-	self->pattern = (cairo_pattern_t*) _tmp4_;
+	g_debug ("background.vala:91: Render of background %s complete", _tmp0_);
+	_tmp1_ = self->priv->thread;
+	g_thread_join (_tmp1_);
 	self->priv->thread = NULL;
 	self->priv->finished = TRUE;
 	g_signal_emit_by_name (self, "loaded");
@@ -330,7 +583,73 @@ static gboolean _background_loader_ready_cb_gsource_func (gpointer self) {
 }
 
 
-static cairo_pattern_t* background_loader_render (BackgroundLoader* self) {
+static void* background_loader_render (BackgroundLoader* self) {
+	void* result = NULL;
+	guint _tmp15_ = 0U;
+	g_return_val_if_fail (self != NULL, NULL);
+	{
+		gint i;
+		i = 0;
+		{
+			gboolean _tmp0_;
+			_tmp0_ = TRUE;
+			while (TRUE) {
+				gboolean _tmp1_;
+				gint _tmp3_;
+				gint* _tmp4_;
+				gint _tmp4__length1;
+				cairo_pattern_t** _tmp5_;
+				gint _tmp5__length1;
+				gint _tmp6_;
+				gint* _tmp7_;
+				gint _tmp7__length1;
+				gint _tmp8_;
+				gint _tmp9_;
+				gint* _tmp10_;
+				gint _tmp10__length1;
+				gint _tmp11_;
+				gint _tmp12_;
+				cairo_pattern_t* _tmp13_ = NULL;
+				cairo_pattern_t* _tmp14_;
+				_tmp1_ = _tmp0_;
+				if (!_tmp1_) {
+					gint _tmp2_;
+					_tmp2_ = i;
+					i = _tmp2_ + 1;
+				}
+				_tmp0_ = FALSE;
+				_tmp3_ = i;
+				_tmp4_ = self->widths;
+				_tmp4__length1 = self->widths_length1;
+				if (!(_tmp3_ < _tmp4__length1)) {
+					break;
+				}
+				_tmp5_ = self->patterns;
+				_tmp5__length1 = self->patterns_length1;
+				_tmp6_ = i;
+				_tmp7_ = self->widths;
+				_tmp7__length1 = self->widths_length1;
+				_tmp8_ = i;
+				_tmp9_ = _tmp7_[_tmp8_];
+				_tmp10_ = self->heights;
+				_tmp10__length1 = self->heights_length1;
+				_tmp11_ = i;
+				_tmp12_ = _tmp10_[_tmp11_];
+				_tmp13_ = background_loader_render_size (self, _tmp9_, _tmp12_);
+				_cairo_pattern_destroy0 (_tmp5_[_tmp6_]);
+				_tmp5_[_tmp6_] = _tmp13_;
+				_tmp14_ = _tmp5_[_tmp6_];
+			}
+		}
+	}
+	_tmp15_ = gdk_threads_add_idle (_background_loader_ready_cb_gsource_func, self);
+	self->priv->ready_id = _tmp15_;
+	result = NULL;
+	return result;
+}
+
+
+static cairo_pattern_t* background_loader_render_size (BackgroundLoader* self, gint width, gint height) {
 	cairo_pattern_t* result = NULL;
 	GdkColor color = {0};
 	GdkPixbuf* orig_image;
@@ -359,7 +678,6 @@ static cairo_pattern_t* background_loader_render (BackgroundLoader* self) {
 	cairo_pattern_t* _tmp85_;
 	cairo_pattern_t* pattern;
 	cairo_pattern_t* _tmp86_;
-	guint _tmp87_ = 0U;
 	GError * _inner_error_ = NULL;
 	g_return_val_if_fail (self != NULL, NULL);
 	orig_image = NULL;
@@ -391,7 +709,7 @@ static cairo_pattern_t* background_loader_render (BackgroundLoader* self) {
 			_inner_error_ = NULL;
 			_tmp6_ = e;
 			_tmp7_ = _tmp6_->message;
-			g_debug ("background.vala:101: Error loading background: %s", _tmp7_);
+			g_debug ("background.vala:124: Error loading background: %s", _tmp7_);
 			_tmp8_ = gdk_threads_add_idle (_background_loader_ready_cb_gsource_func, self);
 			self->priv->ready_id = _tmp8_;
 			result = NULL;
@@ -445,8 +763,8 @@ static cairo_pattern_t* background_loader_render (BackgroundLoader* self) {
 		gdouble _tmp55_;
 		gdouble _tmp56_;
 		gdouble _tmp57_;
-		_tmp10_ = self->priv->width;
-		_tmp11_ = self->priv->height;
+		_tmp10_ = width;
+		_tmp11_ = height;
 		target_aspect = ((gdouble) _tmp10_) / _tmp11_;
 		_tmp12_ = orig_image;
 		_tmp13_ = gdk_pixbuf_get_width (_tmp12_);
@@ -469,7 +787,7 @@ static cairo_pattern_t* background_loader_render (BackgroundLoader* self) {
 			gint _tmp26_;
 			gdouble _tmp27_;
 			gint _tmp28_;
-			_tmp20_ = self->priv->height;
+			_tmp20_ = height;
 			_tmp21_ = orig_image;
 			_tmp22_ = gdk_pixbuf_get_height (_tmp21_);
 			_tmp23_ = _tmp22_;
@@ -478,7 +796,7 @@ static cairo_pattern_t* background_loader_render (BackgroundLoader* self) {
 			_tmp25_ = gdk_pixbuf_get_width (_tmp24_);
 			_tmp26_ = _tmp25_;
 			_tmp27_ = scale;
-			_tmp28_ = self->priv->width;
+			_tmp28_ = width;
 			offset_x = ((_tmp26_ * _tmp27_) - _tmp28_) / 2;
 		} else {
 			gint _tmp29_;
@@ -490,7 +808,7 @@ static cairo_pattern_t* background_loader_render (BackgroundLoader* self) {
 			gint _tmp35_;
 			gdouble _tmp36_;
 			gint _tmp37_;
-			_tmp29_ = self->priv->width;
+			_tmp29_ = width;
 			_tmp30_ = orig_image;
 			_tmp31_ = gdk_pixbuf_get_width (_tmp30_);
 			_tmp32_ = _tmp31_;
@@ -499,7 +817,7 @@ static cairo_pattern_t* background_loader_render (BackgroundLoader* self) {
 			_tmp34_ = gdk_pixbuf_get_height (_tmp33_);
 			_tmp35_ = _tmp34_;
 			_tmp36_ = scale;
-			_tmp37_ = self->priv->height;
+			_tmp37_ = height;
 			offset_y = ((_tmp35_ * _tmp36_) - _tmp37_) / 2;
 		}
 		_tmp38_ = orig_image;
@@ -511,29 +829,29 @@ static cairo_pattern_t* background_loader_render (BackgroundLoader* self) {
 		_tmp44_ = orig_image;
 		_tmp45_ = gdk_pixbuf_get_bits_per_sample (_tmp44_);
 		_tmp46_ = _tmp45_;
-		_tmp47_ = self->priv->width;
-		_tmp48_ = self->priv->height;
+		_tmp47_ = width;
+		_tmp48_ = height;
 		_tmp49_ = gdk_pixbuf_new (_tmp40_, _tmp43_, _tmp46_, _tmp47_, _tmp48_);
 		_g_object_unref0 (image);
 		image = _tmp49_;
 		_tmp50_ = orig_image;
 		_tmp51_ = image;
-		_tmp52_ = self->priv->width;
-		_tmp53_ = self->priv->height;
+		_tmp52_ = width;
+		_tmp53_ = height;
 		_tmp54_ = offset_x;
 		_tmp55_ = offset_y;
 		_tmp56_ = scale;
 		_tmp57_ = scale;
 		gdk_pixbuf_scale (_tmp50_, _tmp51_, 0, 0, _tmp52_, _tmp53_, -_tmp54_, -_tmp55_, _tmp56_, _tmp57_, GDK_INTERP_BILINEAR);
 	}
-	_tmp58_ = self->priv->width;
+	_tmp58_ = width;
 	_tmp59_ = get_grid_offset (_tmp58_);
 	grid_x_offset = _tmp59_;
-	_tmp60_ = self->priv->height;
+	_tmp60_ = height;
 	_tmp61_ = get_grid_offset (_tmp60_);
 	grid_y_offset = _tmp61_;
-	_tmp62_ = self->priv->width;
-	_tmp63_ = self->priv->height;
+	_tmp62_ = width;
+	_tmp63_ = height;
 	_tmp64_ = cairo_image_surface_create (CAIRO_FORMAT_RGB24, _tmp62_, _tmp63_);
 	surface = _tmp64_;
 	_tmp65_ = surface;
@@ -570,7 +888,7 @@ static cairo_pattern_t* background_loader_render (BackgroundLoader* self) {
 		cairo_t* _tmp83_;
 		_tmp74_ = bc;
 		cairo_save (_tmp74_);
-		_tmp75_ = self->priv->height;
+		_tmp75_ = height;
 		_tmp76_ = grid_y_offset;
 		y = (((gint) ((_tmp75_ / grid_size) - 2)) * grid_size) + _tmp76_;
 		_tmp77_ = bc;
@@ -590,8 +908,6 @@ static cairo_pattern_t* background_loader_render (BackgroundLoader* self) {
 	pattern = _tmp85_;
 	_tmp86_ = pattern;
 	cairo_pattern_set_extend (_tmp86_, CAIRO_EXTEND_REPEAT);
-	_tmp87_ = gdk_threads_add_idle (_background_loader_ready_cb_gsource_func, self);
-	self->priv->ready_id = _tmp87_;
 	result = pattern;
 	_cairo_destroy0 (bc);
 	_cairo_surface_destroy0 (surface);
@@ -768,7 +1084,6 @@ static void background_loader_class_init (BackgroundLoaderClass * klass) {
 
 static void background_loader_instance_init (BackgroundLoader * self) {
 	self->priv = BACKGROUND_LOADER_GET_PRIVATE (self);
-	self->pattern = NULL;
 	self->ref_count = 1;
 }
 
@@ -786,7 +1101,9 @@ static void background_loader_finalize (BackgroundLoader* obj) {
 	self->priv->ready_id = (guint) 0;
 	_g_free0 (self->priv->_filename);
 	_cairo_surface_destroy0 (self->priv->_logo);
-	_cairo_pattern_destroy0 (self->pattern);
+	self->widths = (g_free (self->widths), NULL);
+	self->heights = (g_free (self->heights), NULL);
+	self->patterns = (_vala_array_free (self->patterns, self->patterns_length1, (GDestroyNotify) cairo_pattern_destroy), NULL);
 }
 
 
@@ -822,6 +1139,189 @@ void background_loader_unref (gpointer instance) {
 }
 
 
+Monitor* monitor_construct (GType object_type, gint x, gint y, gint width, gint height) {
+	Monitor* self = NULL;
+	gint _tmp0_;
+	gint _tmp1_;
+	gint _tmp2_;
+	gint _tmp3_;
+	self = (Monitor*) g_type_create_instance (object_type);
+	_tmp0_ = x;
+	self->x = _tmp0_;
+	_tmp1_ = y;
+	self->y = _tmp1_;
+	_tmp2_ = width;
+	self->width = _tmp2_;
+	_tmp3_ = height;
+	self->height = _tmp3_;
+	return self;
+}
+
+
+Monitor* monitor_new (gint x, gint y, gint width, gint height) {
+	return monitor_construct (TYPE_MONITOR, x, y, width, height);
+}
+
+
+static void value_monitor_init (GValue* value) {
+	value->data[0].v_pointer = NULL;
+}
+
+
+static void value_monitor_free_value (GValue* value) {
+	if (value->data[0].v_pointer) {
+		monitor_unref (value->data[0].v_pointer);
+	}
+}
+
+
+static void value_monitor_copy_value (const GValue* src_value, GValue* dest_value) {
+	if (src_value->data[0].v_pointer) {
+		dest_value->data[0].v_pointer = monitor_ref (src_value->data[0].v_pointer);
+	} else {
+		dest_value->data[0].v_pointer = NULL;
+	}
+}
+
+
+static gpointer value_monitor_peek_pointer (const GValue* value) {
+	return value->data[0].v_pointer;
+}
+
+
+static gchar* value_monitor_collect_value (GValue* value, guint n_collect_values, GTypeCValue* collect_values, guint collect_flags) {
+	if (collect_values[0].v_pointer) {
+		Monitor* object;
+		object = collect_values[0].v_pointer;
+		if (object->parent_instance.g_class == NULL) {
+			return g_strconcat ("invalid unclassed object pointer for value type `", G_VALUE_TYPE_NAME (value), "'", NULL);
+		} else if (!g_value_type_compatible (G_TYPE_FROM_INSTANCE (object), G_VALUE_TYPE (value))) {
+			return g_strconcat ("invalid object type `", g_type_name (G_TYPE_FROM_INSTANCE (object)), "' for value type `", G_VALUE_TYPE_NAME (value), "'", NULL);
+		}
+		value->data[0].v_pointer = monitor_ref (object);
+	} else {
+		value->data[0].v_pointer = NULL;
+	}
+	return NULL;
+}
+
+
+static gchar* value_monitor_lcopy_value (const GValue* value, guint n_collect_values, GTypeCValue* collect_values, guint collect_flags) {
+	Monitor** object_p;
+	object_p = collect_values[0].v_pointer;
+	if (!object_p) {
+		return g_strdup_printf ("value location for `%s' passed as NULL", G_VALUE_TYPE_NAME (value));
+	}
+	if (!value->data[0].v_pointer) {
+		*object_p = NULL;
+	} else if (collect_flags & G_VALUE_NOCOPY_CONTENTS) {
+		*object_p = value->data[0].v_pointer;
+	} else {
+		*object_p = monitor_ref (value->data[0].v_pointer);
+	}
+	return NULL;
+}
+
+
+GParamSpec* param_spec_monitor (const gchar* name, const gchar* nick, const gchar* blurb, GType object_type, GParamFlags flags) {
+	ParamSpecMonitor* spec;
+	g_return_val_if_fail (g_type_is_a (object_type, TYPE_MONITOR), NULL);
+	spec = g_param_spec_internal (G_TYPE_PARAM_OBJECT, name, nick, blurb, flags);
+	G_PARAM_SPEC (spec)->value_type = object_type;
+	return G_PARAM_SPEC (spec);
+}
+
+
+gpointer value_get_monitor (const GValue* value) {
+	g_return_val_if_fail (G_TYPE_CHECK_VALUE_TYPE (value, TYPE_MONITOR), NULL);
+	return value->data[0].v_pointer;
+}
+
+
+void value_set_monitor (GValue* value, gpointer v_object) {
+	Monitor* old;
+	g_return_if_fail (G_TYPE_CHECK_VALUE_TYPE (value, TYPE_MONITOR));
+	old = value->data[0].v_pointer;
+	if (v_object) {
+		g_return_if_fail (G_TYPE_CHECK_INSTANCE_TYPE (v_object, TYPE_MONITOR));
+		g_return_if_fail (g_value_type_compatible (G_TYPE_FROM_INSTANCE (v_object), G_VALUE_TYPE (value)));
+		value->data[0].v_pointer = v_object;
+		monitor_ref (value->data[0].v_pointer);
+	} else {
+		value->data[0].v_pointer = NULL;
+	}
+	if (old) {
+		monitor_unref (old);
+	}
+}
+
+
+void value_take_monitor (GValue* value, gpointer v_object) {
+	Monitor* old;
+	g_return_if_fail (G_TYPE_CHECK_VALUE_TYPE (value, TYPE_MONITOR));
+	old = value->data[0].v_pointer;
+	if (v_object) {
+		g_return_if_fail (G_TYPE_CHECK_INSTANCE_TYPE (v_object, TYPE_MONITOR));
+		g_return_if_fail (g_value_type_compatible (G_TYPE_FROM_INSTANCE (v_object), G_VALUE_TYPE (value)));
+		value->data[0].v_pointer = v_object;
+	} else {
+		value->data[0].v_pointer = NULL;
+	}
+	if (old) {
+		monitor_unref (old);
+	}
+}
+
+
+static void monitor_class_init (MonitorClass * klass) {
+	monitor_parent_class = g_type_class_peek_parent (klass);
+	MONITOR_CLASS (klass)->finalize = monitor_finalize;
+}
+
+
+static void monitor_instance_init (Monitor * self) {
+	self->ref_count = 1;
+}
+
+
+static void monitor_finalize (Monitor* obj) {
+	Monitor * self;
+	self = MONITOR (obj);
+}
+
+
+GType monitor_get_type (void) {
+	static volatile gsize monitor_type_id__volatile = 0;
+	if (g_once_init_enter (&monitor_type_id__volatile)) {
+		static const GTypeValueTable g_define_type_value_table = { value_monitor_init, value_monitor_free_value, value_monitor_copy_value, value_monitor_peek_pointer, "p", value_monitor_collect_value, "p", value_monitor_lcopy_value };
+		static const GTypeInfo g_define_type_info = { sizeof (MonitorClass), (GBaseInitFunc) NULL, (GBaseFinalizeFunc) NULL, (GClassInitFunc) monitor_class_init, (GClassFinalizeFunc) NULL, NULL, sizeof (Monitor), 0, (GInstanceInitFunc) monitor_instance_init, &g_define_type_value_table };
+		static const GTypeFundamentalInfo g_define_type_fundamental_info = { (G_TYPE_FLAG_CLASSED | G_TYPE_FLAG_INSTANTIATABLE | G_TYPE_FLAG_DERIVABLE | G_TYPE_FLAG_DEEP_DERIVABLE) };
+		GType monitor_type_id;
+		monitor_type_id = g_type_register_fundamental (g_type_fundamental_next (), "Monitor", &g_define_type_info, &g_define_type_fundamental_info, 0);
+		g_once_init_leave (&monitor_type_id__volatile, monitor_type_id);
+	}
+	return monitor_type_id__volatile;
+}
+
+
+gpointer monitor_ref (gpointer instance) {
+	Monitor* self;
+	self = instance;
+	g_atomic_int_inc (&self->ref_count);
+	return instance;
+}
+
+
+void monitor_unref (gpointer instance) {
+	Monitor* self;
+	self = instance;
+	if (g_atomic_int_dec_and_test (&self->ref_count)) {
+		MONITOR_GET_CLASS (self)->finalize (self);
+		g_type_free_instance ((GTypeInstance *) self);
+	}
+}
+
+
 GType background_draw_flags_get_type (void) {
 	static volatile gsize background_draw_flags_type_id__volatile = 0;
 	if (g_once_init_enter (&background_draw_flags_type_id__volatile)) {
@@ -834,27 +1334,102 @@ GType background_draw_flags_get_type (void) {
 }
 
 
-void background_set_logo (Background* self, const gchar* logo_path) {
+static void _monitor_unref0_ (gpointer var) {
+	(var == NULL) ? NULL : (var = (monitor_unref (var), NULL));
+}
+
+
+static void _g_list_free__monitor_unref0_ (GList* self) {
+	g_list_foreach (self, (GFunc) _monitor_unref0_, NULL);
+	g_list_free (self);
+}
+
+
+void background_set_logo (Background* self, const gchar* version_logo, const gchar* background_logo) {
 	const gchar* _tmp0_;
 	gboolean _tmp1_ = FALSE;
+	const gchar* _tmp5_;
+	gboolean _tmp6_ = FALSE;
 	g_return_if_fail (self != NULL);
-	g_return_if_fail (logo_path != NULL);
-	_tmp0_ = logo_path;
+	g_return_if_fail (version_logo != NULL);
+	g_return_if_fail (background_logo != NULL);
+	_tmp0_ = version_logo;
 	_tmp1_ = g_file_test (_tmp0_, G_FILE_TEST_EXISTS);
 	if (_tmp1_) {
 		const gchar* _tmp2_;
 		cairo_surface_t* _tmp3_;
-		_tmp2_ = logo_path;
+		_tmp2_ = version_logo;
 		_tmp3_ = cairo_image_surface_create_from_png (_tmp2_);
-		_cairo_surface_destroy0 (self->priv->logo_surface);
-		self->priv->logo_surface = _tmp3_;
+		_cairo_surface_destroy0 (self->priv->version_logo_surface);
+		self->priv->version_logo_surface = _tmp3_;
 	} else {
 		const gchar* _tmp4_;
-		_tmp4_ = logo_path;
-		g_debug ("background.vala:183: Can't use logo %s, it does not exist", _tmp4_);
-		_cairo_surface_destroy0 (self->priv->logo_surface);
-		self->priv->logo_surface = NULL;
+		_tmp4_ = version_logo;
+		g_debug ("background.vala:220: Can't use logo %s, it does not exist", _tmp4_);
+		_cairo_surface_destroy0 (self->priv->version_logo_surface);
+		self->priv->version_logo_surface = NULL;
 	}
+	_tmp5_ = background_logo;
+	_tmp6_ = g_file_test (_tmp5_, G_FILE_TEST_EXISTS);
+	if (_tmp6_) {
+		const gchar* _tmp7_;
+		cairo_surface_t* _tmp8_;
+		_tmp7_ = background_logo;
+		_tmp8_ = cairo_image_surface_create_from_png (_tmp7_);
+		_cairo_surface_destroy0 (self->priv->background_logo_surface);
+		self->priv->background_logo_surface = _tmp8_;
+	} else {
+		const gchar* _tmp9_;
+		_tmp9_ = background_logo;
+		g_debug ("background.vala:230: Can't use background logo %s, it does not exist", _tmp9_);
+		_cairo_surface_destroy0 (self->priv->background_logo_surface);
+		self->priv->background_logo_surface = NULL;
+	}
+}
+
+
+static gpointer _monitor_ref0 (gpointer self) {
+	return self ? monitor_ref (self) : NULL;
+}
+
+
+void background_set_monitors (Background* self, GList* monitors) {
+	GList* _tmp0_;
+	g_return_if_fail (self != NULL);
+	__g_list_free__monitor_unref0_0 (self->priv->monitors);
+	self->priv->monitors = NULL;
+	_tmp0_ = monitors;
+	{
+		GList* m_collection = NULL;
+		GList* m_it = NULL;
+		m_collection = _tmp0_;
+		for (m_it = m_collection; m_it != NULL; m_it = m_it->next) {
+			Monitor* _tmp1_;
+			Monitor* m = NULL;
+			_tmp1_ = _monitor_ref0 ((Monitor*) m_it->data);
+			m = _tmp1_;
+			{
+				Monitor* _tmp2_;
+				Monitor* _tmp3_;
+				_tmp2_ = m;
+				_tmp3_ = _monitor_ref0 (_tmp2_);
+				self->priv->monitors = g_list_append (self->priv->monitors, _tmp3_);
+				_monitor_unref0 (m);
+			}
+		}
+	}
+	gtk_widget_queue_draw ((GtkWidget*) self);
+}
+
+
+void background_set_active_monitor (Background* self, Monitor* monitor) {
+	Monitor* _tmp0_;
+	Monitor* _tmp1_;
+	g_return_if_fail (self != NULL);
+	_tmp0_ = monitor;
+	_tmp1_ = _monitor_ref0 (_tmp0_);
+	_monitor_unref0 (self->priv->active_monitor);
+	self->priv->active_monitor = _tmp1_;
 }
 
 
@@ -887,13 +1462,13 @@ static void background_real_size_allocate (GtkWidget* base, GtkAllocation* alloc
 	_tmp7_ = _tmp0_;
 	resized = _tmp7_;
 	_tmp8_ = *allocation;
-	GTK_WIDGET_CLASS (background_parent_class)->size_allocate ((GtkWidget*) GTK_BOX (self), &_tmp8_);
+	GTK_WIDGET_CLASS (background_parent_class)->size_allocate ((GtkWidget*) GTK_FIXED (self), &_tmp8_);
 	_tmp9_ = resized;
 	if (_tmp9_) {
 		GHashTable* _tmp10_;
 		BackgroundLoader* _tmp11_ = NULL;
 		BackgroundLoader* _tmp12_;
-		g_debug ("background.vala:197: Regenerating backgrounds");
+		g_debug ("background.vala:257: Regenerating backgrounds");
 		_tmp10_ = self->priv->loaders;
 		g_hash_table_remove_all (_tmp10_);
 		_tmp11_ = background_load_background (self, NULL);
@@ -926,7 +1501,7 @@ static gboolean background_real_draw (GtkWidget* base, cairo_t* c) {
 	_tmp3_ = flags;
 	background_draw_full (self, _tmp2_, _tmp3_);
 	_tmp4_ = c;
-	_tmp5_ = GTK_WIDGET_CLASS (background_parent_class)->draw ((GtkWidget*) GTK_BOX (self), _tmp4_);
+	_tmp5_ = GTK_WIDGET_CLASS (background_parent_class)->draw ((GtkWidget*) GTK_FIXED (self), _tmp4_);
 	result = _tmp5_;
 	return result;
 }
@@ -941,26 +1516,26 @@ void background_draw_full (Background* self, cairo_t* c, BackgroundDrawFlags fla
 	cairo_t* _tmp0_;
 	gboolean _tmp1_ = FALSE;
 	BackgroundLoader* _tmp2_;
-	gboolean _tmp9_;
-	gboolean _tmp25_ = FALSE;
+	gboolean _tmp10_;
 	gboolean _tmp26_ = FALSE;
-	BackgroundLoader* _tmp27_;
-	gboolean _tmp28_ = FALSE;
-	gboolean _tmp31_;
-	gboolean _tmp35_;
-	cairo_t* _tmp37_;
+	gboolean _tmp27_ = FALSE;
+	BackgroundLoader* _tmp28_;
+	gboolean _tmp29_ = FALSE;
+	gboolean _tmp32_;
+	gboolean _tmp36_;
+	cairo_t* _tmp38_;
 	gboolean old_painted;
-	gboolean _tmp38_ = FALSE;
 	gboolean _tmp39_ = FALSE;
-	BackgroundLoader* _tmp40_;
-	gboolean _tmp43_;
-	gboolean _tmp49_;
-	gboolean _tmp54_ = FALSE;
-	BackgroundLoader* _tmp55_;
-	gboolean _tmp56_ = FALSE;
-	gboolean _tmp58_;
-	cairo_t* _tmp67_;
-	BackgroundDrawFlags _tmp68_;
+	gboolean _tmp40_ = FALSE;
+	BackgroundLoader* _tmp41_;
+	gboolean _tmp44_;
+	gboolean _tmp50_;
+	gboolean _tmp53_ = FALSE;
+	BackgroundLoader* _tmp54_;
+	gboolean _tmp55_ = FALSE;
+	gboolean _tmp57_;
+	cairo_t* _tmp64_;
+	BackgroundDrawFlags _tmp65_;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (c != NULL);
 	_tmp0_ = c;
@@ -972,184 +1547,390 @@ void background_draw_full (Background* self, cairo_t* c, BackgroundDrawFlags fla
 		gboolean _tmp3_ = FALSE;
 		BackgroundLoader* _tmp4_;
 		gboolean _tmp5_ = FALSE;
-		gboolean _tmp8_;
+		gboolean _tmp9_;
 		_tmp4_ = self->priv->current;
 		_tmp5_ = background_loader_load (_tmp4_);
 		if (_tmp5_) {
 			BackgroundLoader* _tmp6_;
-			cairo_pattern_t* _tmp7_;
+			cairo_pattern_t** _tmp7_;
+			gint _tmp7__length1;
+			cairo_pattern_t* _tmp8_;
 			_tmp6_ = self->priv->current;
-			_tmp7_ = _tmp6_->pattern;
-			_tmp3_ = _tmp7_ == NULL;
+			_tmp7_ = _tmp6_->patterns;
+			_tmp7__length1 = _tmp6_->patterns_length1;
+			_tmp8_ = _tmp7_[0];
+			_tmp3_ = _tmp8_ == NULL;
 		} else {
 			_tmp3_ = FALSE;
 		}
-		_tmp8_ = _tmp3_;
-		_tmp1_ = _tmp8_;
+		_tmp9_ = _tmp3_;
+		_tmp1_ = _tmp9_;
 	}
-	_tmp9_ = _tmp1_;
-	if (_tmp9_) {
-		BackgroundLoader* _tmp10_ = NULL;
+	_tmp10_ = _tmp1_;
+	if (_tmp10_) {
+		BackgroundLoader* _tmp11_ = NULL;
 		BackgroundLoader* new_background;
-		BackgroundLoader* _tmp11_;
-		BackgroundLoader* _tmp19_;
+		BackgroundLoader* _tmp12_;
 		BackgroundLoader* _tmp20_;
-		BackgroundLoader* _tmp23_;
+		BackgroundLoader* _tmp21_;
 		BackgroundLoader* _tmp24_;
-		_tmp10_ = background_load_background (self, NULL);
-		new_background = _tmp10_;
-		_tmp11_ = self->priv->current;
-		if (_tmp11_ != NULL) {
-			GHashTable* _tmp12_;
-			BackgroundLoader* _tmp13_;
-			const gchar* _tmp14_;
+		BackgroundLoader* _tmp25_;
+		_tmp11_ = background_load_background (self, NULL);
+		new_background = _tmp11_;
+		_tmp12_ = self->priv->current;
+		if (_tmp12_ != NULL) {
+			GHashTable* _tmp13_;
+			BackgroundLoader* _tmp14_;
 			const gchar* _tmp15_;
-			gchar* _tmp16_;
-			BackgroundLoader* _tmp17_;
+			const gchar* _tmp16_;
+			gchar* _tmp17_;
 			BackgroundLoader* _tmp18_;
-			_tmp12_ = self->priv->loaders;
-			_tmp13_ = self->priv->current;
-			_tmp14_ = background_loader_get_filename (_tmp13_);
-			_tmp15_ = _tmp14_;
-			_tmp16_ = g_strdup (_tmp15_);
-			_tmp17_ = new_background;
-			_tmp18_ = _background_loader_ref0 (_tmp17_);
-			g_hash_table_insert (_tmp12_, _tmp16_, _tmp18_);
+			BackgroundLoader* _tmp19_;
+			_tmp13_ = self->priv->loaders;
+			_tmp14_ = self->priv->current;
+			_tmp15_ = background_loader_get_filename (_tmp14_);
+			_tmp16_ = _tmp15_;
+			_tmp17_ = g_strdup (_tmp16_);
+			_tmp18_ = new_background;
+			_tmp19_ = _background_loader_ref0 (_tmp18_);
+			g_hash_table_insert (_tmp13_, _tmp17_, _tmp19_);
 		}
-		_tmp19_ = self->priv->old;
-		_tmp20_ = self->priv->current;
-		if (_tmp19_ == _tmp20_) {
-			BackgroundLoader* _tmp21_;
+		_tmp20_ = self->priv->old;
+		_tmp21_ = self->priv->current;
+		if (_tmp20_ == _tmp21_) {
 			BackgroundLoader* _tmp22_;
-			_tmp21_ = new_background;
-			_tmp22_ = _background_loader_ref0 (_tmp21_);
+			BackgroundLoader* _tmp23_;
+			_tmp22_ = new_background;
+			_tmp23_ = _background_loader_ref0 (_tmp22_);
 			_background_loader_unref0 (self->priv->old);
-			self->priv->old = _tmp22_;
+			self->priv->old = _tmp23_;
 		}
-		_tmp23_ = new_background;
-		_tmp24_ = _background_loader_ref0 (_tmp23_);
+		_tmp24_ = new_background;
+		_tmp25_ = _background_loader_ref0 (_tmp24_);
 		_background_loader_unref0 (self->priv->current);
-		self->priv->current = _tmp24_;
+		self->priv->current = _tmp25_;
 		_background_loader_unref0 (new_background);
 	}
-	_tmp27_ = self->priv->current;
-	_tmp28_ = background_loader_load (_tmp27_);
-	if (_tmp28_) {
-		BackgroundLoader* _tmp29_;
+	_tmp28_ = self->priv->current;
+	_tmp29_ = background_loader_load (_tmp28_);
+	if (_tmp29_) {
 		BackgroundLoader* _tmp30_;
-		_tmp29_ = self->priv->current;
-		_tmp30_ = self->priv->old;
-		_tmp26_ = _tmp29_ != _tmp30_;
+		BackgroundLoader* _tmp31_;
+		_tmp30_ = self->priv->current;
+		_tmp31_ = self->priv->old;
+		_tmp27_ = _tmp30_ != _tmp31_;
+	} else {
+		_tmp27_ = FALSE;
+	}
+	_tmp32_ = _tmp27_;
+	if (_tmp32_) {
+		AnimateTimer* _tmp33_;
+		gboolean _tmp34_;
+		gboolean _tmp35_;
+		_tmp33_ = self->priv->timer;
+		_tmp34_ = animate_timer_get_is_running (_tmp33_);
+		_tmp35_ = _tmp34_;
+		_tmp26_ = !_tmp35_;
 	} else {
 		_tmp26_ = FALSE;
 	}
-	_tmp31_ = _tmp26_;
-	if (_tmp31_) {
-		AnimateTimer* _tmp32_;
-		gboolean _tmp33_;
-		gboolean _tmp34_;
-		_tmp32_ = self->priv->timer;
-		_tmp33_ = animate_timer_get_is_running (_tmp32_);
-		_tmp34_ = _tmp33_;
-		_tmp25_ = !_tmp34_;
-	} else {
-		_tmp25_ = FALSE;
-	}
-	_tmp35_ = _tmp25_;
-	if (_tmp35_) {
-		AnimateTimer* _tmp36_;
+	_tmp36_ = _tmp26_;
+	if (_tmp36_) {
+		AnimateTimer* _tmp37_;
 		background_set_alpha (self, 0.0);
-		_tmp36_ = self->priv->timer;
-		animate_timer_reset (_tmp36_, 0);
+		_tmp37_ = self->priv->timer;
+		animate_timer_reset (_tmp37_, 0);
 	}
-	_tmp37_ = c;
-	cairo_set_source_rgba (_tmp37_, 0.0, 0.0, 0.0, 0.0);
+	_tmp38_ = c;
+	cairo_set_source_rgba (_tmp38_, 0.0, 0.0, 0.0, 0.0);
 	old_painted = FALSE;
-	_tmp40_ = self->priv->old;
-	if (_tmp40_ != NULL) {
-		BackgroundLoader* _tmp41_;
-		gboolean _tmp42_ = FALSE;
-		_tmp41_ = self->priv->old;
-		_tmp42_ = background_loader_load (_tmp41_);
-		_tmp39_ = _tmp42_;
+	_tmp41_ = self->priv->old;
+	if (_tmp41_ != NULL) {
+		BackgroundLoader* _tmp42_;
+		gboolean _tmp43_ = FALSE;
+		_tmp42_ = self->priv->old;
+		_tmp43_ = background_loader_load (_tmp42_);
+		_tmp40_ = _tmp43_;
+	} else {
+		_tmp40_ = FALSE;
+	}
+	_tmp44_ = _tmp40_;
+	if (_tmp44_) {
+		gboolean _tmp45_ = FALSE;
+		gdouble _tmp46_;
+		gboolean _tmp49_;
+		_tmp46_ = self->priv->_alpha;
+		if (_tmp46_ < 1.0) {
+			_tmp45_ = TRUE;
+		} else {
+			BackgroundLoader* _tmp47_;
+			gboolean _tmp48_ = FALSE;
+			_tmp47_ = self->priv->current;
+			_tmp48_ = background_loader_load (_tmp47_);
+			_tmp45_ = !_tmp48_;
+		}
+		_tmp49_ = _tmp45_;
+		_tmp39_ = _tmp49_;
 	} else {
 		_tmp39_ = FALSE;
 	}
-	_tmp43_ = _tmp39_;
-	if (_tmp43_) {
-		gboolean _tmp44_ = FALSE;
-		gdouble _tmp45_;
-		gboolean _tmp48_;
-		_tmp45_ = self->priv->_alpha;
-		if (_tmp45_ < 1.0) {
-			_tmp44_ = TRUE;
-		} else {
-			BackgroundLoader* _tmp46_;
-			gboolean _tmp47_ = FALSE;
-			_tmp46_ = self->priv->current;
-			_tmp47_ = background_loader_load (_tmp46_);
-			_tmp44_ = !_tmp47_;
-		}
-		_tmp48_ = _tmp44_;
-		_tmp38_ = _tmp48_;
-	} else {
-		_tmp38_ = FALSE;
-	}
-	_tmp49_ = _tmp38_;
-	if (_tmp49_) {
-		cairo_t* _tmp50_;
-		BackgroundLoader* _tmp51_;
-		cairo_pattern_t* _tmp52_;
-		cairo_t* _tmp53_;
-		_tmp50_ = c;
-		_tmp51_ = self->priv->old;
-		_tmp52_ = _tmp51_->pattern;
-		cairo_set_source (_tmp50_, _tmp52_);
-		_tmp53_ = c;
-		cairo_paint (_tmp53_);
+	_tmp50_ = _tmp39_;
+	if (_tmp50_) {
+		cairo_t* _tmp51_;
+		BackgroundLoader* _tmp52_;
+		_tmp51_ = c;
+		_tmp52_ = self->priv->old;
+		background_draw_background (self, _tmp51_, _tmp52_, 1.0);
 		old_painted = TRUE;
 	}
-	_tmp55_ = self->priv->current;
-	_tmp56_ = background_loader_load (_tmp55_);
-	if (_tmp56_) {
-		gdouble _tmp57_;
-		_tmp57_ = self->priv->_alpha;
-		_tmp54_ = _tmp57_ > 0.0;
+	_tmp54_ = self->priv->current;
+	_tmp55_ = background_loader_load (_tmp54_);
+	if (_tmp55_) {
+		gdouble _tmp56_;
+		_tmp56_ = self->priv->_alpha;
+		_tmp53_ = _tmp56_ > 0.0;
 	} else {
-		_tmp54_ = FALSE;
+		_tmp53_ = FALSE;
 	}
-	_tmp58_ = _tmp54_;
-	if (_tmp58_) {
-		cairo_t* _tmp59_;
-		BackgroundLoader* _tmp60_;
-		cairo_pattern_t* _tmp61_;
-		gdouble _tmp62_ = 0.0;
-		gboolean _tmp63_;
-		cairo_t* _tmp65_;
-		gdouble _tmp66_;
-		_tmp59_ = c;
-		_tmp60_ = self->priv->current;
-		_tmp61_ = _tmp60_->pattern;
-		cairo_set_source (_tmp59_, _tmp61_);
-		_tmp63_ = old_painted;
-		if (_tmp63_) {
-			gdouble _tmp64_;
-			_tmp64_ = self->priv->_alpha;
-			_tmp62_ = _tmp64_;
+	_tmp57_ = _tmp53_;
+	if (_tmp57_) {
+		gdouble _tmp58_ = 0.0;
+		gboolean _tmp59_;
+		cairo_t* _tmp61_;
+		BackgroundLoader* _tmp62_;
+		gdouble _tmp63_;
+		_tmp59_ = old_painted;
+		if (_tmp59_) {
+			gdouble _tmp60_;
+			_tmp60_ = self->priv->_alpha;
+			_tmp58_ = _tmp60_;
 		} else {
-			_tmp62_ = 1.0;
+			_tmp58_ = 1.0;
 		}
-		_tmp65_ = c;
-		_tmp66_ = _tmp62_;
-		cairo_paint_with_alpha (_tmp65_, _tmp66_);
+		_tmp61_ = c;
+		_tmp62_ = self->priv->current;
+		_tmp63_ = _tmp58_;
+		background_draw_background (self, _tmp61_, _tmp62_, _tmp63_);
 	}
-	_tmp67_ = c;
-	cairo_restore (_tmp67_);
-	_tmp68_ = flags;
-	if ((_tmp68_ & BACKGROUND_DRAW_FLAGS_GRID) != 0) {
-		cairo_t* _tmp69_;
-		_tmp69_ = c;
-		background_overlay_grid (self, _tmp69_);
+	_tmp64_ = c;
+	cairo_restore (_tmp64_);
+	_tmp65_ = flags;
+	if ((_tmp65_ & BACKGROUND_DRAW_FLAGS_GRID) != 0) {
+		cairo_t* _tmp66_;
+		_tmp66_ = c;
+		background_overlay_grid (self, _tmp66_);
+	}
+}
+
+
+static void background_draw_background (Background* self, cairo_t* c, BackgroundLoader* background, gdouble alpha) {
+	GList* _tmp0_;
+	g_return_if_fail (self != NULL);
+	g_return_if_fail (c != NULL);
+	g_return_if_fail (background != NULL);
+	_tmp0_ = self->priv->monitors;
+	{
+		GList* monitor_collection = NULL;
+		GList* monitor_it = NULL;
+		monitor_collection = _tmp0_;
+		for (monitor_it = monitor_collection; monitor_it != NULL; monitor_it = monitor_it->next) {
+			Monitor* _tmp1_;
+			Monitor* monitor = NULL;
+			_tmp1_ = _monitor_ref0 ((Monitor*) monitor_it->data);
+			monitor = _tmp1_;
+			{
+				BackgroundLoader* _tmp2_;
+				Monitor* _tmp3_;
+				gint _tmp4_;
+				Monitor* _tmp5_;
+				gint _tmp6_;
+				cairo_pattern_t* _tmp7_ = NULL;
+				cairo_pattern_t* pattern;
+				cairo_pattern_t* _tmp8_;
+				cairo_t* _tmp9_;
+				BackgroundLoader* _tmp10_;
+				Monitor* _tmp11_;
+				gint _tmp12_;
+				Monitor* _tmp13_;
+				gint _tmp14_;
+				cairo_pattern_t* _tmp15_ = NULL;
+				cairo_matrix_t matrix = {0};
+				Monitor* _tmp16_;
+				gint _tmp17_;
+				Monitor* _tmp18_;
+				gint _tmp19_;
+				cairo_pattern_t* _tmp20_;
+				cairo_matrix_t _tmp21_;
+				cairo_t* _tmp22_;
+				cairo_pattern_t* _tmp23_;
+				cairo_t* _tmp24_;
+				Monitor* _tmp25_;
+				gint _tmp26_;
+				Monitor* _tmp27_;
+				gint _tmp28_;
+				Monitor* _tmp29_;
+				gint _tmp30_;
+				Monitor* _tmp31_;
+				gint _tmp32_;
+				cairo_t* _tmp33_;
+				cairo_t* _tmp34_;
+				gdouble _tmp35_;
+				cairo_t* _tmp36_;
+				gboolean _tmp37_ = FALSE;
+				Monitor* _tmp38_;
+				Monitor* _tmp39_;
+				gboolean _tmp41_;
+				_tmp2_ = background;
+				_tmp3_ = monitor;
+				_tmp4_ = _tmp3_->width;
+				_tmp5_ = monitor;
+				_tmp6_ = _tmp5_->height;
+				_tmp7_ = background_loader_get_pattern (_tmp2_, _tmp4_, _tmp6_);
+				pattern = _tmp7_;
+				_tmp8_ = pattern;
+				if (_tmp8_ == NULL) {
+					_cairo_pattern_destroy0 (pattern);
+					_monitor_unref0 (monitor);
+					continue;
+				}
+				_tmp9_ = c;
+				cairo_save (_tmp9_);
+				_tmp10_ = background;
+				_tmp11_ = monitor;
+				_tmp12_ = _tmp11_->width;
+				_tmp13_ = monitor;
+				_tmp14_ = _tmp13_->height;
+				_tmp15_ = background_loader_get_pattern (_tmp10_, _tmp12_, _tmp14_);
+				_cairo_pattern_destroy0 (pattern);
+				pattern = _tmp15_;
+				cairo_matrix_init_identity (&matrix);
+				_tmp16_ = monitor;
+				_tmp17_ = _tmp16_->x;
+				_tmp18_ = monitor;
+				_tmp19_ = _tmp18_->y;
+				cairo_matrix_translate (&matrix, (gdouble) (-_tmp17_), (gdouble) (-_tmp19_));
+				_tmp20_ = pattern;
+				_tmp21_ = matrix;
+				cairo_pattern_set_matrix (_tmp20_, &_tmp21_);
+				_tmp22_ = c;
+				_tmp23_ = pattern;
+				cairo_set_source (_tmp22_, _tmp23_);
+				_tmp24_ = c;
+				_tmp25_ = monitor;
+				_tmp26_ = _tmp25_->x;
+				_tmp27_ = monitor;
+				_tmp28_ = _tmp27_->y;
+				_tmp29_ = monitor;
+				_tmp30_ = _tmp29_->width;
+				_tmp31_ = monitor;
+				_tmp32_ = _tmp31_->height;
+				cairo_rectangle (_tmp24_, (gdouble) _tmp26_, (gdouble) _tmp28_, (gdouble) _tmp30_, (gdouble) _tmp32_);
+				_tmp33_ = c;
+				cairo_clip (_tmp33_);
+				_tmp34_ = c;
+				_tmp35_ = alpha;
+				cairo_paint_with_alpha (_tmp34_, _tmp35_);
+				_tmp36_ = c;
+				cairo_restore (_tmp36_);
+				_tmp38_ = monitor;
+				_tmp39_ = self->priv->active_monitor;
+				if (_tmp38_ != _tmp39_) {
+					cairo_surface_t* _tmp40_;
+					_tmp40_ = self->priv->background_logo_surface;
+					_tmp37_ = _tmp40_ != NULL;
+				} else {
+					_tmp37_ = FALSE;
+				}
+				_tmp41_ = _tmp37_;
+				if (_tmp41_) {
+					cairo_surface_t* _tmp42_;
+					gint _tmp43_ = 0;
+					gint width;
+					cairo_surface_t* _tmp44_;
+					gint _tmp45_ = 0;
+					gint height;
+					cairo_t* _tmp46_;
+					cairo_surface_t* _tmp47_;
+					cairo_pattern_t* _tmp48_;
+					Monitor* _tmp49_;
+					gint _tmp50_;
+					Monitor* _tmp51_;
+					gint _tmp52_;
+					gint _tmp53_;
+					gint x;
+					Monitor* _tmp54_;
+					gint _tmp55_;
+					Monitor* _tmp56_;
+					gint _tmp57_;
+					gint _tmp58_;
+					gint y;
+					gint _tmp59_;
+					gint _tmp60_;
+					cairo_pattern_t* _tmp61_;
+					cairo_matrix_t _tmp62_;
+					cairo_t* _tmp63_;
+					cairo_pattern_t* _tmp64_;
+					cairo_t* _tmp65_;
+					gint _tmp66_;
+					gint _tmp67_;
+					gint _tmp68_;
+					gint _tmp69_;
+					cairo_t* _tmp70_;
+					cairo_t* _tmp71_;
+					gdouble _tmp72_;
+					cairo_t* _tmp73_;
+					_tmp42_ = self->priv->background_logo_surface;
+					_tmp43_ = cairo_image_surface_get_width (_tmp42_);
+					width = _tmp43_;
+					_tmp44_ = self->priv->background_logo_surface;
+					_tmp45_ = cairo_image_surface_get_height (_tmp44_);
+					height = _tmp45_;
+					_tmp46_ = c;
+					cairo_save (_tmp46_);
+					_tmp47_ = self->priv->background_logo_surface;
+					_tmp48_ = cairo_pattern_create_for_surface (_tmp47_);
+					_cairo_pattern_destroy0 (pattern);
+					pattern = _tmp48_;
+					cairo_matrix_init_identity (&matrix);
+					_tmp49_ = monitor;
+					_tmp50_ = _tmp49_->x;
+					_tmp51_ = monitor;
+					_tmp52_ = _tmp51_->width;
+					_tmp53_ = width;
+					x = _tmp50_ + ((_tmp52_ - _tmp53_) / 2);
+					_tmp54_ = monitor;
+					_tmp55_ = _tmp54_->y;
+					_tmp56_ = monitor;
+					_tmp57_ = _tmp56_->height;
+					_tmp58_ = height;
+					y = _tmp55_ + ((_tmp57_ - _tmp58_) / 2);
+					_tmp59_ = x;
+					_tmp60_ = y;
+					cairo_matrix_translate (&matrix, (gdouble) (-_tmp59_), (gdouble) (-_tmp60_));
+					_tmp61_ = pattern;
+					_tmp62_ = matrix;
+					cairo_pattern_set_matrix (_tmp61_, &_tmp62_);
+					_tmp63_ = c;
+					_tmp64_ = pattern;
+					cairo_set_source (_tmp63_, _tmp64_);
+					_tmp65_ = c;
+					_tmp66_ = x;
+					_tmp67_ = y;
+					_tmp68_ = width;
+					_tmp69_ = height;
+					cairo_rectangle (_tmp65_, (gdouble) _tmp66_, (gdouble) _tmp67_, (gdouble) _tmp68_, (gdouble) _tmp69_);
+					_tmp70_ = c;
+					cairo_clip (_tmp70_);
+					_tmp71_ = c;
+					_tmp72_ = alpha;
+					cairo_paint_with_alpha (_tmp71_, _tmp72_);
+					_tmp73_ = c;
+					cairo_restore (_tmp73_);
+				}
+				_cairo_pattern_destroy0 (pattern);
+				_monitor_unref0 (monitor);
+			}
+		}
 	}
 }
 
@@ -1241,42 +2022,207 @@ static BackgroundLoader* background_load_background (Background* self, const gch
 	b = _tmp5_;
 	_tmp6_ = b;
 	if (_tmp6_ == NULL) {
-		const gchar* _tmp7_;
-		gint _tmp8_ = 0;
-		gint _tmp9_ = 0;
-		gboolean _tmp10_;
-		BackgroundLoader* _tmp11_;
-		BackgroundLoader* _tmp12_;
-		cairo_surface_t* _tmp13_;
-		BackgroundLoader* _tmp14_;
-		BackgroundLoader* _tmp15_;
-		GHashTable* _tmp16_;
-		const gchar* _tmp17_;
-		gchar* _tmp18_;
-		BackgroundLoader* _tmp19_;
-		BackgroundLoader* _tmp20_;
-		_tmp7_ = filename;
-		_tmp8_ = gtk_widget_get_allocated_width ((GtkWidget*) self);
-		_tmp9_ = gtk_widget_get_allocated_height ((GtkWidget*) self);
-		_tmp10_ = self->priv->_draw_grid;
-		_tmp11_ = background_loader_new (_tmp7_, _tmp8_, _tmp9_, _tmp10_);
+		GList* _tmp7_;
+		guint _tmp8_ = 0U;
+		gint* _tmp9_ = NULL;
+		gint* widths;
+		gint widths_length1;
+		gint _widths_size_;
+		GList* _tmp10_;
+		guint _tmp11_ = 0U;
+		gint* _tmp12_ = NULL;
+		gint* heights;
+		gint heights_length1;
+		gint _heights_size_;
+		gint n_sizes;
+		GList* _tmp13_;
+		gint _tmp28_;
+		gint _tmp29_ = 0;
+		gint _tmp30_;
+		gint _tmp31_ = 0;
+		const gchar* _tmp32_;
+		gint* _tmp33_;
+		gint _tmp33__length1;
+		gint* _tmp34_;
+		gint _tmp34__length1;
+		gboolean _tmp35_;
+		BackgroundLoader* _tmp36_;
+		BackgroundLoader* _tmp37_;
+		cairo_surface_t* _tmp38_;
+		BackgroundLoader* _tmp39_;
+		BackgroundLoader* _tmp40_;
+		GHashTable* _tmp41_;
+		const gchar* _tmp42_;
+		gchar* _tmp43_;
+		BackgroundLoader* _tmp44_;
+		BackgroundLoader* _tmp45_;
+		_tmp7_ = self->priv->monitors;
+		_tmp8_ = g_list_length (_tmp7_);
+		_tmp9_ = g_new0 (gint, _tmp8_);
+		widths = _tmp9_;
+		widths_length1 = _tmp8_;
+		_widths_size_ = widths_length1;
+		_tmp10_ = self->priv->monitors;
+		_tmp11_ = g_list_length (_tmp10_);
+		_tmp12_ = g_new0 (gint, _tmp11_);
+		heights = _tmp12_;
+		heights_length1 = _tmp11_;
+		_heights_size_ = heights_length1;
+		n_sizes = 0;
+		_tmp13_ = self->priv->monitors;
+		{
+			GList* monitor_collection = NULL;
+			GList* monitor_it = NULL;
+			monitor_collection = _tmp13_;
+			for (monitor_it = monitor_collection; monitor_it != NULL; monitor_it = monitor_it->next) {
+				Monitor* _tmp14_;
+				Monitor* monitor = NULL;
+				_tmp14_ = _monitor_ref0 ((Monitor*) monitor_it->data);
+				monitor = _tmp14_;
+				{
+					Monitor* _tmp15_;
+					gboolean _tmp16_ = FALSE;
+					_tmp15_ = monitor;
+					_tmp16_ = background_monitor_is_unique_size (self, _tmp15_);
+					if (_tmp16_) {
+						gint* _tmp17_;
+						gint _tmp17__length1;
+						gint _tmp18_;
+						Monitor* _tmp19_;
+						gint _tmp20_;
+						gint _tmp21_;
+						gint* _tmp22_;
+						gint _tmp22__length1;
+						gint _tmp23_;
+						Monitor* _tmp24_;
+						gint _tmp25_;
+						gint _tmp26_;
+						gint _tmp27_;
+						_tmp17_ = widths;
+						_tmp17__length1 = widths_length1;
+						_tmp18_ = n_sizes;
+						_tmp19_ = monitor;
+						_tmp20_ = _tmp19_->width;
+						_tmp17_[_tmp18_] = _tmp20_;
+						_tmp21_ = _tmp17_[_tmp18_];
+						_tmp22_ = heights;
+						_tmp22__length1 = heights_length1;
+						_tmp23_ = n_sizes;
+						_tmp24_ = monitor;
+						_tmp25_ = _tmp24_->height;
+						_tmp22_[_tmp23_] = _tmp25_;
+						_tmp26_ = _tmp22_[_tmp23_];
+						_tmp27_ = n_sizes;
+						n_sizes = _tmp27_ + 1;
+					}
+					_monitor_unref0 (monitor);
+				}
+			}
+		}
+		_tmp28_ = n_sizes;
+		_tmp29_ = _tmp28_;
+		widths = g_renew (gint, widths, _tmp28_);
+		(_tmp29_ > widths_length1) ? memset (widths + widths_length1, 0, sizeof (gint) * (_tmp29_ - widths_length1)) : NULL;
+		widths_length1 = _tmp29_;
+		_widths_size_ = _tmp29_;
+		_tmp30_ = n_sizes;
+		_tmp31_ = _tmp30_;
+		heights = g_renew (gint, heights, _tmp30_);
+		(_tmp31_ > heights_length1) ? memset (heights + heights_length1, 0, sizeof (gint) * (_tmp31_ - heights_length1)) : NULL;
+		heights_length1 = _tmp31_;
+		_heights_size_ = _tmp31_;
+		_tmp32_ = filename;
+		_tmp33_ = widths;
+		_tmp33__length1 = widths_length1;
+		_tmp34_ = heights;
+		_tmp34__length1 = heights_length1;
+		_tmp35_ = self->priv->_draw_grid;
+		_tmp36_ = background_loader_new (_tmp32_, _tmp33_, _tmp33__length1, _tmp34_, _tmp34__length1, _tmp35_);
 		_background_loader_unref0 (b);
-		b = _tmp11_;
-		_tmp12_ = b;
-		_tmp13_ = self->priv->logo_surface;
-		background_loader_set_logo (_tmp12_, _tmp13_);
-		_tmp14_ = b;
-		g_signal_connect_object (_tmp14_, "loaded", (GCallback) ____lambda2__background_loader_loaded, self, 0);
-		_tmp15_ = b;
-		background_loader_load (_tmp15_);
-		_tmp16_ = self->priv->loaders;
-		_tmp17_ = filename;
-		_tmp18_ = g_strdup (_tmp17_);
-		_tmp19_ = b;
-		_tmp20_ = _background_loader_ref0 (_tmp19_);
-		g_hash_table_insert (_tmp16_, _tmp18_, _tmp20_);
+		b = _tmp36_;
+		_tmp37_ = b;
+		_tmp38_ = self->priv->version_logo_surface;
+		background_loader_set_logo (_tmp37_, _tmp38_);
+		_tmp39_ = b;
+		g_signal_connect_object (_tmp39_, "loaded", (GCallback) ____lambda2__background_loader_loaded, self, 0);
+		_tmp40_ = b;
+		background_loader_load (_tmp40_);
+		_tmp41_ = self->priv->loaders;
+		_tmp42_ = filename;
+		_tmp43_ = g_strdup (_tmp42_);
+		_tmp44_ = b;
+		_tmp45_ = _background_loader_ref0 (_tmp44_);
+		g_hash_table_insert (_tmp41_, _tmp43_, _tmp45_);
+		heights = (g_free (heights), NULL);
+		widths = (g_free (widths), NULL);
 	}
 	result = b;
+	return result;
+}
+
+
+static gboolean background_monitor_is_unique_size (Background* self, Monitor* monitor) {
+	gboolean result = FALSE;
+	GList* _tmp0_;
+	g_return_val_if_fail (self != NULL, FALSE);
+	g_return_val_if_fail (monitor != NULL, FALSE);
+	_tmp0_ = self->priv->monitors;
+	{
+		GList* m_collection = NULL;
+		GList* m_it = NULL;
+		m_collection = _tmp0_;
+		for (m_it = m_collection; m_it != NULL; m_it = m_it->next) {
+			Monitor* _tmp1_;
+			Monitor* m = NULL;
+			_tmp1_ = _monitor_ref0 ((Monitor*) m_it->data);
+			m = _tmp1_;
+			{
+				gboolean _tmp2_ = FALSE;
+				gboolean _tmp3_ = FALSE;
+				Monitor* _tmp4_;
+				Monitor* _tmp5_;
+				gboolean _tmp10_;
+				gboolean _tmp15_;
+				_tmp4_ = m;
+				_tmp5_ = monitor;
+				if (_tmp4_ != _tmp5_) {
+					Monitor* _tmp6_;
+					gint _tmp7_;
+					Monitor* _tmp8_;
+					gint _tmp9_;
+					_tmp6_ = m;
+					_tmp7_ = _tmp6_->width;
+					_tmp8_ = monitor;
+					_tmp9_ = _tmp8_->width;
+					_tmp3_ = _tmp7_ == _tmp9_;
+				} else {
+					_tmp3_ = FALSE;
+				}
+				_tmp10_ = _tmp3_;
+				if (_tmp10_) {
+					Monitor* _tmp11_;
+					gint _tmp12_;
+					Monitor* _tmp13_;
+					gint _tmp14_;
+					_tmp11_ = m;
+					_tmp12_ = _tmp11_->height;
+					_tmp13_ = monitor;
+					_tmp14_ = _tmp13_->height;
+					_tmp2_ = _tmp12_ == _tmp14_;
+				} else {
+					_tmp2_ = FALSE;
+				}
+				_tmp15_ = _tmp2_;
+				if (_tmp15_) {
+					result = FALSE;
+					_monitor_unref0 (m);
+					return result;
+				}
+				_monitor_unref0 (m);
+			}
+		}
+	}
+	result = TRUE;
 	return result;
 }
 
@@ -1477,7 +2423,6 @@ static GObject * background_constructor (GType type, guint n_construct_propertie
 	parent_class = G_OBJECT_CLASS (background_parent_class);
 	obj = parent_class->constructor (type, n_construct_properties, construct_properties);
 	self = BACKGROUND (obj);
-	gtk_orientable_set_orientation ((GtkOrientable*) self, GTK_ORIENTATION_VERTICAL);
 	_tmp0_ = animate_timer_new (ANIMATE_TIMER_INSTANT);
 	_g_object_unref0 (self->priv->timer);
 	self->priv->timer = _tmp0_;
@@ -1517,7 +2462,10 @@ static void background_instance_init (Background * self) {
 	self->priv->_current_background = NULL;
 	self->priv->_draw_grid = TRUE;
 	self->priv->_alpha = 1.0;
-	self->priv->logo_surface = NULL;
+	self->priv->monitors = NULL;
+	self->priv->active_monitor = NULL;
+	self->priv->version_logo_surface = NULL;
+	self->priv->background_logo_surface = NULL;
 }
 
 
@@ -1526,11 +2474,14 @@ static void background_finalize (GObject* obj) {
 	self = BACKGROUND (obj);
 	_g_free0 (self->priv->_default_background);
 	_g_free0 (self->priv->_current_background);
+	__g_list_free__monitor_unref0_0 (self->priv->monitors);
+	_monitor_unref0 (self->priv->active_monitor);
 	_g_object_unref0 (self->priv->timer);
 	_background_loader_unref0 (self->priv->current);
 	_background_loader_unref0 (self->priv->old);
 	_g_hash_table_unref0 (self->priv->loaders);
-	_cairo_surface_destroy0 (self->priv->logo_surface);
+	_cairo_surface_destroy0 (self->priv->version_logo_surface);
+	_cairo_surface_destroy0 (self->priv->background_logo_surface);
 	G_OBJECT_CLASS (background_parent_class)->finalize (obj);
 }
 
@@ -1540,7 +2491,7 @@ GType background_get_type (void) {
 	if (g_once_init_enter (&background_type_id__volatile)) {
 		static const GTypeInfo g_define_type_info = { sizeof (BackgroundClass), (GBaseInitFunc) NULL, (GBaseFinalizeFunc) NULL, (GClassInitFunc) background_class_init, (GClassFinalizeFunc) NULL, NULL, sizeof (Background), 0, (GInstanceInitFunc) background_instance_init, NULL };
 		GType background_type_id;
-		background_type_id = g_type_register_static (GTK_TYPE_BOX, "Background", &g_define_type_info, 0);
+		background_type_id = g_type_register_static (GTK_TYPE_FIXED, "Background", &g_define_type_info, 0);
 		g_once_init_leave (&background_type_id__volatile, background_type_id);
 	}
 	return background_type_id__volatile;
@@ -1590,6 +2541,24 @@ static void _vala_background_set_property (GObject * object, guint property_id, 
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
 		break;
 	}
+}
+
+
+static void _vala_array_destroy (gpointer array, gint array_length, GDestroyNotify destroy_func) {
+	if ((array != NULL) && (destroy_func != NULL)) {
+		int i;
+		for (i = 0; i < array_length; i = i + 1) {
+			if (((gpointer*) array)[i] != NULL) {
+				destroy_func (((gpointer*) array)[i]);
+			}
+		}
+	}
+}
+
+
+static void _vala_array_free (gpointer array, gint array_length, GDestroyNotify destroy_func) {
+	_vala_array_destroy (array, array_length, destroy_func);
+	g_free (array);
 }
 
 

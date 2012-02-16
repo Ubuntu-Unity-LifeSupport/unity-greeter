@@ -75,6 +75,7 @@ enum  {
 #define UG_SETTINGS_KEY_BACKGROUND "background"
 #define UG_SETTINGS_KEY_DRAW_GRID "draw-grid"
 #define UG_SETTINGS_KEY_LOGO "logo"
+#define UG_SETTINGS_KEY_BACKGROUND_LOGO "background-logo"
 #define UG_SETTINGS_KEY_THEME_NAME "theme-name"
 #define UG_SETTINGS_KEY_ICON_THEME_NAME "icon-theme-name"
 #define UG_SETTINGS_KEY_FONT_NAME "font-name"
@@ -82,10 +83,14 @@ enum  {
 #define UG_SETTINGS_KEY_XFT_DPI "xft-dpi"
 #define UG_SETTINGS_KEY_XFT_HINTSTYLE "xft-hintstyle"
 #define UG_SETTINGS_KEY_XFT_RGBA "xft-rgba"
+#define UG_SETTINGS_KEY_ONSCREEN_KEYBOARD "onscreen-keyboard"
+#define UG_SETTINGS_KEY_HIGH_CONTRAST "high-contrast"
+#define UG_SETTINGS_KEY_SCREEN_READER "screen-reader"
 #define UG_SETTINGS_SCHEMA "com.canonical.unity-greeter"
 gboolean ug_settings_get_boolean (const gchar* key);
 gdouble ug_settings_get_double (const gchar* key);
 gchar* ug_settings_get_string (const gchar* key);
+gboolean ug_settings_set_boolean (const gchar* key, gboolean value);
 UGSettings* ug_settings_new (void);
 UGSettings* ug_settings_construct (GType object_type);
 static void ug_settings_finalize (UGSettings* obj);
@@ -137,6 +142,25 @@ gchar* ug_settings_get_string (const gchar* key) {
 	_tmp1_ = key;
 	_tmp2_ = g_settings_get_string (gsettings, _tmp1_);
 	result = _tmp2_;
+	_g_object_unref0 (gsettings);
+	return result;
+}
+
+
+gboolean ug_settings_set_boolean (const gchar* key, gboolean value) {
+	gboolean result = FALSE;
+	GSettings* _tmp0_;
+	GSettings* gsettings;
+	const gchar* _tmp1_;
+	gboolean _tmp2_;
+	gboolean _tmp3_ = FALSE;
+	g_return_val_if_fail (key != NULL, FALSE);
+	_tmp0_ = g_settings_new (UG_SETTINGS_SCHEMA);
+	gsettings = _tmp0_;
+	_tmp1_ = key;
+	_tmp2_ = value;
+	_tmp3_ = g_settings_set_boolean (gsettings, _tmp1_, _tmp2_);
+	result = _tmp3_;
 	_g_object_unref0 (gsettings);
 	return result;
 }

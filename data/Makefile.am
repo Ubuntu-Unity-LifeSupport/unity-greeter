@@ -3,7 +3,7 @@
 xgreeterdir = $(datarootdir)/xgreeters
 dist_xgreeter_DATA = unity-greeter.desktop
 
-dist_pkgdata_DATA = a11y.svg cog.png logo.png
+dist_pkgdata_DATA = a11y.svg cof.png cog.png logo.png message.png
 
 @GSETTINGS_RULES@
 gsettings_SCHEMAS = com.canonical.unity-greeter.gschema.xml

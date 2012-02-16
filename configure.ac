@@ -2,7 +2,7 @@
 
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT(unity-greeter, 0.2.1)
+AC_INIT(unity-greeter, 0.2.3)
 AC_CONFIG_MACRO_DIR(m4)
 AM_INIT_AUTOMAKE
 AM_PROG_CC_C_O
@@ -22,9 +22,10 @@ PKG_CHECK_MODULES(UNITY_GREETER, [
     gtk+-3.0
     gdk-x11-3.0
     indicator3-0.4
-    liblightdm-gobject-1 >= 0.9.2
+    liblightdm-gobject-1 >= 1.1.3
     freetype2
     cairo-ft
+    libcanberra
 ])
 
 INDICATORDIR=`$PKG_CONFIG --variable=indicatordir indicator3-0.4`

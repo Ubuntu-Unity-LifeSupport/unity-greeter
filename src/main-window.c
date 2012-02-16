@@ -55,6 +55,16 @@ typedef struct _MainWindowPrivate MainWindowPrivate;
 typedef struct _UserList UserList;
 typedef struct _UserListClass UserListClass;
 
+#define TYPE_MONITOR (monitor_get_type ())
+#define MONITOR(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_MONITOR, Monitor))
+#define MONITOR_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_MONITOR, MonitorClass))
+#define IS_MONITOR(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_MONITOR))
+#define IS_MONITOR_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_MONITOR))
+#define MONITOR_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_MONITOR, MonitorClass))
+
+typedef struct _Monitor Monitor;
+typedef struct _MonitorClass MonitorClass;
+
 #define TYPE_BACKGROUND (background_get_type ())
 #define BACKGROUND(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_BACKGROUND, Background))
 #define BACKGROUND_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_BACKGROUND, BackgroundClass))
@@ -75,6 +85,7 @@ typedef struct _BackgroundClass BackgroundClass;
 typedef struct _MenuBar MenuBar;
 typedef struct _MenuBarClass MenuBarClass;
 #define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
+#define __g_list_free__monitor_unref0_0(var) ((var == NULL) ? NULL : (var = (_g_list_free__monitor_unref0_ (var), NULL)))
 #define _g_free0(var) (var = (g_free (var), NULL))
 
 #define TYPE_USER_ENTRY (user_entry_get_type ())
@@ -87,6 +98,8 @@ typedef struct _MenuBarClass MenuBarClass;
 typedef struct _UserEntry UserEntry;
 typedef struct _UserEntryClass UserEntryClass;
 typedef struct _UserEntryPrivate UserEntryPrivate;
+typedef struct _MonitorPrivate MonitorPrivate;
+#define _monitor_unref0(var) ((var == NULL) ? NULL : (var = (monitor_unref (var), NULL)))
 
 #define USER_LIST_TYPE_SCROLL_TARGET (user_list_scroll_target_get_type ())
 
@@ -101,8 +114,10 @@ struct _MainWindowClass {
 };
 
 struct _MainWindowPrivate {
+	GList* monitors;
 	Background* background;
 	MenuBar* menubar;
+	GtkBox* login_box;
 	guint change_background_timeout;
 };
 
@@ -114,12 +129,28 @@ struct _UserEntry {
 	PangoLayout* layout;
 	gchar* background;
 	gboolean is_active;
+	gboolean has_messages;
 	GList* keyboard_layouts;
 };
 
 struct _UserEntryClass {
 	GTypeClass parent_class;
 	void (*finalize) (UserEntry *self);
+};
+
+struct _Monitor {
+	GTypeInstance parent_instance;
+	volatile int ref_count;
+	MonitorPrivate * priv;
+	gint x;
+	gint y;
+	gint width;
+	gint height;
+};
+
+struct _MonitorClass {
+	GTypeClass parent_class;
+	void (*finalize) (Monitor *self);
 };
 
 typedef enum  {
@@ -135,13 +166,27 @@ extern gboolean unity_greeter_test_mode;
 
 GType main_window_get_type (void) G_GNUC_CONST;
 GType user_list_get_type (void) G_GNUC_CONST;
+gpointer monitor_ref (gpointer instance);
+void monitor_unref (gpointer instance);
+GParamSpec* param_spec_monitor (const gchar* name, const gchar* nick, const gchar* blurb, GType object_type, GParamFlags flags);
+void value_set_monitor (GValue* value, gpointer v_object);
+void value_take_monitor (GValue* value, gpointer v_object);
+gpointer value_get_monitor (const GValue* value);
+GType monitor_get_type (void) G_GNUC_CONST;
 GType background_get_type (void) G_GNUC_CONST;
 GType menu_bar_get_type (void) G_GNUC_CONST;
 #define MAIN_WINDOW_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TYPE_MAIN_WINDOW, MainWindowPrivate))
 enum  {
 	MAIN_WINDOW_DUMMY_PROPERTY
 };
+static void _monitor_unref0_ (gpointer var);
+static void _g_list_free__monitor_unref0_ (GList* self);
 static void main_window_monitors_changed_cb (MainWindow* self, GdkScreen* screen);
+static gboolean main_window_monitor_is_unique_position (MainWindow* self, GdkScreen* screen, gint n);
+Monitor* monitor_new (gint x, gint y, gint width, gint height);
+Monitor* monitor_construct (GType object_type, gint x, gint y, gint width, gint height);
+void background_set_monitors (Background* self, GList* monitors);
+static void main_window_move_to_monitor (MainWindow* self, Monitor* monitor);
 static gboolean main_window_change_background_timeout_cb (MainWindow* self);
 gboolean menu_bar_get_high_contrast (MenuBar* self);
 gpointer user_entry_ref (gpointer instance);
@@ -156,6 +201,8 @@ void background_set_current_background (Background* self, const gchar* value);
 static void main_window_change_background (MainWindow* self);
 const gchar* background_get_current_background (Background* self);
 static gboolean _main_window_change_background_timeout_cb_gsource_func (gpointer self);
+static gboolean main_window_real_motion_notify_event (GtkWidget* base, GdkEventMotion* event);
+void background_set_active_monitor (Background* self, Monitor* monitor);
 static gboolean main_window_real_key_press_event (GtkWidget* base, GdkEventKey* event);
 GType user_list_scroll_target_get_type (void) G_GNUC_CONST;
 void user_list_scroll (UserList* self, UserListScrollTarget target);
@@ -163,7 +210,6 @@ MainWindow* main_window_new (void);
 MainWindow* main_window_construct (GType object_type);
 static GObject * main_window_constructor (GType type, guint n_construct_properties, GObjectConstructParam * construct_properties);
 void unity_greeter_add_style_class (GtkWidget* widget);
-static void _main_window_monitors_changed_cb_gdk_screen_monitors_changed (GdkScreen* _sender, gpointer self);
 Background* background_new (void);
 Background* background_construct (GType object_type);
 gboolean ug_settings_get_boolean (const gchar* key);
@@ -172,10 +218,11 @@ void background_set_draw_grid (Background* self, gboolean value);
 gchar* ug_settings_get_string (const gchar* key);
 #define UG_SETTINGS_KEY_BACKGROUND "background"
 void background_set_default_background (Background* self, const gchar* value);
-void background_set_logo (Background* self, const gchar* logo_path);
+void background_set_logo (Background* self, const gchar* version_logo, const gchar* background_logo);
 #define UG_SETTINGS_KEY_LOGO "logo"
-MenuBar* menu_bar_new (Background* bg);
-MenuBar* menu_bar_construct (GType object_type, Background* bg);
+#define UG_SETTINGS_KEY_BACKGROUND_LOGO "background-logo"
+MenuBar* menu_bar_new (Background* bg, GtkAccelGroup* ag);
+MenuBar* menu_bar_construct (GType object_type, Background* bg, GtkAccelGroup* ag);
 static void _main_window___lambda4_ (MainWindow* self);
 static void __main_window___lambda4__g_object_notify (GObject* _sender, GParamSpec* pspec, gpointer self);
 UserList* user_list_new (Background* bg, MenuBar* mb);
@@ -183,57 +230,218 @@ UserList* user_list_construct (GType object_type, Background* bg, MenuBar* mb);
 static void _main_window___lambda5_ (MainWindow* self);
 void menu_bar_set_layouts (MenuBar* self, GList* layouts);
 static void __main_window___lambda5__user_list_user_displayed (UserList* _sender, gpointer self);
+static void _main_window_monitors_changed_cb_gdk_screen_monitors_changed (GdkScreen* _sender, gpointer self);
 static void main_window_finalize (GObject* obj);
 
 
+static void _monitor_unref0_ (gpointer var) {
+	(var == NULL) ? NULL : (var = (monitor_unref (var), NULL));
+}
+
+
+static void _g_list_free__monitor_unref0_ (GList* self) {
+	g_list_foreach (self, (GFunc) _monitor_unref0_, NULL);
+	g_list_free (self);
+}
+
+
 static void main_window_monitors_changed_cb (MainWindow* self, GdkScreen* screen) {
-	GdkRectangle geometry = {0};
 	GdkScreen* _tmp0_;
-	GdkScreen* _tmp1_;
-	gint _tmp2_ = 0;
-	GdkRectangle _tmp3_ = {0};
-	GdkRectangle _tmp4_;
-	gint _tmp5_;
-	GdkRectangle _tmp6_;
-	gint _tmp7_;
-	GdkRectangle _tmp8_;
-	gint _tmp9_;
-	GdkRectangle _tmp10_;
-	gint _tmp11_;
-	GdkRectangle _tmp12_;
-	gint _tmp13_;
-	GdkRectangle _tmp14_;
-	gint _tmp15_;
-	GdkRectangle _tmp16_;
-	gint _tmp17_;
-	GdkRectangle _tmp18_;
-	gint _tmp19_;
+	gint _tmp1_ = 0;
+	GdkScreen* _tmp2_;
+	gint _tmp3_ = 0;
+	Background* _tmp34_;
+	GList* _tmp35_;
+	GdkScreen* _tmp36_;
+	gint _tmp37_ = 0;
+	GdkScreen* _tmp38_;
+	gint _tmp39_ = 0;
+	GList* _tmp40_;
+	gconstpointer _tmp41_ = NULL;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (screen != NULL);
 	_tmp0_ = screen;
-	_tmp1_ = screen;
-	_tmp2_ = gdk_screen_get_primary_monitor (_tmp1_);
-	gdk_screen_get_monitor_geometry (_tmp0_, _tmp2_, &_tmp3_);
-	geometry = _tmp3_;
-	_tmp4_ = geometry;
-	_tmp5_ = _tmp4_.width;
-	_tmp6_ = geometry;
-	_tmp7_ = _tmp6_.height;
-	_tmp8_ = geometry;
-	_tmp9_ = _tmp8_.x;
-	_tmp10_ = geometry;
-	_tmp11_ = _tmp10_.y;
-	g_debug ("main-window.vala:78: Monitor is %dx%d pixels at %d,%d", _tmp5_, _tmp7_, _tmp9_, _tmp11_);
-	_tmp12_ = geometry;
-	_tmp13_ = _tmp12_.width;
-	_tmp14_ = geometry;
-	_tmp15_ = _tmp14_.height;
-	gtk_window_resize ((GtkWindow*) self, _tmp13_, _tmp15_);
-	_tmp16_ = geometry;
-	_tmp17_ = _tmp16_.x;
-	_tmp18_ = geometry;
-	_tmp19_ = _tmp18_.y;
-	gtk_window_move ((GtkWindow*) self, _tmp17_, _tmp19_);
+	_tmp1_ = gdk_screen_get_width (_tmp0_);
+	_tmp2_ = screen;
+	_tmp3_ = gdk_screen_get_height (_tmp2_);
+	g_debug ("main-window.vala:94: Screen is %dx%d pixels", _tmp1_, _tmp3_);
+	__g_list_free__monitor_unref0_0 (self->priv->monitors);
+	self->priv->monitors = NULL;
+	{
+		gint i;
+		i = 0;
+		{
+			gboolean _tmp4_;
+			_tmp4_ = TRUE;
+			while (TRUE) {
+				gboolean _tmp5_;
+				gint _tmp7_;
+				GdkScreen* _tmp8_;
+				gint _tmp9_ = 0;
+				GdkRectangle geometry = {0};
+				GdkScreen* _tmp10_;
+				gint _tmp11_;
+				GdkRectangle _tmp12_ = {0};
+				gint _tmp13_;
+				GdkRectangle _tmp14_;
+				gint _tmp15_;
+				GdkRectangle _tmp16_;
+				gint _tmp17_;
+				GdkRectangle _tmp18_;
+				gint _tmp19_;
+				GdkRectangle _tmp20_;
+				gint _tmp21_;
+				GdkScreen* _tmp22_;
+				gint _tmp23_;
+				gboolean _tmp24_ = FALSE;
+				_tmp5_ = _tmp4_;
+				if (!_tmp5_) {
+					gint _tmp6_;
+					_tmp6_ = i;
+					i = _tmp6_ + 1;
+				}
+				_tmp4_ = FALSE;
+				_tmp7_ = i;
+				_tmp8_ = screen;
+				_tmp9_ = gdk_screen_get_n_monitors (_tmp8_);
+				if (!(_tmp7_ < _tmp9_)) {
+					break;
+				}
+				_tmp10_ = screen;
+				_tmp11_ = i;
+				gdk_screen_get_monitor_geometry (_tmp10_, _tmp11_, &_tmp12_);
+				geometry = _tmp12_;
+				_tmp13_ = i;
+				_tmp14_ = geometry;
+				_tmp15_ = _tmp14_.width;
+				_tmp16_ = geometry;
+				_tmp17_ = _tmp16_.height;
+				_tmp18_ = geometry;
+				_tmp19_ = _tmp18_.x;
+				_tmp20_ = geometry;
+				_tmp21_ = _tmp20_.y;
+				g_debug ("main-window.vala:100: Monitor %d is %dx%d pixels at %d,%d", _tmp13_, _tmp15_, _tmp17_, _tmp19_, _tmp21_);
+				_tmp22_ = screen;
+				_tmp23_ = i;
+				_tmp24_ = main_window_monitor_is_unique_position (self, _tmp22_, _tmp23_);
+				if (_tmp24_) {
+					GdkRectangle _tmp25_;
+					gint _tmp26_;
+					GdkRectangle _tmp27_;
+					gint _tmp28_;
+					GdkRectangle _tmp29_;
+					gint _tmp30_;
+					GdkRectangle _tmp31_;
+					gint _tmp32_;
+					Monitor* _tmp33_;
+					_tmp25_ = geometry;
+					_tmp26_ = _tmp25_.x;
+					_tmp27_ = geometry;
+					_tmp28_ = _tmp27_.y;
+					_tmp29_ = geometry;
+					_tmp30_ = _tmp29_.width;
+					_tmp31_ = geometry;
+					_tmp32_ = _tmp31_.height;
+					_tmp33_ = monitor_new (_tmp26_, _tmp28_, _tmp30_, _tmp32_);
+					self->priv->monitors = g_list_append (self->priv->monitors, _tmp33_);
+				}
+			}
+		}
+	}
+	_tmp34_ = self->priv->background;
+	_tmp35_ = self->priv->monitors;
+	background_set_monitors (_tmp34_, _tmp35_);
+	_tmp36_ = screen;
+	_tmp37_ = gdk_screen_get_width (_tmp36_);
+	_tmp38_ = screen;
+	_tmp39_ = gdk_screen_get_height (_tmp38_);
+	gtk_window_resize ((GtkWindow*) self, _tmp37_, _tmp39_);
+	gtk_window_move ((GtkWindow*) self, 0, 0);
+	_tmp40_ = self->priv->monitors;
+	_tmp41_ = g_list_nth_data (_tmp40_, (guint) 0);
+	main_window_move_to_monitor (self, (Monitor*) _tmp41_);
+}
+
+
+static gboolean main_window_monitor_is_unique_position (MainWindow* self, GdkScreen* screen, gint n) {
+	gboolean result = FALSE;
+	GdkRectangle g0 = {0};
+	GdkScreen* _tmp0_;
+	gint _tmp1_;
+	GdkRectangle _tmp2_ = {0};
+	g_return_val_if_fail (self != NULL, FALSE);
+	g_return_val_if_fail (screen != NULL, FALSE);
+	_tmp0_ = screen;
+	_tmp1_ = n;
+	gdk_screen_get_monitor_geometry (_tmp0_, _tmp1_, &_tmp2_);
+	g0 = _tmp2_;
+	{
+		gint _tmp3_;
+		gint i;
+		_tmp3_ = n;
+		i = _tmp3_ + 1;
+		{
+			gboolean _tmp4_;
+			_tmp4_ = TRUE;
+			while (TRUE) {
+				gboolean _tmp5_;
+				gint _tmp7_;
+				GdkScreen* _tmp8_;
+				gint _tmp9_ = 0;
+				GdkRectangle g1 = {0};
+				GdkScreen* _tmp10_;
+				gint _tmp11_;
+				GdkRectangle _tmp12_ = {0};
+				gboolean _tmp13_ = FALSE;
+				GdkRectangle _tmp14_;
+				gint _tmp15_;
+				GdkRectangle _tmp16_;
+				gint _tmp17_;
+				gboolean _tmp22_;
+				_tmp5_ = _tmp4_;
+				if (!_tmp5_) {
+					gint _tmp6_;
+					_tmp6_ = i;
+					i = _tmp6_ + 1;
+				}
+				_tmp4_ = FALSE;
+				_tmp7_ = i;
+				_tmp8_ = screen;
+				_tmp9_ = gdk_screen_get_n_monitors (_tmp8_);
+				if (!(_tmp7_ < _tmp9_)) {
+					break;
+				}
+				_tmp10_ = screen;
+				_tmp11_ = i;
+				gdk_screen_get_monitor_geometry (_tmp10_, _tmp11_, &_tmp12_);
+				g1 = _tmp12_;
+				_tmp14_ = g0;
+				_tmp15_ = _tmp14_.x;
+				_tmp16_ = g1;
+				_tmp17_ = _tmp16_.x;
+				if (_tmp15_ == _tmp17_) {
+					GdkRectangle _tmp18_;
+					gint _tmp19_;
+					GdkRectangle _tmp20_;
+					gint _tmp21_;
+					_tmp18_ = g0;
+					_tmp19_ = _tmp18_.y;
+					_tmp20_ = g1;
+					_tmp21_ = _tmp20_.y;
+					_tmp13_ = _tmp19_ == _tmp21_;
+				} else {
+					_tmp13_ = FALSE;
+				}
+				_tmp22_ = _tmp13_;
+				if (_tmp22_) {
+					result = FALSE;
+					return result;
+				}
+			}
+		}
+	}
+	result = TRUE;
+	return result;
 }
 
 
@@ -305,6 +513,193 @@ static void main_window_change_background (MainWindow* self) {
 	} else {
 		main_window_change_background_timeout_cb (self);
 	}
+}
+
+
+static gpointer _monitor_ref0 (gpointer self) {
+	return self ? monitor_ref (self) : NULL;
+}
+
+
+static gboolean main_window_real_motion_notify_event (GtkWidget* base, GdkEventMotion* event) {
+	MainWindow * self;
+	gboolean result = FALSE;
+	GdkEventMotion _tmp0_;
+	gdouble _tmp1_;
+	gint x;
+	GdkEventMotion _tmp2_;
+	gdouble _tmp3_;
+	gint y;
+	GdkEventMotion _tmp4_;
+	GdkWindow* _tmp5_;
+	GdkWindow* _tmp6_ = NULL;
+	GList* _tmp22_;
+	self = (MainWindow*) base;
+	g_return_val_if_fail (event != NULL, FALSE);
+	_tmp0_ = *event;
+	_tmp1_ = _tmp0_.x;
+	x = (gint) (_tmp1_ + 0.5);
+	_tmp2_ = *event;
+	_tmp3_ = _tmp2_.y;
+	y = (gint) (_tmp3_ + 0.5);
+	_tmp4_ = *event;
+	_tmp5_ = _tmp4_.window;
+	_tmp6_ = gtk_widget_get_window ((GtkWidget*) self);
+	if (_tmp5_ != _tmp6_) {
+		gint w_x = 0;
+		gint w_y = 0;
+		GdkWindow* _tmp7_ = NULL;
+		gint _tmp8_ = 0;
+		gint _tmp9_ = 0;
+		gint _tmp10_;
+		gint _tmp11_;
+		gint _tmp12_;
+		gint _tmp13_;
+		GdkEventMotion _tmp14_;
+		GdkWindow* _tmp15_;
+		gint _tmp16_ = 0;
+		gint _tmp17_ = 0;
+		gint _tmp18_;
+		gint _tmp19_;
+		gint _tmp20_;
+		gint _tmp21_;
+		_tmp7_ = gtk_widget_get_window ((GtkWidget*) self);
+		gdk_window_get_origin (_tmp7_, &_tmp8_, &_tmp9_);
+		w_x = _tmp8_;
+		w_y = _tmp9_;
+		_tmp10_ = x;
+		_tmp11_ = w_x;
+		x = _tmp10_ - _tmp11_;
+		_tmp12_ = y;
+		_tmp13_ = w_y;
+		y = _tmp12_ - _tmp13_;
+		_tmp14_ = *event;
+		_tmp15_ = _tmp14_.window;
+		gdk_window_get_origin (_tmp15_, &_tmp16_, &_tmp17_);
+		w_x = _tmp16_;
+		w_y = _tmp17_;
+		_tmp18_ = x;
+		_tmp19_ = w_x;
+		x = _tmp18_ + _tmp19_;
+		_tmp20_ = y;
+		_tmp21_ = w_y;
+		y = _tmp20_ + _tmp21_;
+	}
+	_tmp22_ = self->priv->monitors;
+	{
+		GList* m_collection = NULL;
+		GList* m_it = NULL;
+		m_collection = _tmp22_;
+		for (m_it = m_collection; m_it != NULL; m_it = m_it->next) {
+			Monitor* _tmp23_;
+			Monitor* m = NULL;
+			_tmp23_ = _monitor_ref0 ((Monitor*) m_it->data);
+			m = _tmp23_;
+			{
+				gboolean _tmp24_ = FALSE;
+				gboolean _tmp25_ = FALSE;
+				gboolean _tmp26_ = FALSE;
+				gint _tmp27_;
+				Monitor* _tmp28_;
+				gint _tmp29_;
+				gboolean _tmp35_;
+				gboolean _tmp39_;
+				gboolean _tmp45_;
+				_tmp27_ = x;
+				_tmp28_ = m;
+				_tmp29_ = _tmp28_->x;
+				if (_tmp27_ >= _tmp29_) {
+					gint _tmp30_;
+					Monitor* _tmp31_;
+					gint _tmp32_;
+					Monitor* _tmp33_;
+					gint _tmp34_;
+					_tmp30_ = x;
+					_tmp31_ = m;
+					_tmp32_ = _tmp31_->x;
+					_tmp33_ = m;
+					_tmp34_ = _tmp33_->width;
+					_tmp26_ = _tmp30_ <= (_tmp32_ + _tmp34_);
+				} else {
+					_tmp26_ = FALSE;
+				}
+				_tmp35_ = _tmp26_;
+				if (_tmp35_) {
+					gint _tmp36_;
+					Monitor* _tmp37_;
+					gint _tmp38_;
+					_tmp36_ = y;
+					_tmp37_ = m;
+					_tmp38_ = _tmp37_->y;
+					_tmp25_ = _tmp36_ >= _tmp38_;
+				} else {
+					_tmp25_ = FALSE;
+				}
+				_tmp39_ = _tmp25_;
+				if (_tmp39_) {
+					gint _tmp40_;
+					Monitor* _tmp41_;
+					gint _tmp42_;
+					Monitor* _tmp43_;
+					gint _tmp44_;
+					_tmp40_ = y;
+					_tmp41_ = m;
+					_tmp42_ = _tmp41_->y;
+					_tmp43_ = m;
+					_tmp44_ = _tmp43_->height;
+					_tmp24_ = _tmp40_ <= (_tmp42_ + _tmp44_);
+				} else {
+					_tmp24_ = FALSE;
+				}
+				_tmp45_ = _tmp24_;
+				if (_tmp45_) {
+					Monitor* _tmp46_;
+					_tmp46_ = m;
+					main_window_move_to_monitor (self, _tmp46_);
+					_monitor_unref0 (m);
+					break;
+				}
+				_monitor_unref0 (m);
+			}
+		}
+	}
+	result = FALSE;
+	return result;
+}
+
+
+static void main_window_move_to_monitor (MainWindow* self, Monitor* monitor) {
+	GtkBox* _tmp0_;
+	Monitor* _tmp1_;
+	gint _tmp2_;
+	Monitor* _tmp3_;
+	gint _tmp4_;
+	Background* _tmp5_;
+	Monitor* _tmp6_;
+	Background* _tmp7_;
+	GtkBox* _tmp8_;
+	Monitor* _tmp9_;
+	gint _tmp10_;
+	Monitor* _tmp11_;
+	gint _tmp12_;
+	g_return_if_fail (self != NULL);
+	g_return_if_fail (monitor != NULL);
+	_tmp0_ = self->priv->login_box;
+	_tmp1_ = monitor;
+	_tmp2_ = _tmp1_->width;
+	_tmp3_ = monitor;
+	_tmp4_ = _tmp3_->height;
+	gtk_widget_set_size_request ((GtkWidget*) _tmp0_, _tmp2_, _tmp4_);
+	_tmp5_ = self->priv->background;
+	_tmp6_ = monitor;
+	background_set_active_monitor (_tmp5_, _tmp6_);
+	_tmp7_ = self->priv->background;
+	_tmp8_ = self->priv->login_box;
+	_tmp9_ = monitor;
+	_tmp10_ = _tmp9_->x;
+	_tmp11_ = monitor;
+	_tmp12_ = _tmp11_->y;
+	gtk_fixed_move ((GtkFixed*) _tmp7_, (GtkWidget*) _tmp8_, _tmp10_, _tmp12_);
 }
 
 
@@ -417,11 +812,6 @@ MainWindow* main_window_new (void) {
 }
 
 
-static void _main_window_monitors_changed_cb_gdk_screen_monitors_changed (GdkScreen* _sender, gpointer self) {
-	main_window_monitors_changed_cb (self, _sender);
-}
-
-
 static void _main_window___lambda4_ (MainWindow* self) {
 	main_window_change_background (self);
 }
@@ -453,132 +843,189 @@ static void __main_window___lambda5__user_list_user_displayed (UserList* _sender
 }
 
 
+static void _main_window_monitors_changed_cb_gdk_screen_monitors_changed (GdkScreen* _sender, gpointer self) {
+	main_window_monitors_changed_cb (self, _sender);
+}
+
+
 static GObject * main_window_constructor (GType type, guint n_construct_properties, GObjectConstructParam * construct_properties) {
 	GObject * obj;
 	GObjectClass * parent_class;
 	MainWindow * self;
+	GdkEventMask _tmp0_;
+	GdkEventMask _tmp1_;
+	GtkAccelGroup* _tmp2_;
+	GtkAccelGroup* accel_group;
+	GtkAccelGroup* _tmp3_;
 	GdkColor bg_color = {0};
-	GdkColor _tmp0_ = {0};
-	GdkColor _tmp1_;
-	AtkObject* _tmp2_ = NULL;
-	const gchar* _tmp3_ = NULL;
-	gboolean _tmp4_;
+	GdkColor _tmp4_ = {0};
+	GdkColor _tmp5_;
+	AtkObject* _tmp6_ = NULL;
+	const gchar* _tmp7_ = NULL;
+	Background* _tmp8_;
 	Background* _tmp9_;
 	Background* _tmp10_;
-	Background* _tmp11_;
-	gboolean _tmp12_ = FALSE;
-	Background* _tmp13_;
-	gchar* _tmp14_ = NULL;
-	gchar* _tmp15_;
-	Background* _tmp16_;
-	gchar* _tmp17_ = NULL;
-	gchar* _tmp18_;
-	Background* _tmp19_;
+	gboolean _tmp11_ = FALSE;
+	Background* _tmp12_;
+	gchar* _tmp13_ = NULL;
+	gchar* _tmp14_;
+	Background* _tmp15_;
+	gchar* _tmp16_ = NULL;
+	gchar* _tmp17_;
+	gchar* _tmp18_ = NULL;
+	gchar* _tmp19_;
 	Background* _tmp20_;
 	Background* _tmp21_;
 	Background* _tmp22_;
-	MenuBar* _tmp23_;
-	MenuBar* _tmp24_;
-	MenuBar* _tmp25_;
-	MenuBar* _tmp26_;
-	Background* _tmp27_;
-	MenuBar* _tmp28_;
-	MenuBar* _tmp29_;
-	Background* _tmp30_;
+	GtkBox* _tmp23_;
+	GtkBox* _tmp24_;
+	GtkBox* _tmp25_;
+	Background* _tmp26_;
+	GtkBox* _tmp27_;
+	Background* _tmp28_;
+	GtkAccelGroup* _tmp29_;
+	MenuBar* _tmp30_;
 	MenuBar* _tmp31_;
-	UserList* _tmp32_;
-	UserList* _tmp33_;
-	UserList* _tmp34_;
-	UserList* _tmp35_;
-	UserList* _tmp36_;
+	MenuBar* _tmp32_;
+	MenuBar* _tmp33_;
+	GtkBox* _tmp34_;
+	MenuBar* _tmp35_;
+	MenuBar* _tmp36_;
 	Background* _tmp37_;
-	UserList* _tmp38_;
+	MenuBar* _tmp38_;
 	UserList* _tmp39_;
+	UserList* _tmp40_;
+	UserList* _tmp41_;
+	UserList* _tmp42_;
+	UserList* _tmp43_;
+	GtkBox* _tmp44_;
+	UserList* _tmp45_;
+	UserList* _tmp46_;
+	gboolean _tmp47_;
 	parent_class = G_OBJECT_CLASS (main_window_parent_class);
 	obj = parent_class->constructor (type, n_construct_properties, construct_properties);
 	self = MAIN_WINDOW (obj);
+	_tmp0_ = gtk_widget_get_events ((GtkWidget*) self);
+	_tmp1_ = _tmp0_;
+	gtk_widget_set_events ((GtkWidget*) self, _tmp1_ | GDK_POINTER_MOTION_MASK);
+	_tmp2_ = gtk_accel_group_new ();
+	accel_group = _tmp2_;
+	_tmp3_ = accel_group;
+	gtk_window_add_accel_group ((GtkWindow*) self, _tmp3_);
 	memset (&bg_color, 0, sizeof (GdkColor));
-	gdk_color_parse ("#2C001E", &_tmp0_);
-	bg_color = _tmp0_;
-	_tmp1_ = bg_color;
-	gtk_widget_modify_bg ((GtkWidget*) self, GTK_STATE_NORMAL, &_tmp1_);
-	_tmp2_ = gtk_widget_get_accessible ((GtkWidget*) self);
-	_tmp3_ = _ ("Login Screen");
-	atk_object_set_name (_tmp2_, _tmp3_);
+	gdk_color_parse ("#2C001E", &_tmp4_);
+	bg_color = _tmp4_;
+	_tmp5_ = bg_color;
+	gtk_widget_modify_bg ((GtkWidget*) self, GTK_STATE_NORMAL, &_tmp5_);
+	_tmp6_ = gtk_widget_get_accessible ((GtkWidget*) self);
+	_tmp7_ = _ ("Login Screen");
+	atk_object_set_name (_tmp6_, _tmp7_);
 	gtk_window_set_has_resize_grip ((GtkWindow*) self, FALSE);
 	unity_greeter_add_style_class ((GtkWidget*) self);
-	_tmp4_ = unity_greeter_test_mode;
-	if (_tmp4_) {
-		gtk_window_resize ((GtkWindow*) self, 1024, 600);
+	_tmp8_ = background_new ();
+	_tmp9_ = g_object_ref_sink (_tmp8_);
+	_g_object_unref0 (self->priv->background);
+	self->priv->background = _tmp9_;
+	_tmp10_ = self->priv->background;
+	_tmp11_ = ug_settings_get_boolean (UG_SETTINGS_KEY_DRAW_GRID);
+	background_set_draw_grid (_tmp10_, _tmp11_);
+	_tmp12_ = self->priv->background;
+	_tmp13_ = ug_settings_get_string (UG_SETTINGS_KEY_BACKGROUND);
+	_tmp14_ = _tmp13_;
+	background_set_default_background (_tmp12_, _tmp14_);
+	_g_free0 (_tmp14_);
+	_tmp15_ = self->priv->background;
+	_tmp16_ = ug_settings_get_string (UG_SETTINGS_KEY_LOGO);
+	_tmp17_ = _tmp16_;
+	_tmp18_ = ug_settings_get_string (UG_SETTINGS_KEY_BACKGROUND_LOGO);
+	_tmp19_ = _tmp18_;
+	background_set_logo (_tmp15_, _tmp17_, _tmp19_);
+	_g_free0 (_tmp19_);
+	_g_free0 (_tmp17_);
+	_tmp20_ = self->priv->background;
+	gtk_widget_show ((GtkWidget*) _tmp20_);
+	_tmp21_ = self->priv->background;
+	gtk_container_add ((GtkContainer*) self, (GtkWidget*) _tmp21_);
+	_tmp22_ = self->priv->background;
+	unity_greeter_add_style_class ((GtkWidget*) _tmp22_);
+	_tmp23_ = (GtkBox*) gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+	_tmp24_ = g_object_ref_sink (_tmp23_);
+	_g_object_unref0 (self->priv->login_box);
+	self->priv->login_box = _tmp24_;
+	_tmp25_ = self->priv->login_box;
+	gtk_widget_show ((GtkWidget*) _tmp25_);
+	_tmp26_ = self->priv->background;
+	_tmp27_ = self->priv->login_box;
+	gtk_container_add ((GtkContainer*) _tmp26_, (GtkWidget*) _tmp27_);
+	_tmp28_ = self->priv->background;
+	_tmp29_ = accel_group;
+	_tmp30_ = menu_bar_new (_tmp28_, _tmp29_);
+	_tmp31_ = g_object_ref_sink (_tmp30_);
+	_g_object_unref0 (self->priv->menubar);
+	self->priv->menubar = _tmp31_;
+	_tmp32_ = self->priv->menubar;
+	g_signal_connect_object ((GObject*) _tmp32_, "notify::high-contrast", (GCallback) __main_window___lambda4__g_object_notify, self, 0);
+	_tmp33_ = self->priv->menubar;
+	gtk_widget_show ((GtkWidget*) _tmp33_);
+	_tmp34_ = self->priv->login_box;
+	_tmp35_ = self->priv->menubar;
+	gtk_container_add ((GtkContainer*) _tmp34_, (GtkWidget*) _tmp35_);
+	_tmp36_ = self->priv->menubar;
+	unity_greeter_add_style_class ((GtkWidget*) _tmp36_);
+	_tmp37_ = self->priv->background;
+	_tmp38_ = self->priv->menubar;
+	_tmp39_ = user_list_new (_tmp37_, _tmp38_);
+	_tmp40_ = g_object_ref_sink (_tmp39_);
+	_g_object_unref0 (self->user_list);
+	self->user_list = _tmp40_;
+	_tmp41_ = self->user_list;
+	g_object_set ((GtkWidget*) _tmp41_, "expand", TRUE, NULL);
+	_tmp42_ = self->user_list;
+	g_signal_connect_object (_tmp42_, "user-displayed", (GCallback) __main_window___lambda5__user_list_user_displayed, self, 0);
+	_tmp43_ = self->user_list;
+	gtk_widget_show ((GtkWidget*) _tmp43_);
+	_tmp44_ = self->priv->login_box;
+	_tmp45_ = self->user_list;
+	gtk_container_add ((GtkContainer*) _tmp44_, (GtkWidget*) _tmp45_);
+	_tmp46_ = self->user_list;
+	unity_greeter_add_style_class ((GtkWidget*) _tmp46_);
+	_tmp47_ = unity_greeter_test_mode;
+	if (_tmp47_) {
+		Monitor* _tmp48_;
+		Monitor* _tmp49_;
+		Background* _tmp50_;
+		GList* _tmp51_;
+		GList* _tmp52_;
+		gconstpointer _tmp53_ = NULL;
+		__g_list_free__monitor_unref0_0 (self->priv->monitors);
+		self->priv->monitors = NULL;
+		_tmp48_ = monitor_new (0, 0, 800, 600);
+		self->priv->monitors = g_list_append (self->priv->monitors, _tmp48_);
+		_tmp49_ = monitor_new (800, 120, 640, 480);
+		self->priv->monitors = g_list_append (self->priv->monitors, _tmp49_);
+		_tmp50_ = self->priv->background;
+		_tmp51_ = self->priv->monitors;
+		background_set_monitors (_tmp50_, _tmp51_);
+		_tmp52_ = self->priv->monitors;
+		_tmp53_ = g_list_nth_data (_tmp52_, (guint) 0);
+		main_window_move_to_monitor (self, (Monitor*) _tmp53_);
+		gtk_window_resize ((GtkWindow*) self, 800 + 640, 600);
 	} else {
-		GdkScreen* _tmp5_ = NULL;
-		GdkScreen* _tmp6_;
+		GdkScreen* _tmp54_ = NULL;
+		GdkScreen* _tmp55_;
 		GdkScreen* screen;
-		GdkScreen* _tmp7_;
-		GdkScreen* _tmp8_;
-		_tmp5_ = gtk_window_get_screen ((GtkWindow*) self);
-		_tmp6_ = _g_object_ref0 (_tmp5_);
-		screen = _tmp6_;
-		_tmp7_ = screen;
-		g_signal_connect_object (_tmp7_, "monitors-changed", (GCallback) _main_window_monitors_changed_cb_gdk_screen_monitors_changed, self, 0);
-		_tmp8_ = screen;
-		main_window_monitors_changed_cb (self, _tmp8_);
+		GdkScreen* _tmp56_;
+		GdkScreen* _tmp57_;
+		_tmp54_ = gtk_window_get_screen ((GtkWindow*) self);
+		_tmp55_ = _g_object_ref0 (_tmp54_);
+		screen = _tmp55_;
+		_tmp56_ = screen;
+		g_signal_connect_object (_tmp56_, "monitors-changed", (GCallback) _main_window_monitors_changed_cb_gdk_screen_monitors_changed, self, 0);
+		_tmp57_ = screen;
+		main_window_monitors_changed_cb (self, _tmp57_);
 		_g_object_unref0 (screen);
 	}
-	_tmp9_ = background_new ();
-	_tmp10_ = g_object_ref_sink (_tmp9_);
-	_g_object_unref0 (self->priv->background);
-	self->priv->background = _tmp10_;
-	_tmp11_ = self->priv->background;
-	_tmp12_ = ug_settings_get_boolean (UG_SETTINGS_KEY_DRAW_GRID);
-	background_set_draw_grid (_tmp11_, _tmp12_);
-	_tmp13_ = self->priv->background;
-	_tmp14_ = ug_settings_get_string (UG_SETTINGS_KEY_BACKGROUND);
-	_tmp15_ = _tmp14_;
-	background_set_default_background (_tmp13_, _tmp15_);
-	_g_free0 (_tmp15_);
-	_tmp16_ = self->priv->background;
-	_tmp17_ = ug_settings_get_string (UG_SETTINGS_KEY_LOGO);
-	_tmp18_ = _tmp17_;
-	background_set_logo (_tmp16_, _tmp18_);
-	_g_free0 (_tmp18_);
-	_tmp19_ = self->priv->background;
-	gtk_widget_show ((GtkWidget*) _tmp19_);
-	_tmp20_ = self->priv->background;
-	gtk_container_add ((GtkContainer*) self, (GtkWidget*) _tmp20_);
-	_tmp21_ = self->priv->background;
-	unity_greeter_add_style_class ((GtkWidget*) _tmp21_);
-	_tmp22_ = self->priv->background;
-	_tmp23_ = menu_bar_new (_tmp22_);
-	_tmp24_ = g_object_ref_sink (_tmp23_);
-	_g_object_unref0 (self->priv->menubar);
-	self->priv->menubar = _tmp24_;
-	_tmp25_ = self->priv->menubar;
-	g_signal_connect_object ((GObject*) _tmp25_, "notify::high-contrast", (GCallback) __main_window___lambda4__g_object_notify, self, 0);
-	_tmp26_ = self->priv->menubar;
-	gtk_widget_show ((GtkWidget*) _tmp26_);
-	_tmp27_ = self->priv->background;
-	_tmp28_ = self->priv->menubar;
-	gtk_container_add ((GtkContainer*) _tmp27_, (GtkWidget*) _tmp28_);
-	_tmp29_ = self->priv->menubar;
-	unity_greeter_add_style_class ((GtkWidget*) _tmp29_);
-	_tmp30_ = self->priv->background;
-	_tmp31_ = self->priv->menubar;
-	_tmp32_ = user_list_new (_tmp30_, _tmp31_);
-	_tmp33_ = g_object_ref_sink (_tmp32_);
-	_g_object_unref0 (self->user_list);
-	self->user_list = _tmp33_;
-	_tmp34_ = self->user_list;
-	g_object_set ((GtkWidget*) _tmp34_, "expand", TRUE, NULL);
-	_tmp35_ = self->user_list;
-	g_signal_connect_object (_tmp35_, "user-displayed", (GCallback) __main_window___lambda5__user_list_user_displayed, self, 0);
-	_tmp36_ = self->user_list;
-	gtk_widget_show ((GtkWidget*) _tmp36_);
-	_tmp37_ = self->priv->background;
-	_tmp38_ = self->user_list;
-	gtk_container_add ((GtkContainer*) _tmp37_, (GtkWidget*) _tmp38_);
-	_tmp39_ = self->user_list;
-	unity_greeter_add_style_class ((GtkWidget*) _tmp39_);
+	_g_object_unref0 (accel_group);
 	return obj;
 }
 
@@ -586,6 +1033,7 @@ static GObject * main_window_constructor (GType type, guint n_construct_properti
 static void main_window_class_init (MainWindowClass * klass) {
 	main_window_parent_class = g_type_class_peek_parent (klass);
 	g_type_class_add_private (klass, sizeof (MainWindowPrivate));
+	GTK_WIDGET_CLASS (klass)->motion_notify_event = main_window_real_motion_notify_event;
 	GTK_WIDGET_CLASS (klass)->key_press_event = main_window_real_key_press_event;
 	G_OBJECT_CLASS (klass)->constructor = main_window_constructor;
 	G_OBJECT_CLASS (klass)->finalize = main_window_finalize;
@@ -602,8 +1050,10 @@ static void main_window_finalize (GObject* obj) {
 	MainWindow * self;
 	self = MAIN_WINDOW (obj);
 	_g_object_unref0 (self->user_list);
+	__g_list_free__monitor_unref0_0 (self->priv->monitors);
 	_g_object_unref0 (self->priv->background);
 	_g_object_unref0 (self->priv->menubar);
+	_g_object_unref0 (self->priv->login_box);
 	G_OBJECT_CLASS (main_window_parent_class)->finalize (obj);
 }
 

@@ -37,6 +37,9 @@ public class UserEntry
     /* True if should be marked as active */
     public bool is_active;
 
+    /* True if have messages */
+    public bool has_messages;
+
     /* Keyboard layouts to use for this user by default */
     public List <LightDM.Layout> keyboard_layouts;
 }
@@ -53,6 +56,8 @@ public class UserList : Gtk.EventBox
     public UserEntry? selected_entry {get; private set; default = null;}
 
     private List<UserEntry> entries = null;
+
+    private Gdk.Pixbuf message_pixbuf;
     
     private double scroll_target_location;
     private double scroll_start_location;
@@ -163,10 +168,21 @@ public class UserList : Gtk.EventBox
         login_button.clicked.connect (login_button_clicked_cb);
         add_with_class (login_button);
 
-        try {
+        try
+        {
+            message_pixbuf = new Gdk.Pixbuf.from_file (Path.build_filename (Config.PKGDATADIR, "message.png", null));
+        }
+        catch (Error e)
+        {
+            debug ("Error loading message image: %s", e.message);
+        }
+
+        try
+        {
             options_pixbuf = new Gdk.Pixbuf.from_file (Path.build_filename (Config.PKGDATADIR, "cog.png", null));
         }
-        catch (Error e) {
+        catch (Error e)
+        {
             debug ("Error loading cog image: %s", e.message);
         }
 
@@ -229,14 +245,18 @@ public class UserList : Gtk.EventBox
 
     private void redraw_user_list ()
     {
-        queue_draw_area (box_x, box_y - (int) (n_above + 1) * grid_size,
-                         box_width * grid_size,
-                         (int) (n_above + 1 + box_height + n_below + 1) * grid_size);
+        var y = box_y - (int) (n_above + 1) * grid_size;
+        var height = (int) (n_above + 1 + box_height + n_below + 1) * grid_size;
+        Gtk.Allocation allocation;
+        get_allocation (out allocation);
+        queue_draw_area (allocation.x + box_x, allocation.y + y, box_width * grid_size, height);
     }
 
     private void redraw_login_box ()
     {
-        queue_draw_area (box_x, box_y, box_width * grid_size, box_height * grid_size);
+        Gtk.Allocation allocation;
+        get_allocation (out allocation);
+        queue_draw_area (allocation.x + box_x, allocation.y + box_y, box_width * grid_size, box_height * grid_size);
     }
 
     public void show_message (string text, bool error = false)
@@ -344,7 +364,7 @@ public class UserList : Gtk.EventBox
         return null;
     }
 
-    public void add_entry (string name, string label, string? background, List <LightDM.Layout>? keyboard_layouts, bool is_active = false)
+    public void add_entry (string name, string label, string? background, List <LightDM.Layout>? keyboard_layouts, bool is_active = false, bool has_messages = false)
     {
         var e = find_entry (name);
         if (e == null)
@@ -358,6 +378,7 @@ public class UserList : Gtk.EventBox
         e.background = background;
         e.keyboard_layouts = keyboard_layouts.copy ();
         e.is_active = is_active;
+        e.has_messages = has_messages;
 
         if (selected_entry == null)
             select_entry (e, 1.0);
@@ -529,14 +550,10 @@ public class UserList : Gtk.EventBox
 
     public override void size_allocate (Gtk.Allocation allocation)
     {
-        var resized = allocation.height != get_allocated_height () || allocation.width != get_allocated_width ();
         base.size_allocate (allocation);
 
         if (!get_realized ())
             return;
-
-        if (resized)
-            debug ("Resized to %dx%d", get_allocated_width (), get_allocated_height ());
 
         var child_allocation = Gtk.Allocation ();
 
@@ -570,7 +587,7 @@ public class UserList : Gtk.EventBox
 
         if (entry.is_active)
         {
-            c.move_to (8, grid_size / 2 + 0.5 - 4);
+            c.move_to (8, grid_size / 2 + 0.5 - 4 + border);
             c.rel_line_to (5, 4);
             c.rel_line_to (-5, 4);
             c.close_path ();
@@ -581,6 +598,7 @@ public class UserList : Gtk.EventBox
         int w, h;
         entry.layout.get_pixel_size (out w, out h);
 
+        /* Trim label if too wide */
         var bw = (box_width - (in_box ? 1.1 : 0.5)) * grid_size;
         if (w > bw)
         {
@@ -601,6 +619,14 @@ public class UserList : Gtk.EventBox
         c.translate (grid_size / 2, (grid_size - h) / 2 + border);
         c.move_to (0, 0);
         Pango.cairo_show_layout (c, entry.layout);
+
+        if (entry.has_messages)
+        {
+            c.translate (w + 6, (h - message_pixbuf.get_height ()) / 2);
+            Gdk.cairo_set_source_pixbuf (c, message_pixbuf, 0, 0);
+            c.rectangle (0, 0, message_pixbuf.get_width (), message_pixbuf.get_height ());
+            c.paint_with_alpha (alpha);
+        }
 
         c.restore ();
 

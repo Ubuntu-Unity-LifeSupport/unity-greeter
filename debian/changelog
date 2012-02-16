@@ -1,3 +1,15 @@
+unity-greeter (0.2.3-0ubuntu1) precise; urgency=low
+
+  * New upstream release:
+    [ 0.2.2 ]
+    - Support multi-monitor
+    - Add messaging indicator
+    [ 0.2.3 ] 
+    - Play system-ready sound on startup
+    - Fix placement of user-is-logged-in arrow
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Thu, 16 Feb 2012 17:35:24 +1100
+
 unity-greeter (0.2.1-0ubuntu1) precise; urgency=low
 
   * New upstream release
