@@ -1,0 +1,15 @@
+=== modified file 'a/src/background.vala'
+--- a/src/background.vala	2012-02-14 10:40:46 +0000
++++ b/src/background.vala	2012-02-17 22:33:55 +0000
+@@ -443,7 +443,9 @@
+     {
+         foreach (var m in monitors)
+         {
+-            if (m != monitor && m.width == monitor.width && m.height == monitor.height)
++            if (m == monitor)
++                break;
++            else if (m.width == monitor.width && m.height == monitor.height)
+                 return false;
+         }
+ 
+

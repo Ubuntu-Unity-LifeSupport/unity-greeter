@@ -1,3 +1,11 @@
+unity-greeter (0.2.3-0ubuntu4) precise; urgency=low
+
+  * debian/patches/do_not_crash_with_twinview.patch:
+    - Don't crash when all monitors have the same size (as can happen with
+      TwinView)  LP: #934040
+
+ -- Michael Terry <mterry@ubuntu.com>  Fri, 17 Feb 2012 17:43:37 -0500
+
 unity-greeter (0.2.3-0ubuntu3) precise; urgency=low
 
   * debian/control:
