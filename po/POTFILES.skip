@@ -4,9 +4,11 @@ src/dash-box.c
 src/dash-button.c
 src/dash-entry.c
 src/fadable.c
+src/fadable-box.c
 src/main-window.c
 src/menubar.c
 src/menu.c
+src/session-chooser.c
 src/settings.c
 src/settings-daemon.c
 src/unity-greeter.c

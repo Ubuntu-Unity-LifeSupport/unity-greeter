@@ -26,19 +26,24 @@ class BackgroundLoader
     public int[] widths;
     public int[] heights;
     public Cairo.Pattern[] patterns;
+
+    private Cairo.Surface target_surface;
     private bool draw_grid;
     private unowned Thread<void*> thread;
+    private Gdk.Pixbuf[] images;
     private bool finished;
     private uint ready_id;
 
     public signal void loaded ();
 
-    public BackgroundLoader (string filename, int[] widths, int[] heights, bool draw_grid)
+    public BackgroundLoader (Cairo.Surface target_surface, string filename, int[] widths, int[] heights, bool draw_grid)
     {
+        this.target_surface = target_surface;
         this.filename = filename;
         this.widths = widths;
         this.heights = heights;
         patterns = new Cairo.Pattern[widths.length];
+        images = new Gdk.Pixbuf[widths.length];
         this.draw_grid = draw_grid;
     }
 
@@ -56,14 +61,28 @@ class BackgroundLoader
         for (var i = 1; i < widths.length; i++)
             text += ",%dx%d".printf (widths[i], heights[i]);
         debug (text);
-        try
+
+        var color = Gdk.RGBA ();
+        if (color.parse (filename))
         {
-            thread = Thread<void*>.create<void*> (render, true);
-        }
-        catch (ThreadError e)
-        {
+            var pattern = new Cairo.Pattern.rgba (color.red, color.green, color.blue, color.alpha);
+            for (var i = 0; i < widths.length; i++)
+                patterns[i] = pattern;
             finished = true;
+            debug ("Render of background %s complete", filename);
             return true;
+        }
+        else
+        {
+            try
+            {
+                thread = Thread<void*>.create<void*> (load_and_scale, true);
+            }
+            catch (ThreadError e)
+            {
+                finished = true;
+                return true;
+            }
         }
 
         return false;
@@ -94,79 +113,76 @@ class BackgroundLoader
         thread = null;
         finished = true;
 
+        for (var i = 0; i < widths.length; i++)
+        {
+            patterns[i] = create_pattern (images[i]);
+            images[i] = null;
+        }
+
         loaded ();
 
         return false;
     }
 
-    private void* render ()
+    private void* load_and_scale ()
     {
-        for (var i = 0; i < widths.length; i++)
-            patterns[i] = render_size (widths[i], heights[i]);
+        try
+        {
+            var image = new Gdk.Pixbuf.from_file (filename);
+            for (var i = 0; i < widths.length; i++)
+                images[i] = scale (image, widths[i], heights[i]);
+        }
+        catch (Error e)
+        {
+            debug ("Error loading background: %s", e.message);
+        }
 
         ready_id = Gdk.threads_add_idle (ready_cb);
 
         return null;
     }
     
-    private Cairo.Pattern? render_size (int width, int height)
+    private Gdk.Pixbuf? scale (Gdk.Pixbuf? image, int width, int height)
     {
-        Gdk.Color color;
-        Gdk.Pixbuf orig_image = null;
-        if (!Gdk.Color.parse (filename, out color))
+        var target_aspect = (double) width / height;
+        var aspect = (double) image.width / image.height;
+        double scale, offset_x = 0, offset_y = 0;
+        if (aspect > target_aspect)
         {
-            try
-            {
-                orig_image = new Gdk.Pixbuf.from_file (filename);
-            }
-            catch (Error e)
-            {
-                debug ("Error loading background: %s", e.message);
-                ready_id = Gdk.threads_add_idle (ready_cb);
-                return null;
-            }
+            /* Fit height and trim sides */
+            scale = (double) height / image.height;
+            offset_x = (image.width * scale - width) / 2;
+        }
+        else
+        {
+            /* Fit width and trim top and bottom */
+            scale = (double) width / image.width;
+            offset_y = (image.height * scale - height) / 2;
         }
 
-        Gdk.Pixbuf? image = null;
-        if (orig_image != null)
-        {
-            var target_aspect = (double) width / height;
-            var aspect = (double) orig_image.width / orig_image.height;
-            double scale, offset_x = 0, offset_y = 0;
-            if (aspect > target_aspect)
-            {
-                /* Fit height and trim sides */
-                scale = (double) height / orig_image.height;
-                offset_x = (orig_image.width * scale - width) / 2;
-            }
-            else
-            {
-                /* Fit width and trim top and bottom */
-                scale = (double) width / orig_image.width;
-                offset_y = (orig_image.height * scale - height) / 2;
-            }
+        var scaled_image = new Gdk.Pixbuf (image.colorspace, image.has_alpha, image.bits_per_sample, width, height);
+        image.scale (scaled_image, 0, 0, width, height, -offset_x, -offset_y, scale, scale, Gdk.InterpType.BILINEAR);
 
-            image = new Gdk.Pixbuf (orig_image.colorspace, orig_image.has_alpha, orig_image.bits_per_sample, width, height);
-            orig_image.scale (image, 0, 0, width, height, -offset_x, -offset_y, scale, scale, Gdk.InterpType.BILINEAR);
-        }
+        return scaled_image;
+    }
 
-        var grid_x_offset = get_grid_offset (width);
-        var grid_y_offset = get_grid_offset (height);
+    private Cairo.Pattern? create_pattern (Gdk.Pixbuf image)
+    {
+        var grid_x_offset = get_grid_offset (image.width);
+        var grid_y_offset = get_grid_offset (image.height);
 
         /* Create background */
-        var surface = new Cairo.ImageSurface (Cairo.Format.RGB24, width, height);
+        var surface = new Cairo.Surface.similar (target_surface, Cairo.Content.COLOR, image.width, image.height);
         var bc = new Cairo.Context (surface);
-        if (image != null)
-            Gdk.cairo_set_source_pixbuf (bc, image, 0, 0);
-        else
-            Gdk.cairo_set_source_color (bc, color);
+        Gdk.cairo_set_source_pixbuf (bc, image, 0, 0);
+
         bc.paint ();
 
         /* Draw logo */
         if (logo != null)
         {
             bc.save ();
-            var y = (int) (height / grid_size - 2) * grid_size + grid_y_offset;
+            var y = (int) (image.height / grid_size - 2) * grid_size + grid_y_offset;
             bc.translate (grid_x_offset, y);
             bc.set_source_surface (logo, 0, 0);
             bc.paint_with_alpha (0.5);
@@ -209,27 +225,62 @@ public class Background : Gtk.Fixed
     public bool draw_grid {get; set; default = true;}
     public double alpha {get; private set; default = 1.0;}
 
+    private Cairo.Surface target_surface;
+
+    private List<Monitor> monitors = null;
+    private Monitor? active_monitor = null;
+
+    private AnimateTimer timer;
+
+    private BackgroundLoader current;
+    private BackgroundLoader old;
+
+    private HashTable<string, BackgroundLoader> loaders;
+
+    private Cairo.Surface? version_logo_surface = null;
+    private int version_logo_width;
+    private int version_logo_height;
+    private Cairo.Surface? background_logo_surface = null;
+    private int background_logo_width;
+    private int background_logo_height;
+
+    public Background (Cairo.Surface target_surface)
+    {
+        this.target_surface = target_surface;
+        timer = new AnimateTimer (AnimateTimer.INSTANT);
+        timer.animate.connect (animate_cb);
+
+        loaders = new HashTable<string?, BackgroundLoader> (str_hash, str_equal);
+
+        notify["current-background"].connect (() => {reload ();});
+    }
+
     public void set_logo (string version_logo, string background_logo)
-    {       
-        if (FileUtils.test (version_logo, FileTest.EXISTS))
+    {
+        version_logo_surface = load_image (version_logo, out version_logo_width, out version_logo_height);
+        background_logo_surface = load_image (background_logo, out background_logo_width, out background_logo_height);
+    }
+
+    private Cairo.Surface? load_image (string filename, out int width, out int height)
+    {
+        width = height = 0;
+        try
         {
-            version_logo_surface = new Cairo.ImageSurface.from_png (version_logo);
+            var image = new Gdk.Pixbuf.from_file (filename);
+            width = image.width;
+            height = image.height;
+            var surface = new Cairo.Surface.similar (target_surface, Cairo.Content.COLOR_ALPHA, image.width, image.height);
+            var c = new Cairo.Context (surface);
+            Gdk.cairo_set_source_pixbuf (c, image, 0, 0);
+            c.paint ();
+            return surface;
         }
-        else
+        catch (Error e)
         {
-            debug ("Can't use logo %s, it does not exist", version_logo);
-            version_logo_surface = null;
+            debug ("Failed to load background component %s: %s", filename, e.message);
         }
 
-        if (FileUtils.test (background_logo, FileTest.EXISTS))
-        {
-            background_logo_surface = new Cairo.ImageSurface.from_png (background_logo);
-        }
-        else
-        {
-            debug ("Can't use background logo %s, it does not exist", background_logo);
-            background_logo_surface = null;
-        }
+        return null;
     }
 
     public void set_monitors (List<Monitor> monitors)
@@ -313,7 +364,7 @@ public class Background : Gtk.Fixed
         if ((flags & DrawFlags.GRID) != 0)
             overlay_grid (c);
     }
-    
+
     private void draw_background (Cairo.Context c, BackgroundLoader background, double alpha)
     {
         foreach (var monitor in monitors)
@@ -335,8 +386,8 @@ public class Background : Gtk.Fixed
 
             if (monitor != active_monitor && background_logo_surface != null)
             {
-                var width = background_logo_surface.get_width ();
-                var height = background_logo_surface.get_height ();
+                var width = background_logo_width;
+                var height = background_logo_height;
 
                 c.save ();
                 pattern = new Cairo.Pattern.for_surface (background_logo_surface);
@@ -352,29 +403,6 @@ public class Background : Gtk.Fixed
                 c.restore ();
             }
         }
-    }
-
-    private List<Monitor> monitors = null;
-    private Monitor? active_monitor = null;
-
-    private AnimateTimer timer;
-
-    private BackgroundLoader current;
-    private BackgroundLoader old;
-
-    private HashTable<string, BackgroundLoader> loaders;
-
-    private Cairo.ImageSurface? version_logo_surface = null;
-    private Cairo.ImageSurface? background_logo_surface = null;
-
-    construct
-    {
-        timer = new AnimateTimer (AnimateTimer.INSTANT);
-        timer.animate.connect (animate_cb);
-
-        loaders = new HashTable<string?, BackgroundLoader> (str_hash, str_equal);
-
-        notify["current-background"].connect (() => {reload ();});
     }
 
     private void animate_cb (double progress)
@@ -428,7 +456,7 @@ public class Background : Gtk.Fixed
             widths.resize (n_sizes);
             heights.resize (n_sizes);
 
-            b = new BackgroundLoader (filename, widths, heights, draw_grid);
+            b = new BackgroundLoader (target_surface, filename, widths, heights, draw_grid);
             b.logo = version_logo_surface;
             b.loaded.connect (() => {reload();});
             b.load ();
@@ -443,7 +471,9 @@ public class Background : Gtk.Fixed
     {
         foreach (var m in monitors)
         {
-            if (m != monitor && m.width == monitor.width && m.height == monitor.height)
+            if (m == monitor)
+                break;
+            else if (m.width == monitor.width && m.height == monitor.height)
                 return false;
         }
 
@@ -458,7 +488,7 @@ public class Background : Gtk.Fixed
         var grid_y_offset = get_grid_offset (height);
 
         /* Overlay grid */
-        var overlay_surface = new Cairo.ImageSurface (Cairo.Format.ARGB32, grid_size, grid_size);
+        var overlay_surface = new Cairo.Surface.similar (target_surface, Cairo.Content.COLOR_ALPHA, grid_size, grid_size);
         var oc = new Cairo.Context (overlay_surface);
         oc.rectangle (0, 0, 1, 1);
         oc.rectangle (grid_size - 1, 0, 1, 1);

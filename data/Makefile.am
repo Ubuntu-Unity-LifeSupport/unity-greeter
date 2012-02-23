@@ -3,7 +3,18 @@
 xgreeterdir = $(datarootdir)/xgreeters
 dist_xgreeter_DATA = unity-greeter.desktop
 
-dist_pkgdata_DATA = a11y.svg cof.png cog.png logo.png message.png
+dist_pkgdata_DATA = \
+	a11y.svg \
+	arrow_left.png \
+	arrow_right.png \
+	cof.png \
+	logo.png \
+	message.png \
+	gnome_badge.png \
+	kde_badge.png \
+	recovery_console_badge.png \
+	ubuntu_badge.png \
+	unknown_badge.png
 
 @GSETTINGS_RULES@
 gsettings_SCHEMAS = com.canonical.unity-greeter.gschema.xml

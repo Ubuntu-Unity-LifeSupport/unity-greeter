@@ -102,6 +102,7 @@ typedef struct _MonitorPrivate MonitorPrivate;
 #define _monitor_unref0(var) ((var == NULL) ? NULL : (var = (monitor_unref (var), NULL)))
 
 #define USER_LIST_TYPE_SCROLL_TARGET (user_list_scroll_target_get_type ())
+#define _cairo_destroy0(var) ((var == NULL) ? NULL : (var = (cairo_destroy (var), NULL)))
 
 struct _MainWindow {
 	GtkWindow parent_instance;
@@ -131,6 +132,7 @@ struct _UserEntry {
 	gboolean is_active;
 	gboolean has_messages;
 	GList* keyboard_layouts;
+	gchar* session;
 };
 
 struct _UserEntryClass {
@@ -210,8 +212,8 @@ MainWindow* main_window_new (void);
 MainWindow* main_window_construct (GType object_type);
 static GObject * main_window_constructor (GType type, guint n_construct_properties, GObjectConstructParam * construct_properties);
 void unity_greeter_add_style_class (GtkWidget* widget);
-Background* background_new (void);
-Background* background_construct (GType object_type);
+Background* background_new (cairo_surface_t* target_surface);
+Background* background_construct (GType object_type, cairo_surface_t* target_surface);
 gboolean ug_settings_get_boolean (const gchar* key);
 #define UG_SETTINGS_KEY_DRAW_GRID "draw-grid"
 void background_set_draw_grid (Background* self, gboolean value);
@@ -223,13 +225,13 @@ void background_set_logo (Background* self, const gchar* version_logo, const gch
 #define UG_SETTINGS_KEY_BACKGROUND_LOGO "background-logo"
 MenuBar* menu_bar_new (Background* bg, GtkAccelGroup* ag);
 MenuBar* menu_bar_construct (GType object_type, Background* bg, GtkAccelGroup* ag);
-static void _main_window___lambda4_ (MainWindow* self);
-static void __main_window___lambda4__g_object_notify (GObject* _sender, GParamSpec* pspec, gpointer self);
+static void _main_window___lambda7_ (MainWindow* self);
+static void __main_window___lambda7__g_object_notify (GObject* _sender, GParamSpec* pspec, gpointer self);
 UserList* user_list_new (Background* bg, MenuBar* mb);
 UserList* user_list_construct (GType object_type, Background* bg, MenuBar* mb);
-static void _main_window___lambda5_ (MainWindow* self);
+static void _main_window___lambda8_ (MainWindow* self);
 void menu_bar_set_layouts (MenuBar* self, GList* layouts);
-static void __main_window___lambda5__user_list_user_displayed (UserList* _sender, gpointer self);
+static void __main_window___lambda8__user_list_user_displayed (UserList* _sender, gpointer self);
 static void _main_window_monitors_changed_cb_gdk_screen_monitors_changed (GdkScreen* _sender, gpointer self);
 static void main_window_finalize (GObject* obj);
 
@@ -264,7 +266,7 @@ static void main_window_monitors_changed_cb (MainWindow* self, GdkScreen* screen
 	_tmp1_ = gdk_screen_get_width (_tmp0_);
 	_tmp2_ = screen;
 	_tmp3_ = gdk_screen_get_height (_tmp2_);
-	g_debug ("main-window.vala:94: Screen is %dx%d pixels", _tmp1_, _tmp3_);
+	g_debug ("main-window.vala:95: Screen is %dx%d pixels", _tmp1_, _tmp3_);
 	__g_list_free__monitor_unref0_0 (self->priv->monitors);
 	self->priv->monitors = NULL;
 	{
@@ -320,7 +322,7 @@ static void main_window_monitors_changed_cb (MainWindow* self, GdkScreen* screen
 				_tmp19_ = _tmp18_.x;
 				_tmp20_ = geometry;
 				_tmp21_ = _tmp20_.y;
-				g_debug ("main-window.vala:100: Monitor %d is %dx%d pixels at %d,%d", _tmp13_, _tmp15_, _tmp17_, _tmp19_, _tmp21_);
+				g_debug ("main-window.vala:101: Monitor %d is %dx%d pixels at %d,%d", _tmp13_, _tmp15_, _tmp17_, _tmp19_, _tmp21_);
 				_tmp22_ = screen;
 				_tmp23_ = i;
 				_tmp24_ = main_window_monitor_is_unique_position (self, _tmp22_, _tmp23_);
@@ -812,17 +814,17 @@ MainWindow* main_window_new (void) {
 }
 
 
-static void _main_window___lambda4_ (MainWindow* self) {
+static void _main_window___lambda7_ (MainWindow* self) {
 	main_window_change_background (self);
 }
 
 
-static void __main_window___lambda4__g_object_notify (GObject* _sender, GParamSpec* pspec, gpointer self) {
-	_main_window___lambda4_ (self);
+static void __main_window___lambda7__g_object_notify (GObject* _sender, GParamSpec* pspec, gpointer self) {
+	_main_window___lambda7_ (self);
 }
 
 
-static void _main_window___lambda5_ (MainWindow* self) {
+static void _main_window___lambda8_ (MainWindow* self) {
 	MenuBar* _tmp0_;
 	UserList* _tmp1_;
 	UserEntry* _tmp2_;
@@ -838,8 +840,8 @@ static void _main_window___lambda5_ (MainWindow* self) {
 }
 
 
-static void __main_window___lambda5__user_list_user_displayed (UserList* _sender, gpointer self) {
-	_main_window___lambda5_ (self);
+static void __main_window___lambda8__user_list_user_displayed (UserList* _sender, gpointer self) {
+	_main_window___lambda8_ (self);
 }
 
 
@@ -857,51 +859,54 @@ static GObject * main_window_constructor (GType type, guint n_construct_properti
 	GtkAccelGroup* _tmp2_;
 	GtkAccelGroup* accel_group;
 	GtkAccelGroup* _tmp3_;
-	GdkColor bg_color = {0};
-	GdkColor _tmp4_ = {0};
-	GdkColor _tmp5_;
-	AtkObject* _tmp6_ = NULL;
-	const gchar* _tmp7_ = NULL;
-	Background* _tmp8_;
-	Background* _tmp9_;
-	Background* _tmp10_;
-	gboolean _tmp11_ = FALSE;
+	GdkRGBA bg_color = {0};
+	GdkRGBA _tmp4_;
+	AtkObject* _tmp5_ = NULL;
+	const gchar* _tmp6_ = NULL;
+	GdkWindow* _tmp7_ = NULL;
+	cairo_t* _tmp8_ = NULL;
+	cairo_t* _tmp9_;
+	cairo_surface_t* _tmp10_ = NULL;
+	Background* _tmp11_;
 	Background* _tmp12_;
-	gchar* _tmp13_ = NULL;
-	gchar* _tmp14_;
+	Background* _tmp13_;
+	gboolean _tmp14_ = FALSE;
 	Background* _tmp15_;
 	gchar* _tmp16_ = NULL;
 	gchar* _tmp17_;
-	gchar* _tmp18_ = NULL;
-	gchar* _tmp19_;
-	Background* _tmp20_;
-	Background* _tmp21_;
-	Background* _tmp22_;
-	GtkBox* _tmp23_;
-	GtkBox* _tmp24_;
-	GtkBox* _tmp25_;
-	Background* _tmp26_;
+	Background* _tmp18_;
+	gchar* _tmp19_ = NULL;
+	gchar* _tmp20_;
+	gchar* _tmp21_ = NULL;
+	gchar* _tmp22_;
+	Background* _tmp23_;
+	Background* _tmp24_;
+	Background* _tmp25_;
+	GtkBox* _tmp26_;
 	GtkBox* _tmp27_;
-	Background* _tmp28_;
-	GtkAccelGroup* _tmp29_;
-	MenuBar* _tmp30_;
-	MenuBar* _tmp31_;
-	MenuBar* _tmp32_;
+	GtkBox* _tmp28_;
+	Background* _tmp29_;
+	GtkBox* _tmp30_;
+	Background* _tmp31_;
+	GtkAccelGroup* _tmp32_;
 	MenuBar* _tmp33_;
-	GtkBox* _tmp34_;
+	MenuBar* _tmp34_;
 	MenuBar* _tmp35_;
 	MenuBar* _tmp36_;
-	Background* _tmp37_;
+	GtkBox* _tmp37_;
 	MenuBar* _tmp38_;
-	UserList* _tmp39_;
-	UserList* _tmp40_;
-	UserList* _tmp41_;
+	MenuBar* _tmp39_;
+	Background* _tmp40_;
+	MenuBar* _tmp41_;
 	UserList* _tmp42_;
 	UserList* _tmp43_;
-	GtkBox* _tmp44_;
+	UserList* _tmp44_;
 	UserList* _tmp45_;
 	UserList* _tmp46_;
-	gboolean _tmp47_;
+	GtkBox* _tmp47_;
+	UserList* _tmp48_;
+	UserList* _tmp49_;
+	gboolean _tmp50_;
 	parent_class = G_OBJECT_CLASS (main_window_parent_class);
 	obj = parent_class->constructor (type, n_construct_properties, construct_properties);
 	self = MAIN_WINDOW (obj);
@@ -912,117 +917,122 @@ static GObject * main_window_constructor (GType type, guint n_construct_properti
 	accel_group = _tmp2_;
 	_tmp3_ = accel_group;
 	gtk_window_add_accel_group ((GtkWindow*) self, _tmp3_);
-	memset (&bg_color, 0, sizeof (GdkColor));
-	gdk_color_parse ("#2C001E", &_tmp4_);
-	bg_color = _tmp4_;
-	_tmp5_ = bg_color;
-	gtk_widget_modify_bg ((GtkWidget*) self, GTK_STATE_NORMAL, &_tmp5_);
-	_tmp6_ = gtk_widget_get_accessible ((GtkWidget*) self);
-	_tmp7_ = _ ("Login Screen");
-	atk_object_set_name (_tmp6_, _tmp7_);
+	memset (&bg_color, 0, sizeof (GdkRGBA));
+	gdk_rgba_parse (&bg_color, "#2C001E");
+	_tmp4_ = bg_color;
+	gtk_widget_override_background_color ((GtkWidget*) self, GTK_STATE_FLAG_NORMAL, &_tmp4_);
+	_tmp5_ = gtk_widget_get_accessible ((GtkWidget*) self);
+	_tmp6_ = _ ("Login Screen");
+	atk_object_set_name (_tmp5_, _tmp6_);
 	gtk_window_set_has_resize_grip ((GtkWindow*) self, FALSE);
 	unity_greeter_add_style_class ((GtkWidget*) self);
-	_tmp8_ = background_new ();
-	_tmp9_ = g_object_ref_sink (_tmp8_);
+	gtk_widget_realize ((GtkWidget*) self);
+	_tmp7_ = gtk_widget_get_window ((GtkWidget*) self);
+	_tmp8_ = gdk_cairo_create (_tmp7_);
+	_tmp9_ = _tmp8_;
+	_tmp10_ = cairo_get_target (_tmp9_);
+	_tmp11_ = background_new (_tmp10_);
+	_tmp12_ = g_object_ref_sink (_tmp11_);
 	_g_object_unref0 (self->priv->background);
-	self->priv->background = _tmp9_;
-	_tmp10_ = self->priv->background;
-	_tmp11_ = ug_settings_get_boolean (UG_SETTINGS_KEY_DRAW_GRID);
-	background_set_draw_grid (_tmp10_, _tmp11_);
-	_tmp12_ = self->priv->background;
-	_tmp13_ = ug_settings_get_string (UG_SETTINGS_KEY_BACKGROUND);
-	_tmp14_ = _tmp13_;
-	background_set_default_background (_tmp12_, _tmp14_);
-	_g_free0 (_tmp14_);
+	self->priv->background = _tmp12_;
+	_cairo_destroy0 (_tmp9_);
+	_tmp13_ = self->priv->background;
+	_tmp14_ = ug_settings_get_boolean (UG_SETTINGS_KEY_DRAW_GRID);
+	background_set_draw_grid (_tmp13_, _tmp14_);
 	_tmp15_ = self->priv->background;
-	_tmp16_ = ug_settings_get_string (UG_SETTINGS_KEY_LOGO);
+	_tmp16_ = ug_settings_get_string (UG_SETTINGS_KEY_BACKGROUND);
 	_tmp17_ = _tmp16_;
-	_tmp18_ = ug_settings_get_string (UG_SETTINGS_KEY_BACKGROUND_LOGO);
-	_tmp19_ = _tmp18_;
-	background_set_logo (_tmp15_, _tmp17_, _tmp19_);
-	_g_free0 (_tmp19_);
+	background_set_default_background (_tmp15_, _tmp17_);
 	_g_free0 (_tmp17_);
-	_tmp20_ = self->priv->background;
-	gtk_widget_show ((GtkWidget*) _tmp20_);
-	_tmp21_ = self->priv->background;
-	gtk_container_add ((GtkContainer*) self, (GtkWidget*) _tmp21_);
-	_tmp22_ = self->priv->background;
-	unity_greeter_add_style_class ((GtkWidget*) _tmp22_);
-	_tmp23_ = (GtkBox*) gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
-	_tmp24_ = g_object_ref_sink (_tmp23_);
+	_tmp18_ = self->priv->background;
+	_tmp19_ = ug_settings_get_string (UG_SETTINGS_KEY_LOGO);
+	_tmp20_ = _tmp19_;
+	_tmp21_ = ug_settings_get_string (UG_SETTINGS_KEY_BACKGROUND_LOGO);
+	_tmp22_ = _tmp21_;
+	background_set_logo (_tmp18_, _tmp20_, _tmp22_);
+	_g_free0 (_tmp22_);
+	_g_free0 (_tmp20_);
+	_tmp23_ = self->priv->background;
+	gtk_widget_show ((GtkWidget*) _tmp23_);
+	_tmp24_ = self->priv->background;
+	gtk_container_add ((GtkContainer*) self, (GtkWidget*) _tmp24_);
+	_tmp25_ = self->priv->background;
+	unity_greeter_add_style_class ((GtkWidget*) _tmp25_);
+	_tmp26_ = (GtkBox*) gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+	_tmp27_ = g_object_ref_sink (_tmp26_);
 	_g_object_unref0 (self->priv->login_box);
-	self->priv->login_box = _tmp24_;
-	_tmp25_ = self->priv->login_box;
-	gtk_widget_show ((GtkWidget*) _tmp25_);
-	_tmp26_ = self->priv->background;
-	_tmp27_ = self->priv->login_box;
-	gtk_container_add ((GtkContainer*) _tmp26_, (GtkWidget*) _tmp27_);
-	_tmp28_ = self->priv->background;
-	_tmp29_ = accel_group;
-	_tmp30_ = menu_bar_new (_tmp28_, _tmp29_);
-	_tmp31_ = g_object_ref_sink (_tmp30_);
+	self->priv->login_box = _tmp27_;
+	_tmp28_ = self->priv->login_box;
+	gtk_widget_show ((GtkWidget*) _tmp28_);
+	_tmp29_ = self->priv->background;
+	_tmp30_ = self->priv->login_box;
+	gtk_container_add ((GtkContainer*) _tmp29_, (GtkWidget*) _tmp30_);
+	_tmp31_ = self->priv->background;
+	_tmp32_ = accel_group;
+	_tmp33_ = menu_bar_new (_tmp31_, _tmp32_);
+	_tmp34_ = g_object_ref_sink (_tmp33_);
 	_g_object_unref0 (self->priv->menubar);
-	self->priv->menubar = _tmp31_;
-	_tmp32_ = self->priv->menubar;
-	g_signal_connect_object ((GObject*) _tmp32_, "notify::high-contrast", (GCallback) __main_window___lambda4__g_object_notify, self, 0);
-	_tmp33_ = self->priv->menubar;
-	gtk_widget_show ((GtkWidget*) _tmp33_);
-	_tmp34_ = self->priv->login_box;
+	self->priv->menubar = _tmp34_;
 	_tmp35_ = self->priv->menubar;
-	gtk_container_add ((GtkContainer*) _tmp34_, (GtkWidget*) _tmp35_);
+	g_signal_connect_object ((GObject*) _tmp35_, "notify::high-contrast", (GCallback) __main_window___lambda7__g_object_notify, self, 0);
 	_tmp36_ = self->priv->menubar;
-	unity_greeter_add_style_class ((GtkWidget*) _tmp36_);
-	_tmp37_ = self->priv->background;
+	gtk_widget_show ((GtkWidget*) _tmp36_);
+	_tmp37_ = self->priv->login_box;
 	_tmp38_ = self->priv->menubar;
-	_tmp39_ = user_list_new (_tmp37_, _tmp38_);
-	_tmp40_ = g_object_ref_sink (_tmp39_);
+	gtk_container_add ((GtkContainer*) _tmp37_, (GtkWidget*) _tmp38_);
+	_tmp39_ = self->priv->menubar;
+	unity_greeter_add_style_class ((GtkWidget*) _tmp39_);
+	_tmp40_ = self->priv->background;
+	_tmp41_ = self->priv->menubar;
+	_tmp42_ = user_list_new (_tmp40_, _tmp41_);
+	_tmp43_ = g_object_ref_sink (_tmp42_);
 	_g_object_unref0 (self->user_list);
-	self->user_list = _tmp40_;
-	_tmp41_ = self->user_list;
-	g_object_set ((GtkWidget*) _tmp41_, "expand", TRUE, NULL);
-	_tmp42_ = self->user_list;
-	g_signal_connect_object (_tmp42_, "user-displayed", (GCallback) __main_window___lambda5__user_list_user_displayed, self, 0);
-	_tmp43_ = self->user_list;
-	gtk_widget_show ((GtkWidget*) _tmp43_);
-	_tmp44_ = self->priv->login_box;
+	self->user_list = _tmp43_;
+	_tmp44_ = self->user_list;
+	g_object_set ((GtkWidget*) _tmp44_, "expand", TRUE, NULL);
 	_tmp45_ = self->user_list;
-	gtk_container_add ((GtkContainer*) _tmp44_, (GtkWidget*) _tmp45_);
+	g_signal_connect_object (_tmp45_, "user-displayed", (GCallback) __main_window___lambda8__user_list_user_displayed, self, 0);
 	_tmp46_ = self->user_list;
-	unity_greeter_add_style_class ((GtkWidget*) _tmp46_);
-	_tmp47_ = unity_greeter_test_mode;
-	if (_tmp47_) {
-		Monitor* _tmp48_;
-		Monitor* _tmp49_;
-		Background* _tmp50_;
-		GList* _tmp51_;
-		GList* _tmp52_;
-		gconstpointer _tmp53_ = NULL;
+	gtk_widget_show ((GtkWidget*) _tmp46_);
+	_tmp47_ = self->priv->login_box;
+	_tmp48_ = self->user_list;
+	gtk_container_add ((GtkContainer*) _tmp47_, (GtkWidget*) _tmp48_);
+	_tmp49_ = self->user_list;
+	unity_greeter_add_style_class ((GtkWidget*) _tmp49_);
+	_tmp50_ = unity_greeter_test_mode;
+	if (_tmp50_) {
+		Monitor* _tmp51_;
+		Monitor* _tmp52_;
+		Background* _tmp53_;
+		GList* _tmp54_;
+		GList* _tmp55_;
+		gconstpointer _tmp56_ = NULL;
 		__g_list_free__monitor_unref0_0 (self->priv->monitors);
 		self->priv->monitors = NULL;
-		_tmp48_ = monitor_new (0, 0, 800, 600);
-		self->priv->monitors = g_list_append (self->priv->monitors, _tmp48_);
-		_tmp49_ = monitor_new (800, 120, 640, 480);
-		self->priv->monitors = g_list_append (self->priv->monitors, _tmp49_);
-		_tmp50_ = self->priv->background;
-		_tmp51_ = self->priv->monitors;
-		background_set_monitors (_tmp50_, _tmp51_);
-		_tmp52_ = self->priv->monitors;
-		_tmp53_ = g_list_nth_data (_tmp52_, (guint) 0);
-		main_window_move_to_monitor (self, (Monitor*) _tmp53_);
+		_tmp51_ = monitor_new (0, 0, 800, 600);
+		self->priv->monitors = g_list_append (self->priv->monitors, _tmp51_);
+		_tmp52_ = monitor_new (800, 120, 640, 480);
+		self->priv->monitors = g_list_append (self->priv->monitors, _tmp52_);
+		_tmp53_ = self->priv->background;
+		_tmp54_ = self->priv->monitors;
+		background_set_monitors (_tmp53_, _tmp54_);
+		_tmp55_ = self->priv->monitors;
+		_tmp56_ = g_list_nth_data (_tmp55_, (guint) 0);
+		main_window_move_to_monitor (self, (Monitor*) _tmp56_);
 		gtk_window_resize ((GtkWindow*) self, 800 + 640, 600);
 	} else {
-		GdkScreen* _tmp54_ = NULL;
-		GdkScreen* _tmp55_;
+		GdkScreen* _tmp57_ = NULL;
+		GdkScreen* _tmp58_;
 		GdkScreen* screen;
-		GdkScreen* _tmp56_;
-		GdkScreen* _tmp57_;
-		_tmp54_ = gtk_window_get_screen ((GtkWindow*) self);
-		_tmp55_ = _g_object_ref0 (_tmp54_);
-		screen = _tmp55_;
-		_tmp56_ = screen;
-		g_signal_connect_object (_tmp56_, "monitors-changed", (GCallback) _main_window_monitors_changed_cb_gdk_screen_monitors_changed, self, 0);
-		_tmp57_ = screen;
-		main_window_monitors_changed_cb (self, _tmp57_);
+		GdkScreen* _tmp59_;
+		GdkScreen* _tmp60_;
+		_tmp57_ = gtk_window_get_screen ((GtkWindow*) self);
+		_tmp58_ = _g_object_ref0 (_tmp57_);
+		screen = _tmp58_;
+		_tmp59_ = screen;
+		g_signal_connect_object (_tmp59_, "monitors-changed", (GCallback) _main_window_monitors_changed_cb_gdk_screen_monitors_changed, self, 0);
+		_tmp60_ = screen;
+		main_window_monitors_changed_cb (self, _tmp60_);
 		_g_object_unref0 (screen);
 	}
 	_g_object_unref0 (accel_group);

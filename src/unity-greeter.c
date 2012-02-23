@@ -143,7 +143,6 @@ struct _UnityGreeterPrivate {
 	MainWindow* main_window;
 	LightDMGreeter* greeter;
 	gboolean prompted;
-	gboolean have_session;
 	gchar* authenticate_user;
 	gchar* test_username;
 	gboolean test_is_authenticated;
@@ -215,8 +214,7 @@ void settings_daemon_start (SettingsDaemon* self, GAsyncReadyCallback _callback_
 void settings_daemon_start_finish (SettingsDaemon* self, GAsyncResult* _res_);
 MainWindow* main_window_new (void);
 MainWindow* main_window_construct (GType object_type);
-void user_list_add_session (UserList* self, const gchar* name, const gchar* label);
-void user_list_add_entry (UserList* self, const gchar* name, const gchar* label, const gchar* background, GList* keyboard_layouts, gboolean is_active, gboolean has_messages);
+void user_list_add_entry (UserList* self, const gchar* name, const gchar* label, const gchar* background, GList* keyboard_layouts, gboolean is_active, gboolean has_messages, const gchar* session);
 static GList* unity_greeter_make_layout_list (UnityGreeter* self, const gchar* names);
 static void _g_object_unref0_ (gpointer var);
 static void _g_list_free__g_object_unref0_ (GList* self);
@@ -240,8 +238,6 @@ void unity_greeter_add_style_class (GtkWidget* widget);
 static LightDMLayout* unity_greeter_get_layout_by_name (UnityGreeter* self, const gchar* name);
 void user_list_remove_entry (UserList* self, const gchar* name);
 void unity_greeter_show (UnityGreeter* self);
-static void unity_greeter_update_session (UnityGreeter* self);
-void user_list_set_session (UserList* self, const gchar* value);
 void user_list_show_message (UserList* self, const gchar* text, gboolean _error_);
 static void unity_greeter_update_other_label (UnityGreeter* self);
 void user_list_show_prompt (UserList* self, const gchar* text, gboolean secret);
@@ -372,14 +368,13 @@ UnityGreeter* unity_greeter_construct (GType object_type) {
 	MainWindow* _tmp36_;
 	UserList* _tmp37_;
 	UserList* _tmp38_;
-	GList* _tmp39_ = NULL;
-	gboolean _tmp53_;
-	UserList* _tmp113_;
-	UserList* _tmp114_;
-	UserList* _tmp115_;
-	UserList* _tmp116_;
-	const gchar* _tmp117_;
-	const gchar* _tmp118_;
+	gboolean _tmp39_;
+	UserList* _tmp102_;
+	UserList* _tmp103_;
+	UserList* _tmp104_;
+	UserList* _tmp105_;
+	const gchar* _tmp106_;
+	const gchar* _tmp107_;
 	GError * _inner_error_ = NULL;
 	self = (UnityGreeter*) g_type_create_instance (object_type);
 	_tmp0_ = lightdm_greeter_new ();
@@ -400,20 +395,20 @@ UnityGreeter* unity_greeter_construct (GType object_type) {
 		_tmp5_ = lightdm_greeter_connect_sync (_tmp4_, &_inner_error_);
 		_tmp6_ = _tmp5_;
 		if (_inner_error_ != NULL) {
-			goto __catch6_g_error;
+			goto __catch9_g_error;
 		}
 		connected = _tmp6_;
 	}
-	goto __finally6;
-	__catch6_g_error:
+	goto __finally9;
+	__catch9_g_error:
 	{
 		GError* e = NULL;
 		e = _inner_error_;
 		_inner_error_ = NULL;
-		g_warning ("unity-greeter.vala:73: Failed to connect to LightDM daemon");
+		g_warning ("unity-greeter.vala:72: Failed to connect to LightDM daemon");
 		_g_error_free0 (e);
 	}
-	__finally6:
+	__finally9:
 	if (_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
@@ -466,11 +461,11 @@ UnityGreeter* unity_greeter_construct (GType object_type) {
 		g_key_file_load_from_file (_tmp20_, _tmp23_, G_KEY_FILE_NONE, &_inner_error_);
 		_g_free0 (_tmp23_);
 		if (_inner_error_ != NULL) {
-			goto __catch7_g_error;
+			goto __catch10_g_error;
 		}
 	}
-	goto __finally7;
-	__catch7_g_error:
+	goto __finally10;
+	__catch10_g_error:
 	{
 		GError* e = NULL;
 		GError* _tmp24_;
@@ -488,12 +483,12 @@ UnityGreeter* unity_greeter_construct (GType object_type) {
 			_tmp27_ = _tmp26_;
 			_tmp28_ = e;
 			_tmp29_ = _tmp28_->message;
-			g_warning ("unity-greeter.vala:96: Failed to load state from %s: %s\n", _tmp27_, _tmp29_);
+			g_warning ("unity-greeter.vala:95: Failed to load state from %s: %s\n", _tmp27_, _tmp29_);
 			_g_free0 (_tmp27_);
 		}
 		_g_error_free0 (e);
 	}
-	__finally7:
+	__finally10:
 	if (_inner_error_ != NULL) {
 		_g_free0 (state_dir);
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
@@ -510,20 +505,20 @@ UnityGreeter* unity_greeter_construct (GType object_type) {
 		_tmp32_ = g_key_file_get_value (_tmp31_, "greeter", "last-user", &_inner_error_);
 		_tmp33_ = _tmp32_;
 		if (_inner_error_ != NULL) {
-			goto __catch8_g_error;
+			goto __catch11_g_error;
 		}
 		_g_free0 (last_user);
 		last_user = _tmp33_;
 	}
-	goto __finally8;
-	__catch8_g_error:
+	goto __finally11;
+	__catch11_g_error:
 	{
 		GError* e = NULL;
 		e = _inner_error_;
 		_inner_error_ = NULL;
 		_g_error_free0 (e);
 	}
-	__finally8:
+	__finally11:
 	if (_inner_error_ != NULL) {
 		_g_free0 (last_user);
 		_g_free0 (state_dir);
@@ -540,233 +535,196 @@ UnityGreeter* unity_greeter_construct (GType object_type) {
 	_tmp38_ = _g_object_ref0 (_tmp37_);
 	_g_object_unref0 (self->user_list);
 	self->user_list = _tmp38_;
-	_tmp39_ = lightdm_get_sessions ();
-	{
-		GList* session_collection = NULL;
-		GList* session_it = NULL;
-		session_collection = _tmp39_;
-		for (session_it = session_collection; session_it != NULL; session_it = session_it->next) {
-			LightDMSession* session = NULL;
-			session = (LightDMSession*) session_it->data;
-			{
-				LightDMSession* _tmp40_;
-				const gchar* _tmp41_;
-				const gchar* _tmp42_;
-				LightDMSession* _tmp43_;
-				const gchar* _tmp44_;
-				const gchar* _tmp45_;
-				UserList* _tmp46_;
-				LightDMSession* _tmp47_;
-				const gchar* _tmp48_;
-				const gchar* _tmp49_;
-				LightDMSession* _tmp50_;
-				const gchar* _tmp51_;
-				const gchar* _tmp52_;
-				_tmp40_ = session;
-				_tmp41_ = lightdm_session_get_key (_tmp40_);
-				_tmp42_ = _tmp41_;
-				_tmp43_ = session;
-				_tmp44_ = lightdm_session_get_name (_tmp43_);
-				_tmp45_ = _tmp44_;
-				g_debug ("unity-greeter.vala:110: Adding session %s (%s)", _tmp42_, _tmp45_);
-				_tmp46_ = self->user_list;
-				_tmp47_ = session;
-				_tmp48_ = lightdm_session_get_key (_tmp47_);
-				_tmp49_ = _tmp48_;
-				_tmp50_ = session;
-				_tmp51_ = lightdm_session_get_name (_tmp50_);
-				_tmp52_ = _tmp51_;
-				user_list_add_session (_tmp46_, _tmp49_, _tmp52_);
-			}
-		}
-	}
-	_tmp53_ = unity_greeter_test_mode;
-	if (_tmp53_) {
-		UserList* _tmp54_;
-		GList* _tmp55_ = NULL;
-		GList* _tmp56_;
-		UserList* _tmp57_;
-		UserList* _tmp58_;
-		GList* _tmp59_ = NULL;
-		GList* _tmp60_;
-		UserList* _tmp61_;
-		GList* _tmp62_ = NULL;
-		GList* _tmp63_;
-		UserList* _tmp64_;
-		GList* _tmp65_ = NULL;
-		GList* _tmp66_;
-		UserList* _tmp67_;
-		GList* _tmp68_ = NULL;
-		GList* _tmp69_;
-		UserList* _tmp70_;
-		GList* _tmp71_ = NULL;
-		GList* _tmp72_;
-		UserList* _tmp73_;
-		GList* _tmp74_ = NULL;
-		GList* _tmp75_;
-		UserList* _tmp76_;
-		const gchar* _tmp77_ = NULL;
-		UserList* _tmp78_;
-		UserList* _tmp79_;
-		UserList* _tmp80_;
-		const gchar* _tmp81_;
-		_tmp54_ = self->user_list;
-		_tmp55_ = unity_greeter_make_layout_list (self, "kr");
-		_tmp56_ = _tmp55_;
-		user_list_add_entry (_tmp54_, "alice", "가나다라마", "/usr/share/backgrounds/Darkening_Clockwork_by_Matt_Katzenberger.jpg", _tmp56_, TRUE, FALSE);
-		__g_list_free__g_object_unref0_0 (_tmp56_);
-		_tmp57_ = self->user_list;
-		user_list_add_entry (_tmp57_, "chris", "Christopher Halse Rogers!!!!!!!!!!!!!!!", "/usr/share/backgrounds/Darkening_Clockwork_by_Matt_Katzenberger.jpg", NULL, TRUE, FALSE);
-		_tmp58_ = self->user_list;
-		_tmp59_ = unity_greeter_make_layout_list (self, "us");
-		_tmp60_ = _tmp59_;
-		user_list_add_entry (_tmp58_, "jorge", "Jorge O Castro", "/usr/share/backgrounds/PurpleDancers_by_Emilio_Merlino.jpg", _tmp60_, FALSE, FALSE);
-		__g_list_free__g_object_unref0_0 (_tmp60_);
-		_tmp61_ = self->user_list;
-		_tmp62_ = unity_greeter_make_layout_list (self, "uk;us");
-		_tmp63_ = _tmp62_;
-		user_list_add_entry (_tmp61_, "ken", "Ken VanDine", "/usr/share/backgrounds/Small_flowers_by_Dariusz_Duma.jpg", _tmp63_, FALSE, FALSE);
-		__g_list_free__g_object_unref0_0 (_tmp63_);
-		_tmp64_ = self->user_list;
-		_tmp65_ = unity_greeter_make_layout_list (self, "gb");
-		_tmp66_ = _tmp65_;
-		user_list_add_entry (_tmp64_, "matthew", "Matthew Paul Thomas", "/usr/share/backgrounds/Not_Alone_by_Deacon_MacMillan.jpg", _tmp66_, FALSE, TRUE);
-		__g_list_free__g_object_unref0_0 (_tmp66_);
-		_tmp67_ = self->user_list;
-		_tmp68_ = unity_greeter_make_layout_list (self, "gb");
-		_tmp69_ = _tmp68_;
-		user_list_add_entry (_tmp67_, "otto", "Otto Greenslade", "/usr/share/backgrounds/Mount_Snowdon,_Wales_by_Adam_Vellender.jpg", _tmp69_, FALSE, FALSE);
-		__g_list_free__g_object_unref0_0 (_tmp69_);
-		_tmp70_ = self->user_list;
-		_tmp71_ = unity_greeter_make_layout_list (self, "de\tdvorak;us");
-		_tmp72_ = _tmp71_;
-		user_list_add_entry (_tmp70_, "pitti", "Martin Pitt", "/usr/share/backgrounds/Stalking_Ocelot_by_Sayantan_Chaudhuri.jpg", _tmp72_, FALSE, FALSE);
-		__g_list_free__g_object_unref0_0 (_tmp72_);
-		_tmp73_ = self->user_list;
-		_tmp74_ = unity_greeter_make_layout_list (self, "ca");
-		_tmp75_ = _tmp74_;
-		user_list_add_entry (_tmp73_, "desrt", "Ryan Lortie", "/usr/share/backgrounds/Power_of_Words_by_Antonio_Litterio.jpg", _tmp75_, FALSE, TRUE);
-		__g_list_free__g_object_unref0_0 (_tmp75_);
-		_tmp76_ = self->user_list;
-		_tmp77_ = _ ("Guest Session");
-		user_list_add_entry (_tmp76_, "*guest", _tmp77_, NULL, NULL, TRUE, FALSE);
-		_tmp78_ = self->user_list;
-		user_list_add_session (_tmp78_, "gnome", "Ubuntu");
-		_tmp79_ = self->user_list;
-		user_list_add_session (_tmp79_, "gnome-shell", "GNOME");
-		_tmp80_ = self->user_list;
-		user_list_add_session (_tmp80_, "kde", "KDE");
-		_tmp81_ = last_user;
-		if (_tmp81_ != NULL) {
-			UserList* _tmp82_;
-			const gchar* _tmp83_;
-			_tmp82_ = self->user_list;
-			_tmp83_ = last_user;
-			user_list_set_active_entry (_tmp82_, _tmp83_);
+	_tmp39_ = unity_greeter_test_mode;
+	if (_tmp39_) {
+		UserList* _tmp40_;
+		GList* _tmp41_ = NULL;
+		GList* _tmp42_;
+		UserList* _tmp43_;
+		UserList* _tmp44_;
+		GList* _tmp45_ = NULL;
+		GList* _tmp46_;
+		UserList* _tmp47_;
+		GList* _tmp48_ = NULL;
+		GList* _tmp49_;
+		UserList* _tmp50_;
+		GList* _tmp51_ = NULL;
+		GList* _tmp52_;
+		UserList* _tmp53_;
+		GList* _tmp54_ = NULL;
+		GList* _tmp55_;
+		UserList* _tmp56_;
+		GList* _tmp57_ = NULL;
+		GList* _tmp58_;
+		UserList* _tmp59_;
+		GList* _tmp60_ = NULL;
+		GList* _tmp61_;
+		UserList* _tmp62_;
+		const gchar* _tmp63_ = NULL;
+		const gchar* _tmp64_;
+		_tmp40_ = self->user_list;
+		_tmp41_ = unity_greeter_make_layout_list (self, "kr");
+		_tmp42_ = _tmp41_;
+		user_list_add_entry (_tmp40_, "alice", "가나다라마", "#dd4814", _tmp42_, TRUE, FALSE, "gnome");
+		__g_list_free__g_object_unref0_0 (_tmp42_);
+		_tmp43_ = self->user_list;
+		user_list_add_entry (_tmp43_, "chris", "Christopher Halse Rogers!!!!!!!!!!!!!!!", "/usr/share/backgrounds/Darkening_Clockwork_by_Matt_Katzenberger.jpg", NULL, TRUE, TRUE, "kde");
+		_tmp44_ = self->user_list;
+		_tmp45_ = unity_greeter_make_layout_list (self, "us");
+		_tmp46_ = _tmp45_;
+		user_list_add_entry (_tmp44_, "jorge", "Jorge O Castro", "/usr/share/backgrounds/PurpleDancers_by_Emilio_Merlino.jpg", _tmp46_, FALSE, FALSE, NULL);
+		__g_list_free__g_object_unref0_0 (_tmp46_);
+		_tmp47_ = self->user_list;
+		_tmp48_ = unity_greeter_make_layout_list (self, "uk;us");
+		_tmp49_ = _tmp48_;
+		user_list_add_entry (_tmp47_, "ken", "Ken VanDine", "/usr/share/backgrounds/Small_flowers_by_Dariusz_Duma.jpg", _tmp49_, FALSE, FALSE, NULL);
+		__g_list_free__g_object_unref0_0 (_tmp49_);
+		_tmp50_ = self->user_list;
+		_tmp51_ = unity_greeter_make_layout_list (self, "gb");
+		_tmp52_ = _tmp51_;
+		user_list_add_entry (_tmp50_, "matthew", "Matthew Paul Thomas", "/usr/share/backgrounds/Not_Alone_by_Deacon_MacMillan.jpg", _tmp52_, FALSE, TRUE, NULL);
+		__g_list_free__g_object_unref0_0 (_tmp52_);
+		_tmp53_ = self->user_list;
+		_tmp54_ = unity_greeter_make_layout_list (self, "gb");
+		_tmp55_ = _tmp54_;
+		user_list_add_entry (_tmp53_, "otto", "Otto Greenslade", "/usr/share/backgrounds/Mount_Snowdon,_Wales_by_Adam_Vellender.jpg", _tmp55_, FALSE, FALSE, NULL);
+		__g_list_free__g_object_unref0_0 (_tmp55_);
+		_tmp56_ = self->user_list;
+		_tmp57_ = unity_greeter_make_layout_list (self, "de\tdvorak;us");
+		_tmp58_ = _tmp57_;
+		user_list_add_entry (_tmp56_, "pitti", "Martin Pitt", "/usr/share/backgrounds/Stalking_Ocelot_by_Sayantan_Chaudhuri.jpg", _tmp58_, FALSE, FALSE, NULL);
+		__g_list_free__g_object_unref0_0 (_tmp58_);
+		_tmp59_ = self->user_list;
+		_tmp60_ = unity_greeter_make_layout_list (self, "ca");
+		_tmp61_ = _tmp60_;
+		user_list_add_entry (_tmp59_, "desrt", "Ryan Lortie", "/usr/share/backgrounds/Power_of_Words_by_Antonio_Litterio.jpg", _tmp61_, FALSE, TRUE, "gnome-shell");
+		__g_list_free__g_object_unref0_0 (_tmp61_);
+		_tmp62_ = self->user_list;
+		_tmp63_ = _ ("Guest Session");
+		user_list_add_entry (_tmp62_, "*guest", _tmp63_, NULL, NULL, TRUE, FALSE, NULL);
+		_tmp64_ = last_user;
+		if (_tmp64_ != NULL) {
+			UserList* _tmp65_;
+			const gchar* _tmp66_;
+			_tmp65_ = self->user_list;
+			_tmp66_ = last_user;
+			user_list_set_active_entry (_tmp65_, _tmp66_);
 		}
 	} else {
+		LightDMGreeter* _tmp67_;
+		gboolean _tmp68_;
+		gboolean _tmp69_;
 		LightDMGreeter* _tmp84_;
 		gboolean _tmp85_;
 		gboolean _tmp86_;
-		LightDMGreeter* _tmp98_;
-		gboolean _tmp99_;
-		gboolean _tmp100_;
-		LightDMGreeter* _tmp103_;
-		const gchar* _tmp104_;
-		const gchar* _tmp105_;
-		_tmp84_ = self->priv->greeter;
-		_tmp85_ = lightdm_greeter_get_hide_users_hint (_tmp84_);
-		_tmp86_ = _tmp85_;
-		if (_tmp86_) {
-			UserList* _tmp87_;
-			const gchar* _tmp88_ = NULL;
-			_tmp87_ = self->user_list;
-			_tmp88_ = _ ("Login");
-			user_list_add_entry (_tmp87_, "*other", _tmp88_, NULL, NULL, FALSE, FALSE);
+		LightDMGreeter* _tmp92_;
+		const gchar* _tmp93_;
+		const gchar* _tmp94_;
+		_tmp67_ = self->priv->greeter;
+		_tmp68_ = lightdm_greeter_get_hide_users_hint (_tmp67_);
+		_tmp69_ = _tmp68_;
+		if (_tmp69_) {
+			UserList* _tmp70_;
+			const gchar* _tmp71_ = NULL;
+			LightDMGreeter* _tmp72_;
+			const gchar* _tmp73_;
+			const gchar* _tmp74_;
+			_tmp70_ = self->user_list;
+			_tmp71_ = _ ("Login");
+			_tmp72_ = self->priv->greeter;
+			_tmp73_ = lightdm_greeter_get_default_session_hint (_tmp72_);
+			_tmp74_ = _tmp73_;
+			user_list_add_entry (_tmp70_, "*other", _tmp71_, NULL, NULL, FALSE, FALSE, _tmp74_);
 		} else {
-			LightDMUserList* _tmp89_ = NULL;
-			LightDMUserList* _tmp90_;
+			LightDMUserList* _tmp75_ = NULL;
+			LightDMUserList* _tmp76_;
 			LightDMUserList* users;
-			LightDMUserList* _tmp91_;
-			LightDMUserList* _tmp92_;
-			LightDMUserList* _tmp93_;
-			LightDMUserList* _tmp94_;
-			GList* _tmp95_;
-			GList* _tmp96_;
-			_tmp89_ = lightdm_user_list_get_instance ();
-			_tmp90_ = _g_object_ref0 (_tmp89_);
-			users = _tmp90_;
-			_tmp91_ = users;
-			g_signal_connect (_tmp91_, "user-added", (GCallback) _unity_greeter_user_added_cb_lightdm_user_list_user_added, self);
-			_tmp92_ = users;
-			g_signal_connect (_tmp92_, "user-changed", (GCallback) _unity_greeter_user_added_cb_lightdm_user_list_user_changed, self);
-			_tmp93_ = users;
-			g_signal_connect (_tmp93_, "user-removed", (GCallback) _unity_greeter_user_removed_cb_lightdm_user_list_user_removed, self);
-			_tmp94_ = users;
-			_tmp95_ = lightdm_user_list_get_users (_tmp94_);
-			_tmp96_ = _tmp95_;
+			LightDMUserList* _tmp77_;
+			LightDMUserList* _tmp78_;
+			LightDMUserList* _tmp79_;
+			LightDMUserList* _tmp80_;
+			GList* _tmp81_;
+			GList* _tmp82_;
+			_tmp75_ = lightdm_user_list_get_instance ();
+			_tmp76_ = _g_object_ref0 (_tmp75_);
+			users = _tmp76_;
+			_tmp77_ = users;
+			g_signal_connect (_tmp77_, "user-added", (GCallback) _unity_greeter_user_added_cb_lightdm_user_list_user_added, self);
+			_tmp78_ = users;
+			g_signal_connect (_tmp78_, "user-changed", (GCallback) _unity_greeter_user_added_cb_lightdm_user_list_user_changed, self);
+			_tmp79_ = users;
+			g_signal_connect (_tmp79_, "user-removed", (GCallback) _unity_greeter_user_removed_cb_lightdm_user_list_user_removed, self);
+			_tmp80_ = users;
+			_tmp81_ = lightdm_user_list_get_users (_tmp80_);
+			_tmp82_ = _tmp81_;
 			{
 				GList* user_collection = NULL;
 				GList* user_it = NULL;
-				user_collection = _tmp96_;
+				user_collection = _tmp82_;
 				for (user_it = user_collection; user_it != NULL; user_it = user_it->next) {
 					LightDMUser* user = NULL;
 					user = (LightDMUser*) user_it->data;
 					{
-						LightDMUser* _tmp97_;
-						_tmp97_ = user;
-						unity_greeter_user_added_cb (self, _tmp97_);
+						LightDMUser* _tmp83_;
+						_tmp83_ = user;
+						unity_greeter_user_added_cb (self, _tmp83_);
 					}
 				}
 			}
 			_g_object_unref0 (users);
 		}
-		_tmp98_ = self->priv->greeter;
-		_tmp99_ = lightdm_greeter_get_has_guest_account_hint (_tmp98_);
-		_tmp100_ = _tmp99_;
-		if (_tmp100_) {
-			UserList* _tmp101_;
-			const gchar* _tmp102_ = NULL;
-			g_debug ("unity-greeter.vala:149: Adding guest account entry");
-			_tmp101_ = self->user_list;
-			_tmp102_ = _ ("Guest Session");
-			user_list_add_entry (_tmp101_, "*guest", _tmp102_, NULL, NULL, FALSE, FALSE);
+		_tmp84_ = self->priv->greeter;
+		_tmp85_ = lightdm_greeter_get_has_guest_account_hint (_tmp84_);
+		_tmp86_ = _tmp85_;
+		if (_tmp86_) {
+			UserList* _tmp87_;
+			const gchar* _tmp88_ = NULL;
+			LightDMGreeter* _tmp89_;
+			const gchar* _tmp90_;
+			const gchar* _tmp91_;
+			g_debug ("unity-greeter.vala:138: Adding guest account entry");
+			_tmp87_ = self->user_list;
+			_tmp88_ = _ ("Guest Session");
+			_tmp89_ = self->priv->greeter;
+			_tmp90_ = lightdm_greeter_get_default_session_hint (_tmp89_);
+			_tmp91_ = _tmp90_;
+			user_list_add_entry (_tmp87_, "*guest", _tmp88_, NULL, NULL, FALSE, FALSE, _tmp91_);
 		}
-		_tmp103_ = self->priv->greeter;
-		_tmp104_ = lightdm_greeter_get_select_user_hint (_tmp103_);
-		_tmp105_ = _tmp104_;
-		if (_tmp105_ != NULL) {
-			UserList* _tmp106_;
-			LightDMGreeter* _tmp107_;
-			const gchar* _tmp108_;
-			const gchar* _tmp109_;
-			_tmp106_ = self->user_list;
-			_tmp107_ = self->priv->greeter;
-			_tmp108_ = lightdm_greeter_get_select_user_hint (_tmp107_);
-			_tmp109_ = _tmp108_;
-			user_list_set_active_entry (_tmp106_, _tmp109_);
+		_tmp92_ = self->priv->greeter;
+		_tmp93_ = lightdm_greeter_get_select_user_hint (_tmp92_);
+		_tmp94_ = _tmp93_;
+		if (_tmp94_ != NULL) {
+			UserList* _tmp95_;
+			LightDMGreeter* _tmp96_;
+			const gchar* _tmp97_;
+			const gchar* _tmp98_;
+			_tmp95_ = self->user_list;
+			_tmp96_ = self->priv->greeter;
+			_tmp97_ = lightdm_greeter_get_select_user_hint (_tmp96_);
+			_tmp98_ = _tmp97_;
+			user_list_set_active_entry (_tmp95_, _tmp98_);
 		} else {
-			const gchar* _tmp110_;
-			_tmp110_ = last_user;
-			if (_tmp110_ != NULL) {
-				UserList* _tmp111_;
-				const gchar* _tmp112_;
-				_tmp111_ = self->user_list;
-				_tmp112_ = last_user;
-				user_list_set_active_entry (_tmp111_, _tmp112_);
+			const gchar* _tmp99_;
+			_tmp99_ = last_user;
+			if (_tmp99_ != NULL) {
+				UserList* _tmp100_;
+				const gchar* _tmp101_;
+				_tmp100_ = self->user_list;
+				_tmp101_ = last_user;
+				user_list_set_active_entry (_tmp100_, _tmp101_);
 			}
 		}
 	}
-	_tmp113_ = self->user_list;
-	g_signal_connect (_tmp113_, "user-selected", (GCallback) _unity_greeter_user_selected_cb_user_list_user_selected, self);
-	_tmp114_ = self->user_list;
-	g_signal_connect (_tmp114_, "respond-to-prompt", (GCallback) _unity_greeter_respond_to_prompt_cb_user_list_respond_to_prompt, self);
-	_tmp115_ = self->user_list;
-	g_signal_connect (_tmp115_, "start-session", (GCallback) _unity_greeter_start_session_cb_user_list_start_session, self);
-	_tmp116_ = self->user_list;
-	_tmp117_ = user_list_get_selected (_tmp116_);
-	_tmp118_ = _tmp117_;
-	unity_greeter_user_selected_cb (self, _tmp118_);
+	_tmp102_ = self->user_list;
+	g_signal_connect (_tmp102_, "user-selected", (GCallback) _unity_greeter_user_selected_cb_user_list_user_selected, self);
+	_tmp103_ = self->user_list;
+	g_signal_connect (_tmp103_, "respond-to-prompt", (GCallback) _unity_greeter_respond_to_prompt_cb_user_list_respond_to_prompt, self);
+	_tmp104_ = self->user_list;
+	g_signal_connect (_tmp104_, "start-session", (GCallback) _unity_greeter_start_session_cb_user_list_start_session, self);
+	_tmp105_ = self->user_list;
+	_tmp106_ = user_list_get_selected (_tmp105_);
+	_tmp107_ = _tmp106_;
+	unity_greeter_user_selected_cb (self, _tmp107_);
 	unity_greeter_start_fake_wm (self);
 	gdk_threads_add_idle (_unity_greeter_ready_cb_gsource_func, self);
 	_g_free0 (last_user);
@@ -898,7 +856,7 @@ static gboolean unity_greeter_ready_cb (UnityGreeter* self) {
 	ca_context* _tmp0_ = NULL;
 	ca_context* _tmp1_;
 	g_return_val_if_fail (self != NULL, FALSE);
-	g_debug ("unity-greeter.vala:202: starting system-ready sound");
+	g_debug ("unity-greeter.vala:191: starting system-ready sound");
 	ca_context_create (&_tmp0_);
 	_ca_context_destroy0 (self->priv->canberra_context);
 	self->priv->canberra_context = _tmp0_;
@@ -924,25 +882,32 @@ static void unity_greeter_user_added_cb (UnityGreeter* self, LightDMUser* user) 
 	LightDMUser* _tmp10_;
 	const gchar* _tmp11_;
 	const gchar* _tmp12_;
-	GList* layouts;
 	LightDMUser* _tmp17_;
-	gchar** _tmp18_;
-	gchar** _tmp19_ = NULL;
-	UserList* _tmp26_;
-	LightDMUser* _tmp27_;
-	const gchar* _tmp28_;
-	const gchar* _tmp29_;
-	const gchar* _tmp30_;
-	LightDMUser* _tmp31_;
-	const gchar* _tmp32_;
-	const gchar* _tmp33_;
-	GList* _tmp34_;
-	LightDMUser* _tmp35_;
-	gboolean _tmp36_;
-	gboolean _tmp37_;
-	LightDMUser* _tmp38_;
-	gboolean _tmp39_;
-	gboolean _tmp40_;
+	const gchar* _tmp18_;
+	const gchar* _tmp19_;
+	gchar* _tmp20_;
+	gchar* session;
+	const gchar* _tmp21_;
+	GList* layouts;
+	LightDMUser* _tmp26_;
+	gchar** _tmp27_;
+	gchar** _tmp28_ = NULL;
+	UserList* _tmp35_;
+	LightDMUser* _tmp36_;
+	const gchar* _tmp37_;
+	const gchar* _tmp38_;
+	const gchar* _tmp39_;
+	LightDMUser* _tmp40_;
+	const gchar* _tmp41_;
+	const gchar* _tmp42_;
+	GList* _tmp43_;
+	LightDMUser* _tmp44_;
+	gboolean _tmp45_;
+	gboolean _tmp46_;
+	LightDMUser* _tmp47_;
+	gboolean _tmp48_;
+	gboolean _tmp49_;
+	const gchar* _tmp50_;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (user != NULL);
 	_tmp0_ = user;
@@ -951,7 +916,7 @@ static void unity_greeter_user_added_cb (UnityGreeter* self, LightDMUser* user) 
 	_tmp3_ = user;
 	_tmp4_ = lightdm_user_get_real_name (_tmp3_);
 	_tmp5_ = _tmp4_;
-	g_debug ("unity-greeter.vala:217: Adding/updating user %s (%s)", _tmp2_, _tmp5_);
+	g_debug ("unity-greeter.vala:206: Adding/updating user %s (%s)", _tmp2_, _tmp5_);
 	_tmp6_ = user;
 	_tmp7_ = lightdm_user_get_real_name (_tmp6_);
 	_tmp8_ = _tmp7_;
@@ -972,59 +937,79 @@ static void unity_greeter_user_added_cb (UnityGreeter* self, LightDMUser* user) 
 		_g_free0 (label);
 		label = _tmp16_;
 	}
-	layouts = NULL;
 	_tmp17_ = user;
-	_tmp19_ = _tmp18_ = lightdm_user_get_layouts (_tmp17_);
+	_tmp18_ = lightdm_user_get_session (_tmp17_);
+	_tmp19_ = _tmp18_;
+	_tmp20_ = g_strdup (_tmp19_);
+	session = _tmp20_;
+	_tmp21_ = session;
+	if (_tmp21_ == NULL) {
+		LightDMGreeter* _tmp22_;
+		const gchar* _tmp23_;
+		const gchar* _tmp24_;
+		gchar* _tmp25_;
+		_tmp22_ = self->priv->greeter;
+		_tmp23_ = lightdm_greeter_get_default_session_hint (_tmp22_);
+		_tmp24_ = _tmp23_;
+		_tmp25_ = g_strdup (_tmp24_);
+		_g_free0 (session);
+		session = _tmp25_;
+	}
+	layouts = NULL;
+	_tmp26_ = user;
+	_tmp28_ = _tmp27_ = lightdm_user_get_layouts (_tmp26_);
 	{
 		gchar** name_collection = NULL;
 		gint name_collection_length1 = 0;
 		gint _name_collection_size_ = 0;
 		gint name_it = 0;
-		name_collection = _tmp19_;
-		name_collection_length1 = _vala_array_length (_tmp18_);
-		for (name_it = 0; name_it < _vala_array_length (_tmp18_); name_it = name_it + 1) {
-			gchar* _tmp20_;
+		name_collection = _tmp28_;
+		name_collection_length1 = _vala_array_length (_tmp27_);
+		for (name_it = 0; name_it < _vala_array_length (_tmp27_); name_it = name_it + 1) {
+			gchar* _tmp29_;
 			gchar* name = NULL;
-			_tmp20_ = g_strdup (name_collection[name_it]);
-			name = _tmp20_;
+			_tmp29_ = g_strdup (name_collection[name_it]);
+			name = _tmp29_;
 			{
-				const gchar* _tmp21_;
-				LightDMLayout* _tmp22_ = NULL;
+				const gchar* _tmp30_;
+				LightDMLayout* _tmp31_ = NULL;
 				LightDMLayout* layout;
-				LightDMLayout* _tmp23_;
-				_tmp21_ = name;
-				_tmp22_ = unity_greeter_get_layout_by_name (self, _tmp21_);
-				layout = _tmp22_;
-				_tmp23_ = layout;
-				if (_tmp23_ != NULL) {
-					LightDMLayout* _tmp24_;
-					LightDMLayout* _tmp25_;
-					_tmp24_ = layout;
-					_tmp25_ = _g_object_ref0 (_tmp24_);
-					layouts = g_list_append (layouts, _tmp25_);
+				LightDMLayout* _tmp32_;
+				_tmp30_ = name;
+				_tmp31_ = unity_greeter_get_layout_by_name (self, _tmp30_);
+				layout = _tmp31_;
+				_tmp32_ = layout;
+				if (_tmp32_ != NULL) {
+					LightDMLayout* _tmp33_;
+					LightDMLayout* _tmp34_;
+					_tmp33_ = layout;
+					_tmp34_ = _g_object_ref0 (_tmp33_);
+					layouts = g_list_append (layouts, _tmp34_);
 				}
 				_g_object_unref0 (layout);
 				_g_free0 (name);
 			}
 		}
 	}
-	_tmp26_ = self->user_list;
-	_tmp27_ = user;
-	_tmp28_ = lightdm_user_get_name (_tmp27_);
-	_tmp29_ = _tmp28_;
-	_tmp30_ = label;
-	_tmp31_ = user;
-	_tmp32_ = lightdm_user_get_background (_tmp31_);
-	_tmp33_ = _tmp32_;
-	_tmp34_ = layouts;
-	_tmp35_ = user;
-	_tmp36_ = lightdm_user_get_logged_in (_tmp35_);
-	_tmp37_ = _tmp36_;
-	_tmp38_ = user;
-	_tmp39_ = lightdm_user_get_has_messages (_tmp38_);
-	_tmp40_ = _tmp39_;
-	user_list_add_entry (_tmp26_, _tmp29_, _tmp30_, _tmp33_, _tmp34_, _tmp37_, _tmp40_);
+	_tmp35_ = self->user_list;
+	_tmp36_ = user;
+	_tmp37_ = lightdm_user_get_name (_tmp36_);
+	_tmp38_ = _tmp37_;
+	_tmp39_ = label;
+	_tmp40_ = user;
+	_tmp41_ = lightdm_user_get_background (_tmp40_);
+	_tmp42_ = _tmp41_;
+	_tmp43_ = layouts;
+	_tmp44_ = user;
+	_tmp45_ = lightdm_user_get_logged_in (_tmp44_);
+	_tmp46_ = _tmp45_;
+	_tmp47_ = user;
+	_tmp48_ = lightdm_user_get_has_messages (_tmp47_);
+	_tmp49_ = _tmp48_;
+	_tmp50_ = session;
+	user_list_add_entry (_tmp35_, _tmp38_, _tmp39_, _tmp42_, _tmp43_, _tmp46_, _tmp49_, _tmp50_);
 	__g_list_free__g_object_unref0_0 (layouts);
+	_g_free0 (session);
 	_g_free0 (label);
 }
 
@@ -1042,7 +1027,7 @@ static void unity_greeter_user_removed_cb (UnityGreeter* self, LightDMUser* user
 	_tmp0_ = user;
 	_tmp1_ = lightdm_user_get_name (_tmp0_);
 	_tmp2_ = _tmp1_;
-	g_debug ("unity-greeter.vala:236: Removing user %s", _tmp2_);
+	g_debug ("unity-greeter.vala:229: Removing user %s", _tmp2_);
 	_tmp3_ = self->user_list;
 	_tmp4_ = user;
 	_tmp5_ = lightdm_user_get_name (_tmp4_);
@@ -1056,130 +1041,12 @@ void unity_greeter_show (UnityGreeter* self) {
 	MainWindow* _tmp1_;
 	GdkWindow* _tmp2_ = NULL;
 	g_return_if_fail (self != NULL);
-	g_debug ("unity-greeter.vala:242: Showing main window");
+	g_debug ("unity-greeter.vala:235: Showing main window");
 	_tmp0_ = self->priv->main_window;
 	gtk_widget_show ((GtkWidget*) _tmp0_);
 	_tmp1_ = self->priv->main_window;
 	_tmp2_ = gtk_widget_get_window ((GtkWidget*) _tmp1_);
 	gdk_window_focus (_tmp2_, (guint32) GDK_CURRENT_TIME);
-}
-
-
-static void unity_greeter_update_session (UnityGreeter* self) {
-	gboolean _tmp0_;
-	gboolean _tmp1_;
-	g_return_if_fail (self != NULL);
-	_tmp0_ = self->priv->have_session;
-	if (_tmp0_) {
-		return;
-	}
-	_tmp1_ = unity_greeter_test_mode;
-	if (_tmp1_) {
-		const gchar* _tmp2_;
-		const gchar* _tmp3_;
-		const gchar* _tmp4_;
-		GQuark _tmp6_ = 0U;
-		static GQuark _tmp5_label0 = 0;
-		static GQuark _tmp5_label1 = 0;
-		static GQuark _tmp5_label2 = 0;
-		_tmp2_ = self->priv->test_username;
-		if (_tmp2_ == NULL) {
-			return;
-		}
-		_tmp3_ = self->priv->test_username;
-		_tmp4_ = _tmp3_;
-		_tmp6_ = (NULL == _tmp4_) ? 0 : g_quark_from_string (_tmp4_);
-		if (_tmp6_ == ((0 != _tmp5_label0) ? _tmp5_label0 : (_tmp5_label0 = g_quark_from_static_string ("alice")))) {
-			switch (0) {
-				default:
-				{
-					UserList* _tmp7_;
-					_tmp7_ = self->user_list;
-					user_list_set_session (_tmp7_, "ubuntu");
-					break;
-				}
-			}
-		} else if (_tmp6_ == ((0 != _tmp5_label1) ? _tmp5_label1 : (_tmp5_label1 = g_quark_from_static_string ("bob")))) {
-			switch (0) {
-				default:
-				{
-					UserList* _tmp8_;
-					_tmp8_ = self->user_list;
-					user_list_set_session (_tmp8_, "gnome-shell");
-					break;
-				}
-			}
-		} else if (_tmp6_ == ((0 != _tmp5_label2) ? _tmp5_label2 : (_tmp5_label2 = g_quark_from_static_string ("carol")))) {
-			switch (0) {
-				default:
-				{
-					UserList* _tmp9_;
-					_tmp9_ = self->user_list;
-					user_list_set_session (_tmp9_, "kde");
-					break;
-				}
-			}
-		} else {
-			switch (0) {
-				default:
-				{
-					return;
-				}
-			}
-		}
-		self->priv->have_session = TRUE;
-		return;
-	} else {
-		LightDMGreeter* _tmp10_;
-		const gchar* _tmp11_;
-		const gchar* _tmp12_;
-		LightDMUserList* _tmp13_ = NULL;
-		LightDMGreeter* _tmp14_;
-		const gchar* _tmp15_;
-		const gchar* _tmp16_;
-		LightDMUser* _tmp17_ = NULL;
-		LightDMUser* _tmp18_;
-		LightDMUser* user;
-		LightDMUser* _tmp19_;
-		UserList* _tmp24_;
-		LightDMUser* _tmp25_;
-		const gchar* _tmp26_;
-		const gchar* _tmp27_;
-		_tmp10_ = self->priv->greeter;
-		_tmp11_ = lightdm_greeter_get_authentication_user (_tmp10_);
-		_tmp12_ = _tmp11_;
-		if (_tmp12_ == NULL) {
-			return;
-		}
-		_tmp13_ = lightdm_user_list_get_instance ();
-		_tmp14_ = self->priv->greeter;
-		_tmp15_ = lightdm_greeter_get_authentication_user (_tmp14_);
-		_tmp16_ = _tmp15_;
-		_tmp17_ = lightdm_user_list_get_user_by_name (_tmp13_, _tmp16_);
-		_tmp18_ = _g_object_ref0 (_tmp17_);
-		user = _tmp18_;
-		_tmp19_ = user;
-		if (_tmp19_ == NULL) {
-			UserList* _tmp20_;
-			LightDMGreeter* _tmp21_;
-			const gchar* _tmp22_;
-			const gchar* _tmp23_;
-			_tmp20_ = self->user_list;
-			_tmp21_ = self->priv->greeter;
-			_tmp22_ = lightdm_greeter_get_default_session_hint (_tmp21_);
-			_tmp23_ = _tmp22_;
-			user_list_set_session (_tmp20_, _tmp23_);
-			_g_object_unref0 (user);
-			return;
-		}
-		_tmp24_ = self->user_list;
-		_tmp25_ = user;
-		_tmp26_ = lightdm_user_get_session (_tmp25_);
-		_tmp27_ = _tmp26_;
-		user_list_set_session (_tmp24_, _tmp27_);
-		self->priv->have_session = TRUE;
-		_g_object_unref0 (user);
-	}
 }
 
 
@@ -1189,7 +1056,6 @@ static void unity_greeter_show_message_cb (UnityGreeter* self, const gchar* text
 	LightDMMessageType _tmp2_;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (text != NULL);
-	unity_greeter_update_session (self);
 	_tmp0_ = self->user_list;
 	_tmp1_ = text;
 	_tmp2_ = type;
@@ -1205,7 +1071,6 @@ static void unity_greeter_show_prompt_cb (UnityGreeter* self, const gchar* text,
 	LightDMPromptType _tmp6_;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (text != NULL);
-	unity_greeter_update_session (self);
 	unity_greeter_update_other_label (self);
 	self->priv->prompted = TRUE;
 	_tmp0_ = text;
@@ -1289,11 +1154,11 @@ static void unity_greeter_start_session (UnityGreeter* self) {
 		_tmp9_ = _tmp8_;
 		lightdm_greeter_start_session_sync (_tmp6_, _tmp9_, &_inner_error_);
 		if (_inner_error_ != NULL) {
-			goto __catch9_g_error;
+			goto __catch12_g_error;
 		}
 	}
-	goto __finally9;
-	__catch9_g_error:
+	goto __finally12;
+	__catch12_g_error:
 	{
 		GError* e = NULL;
 		GError* _tmp10_;
@@ -1302,10 +1167,10 @@ static void unity_greeter_start_session (UnityGreeter* self) {
 		_inner_error_ = NULL;
 		_tmp10_ = e;
 		_tmp11_ = _tmp10_->message;
-		g_warning ("unity-greeter.vala:333: Failed to start session: %s", _tmp11_);
+		g_warning ("unity-greeter.vala:280: Failed to start session: %s", _tmp11_);
 		_g_error_free0 (e);
 	}
-	__finally9:
+	__finally12:
 	if (_inner_error_ != NULL) {
 		_cairo_destroy0 (c);
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
@@ -1321,7 +1186,6 @@ static void unity_greeter_authentication_complete_cb (UnityGreeter* self) {
 	gboolean _tmp0_;
 	gboolean _tmp5_;
 	g_return_if_fail (self != NULL);
-	unity_greeter_update_session (self);
 	unity_greeter_update_other_label (self);
 	_tmp0_ = unity_greeter_test_mode;
 	if (_tmp0_) {
@@ -1403,7 +1267,6 @@ static void unity_greeter_user_selected_cb (UnityGreeter* self, const gchar* use
 	gchar* _tmp3_ = NULL;
 	gchar* data;
 	UserList* _tmp7_;
-	gboolean _tmp8_;
 	GError * _inner_error_ = NULL;
 	g_return_if_fail (self != NULL);
 	_tmp0_ = self->priv->state;
@@ -1417,11 +1280,11 @@ static void unity_greeter_user_selected_cb (UnityGreeter* self, const gchar* use
 		_tmp4_ = self->priv->state_file;
 		g_file_replace_contents (_tmp4_, (guint8*) data, (gsize) -1, NULL, FALSE, G_FILE_CREATE_NONE, NULL, NULL, &_inner_error_);
 		if (_inner_error_ != NULL) {
-			goto __catch10_g_error;
+			goto __catch13_g_error;
 		}
 	}
-	goto __finally10;
-	__catch10_g_error:
+	goto __finally13;
+	__catch13_g_error:
 	{
 		GError* e = NULL;
 		GError* _tmp5_;
@@ -1430,10 +1293,10 @@ static void unity_greeter_user_selected_cb (UnityGreeter* self, const gchar* use
 		_inner_error_ = NULL;
 		_tmp5_ = e;
 		_tmp6_ = _tmp5_->message;
-		g_debug ("unity-greeter.vala:393: Failed to write state: %s", _tmp6_);
+		g_debug ("unity-greeter.vala:339: Failed to write state: %s", _tmp6_);
 		_g_error_free0 (e);
 	}
-	__finally10:
+	__finally13:
 	if (_inner_error_ != NULL) {
 		_g_free0 (data);
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
@@ -1442,22 +1305,6 @@ static void unity_greeter_user_selected_cb (UnityGreeter* self, const gchar* use
 	}
 	_tmp7_ = self->user_list;
 	user_list_set_error (_tmp7_, NULL);
-	_tmp8_ = unity_greeter_test_mode;
-	if (_tmp8_) {
-		UserList* _tmp9_;
-		_tmp9_ = self->user_list;
-		user_list_set_session (_tmp9_, "ubuntu");
-	} else {
-		UserList* _tmp10_;
-		LightDMGreeter* _tmp11_;
-		const gchar* _tmp12_;
-		const gchar* _tmp13_;
-		_tmp10_ = self->user_list;
-		_tmp11_ = self->priv->greeter;
-		_tmp12_ = lightdm_greeter_get_default_session_hint (_tmp11_);
-		_tmp13_ = _tmp12_;
-		user_list_set_session (_tmp10_, _tmp13_);
-	}
 	unity_greeter_start_authentication (self);
 	_g_free0 (data);
 }
@@ -1473,6 +1320,9 @@ static void unity_greeter_update_other_label (UnityGreeter* self) {
 	gboolean _tmp5_;
 	UserList* _tmp26_;
 	const gchar* _tmp27_;
+	LightDMGreeter* _tmp28_;
+	const gchar* _tmp29_;
+	const gchar* _tmp30_;
 	g_return_if_fail (self != NULL);
 	_tmp0_ = self->priv->greeter;
 	_tmp1_ = lightdm_greeter_get_hide_users_hint (_tmp0_);
@@ -1545,7 +1395,10 @@ static void unity_greeter_update_other_label (UnityGreeter* self) {
 	}
 	_tmp26_ = self->user_list;
 	_tmp27_ = text;
-	user_list_add_entry (_tmp26_, "*other", _tmp27_, NULL, NULL, FALSE, FALSE);
+	_tmp28_ = self->priv->greeter;
+	_tmp29_ = lightdm_greeter_get_default_session_hint (_tmp28_);
+	_tmp30_ = _tmp29_;
+	user_list_add_entry (_tmp26_, "*other", _tmp27_, NULL, NULL, FALSE, FALSE, _tmp30_);
 	_g_free0 (text);
 }
 
@@ -1554,7 +1407,6 @@ static void unity_greeter_start_authentication (UnityGreeter* self) {
 	gboolean _tmp0_;
 	g_return_if_fail (self != NULL);
 	self->priv->prompted = FALSE;
-	self->priv->have_session = FALSE;
 	_tmp0_ = unity_greeter_test_mode;
 	if (_tmp0_) {
 		UserList* _tmp1_;
@@ -1672,7 +1524,6 @@ static void unity_greeter_start_authentication (UnityGreeter* self) {
 			}
 		}
 	}
-	unity_greeter_update_session (self);
 	unity_greeter_update_other_label (self);
 }
 
@@ -1689,7 +1540,7 @@ static void unity_greeter_respond_to_prompt_cb (UnityGreeter* self, const gchar*
 		const gchar* _tmp2_;
 		const gchar* _tmp3_;
 		_tmp2_ = text;
-		g_debug ("unity-greeter.vala:485: response %s", _tmp2_);
+		g_debug ("unity-greeter.vala:425: response %s", _tmp2_);
 		_tmp3_ = self->priv->test_username;
 		if (_tmp3_ == NULL) {
 			const gchar* _tmp4_;
@@ -1697,7 +1548,7 @@ static void unity_greeter_respond_to_prompt_cb (UnityGreeter* self, const gchar*
 			gchar* _tmp6_;
 			const gchar* _tmp7_ = NULL;
 			_tmp4_ = text;
-			g_debug ("unity-greeter.vala:488: username=%s", _tmp4_);
+			g_debug ("unity-greeter.vala:428: username=%s", _tmp4_);
 			_tmp5_ = text;
 			_tmp6_ = g_strdup (_tmp5_);
 			_g_free0 (self->priv->test_username);
@@ -1863,7 +1714,7 @@ static cairo_surface_t* unity_greeter_create_root_surface (GdkScreen* screen) {
 	display = _tmp6_;
 	_tmp7_ = display;
 	if (_tmp7_ == NULL) {
-		g_warning ("unity-greeter.vala:548: Failed to create root pixmap");
+		g_warning ("unity-greeter.vala:488: Failed to create root pixmap");
 		result = NULL;
 		_XCloseDisplay0 (display);
 		_g_object_unref0 (visual);
@@ -2082,7 +1933,7 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 		_argv_size_ = argv_length1;
 		if (_inner_error_ != NULL) {
 			argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
-			goto __catch11_g_error;
+			goto __catch14_g_error;
 		}
 		_tmp2_ = argv;
 		_tmp2__length1 = argv_length1;
@@ -2090,12 +1941,12 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 		atspi_pid = _tmp3_;
 		if (_inner_error_ != NULL) {
 			argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
-			goto __catch11_g_error;
+			goto __catch14_g_error;
 		}
 		argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
 	}
-	goto __finally11;
-	__catch11_g_error:
+	goto __finally14;
+	__catch14_g_error:
 	{
 		GError* e = NULL;
 		GError* _tmp4_;
@@ -2104,10 +1955,10 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 		_inner_error_ = NULL;
 		_tmp4_ = e;
 		_tmp5_ = _tmp4_->message;
-		g_warning ("unity-greeter.vala:641: Error starting the at-spi registry: %s", _tmp5_);
+		g_warning ("unity-greeter.vala:581: Error starting the at-spi registry: %s", _tmp5_);
 		_g_error_free0 (e);
 	}
-	__finally11:
+	__finally14:
 	if (_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
@@ -2120,19 +1971,19 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 	g_log_set_default_handler (_unity_greeter_log_cb_glog_func, NULL);
 	_tmp7_ = getuid ();
 	_tmp8_ = g_getenv ("LANG");
-	g_debug ("unity-greeter.vala:649: Starting unity-greeter %s UID=%d LANG=%s", VERSION, (gint) _tmp7_, _tmp8_);
-	g_debug ("unity-greeter.vala:652: Setting cursor");
+	g_debug ("unity-greeter.vala:589: Starting unity-greeter %s UID=%d LANG=%s", VERSION, (gint) _tmp7_, _tmp8_);
+	g_debug ("unity-greeter.vala:592: Setting cursor");
 	_tmp9_ = gdk_get_default_root_window ();
 	_tmp10_ = gdk_cursor_new (GDK_LEFT_PTR);
 	_tmp11_ = _tmp10_;
 	gdk_window_set_cursor (_tmp9_, _tmp11_);
 	_g_object_unref0 (_tmp11_);
-	g_debug ("unity-greeter.vala:656: Creating background surface");
+	g_debug ("unity-greeter.vala:596: Creating background surface");
 	_tmp12_ = gdk_screen_get_default ();
 	_tmp13_ = unity_greeter_create_root_surface (_tmp12_);
 	_cairo_surface_destroy0 (unity_greeter_background_surface);
 	unity_greeter_background_surface = _tmp13_;
-	g_debug ("unity-greeter.vala:659: Loading command line options");
+	g_debug ("unity-greeter.vala:599: Loading command line options");
 	_tmp14_ = _ ("- Unity Greeter");
 	_tmp15_ = g_option_context_new (_tmp14_);
 	c = _tmp15_;
@@ -2146,11 +1997,11 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 		_tmp19_ = c;
 		g_option_context_parse (_tmp19_, &args_length1, &args, &_inner_error_);
 		if (_inner_error_ != NULL) {
-			goto __catch12_g_error;
+			goto __catch15_g_error;
 		}
 	}
-	goto __finally12;
-	__catch12_g_error:
+	goto __finally15;
+	__catch15_g_error:
 	{
 		GError* e = NULL;
 		FILE* _tmp20_;
@@ -2181,7 +2032,7 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 		_g_option_context_free0 (c);
 		return result;
 	}
-	__finally12:
+	__finally15:
 	if (_inner_error_ != NULL) {
 		_g_option_context_free0 (c);
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
@@ -2199,9 +2050,9 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 	}
 	_tmp30_ = unity_greeter_test_mode;
 	if (_tmp30_) {
-		g_debug ("unity-greeter.vala:684: Running in test mode");
+		g_debug ("unity-greeter.vala:624: Running in test mode");
 	}
-	g_debug ("unity-greeter.vala:687: Setting GTK+ settings");
+	g_debug ("unity-greeter.vala:627: Setting GTK+ settings");
 	_tmp31_ = gtk_settings_get_default ();
 	_tmp32_ = _g_object_ref0 (_tmp31_);
 	settings = _tmp32_;
@@ -2274,13 +2125,13 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 		_tmp59_ = value;
 		g_object_set ((GObject*) _tmp58_, "gtk-xft-rgba", _tmp59_, NULL, NULL);
 	}
-	g_debug ("unity-greeter.vala:710: Creating Unity Greeter");
+	g_debug ("unity-greeter.vala:650: Creating Unity Greeter");
 	_tmp60_ = unity_greeter_new ();
 	greeter = _tmp60_;
-	g_debug ("unity-greeter.vala:713: Showing greeter");
+	g_debug ("unity-greeter.vala:653: Showing greeter");
 	_tmp61_ = greeter;
 	unity_greeter_show (_tmp61_);
-	g_debug ("unity-greeter.vala:716: Starting main loop");
+	g_debug ("unity-greeter.vala:656: Starting main loop");
 	gtk_main ();
 	_tmp62_ = atspi_pid;
 	if (_tmp62_ != ((GPid) 0)) {
@@ -2430,7 +2281,6 @@ static void unity_greeter_class_init (UnityGreeterClass * klass) {
 static void unity_greeter_instance_init (UnityGreeter * self) {
 	self->priv = UNITY_GREETER_GET_PRIVATE (self);
 	self->priv->prompted = FALSE;
-	self->priv->have_session = FALSE;
 	self->priv->authenticate_user = NULL;
 	self->priv->test_username = NULL;
 	self->priv->test_is_authenticated = FALSE;

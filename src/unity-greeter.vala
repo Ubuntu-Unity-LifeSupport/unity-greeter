@@ -48,7 +48,6 @@ public class UnityGreeter
 
     private LightDM.Greeter greeter;
     private bool prompted = false;
-    private bool have_session = false;
 
     /* User to authenticate against */
     private string ?authenticate_user = null;
@@ -105,27 +104,17 @@ public class UnityGreeter
         main_window = new MainWindow ();
         user_list = main_window.user_list;
 
-        foreach (var session in LightDM.get_sessions ())
-        {
-            debug ("Adding session %s (%s)", session.key, session.name);
-            user_list.add_session (session.key, session.name);
-        }
-
         if (test_mode)
         {
-            user_list.add_entry ("alice", "가나다라마", "/usr/share/backgrounds/Darkening_Clockwork_by_Matt_Katzenberger.jpg", make_layout_list ("kr"), true);
-            user_list.add_entry ("chris", "Christopher Halse Rogers!!!!!!!!!!!!!!!", "/usr/share/backgrounds/Darkening_Clockwork_by_Matt_Katzenberger.jpg", null, true);
+            user_list.add_entry ("alice", "가나다라마", "#dd4814", make_layout_list ("kr"), true, false, "gnome");
+            user_list.add_entry ("chris", "Christopher Halse Rogers!!!!!!!!!!!!!!!", "/usr/share/backgrounds/Darkening_Clockwork_by_Matt_Katzenberger.jpg", null, true, true, "kde");
             user_list.add_entry ("jorge", "Jorge O Castro", "/usr/share/backgrounds/PurpleDancers_by_Emilio_Merlino.jpg", make_layout_list ("us"));
             user_list.add_entry ("ken", "Ken VanDine", "/usr/share/backgrounds/Small_flowers_by_Dariusz_Duma.jpg", make_layout_list ("uk;us"));
             user_list.add_entry ("matthew", "Matthew Paul Thomas", "/usr/share/backgrounds/Not_Alone_by_Deacon_MacMillan.jpg", make_layout_list ("gb"), false, true);
             user_list.add_entry ("otto", "Otto Greenslade", "/usr/share/backgrounds/Mount_Snowdon,_Wales_by_Adam_Vellender.jpg", make_layout_list ("gb"));
             user_list.add_entry ("pitti", "Martin Pitt", "/usr/share/backgrounds/Stalking_Ocelot_by_Sayantan_Chaudhuri.jpg", make_layout_list ("de\tdvorak;us"));
-            user_list.add_entry ("desrt", "Ryan Lortie", "/usr/share/backgrounds/Power_of_Words_by_Antonio_Litterio.jpg", make_layout_list ("ca"), false, true);
+            user_list.add_entry ("desrt", "Ryan Lortie", "/usr/share/backgrounds/Power_of_Words_by_Antonio_Litterio.jpg", make_layout_list ("ca"), false, true, "gnome-shell");
             user_list.add_entry ("*guest", _("Guest Session"), null, null, true);
-
-            user_list.add_session ("gnome", "Ubuntu");
-            user_list.add_session ("gnome-shell", "GNOME");
-            user_list.add_session ("kde", "KDE");
 
             if (last_user != null)
                 user_list.set_active_entry (last_user);
@@ -133,7 +122,7 @@ public class UnityGreeter
         else
         {
             if (greeter.hide_users_hint)
-                user_list.add_entry ("*other", _("Login"), null, null);
+                user_list.add_entry ("*other", _("Login"), null, null, false, false, greeter.default_session_hint);
             else
             {
                 var users = LightDM.UserList.get_instance ();
@@ -147,7 +136,7 @@ public class UnityGreeter
             if (greeter.has_guest_account_hint)
             {
                 debug ("Adding guest account entry");
-                user_list.add_entry ("*guest", _("Guest Session"), null, null);
+                user_list.add_entry ("*guest", _("Guest Session"), null, null, false, false, greeter.default_session_hint);
             }
 
             if (greeter.select_user_hint != null)
@@ -220,6 +209,10 @@ public class UnityGreeter
         if (user.real_name == "")
             label = user.name;
 
+        var session = user.session;
+        if (session == null)
+            session = greeter.default_session_hint;
+
         var layouts = new List <LightDM.Layout> ();
         foreach (var name in user.get_layouts ())
         {
@@ -228,7 +221,7 @@ public class UnityGreeter
                 layouts.append (layout);
         }
 
-        user_list.add_entry (user.name, label, user.background, layouts, user.logged_in, user.has_messages);
+        user_list.add_entry (user.name, label, user.background, layouts, user.logged_in, user.has_messages, session);
     }
 
     private void user_removed_cb (LightDM.User user)
@@ -244,59 +237,13 @@ public class UnityGreeter
         main_window.get_window ().focus (Gdk.CURRENT_TIME);
     }
 
-    private void update_session ()
-    {
-        if (have_session)
-            return;
-
-        if (test_mode)
-        {
-            if (test_username == null)
-                return;
-
-            switch (test_username)
-            {
-            case "alice":
-                user_list.session = "ubuntu";
-                break;
-            case "bob":
-                user_list.session = "gnome-shell";
-                break;
-            case "carol":
-                user_list.session = "kde";
-                break;
-            default:
-                return;
-            }
-            have_session = true;
-            return;
-        }
-        else
-        {
-            if (greeter.authentication_user == null)
-                return;
-
-            var user = LightDM.UserList.get_instance ().get_user_by_name (greeter.authentication_user);
-            if (user == null)
-            {
-                user_list.session = greeter.default_session_hint;
-                return;
-            }
-
-            user_list.session = user.session;
-            have_session = true;
-        }
-    }
-
     private void show_message_cb (string text, LightDM.MessageType type)
     {
-        update_session ();
         user_list.show_message (text, type == LightDM.MessageType.ERROR);
     }
 
     private void show_prompt_cb (string text, LightDM.PromptType type)
     {
-        update_session ();
         update_other_label ();
 
         prompted = true;
@@ -336,7 +283,6 @@ public class UnityGreeter
 
     private void authentication_complete_cb ()
     {
-        update_session ();
         update_other_label ();
 
         bool is_authenticated;
@@ -394,10 +340,6 @@ public class UnityGreeter
         }
 
         user_list.set_error (null);
-        if (test_mode)
-            user_list.session = "ubuntu";
-        else
-            user_list.session = greeter.default_session_hint;        
         start_authentication ();
     }
 
@@ -418,13 +360,12 @@ public class UnityGreeter
                 text = greeter.authentication_user;
         }
 
-        user_list.add_entry ("*other", text, null, null);
+        user_list.add_entry ("*other", text, null, null, false, false, greeter.default_session_hint);
     }
 
     private void start_authentication ()
     {
         prompted = false;
-        have_session = false;
 
         if (test_mode)
         {
@@ -472,7 +413,6 @@ public class UnityGreeter
                 greeter.authenticate (user_list.selected);
         }
 
-        update_session ();
         update_other_label ();
     }
 

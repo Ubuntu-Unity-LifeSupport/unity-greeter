@@ -1,3 +1,15 @@
+unity-greeter (0.2.4-0ubuntu1) precise; urgency=low
+
+  * New upstream release
+    - Don't crash when all monitors are the same size
+    - Use OS icon instead of cog for session selector (LP: #932164)
+    - Show arrow on password entry to indicate will login
+    - Show session chooser dialog instead of a menu (LP: #932169)
+  * debian/patches/do_not_crash_with_twinview.patch:
+    - Dropped, included upstream
+
+ -- Michael Terry <mterry@ubuntu.com>  Thu, 23 Feb 2012 10:02:11 -0500
+
 unity-greeter (0.2.3-0ubuntu4) precise; urgency=low
 
   * debian/patches/do_not_crash_with_twinview.patch:

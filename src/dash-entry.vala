@@ -30,6 +30,11 @@ public class DashEntry : Gtk.Entry, Fadable
     construct
     {
         fade_tracker = new FadeTracker (this);
+
+        set_icon_activatable (Gtk.EntryIconPosition.SECONDARY, true);
+
+        changed.connect (changed_cb);
+        icon_press.connect (icon_press_cb);
     }
 
     public override bool draw (Cairo.Context c)
@@ -66,5 +71,29 @@ public class DashEntry : Gtk.Entry, Fadable
         var layout = create_pango_layout (constant_placeholder_text);
         layout.set_font_description (Pango.FontDescription.from_string ("Ubuntu 14"));
         Pango.cairo_show_layout (c, layout);
+    }
+
+    private void changed_cb ()
+    {
+        enable_arrow (get_text_length () != 0);
+    }
+
+    private void icon_press_cb ()
+    {
+        activate ();
+    }
+
+    private void enable_arrow (bool enabled)
+    {
+        if (enabled)
+        {
+            var file = File.new_for_path (Path.build_filename (Config.PKGDATADIR, "arrow_right.png", null));
+            var icon = new FileIcon (file);
+            set_icon_from_gicon (Gtk.EntryIconPosition.SECONDARY, icon);
+        }
+        else
+        {
+            set_icon_from_gicon (Gtk.EntryIconPosition.SECONDARY, null);
+        }
     }
 }

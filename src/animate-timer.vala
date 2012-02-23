@@ -46,6 +46,7 @@ private class AnimateTimer : Object
         stop ();
 
         timeout = Timeout.add (16, animate_cb);
+        progress = 0;
         start_time = 0;
         extra_time = 0;
         extra_progress = 0;

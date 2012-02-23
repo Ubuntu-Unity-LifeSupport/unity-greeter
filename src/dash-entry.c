@@ -32,6 +32,7 @@
 #include <math.h>
 #include <pango/pango.h>
 #include <pango/pangocairo.h>
+#include <gio/gio.h>
 
 
 #define TYPE_FADABLE (fadable_get_type ())
@@ -105,6 +106,9 @@ FadeTracker* fadable_get_fade_tracker (Fadable* self);
 gdouble fade_tracker_get_alpha (FadeTracker* self);
 const gchar* dash_entry_get_constant_placeholder_text (DashEntry* self);
 static void dash_entry_draw_prompt_text (DashEntry* self, cairo_t* c);
+static void dash_entry_changed_cb (DashEntry* self);
+static void dash_entry_enable_arrow (DashEntry* self, gboolean enabled);
+static void dash_entry_icon_press_cb (DashEntry* self);
 DashEntry* dash_entry_new (void);
 DashEntry* dash_entry_construct (GType object_type);
 void dash_entry_set_constant_placeholder_text (DashEntry* self, const gchar* value);
@@ -112,6 +116,8 @@ static GObject * dash_entry_constructor (GType type, guint n_construct_propertie
 FadeTracker* fade_tracker_new (GtkWidget* widget);
 FadeTracker* fade_tracker_construct (GType object_type, GtkWidget* widget);
 void fadable_set_fade_tracker (Fadable* self, FadeTracker* value);
+static void _dash_entry_changed_cb_gtk_editable_changed (GtkEditable* _sender, gpointer self);
+static void _dash_entry_icon_press_cb_gtk_entry_icon_press (GtkEntry* _sender, GtkEntryIconPosition p0, GdkEvent* p1, gpointer self);
 static void dash_entry_finalize (GObject* obj);
 static void _vala_dash_entry_get_property (GObject * object, guint property_id, GValue * value, GParamSpec * pspec);
 static void _vala_dash_entry_set_property (GObject * object, guint property_id, const GValue * value, GParamSpec * pspec);
@@ -252,6 +258,53 @@ static void dash_entry_draw_prompt_text (DashEntry* self, cairo_t* c) {
 }
 
 
+static void dash_entry_changed_cb (DashEntry* self) {
+	guint16 _tmp0_ = 0U;
+	g_return_if_fail (self != NULL);
+	_tmp0_ = gtk_entry_get_text_length ((GtkEntry*) self);
+	dash_entry_enable_arrow (self, ((gint) _tmp0_) != 0);
+}
+
+
+static void dash_entry_icon_press_cb (DashEntry* self) {
+	g_return_if_fail (self != NULL);
+	g_signal_emit_by_name ((GtkEntry*) self, "activate");
+}
+
+
+static void dash_entry_enable_arrow (DashEntry* self, gboolean enabled) {
+	gboolean _tmp0_;
+	g_return_if_fail (self != NULL);
+	_tmp0_ = enabled;
+	if (_tmp0_) {
+		gchar* _tmp1_ = NULL;
+		gchar* _tmp2_;
+		GFile* _tmp3_ = NULL;
+		GFile* _tmp4_;
+		GFile* file;
+		GFile* _tmp5_;
+		GFileIcon* _tmp6_;
+		GFileIcon* icon;
+		GFileIcon* _tmp7_;
+		_tmp1_ = g_build_filename (PKGDATADIR, "arrow_right.png", NULL, NULL);
+		_tmp2_ = _tmp1_;
+		_tmp3_ = g_file_new_for_path (_tmp2_);
+		_tmp4_ = _tmp3_;
+		_g_free0 (_tmp2_);
+		file = _tmp4_;
+		_tmp5_ = file;
+		_tmp6_ = (GFileIcon*) g_file_icon_new (_tmp5_);
+		icon = _tmp6_;
+		_tmp7_ = icon;
+		gtk_entry_set_icon_from_gicon ((GtkEntry*) self, GTK_ENTRY_ICON_SECONDARY, (GIcon*) _tmp7_);
+		_g_object_unref0 (icon);
+		_g_object_unref0 (file);
+	} else {
+		gtk_entry_set_icon_from_gicon ((GtkEntry*) self, GTK_ENTRY_ICON_SECONDARY, NULL);
+	}
+}
+
+
 DashEntry* dash_entry_construct (GType object_type) {
 	DashEntry * self = NULL;
 	self = (DashEntry*) g_object_new (object_type, NULL);
@@ -310,6 +363,16 @@ static void dash_entry_real_set_fade_tracker (Fadable* base, FadeTracker* value)
 }
 
 
+static void _dash_entry_changed_cb_gtk_editable_changed (GtkEditable* _sender, gpointer self) {
+	dash_entry_changed_cb (self);
+}
+
+
+static void _dash_entry_icon_press_cb_gtk_entry_icon_press (GtkEntry* _sender, GtkEntryIconPosition p0, GdkEvent* p1, gpointer self) {
+	dash_entry_icon_press_cb (self);
+}
+
+
 static GObject * dash_entry_constructor (GType type, guint n_construct_properties, GObjectConstructParam * construct_properties) {
 	GObject * obj;
 	GObjectClass * parent_class;
@@ -323,6 +386,9 @@ static GObject * dash_entry_constructor (GType type, guint n_construct_propertie
 	_tmp1_ = _tmp0_;
 	fadable_set_fade_tracker ((Fadable*) self, _tmp1_);
 	_g_object_unref0 (_tmp1_);
+	gtk_entry_set_icon_activatable ((GtkEntry*) self, GTK_ENTRY_ICON_SECONDARY, TRUE);
+	g_signal_connect_object ((GtkEditable*) self, "changed", (GCallback) _dash_entry_changed_cb_gtk_editable_changed, self, 0);
+	g_signal_connect_object ((GtkEntry*) self, "icon-press", (GCallback) _dash_entry_icon_press_cb_gtk_entry_icon_press, self, 0);
 	return obj;
 }
 

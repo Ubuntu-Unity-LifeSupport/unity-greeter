@@ -578,7 +578,7 @@ static void menu_bar_greeter_set_env (MenuBar* self, const gchar* key, const gch
 		_tmp2_ = g_dbus_proxy_new_for_bus_sync (G_BUS_TYPE_SESSION, G_DBUS_PROXY_FLAGS_NONE, NULL, "org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus", NULL, &_inner_error_);
 		proxy = _tmp2_;
 		if (_inner_error_ != NULL) {
-			goto __catch2_g_error;
+			goto __catch3_g_error;
 		}
 		_tmp3_ = G_VARIANT_TYPE_ARRAY;
 		_tmp4_ = g_variant_builder_new (_tmp3_);
@@ -596,8 +596,8 @@ static void menu_bar_greeter_set_env (MenuBar* self, const gchar* key, const gch
 		_g_variant_builder_unref0 (builder);
 		_g_object_unref0 (proxy);
 	}
-	goto __finally2;
-	__catch2_g_error:
+	goto __finally3;
+	__catch3_g_error:
 	{
 		GError* e = NULL;
 		GError* _tmp12_;
@@ -610,7 +610,7 @@ static void menu_bar_greeter_set_env (MenuBar* self, const gchar* key, const gch
 		_g_error_free0 (e);
 		return;
 	}
-	__finally2:
+	__finally3:
 	if (_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
@@ -1210,7 +1210,7 @@ static void menu_bar_keyboard_toggled_cb (MenuBar* self, GtkCheckMenuItem* item)
 			_argv_size_ = argv_length1;
 			if (_inner_error_ != NULL) {
 				argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
-				goto __catch3_g_error;
+				goto __catch4_g_error;
 			}
 			_tmp6_ = argv;
 			_tmp6__length1 = argv_length1;
@@ -1219,7 +1219,7 @@ static void menu_bar_keyboard_toggled_cb (MenuBar* self, GtkCheckMenuItem* item)
 			onboard_stdout_fd = _tmp8_;
 			if (_inner_error_ != NULL) {
 				argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
-				goto __catch3_g_error;
+				goto __catch4_g_error;
 			}
 			_tmp9_ = onboard_stdout_fd;
 			_tmp10_ = fdopen (_tmp9_, "r");
@@ -1240,8 +1240,8 @@ static void menu_bar_keyboard_toggled_cb (MenuBar* self, GtkCheckMenuItem* item)
 			_fclose0 (f);
 			argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
 		}
-		goto __finally3;
-		__catch3_g_error:
+		goto __finally4;
+		__catch4_g_error:
 		{
 			GError* e = NULL;
 			GError* _tmp16_;
@@ -1254,7 +1254,7 @@ static void menu_bar_keyboard_toggled_cb (MenuBar* self, GtkCheckMenuItem* item)
 			_g_error_free0 (e);
 			return;
 		}
-		__finally3:
+		__finally4:
 		if (_inner_error_ != NULL) {
 			g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 			g_clear_error (&_inner_error_);
@@ -1498,17 +1498,17 @@ static void menu_bar_screen_reader_toggled_cb (MenuBar* self, GtkCheckMenuItem* 
 			g_spawn_command_line_async ("orca --replace --no-setup --disable=splash-window --disable=main-windo" \
 "w", &_inner_error_);
 			if (_inner_error_ != NULL) {
-				goto __catch4_g_error;
+				goto __catch5_g_error;
 			}
 		} else {
 			g_spawn_command_line_async ("orca --quit", &_inner_error_);
 			if (_inner_error_ != NULL) {
-				goto __catch4_g_error;
+				goto __catch5_g_error;
 			}
 		}
 	}
-	goto __finally4;
-	__catch4_g_error:
+	goto __finally5;
+	__catch5_g_error:
 	{
 		GError* e = NULL;
 		GError* _tmp6_;
@@ -1520,7 +1520,7 @@ static void menu_bar_screen_reader_toggled_cb (MenuBar* self, GtkCheckMenuItem* 
 		g_warning ("menubar.vala:439: Failed to run Orca: %s", _tmp7_);
 		_g_error_free0 (e);
 	}
-	__finally4:
+	__finally5:
 	if (_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);

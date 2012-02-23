@@ -1,3 +1,10 @@
+Overview of changes in unity-greeter 0.2.4
+
+    * Don't crash when all monitors are the same size
+    * Use OS icon instead of cog for session selector
+    * Show arrow on password entry to indicate will login
+    * Show session chooser dialog instead of a menu
+
 Overview of changes in unity-greeter 0.2.3
 
     * Play system-ready sound on startup

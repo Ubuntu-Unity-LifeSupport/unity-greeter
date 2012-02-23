@@ -19,6 +19,8 @@
 
 public class FadeTracker : Object
 {
+    public signal void done ();
+
     public double alpha {get; private set; default = 1.0;}
     public Gtk.Widget widget {get; construct;}
 
@@ -56,13 +58,19 @@ public class FadeTracker : Object
         {
             alpha = progress;
             if (progress == 1.0)
+            {
                 widget.grab_focus ();
+                done ();
+            }
         }
         else
         {
             alpha = 1.0 - progress;
             if (progress == 1.0)
+            {
                 widget.hide (); /* finish the job */
+                done ();
+            }
         }
 
         widget.queue_draw ();

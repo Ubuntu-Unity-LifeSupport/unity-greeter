@@ -36,14 +36,15 @@ public class MainWindow : Gtk.Window
         var accel_group = new Gtk.AccelGroup ();
         add_accel_group (accel_group);
 
-        var bg_color = Gdk.Color ();
-        Gdk.Color.parse ("#2C001E", out bg_color);
-        modify_bg (Gtk.StateType.NORMAL, bg_color);
+        var bg_color = Gdk.RGBA ();
+        bg_color.parse ("#2C001E");
+        override_background_color (Gtk.StateFlags.NORMAL, bg_color);
         get_accessible ().set_name (_("Login Screen"));
         has_resize_grip = false;
         UnityGreeter.add_style_class (this);
 
-        background = new Background ();
+        realize ();
+        background = new Background (Gdk.cairo_create (get_window ()).get_target ());
         background.draw_grid = UGSettings.get_boolean (UGSettings.KEY_DRAW_GRID);
         background.default_background = UGSettings.get_string (UGSettings.KEY_BACKGROUND);
         background.set_logo (UGSettings.get_string (UGSettings.KEY_LOGO), UGSettings.get_string (UGSettings.KEY_BACKGROUND_LOGO));

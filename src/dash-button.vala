@@ -19,11 +19,40 @@
 
 public class DashButton : Gtk.Button, Fadable
 {
+    public string text {get; construct; default = "";}
     protected FadeTracker fade_tracker {get; protected set;}
+
+    public DashButton (string text)
+    {
+        Object (text: text);
+    }
 
     construct
     {
         fade_tracker = new FadeTracker (this);
+
+        var hbox = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
+        var sizes = new Gtk.SizeGroup (Gtk.SizeGroupMode.HORIZONTAL);
+
+        // add blank label to match chevron
+        var label = new Gtk.Label ("");
+        sizes.add_widget (label);
+        hbox.add (label);
+
+        // add text
+        label = new Gtk.Label ("<span font_size=\"large\">%s</span>".printf (text));
+        label.use_markup = true;
+        label.hexpand = true;
+        label.halign = Gtk.Align.CENTER;
+        hbox.add (label);
+
+        // add chevron
+        var image = new Gtk.Image.from_file (Path.build_filename (Config.PKGDATADIR, "arrow_right.png", null));
+        sizes.add_widget (image);
+        hbox.add (image);
+
+        hbox.show_all ();
+        add (hbox);
     }
 
     public override bool draw (Cairo.Context c)

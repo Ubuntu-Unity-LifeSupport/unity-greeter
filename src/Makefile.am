@@ -12,9 +12,11 @@ unity_greeter_SOURCES = \
 	dash-button.vala \
 	dash-entry.vala \
 	fadable.vala \
+	fadable-box.vala \
 	main-window.vala \
 	menu.vala \
 	menubar.vala \
+	session-chooser.vala \
 	settings.vala \
 	settings-daemon.vala \
 	unity-greeter.vala \

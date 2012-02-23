@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2012-02-15 16:41+0000\n"
+"POT-Creation-Date: 2012-02-22 13:47+0000\n"
 "PO-Revision-Date: 2012-01-24 16:14+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: Serbian <sr@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2012-02-16 05:37+0000\n"
-"X-Generator: Launchpad (build 14781)\n"
+"X-Launchpad-Export-Date: 2012-02-23 05:02+0000\n"
+"X-Generator: Launchpad (build 14855)\n"
 
 #: ../src/main-window.vala:42
 msgid "Login Screen"
@@ -43,74 +43,72 @@ msgstr ""
 msgid "Run in test mode"
 msgstr ""
 
-#: ../src/unity-greeter.vala:124 ../src/unity-greeter.vala:150
+#: ../src/unity-greeter.vala:117 ../src/unity-greeter.vala:139
 msgid "Guest Session"
 msgstr ""
 
-#: ../src/unity-greeter.vala:136
+#: ../src/unity-greeter.vala:125
 msgid "Login"
 msgstr ""
 
-#: ../src/unity-greeter.vala:304 ../src/unity-greeter.vala:440
-#: ../src/unity-greeter.vala:459 ../src/unity-greeter.vala:490
+#: ../src/unity-greeter.vala:251 ../src/unity-greeter.vala:381
+#: ../src/unity-greeter.vala:400 ../src/unity-greeter.vala:430
 msgid "Password:"
 msgstr ""
 
-#: ../src/unity-greeter.vala:306 ../src/unity-greeter.vala:443
+#: ../src/unity-greeter.vala:253 ../src/unity-greeter.vala:384
 msgid "Username:"
 msgstr ""
 
-#: ../src/unity-greeter.vala:372
+#: ../src/unity-greeter.vala:318
 msgid "Invalid password, please try again"
 msgstr ""
 
-#: ../src/unity-greeter.vala:377
+#: ../src/unity-greeter.vala:323
 msgid "Failed to authenticate"
 msgstr ""
 
-#: ../src/unity-greeter.vala:409
+#: ../src/unity-greeter.vala:351
 msgid "Other..."
 msgstr ""
 
 #. Arguments and description for --help text
-#: ../src/unity-greeter.vala:661
+#: ../src/unity-greeter.vala:601
 msgid "- Unity Greeter"
 msgstr ""
 
 #. Text printed out when an unknown command-line argument provided
-#: ../src/unity-greeter.vala:672
+#: ../src/unity-greeter.vala:612
 #, c-format
 msgid "Run '%s --help' to see a full list of available command line options."
 msgstr ""
 
-#. 'Log In' here is the button for logging in.
-#: ../src/user-list.vala:164
-#, c-format
+#: ../src/user-list.vala:156
 msgid "Log In"
 msgstr ""
 
-#: ../src/user-list.vala:191
+#: ../src/user-list.vala:171
 msgid "Session Options"
 msgstr ""
 
-#: ../src/user-list.vala:298
+#: ../src/user-list.vala:278
 #, c-format
 msgid "Enter password for %s"
 msgstr ""
 
-#: ../src/user-list.vala:302
+#: ../src/user-list.vala:282
 msgid "Enter username"
 msgstr ""
 
-#: ../src/user-list.vala:304
+#: ../src/user-list.vala:284
 msgid "Enter password"
 msgstr ""
 
-#: ../src/user-list.vala:320
+#: ../src/user-list.vala:300
 #, c-format
 msgid "Login as %s"
 msgstr ""
 
-#: ../src/user-list.vala:331
+#: ../src/user-list.vala:311
 msgid "Logging in..."
 msgstr ""

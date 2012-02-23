@@ -179,6 +179,7 @@ static void fade_tracker_animate_cb (FadeTracker* self, gdouble progress) {
 			GtkWidget* _tmp3_;
 			_tmp3_ = self->priv->_widget;
 			gtk_widget_grab_focus (_tmp3_);
+			g_signal_emit_by_name (self, "done");
 		}
 	} else {
 		gdouble _tmp4_;
@@ -190,6 +191,7 @@ static void fade_tracker_animate_cb (FadeTracker* self, gdouble progress) {
 			GtkWidget* _tmp6_;
 			_tmp6_ = self->priv->_widget;
 			gtk_widget_hide (_tmp6_);
+			g_signal_emit_by_name (self, "done");
 		}
 	}
 	_tmp7_ = self->priv->_widget;
@@ -275,6 +277,7 @@ static void fade_tracker_class_init (FadeTrackerClass * klass) {
 	G_OBJECT_CLASS (klass)->finalize = fade_tracker_finalize;
 	g_object_class_install_property (G_OBJECT_CLASS (klass), FADE_TRACKER_ALPHA, g_param_spec_double ("alpha", "alpha", "alpha", -G_MAXDOUBLE, G_MAXDOUBLE, 1.0, G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB | G_PARAM_READABLE));
 	g_object_class_install_property (G_OBJECT_CLASS (klass), FADE_TRACKER_WIDGET, g_param_spec_object ("widget", "widget", "widget", GTK_TYPE_WIDGET, G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB | G_PARAM_READABLE | G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
+	g_signal_new ("done", TYPE_FADE_TRACKER, G_SIGNAL_RUN_LAST, 0, NULL, NULL, g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
 }
 
 

@@ -23,6 +23,8 @@
 #include <glib.h>
 #include <glib-object.h>
 #include <gtk/gtk.h>
+#include <stdlib.h>
+#include <string.h>
 #include <cairo.h>
 #include <float.h>
 #include <math.h>
@@ -56,6 +58,7 @@ typedef struct _FadeTrackerClass FadeTrackerClass;
 typedef struct _DashButton DashButton;
 typedef struct _DashButtonClass DashButtonClass;
 typedef struct _DashButtonPrivate DashButtonPrivate;
+#define _g_free0(var) (var = (g_free (var), NULL))
 #define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
 
 struct _FadableIface {
@@ -74,6 +77,7 @@ struct _DashButtonClass {
 };
 
 struct _DashButtonPrivate {
+	gchar* _text;
 	FadeTracker* _fade_tracker;
 };
 
@@ -87,13 +91,16 @@ GType dash_button_get_type (void) G_GNUC_CONST;
 #define DASH_BUTTON_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TYPE_DASH_BUTTON, DashButtonPrivate))
 enum  {
 	DASH_BUTTON_DUMMY_PROPERTY,
+	DASH_BUTTON_TEXT,
 	DASH_BUTTON_FADE_TRACKER
 };
+DashButton* dash_button_new (const gchar* text);
+DashButton* dash_button_construct (GType object_type, const gchar* text);
 static gboolean dash_button_real_draw (GtkWidget* base, cairo_t* c);
 FadeTracker* fadable_get_fade_tracker (Fadable* self);
 gdouble fade_tracker_get_alpha (FadeTracker* self);
-DashButton* dash_button_new (void);
-DashButton* dash_button_construct (GType object_type);
+const gchar* dash_button_get_text (DashButton* self);
+static void dash_button_set_text (DashButton* self, const gchar* value);
 static GObject * dash_button_constructor (GType type, guint n_construct_properties, GObjectConstructParam * construct_properties);
 FadeTracker* fade_tracker_new (GtkWidget* widget);
 FadeTracker* fade_tracker_construct (GType object_type, GtkWidget* widget);
@@ -101,6 +108,21 @@ void fadable_set_fade_tracker (Fadable* self, FadeTracker* value);
 static void dash_button_finalize (GObject* obj);
 static void _vala_dash_button_get_property (GObject * object, guint property_id, GValue * value, GParamSpec * pspec);
 static void _vala_dash_button_set_property (GObject * object, guint property_id, const GValue * value, GParamSpec * pspec);
+
+
+DashButton* dash_button_construct (GType object_type, const gchar* text) {
+	DashButton * self = NULL;
+	const gchar* _tmp0_;
+	g_return_val_if_fail (text != NULL, NULL);
+	_tmp0_ = text;
+	self = (DashButton*) g_object_new (object_type, "text", _tmp0_, NULL);
+	return self;
+}
+
+
+DashButton* dash_button_new (const gchar* text) {
+	return dash_button_construct (TYPE_DASH_BUTTON, text);
+}
 
 
 static gboolean dash_button_real_draw (GtkWidget* base, cairo_t* c) {
@@ -133,15 +155,25 @@ static gboolean dash_button_real_draw (GtkWidget* base, cairo_t* c) {
 }
 
 
-DashButton* dash_button_construct (GType object_type) {
-	DashButton * self = NULL;
-	self = (DashButton*) g_object_new (object_type, NULL);
-	return self;
+const gchar* dash_button_get_text (DashButton* self) {
+	const gchar* result;
+	const gchar* _tmp0_;
+	g_return_val_if_fail (self != NULL, NULL);
+	_tmp0_ = self->priv->_text;
+	result = _tmp0_;
+	return result;
 }
 
 
-DashButton* dash_button_new (void) {
-	return dash_button_construct (TYPE_DASH_BUTTON);
+static void dash_button_set_text (DashButton* self, const gchar* value) {
+	const gchar* _tmp0_;
+	gchar* _tmp1_;
+	g_return_if_fail (self != NULL);
+	_tmp0_ = value;
+	_tmp1_ = g_strdup (_tmp0_);
+	_g_free0 (self->priv->_text);
+	self->priv->_text = _tmp1_;
+	g_object_notify ((GObject *) self, "text");
 }
 
 
@@ -180,6 +212,40 @@ static GObject * dash_button_constructor (GType type, guint n_construct_properti
 	DashButton * self;
 	FadeTracker* _tmp0_;
 	FadeTracker* _tmp1_;
+	GtkBox* _tmp2_;
+	GtkBox* _tmp3_;
+	GtkBox* hbox;
+	GtkSizeGroup* _tmp4_;
+	GtkSizeGroup* sizes;
+	GtkLabel* _tmp5_;
+	GtkLabel* _tmp6_;
+	GtkLabel* label;
+	GtkSizeGroup* _tmp7_;
+	GtkLabel* _tmp8_;
+	GtkBox* _tmp9_;
+	GtkLabel* _tmp10_;
+	const gchar* _tmp11_;
+	gchar* _tmp12_ = NULL;
+	gchar* _tmp13_;
+	GtkLabel* _tmp14_;
+	GtkLabel* _tmp15_;
+	GtkLabel* _tmp16_;
+	GtkLabel* _tmp17_;
+	GtkLabel* _tmp18_;
+	GtkBox* _tmp19_;
+	GtkLabel* _tmp20_;
+	gchar* _tmp21_ = NULL;
+	gchar* _tmp22_;
+	GtkImage* _tmp23_;
+	GtkImage* _tmp24_;
+	GtkImage* _tmp25_;
+	GtkImage* image;
+	GtkSizeGroup* _tmp26_;
+	GtkImage* _tmp27_;
+	GtkBox* _tmp28_;
+	GtkImage* _tmp29_;
+	GtkBox* _tmp30_;
+	GtkBox* _tmp31_;
 	parent_class = G_OBJECT_CLASS (dash_button_parent_class);
 	obj = parent_class->constructor (type, n_construct_properties, construct_properties);
 	self = DASH_BUTTON (obj);
@@ -187,6 +253,58 @@ static GObject * dash_button_constructor (GType type, guint n_construct_properti
 	_tmp1_ = _tmp0_;
 	fadable_set_fade_tracker ((Fadable*) self, _tmp1_);
 	_g_object_unref0 (_tmp1_);
+	_tmp2_ = (GtkBox*) gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+	_tmp3_ = g_object_ref_sink (_tmp2_);
+	hbox = _tmp3_;
+	_tmp4_ = gtk_size_group_new (GTK_SIZE_GROUP_HORIZONTAL);
+	sizes = _tmp4_;
+	_tmp5_ = (GtkLabel*) gtk_label_new ("");
+	_tmp6_ = g_object_ref_sink (_tmp5_);
+	label = _tmp6_;
+	_tmp7_ = sizes;
+	_tmp8_ = label;
+	gtk_size_group_add_widget (_tmp7_, (GtkWidget*) _tmp8_);
+	_tmp9_ = hbox;
+	_tmp10_ = label;
+	gtk_container_add ((GtkContainer*) _tmp9_, (GtkWidget*) _tmp10_);
+	_tmp11_ = self->priv->_text;
+	_tmp12_ = g_strdup_printf ("<span font_size=\"large\">%s</span>", _tmp11_);
+	_tmp13_ = _tmp12_;
+	_tmp14_ = (GtkLabel*) gtk_label_new (_tmp13_);
+	_tmp15_ = g_object_ref_sink (_tmp14_);
+	_g_object_unref0 (label);
+	label = _tmp15_;
+	_g_free0 (_tmp13_);
+	_tmp16_ = label;
+	gtk_label_set_use_markup (_tmp16_, TRUE);
+	_tmp17_ = label;
+	gtk_widget_set_hexpand ((GtkWidget*) _tmp17_, TRUE);
+	_tmp18_ = label;
+	gtk_widget_set_halign ((GtkWidget*) _tmp18_, GTK_ALIGN_CENTER);
+	_tmp19_ = hbox;
+	_tmp20_ = label;
+	gtk_container_add ((GtkContainer*) _tmp19_, (GtkWidget*) _tmp20_);
+	_tmp21_ = g_build_filename (PKGDATADIR, "arrow_right.png", NULL, NULL);
+	_tmp22_ = _tmp21_;
+	_tmp23_ = (GtkImage*) gtk_image_new_from_file (_tmp22_);
+	_tmp24_ = g_object_ref_sink (_tmp23_);
+	_tmp25_ = _tmp24_;
+	_g_free0 (_tmp22_);
+	image = _tmp25_;
+	_tmp26_ = sizes;
+	_tmp27_ = image;
+	gtk_size_group_add_widget (_tmp26_, (GtkWidget*) _tmp27_);
+	_tmp28_ = hbox;
+	_tmp29_ = image;
+	gtk_container_add ((GtkContainer*) _tmp28_, (GtkWidget*) _tmp29_);
+	_tmp30_ = hbox;
+	gtk_widget_show_all ((GtkWidget*) _tmp30_);
+	_tmp31_ = hbox;
+	gtk_container_add ((GtkContainer*) self, (GtkWidget*) _tmp31_);
+	_g_object_unref0 (image);
+	_g_object_unref0 (label);
+	_g_object_unref0 (sizes);
+	_g_object_unref0 (hbox);
 	return obj;
 }
 
@@ -199,6 +317,7 @@ static void dash_button_class_init (DashButtonClass * klass) {
 	G_OBJECT_CLASS (klass)->set_property = _vala_dash_button_set_property;
 	G_OBJECT_CLASS (klass)->constructor = dash_button_constructor;
 	G_OBJECT_CLASS (klass)->finalize = dash_button_finalize;
+	g_object_class_install_property (G_OBJECT_CLASS (klass), DASH_BUTTON_TEXT, g_param_spec_string ("text", "text", "text", NULL, G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB | G_PARAM_READABLE | G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
 	g_object_class_install_property (G_OBJECT_CLASS (klass), DASH_BUTTON_FADE_TRACKER, g_param_spec_object ("fade-tracker", "fade-tracker", "fade-tracker", TYPE_FADE_TRACKER, G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB | G_PARAM_READABLE | G_PARAM_WRITABLE));
 }
 
@@ -211,13 +330,17 @@ static void dash_button_fadable_interface_init (FadableIface * iface) {
 
 
 static void dash_button_instance_init (DashButton * self) {
+	gchar* _tmp0_;
 	self->priv = DASH_BUTTON_GET_PRIVATE (self);
+	_tmp0_ = g_strdup ("");
+	self->priv->_text = _tmp0_;
 }
 
 
 static void dash_button_finalize (GObject* obj) {
 	DashButton * self;
 	self = DASH_BUTTON (obj);
+	_g_free0 (self->priv->_text);
 	_g_object_unref0 (self->priv->_fade_tracker);
 	G_OBJECT_CLASS (dash_button_parent_class)->finalize (obj);
 }
@@ -241,6 +364,9 @@ static void _vala_dash_button_get_property (GObject * object, guint property_id,
 	DashButton * self;
 	self = DASH_BUTTON (object);
 	switch (property_id) {
+		case DASH_BUTTON_TEXT:
+		g_value_set_string (value, dash_button_get_text (self));
+		break;
 		case DASH_BUTTON_FADE_TRACKER:
 		g_value_set_object (value, fadable_get_fade_tracker ((Fadable*) self));
 		break;
@@ -255,6 +381,9 @@ static void _vala_dash_button_set_property (GObject * object, guint property_id,
 	DashButton * self;
 	self = DASH_BUTTON (object);
 	switch (property_id) {
+		case DASH_BUTTON_TEXT:
+		dash_button_set_text (self, g_value_get_string (value));
+		break;
 		case DASH_BUTTON_FADE_TRACKER:
 		fadable_set_fade_tracker ((Fadable*) self, g_value_get_object (value));
 		break;

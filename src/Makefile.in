@@ -38,9 +38,9 @@ sbin_PROGRAMS = unity-greeter$(EXEEXT)
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	animate-timer.c background.c dash-box.c dash-button.c \
-	dash-entry.c fadable.c main-window.c menu.c menubar.c \
-	settings-daemon.c settings.c unity-greeter.c \
-	unity_greeter_vala.stamp user-list.c
+	dash-entry.c fadable-box.c fadable.c main-window.c menu.c \
+	menubar.c session-chooser.c settings-daemon.c settings.c \
+	unity-greeter.c unity_greeter_vala.stamp user-list.c
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/configure.ac
@@ -58,8 +58,10 @@ am_unity_greeter_OBJECTS = unity_greeter-animate-timer.$(OBJEXT) \
 	unity_greeter-dash-button.$(OBJEXT) \
 	unity_greeter-dash-entry.$(OBJEXT) \
 	unity_greeter-fadable.$(OBJEXT) \
+	unity_greeter-fadable-box.$(OBJEXT) \
 	unity_greeter-main-window.$(OBJEXT) \
 	unity_greeter-menu.$(OBJEXT) unity_greeter-menubar.$(OBJEXT) \
+	unity_greeter-session-chooser.$(OBJEXT) \
 	unity_greeter-settings.$(OBJEXT) \
 	unity_greeter-settings-daemon.$(OBJEXT) \
 	unity_greeter-unity-greeter.$(OBJEXT) \
@@ -225,9 +227,11 @@ unity_greeter_SOURCES = \
 	dash-button.vala \
 	dash-entry.vala \
 	fadable.vala \
+	fadable-box.vala \
 	main-window.vala \
 	menu.vala \
 	menubar.vala \
+	session-chooser.vala \
 	settings.vala \
 	settings-daemon.vala \
 	unity-greeter.vala \
@@ -343,10 +347,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-dash-box.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-dash-button.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-dash-entry.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-fadable-box.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-fadable.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-main-window.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-menu.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-menubar.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-session-chooser.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-settings-daemon.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-settings.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-unity-greeter.Po@am__quote@
@@ -450,6 +456,20 @@ unity_greeter-fadable.obj: fadable.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-fadable.obj `if test -f 'fadable.c'; then $(CYGPATH_W) 'fadable.c'; else $(CYGPATH_W) '$(srcdir)/fadable.c'; fi`
 
+unity_greeter-fadable-box.o: fadable-box.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-fadable-box.o -MD -MP -MF $(DEPDIR)/unity_greeter-fadable-box.Tpo -c -o unity_greeter-fadable-box.o `test -f 'fadable-box.c' || echo '$(srcdir)/'`fadable-box.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-fadable-box.Tpo $(DEPDIR)/unity_greeter-fadable-box.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fadable-box.c' object='unity_greeter-fadable-box.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-fadable-box.o `test -f 'fadable-box.c' || echo '$(srcdir)/'`fadable-box.c
+
+unity_greeter-fadable-box.obj: fadable-box.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-fadable-box.obj -MD -MP -MF $(DEPDIR)/unity_greeter-fadable-box.Tpo -c -o unity_greeter-fadable-box.obj `if test -f 'fadable-box.c'; then $(CYGPATH_W) 'fadable-box.c'; else $(CYGPATH_W) '$(srcdir)/fadable-box.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-fadable-box.Tpo $(DEPDIR)/unity_greeter-fadable-box.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fadable-box.c' object='unity_greeter-fadable-box.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-fadable-box.obj `if test -f 'fadable-box.c'; then $(CYGPATH_W) 'fadable-box.c'; else $(CYGPATH_W) '$(srcdir)/fadable-box.c'; fi`
+
 unity_greeter-main-window.o: main-window.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-main-window.o -MD -MP -MF $(DEPDIR)/unity_greeter-main-window.Tpo -c -o unity_greeter-main-window.o `test -f 'main-window.c' || echo '$(srcdir)/'`main-window.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-main-window.Tpo $(DEPDIR)/unity_greeter-main-window.Po
@@ -491,6 +511,20 @@ unity_greeter-menubar.obj: menubar.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='menubar.c' object='unity_greeter-menubar.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-menubar.obj `if test -f 'menubar.c'; then $(CYGPATH_W) 'menubar.c'; else $(CYGPATH_W) '$(srcdir)/menubar.c'; fi`
+
+unity_greeter-session-chooser.o: session-chooser.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-session-chooser.o -MD -MP -MF $(DEPDIR)/unity_greeter-session-chooser.Tpo -c -o unity_greeter-session-chooser.o `test -f 'session-chooser.c' || echo '$(srcdir)/'`session-chooser.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-session-chooser.Tpo $(DEPDIR)/unity_greeter-session-chooser.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='session-chooser.c' object='unity_greeter-session-chooser.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-session-chooser.o `test -f 'session-chooser.c' || echo '$(srcdir)/'`session-chooser.c
+
+unity_greeter-session-chooser.obj: session-chooser.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-session-chooser.obj -MD -MP -MF $(DEPDIR)/unity_greeter-session-chooser.Tpo -c -o unity_greeter-session-chooser.obj `if test -f 'session-chooser.c'; then $(CYGPATH_W) 'session-chooser.c'; else $(CYGPATH_W) '$(srcdir)/session-chooser.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-session-chooser.Tpo $(DEPDIR)/unity_greeter-session-chooser.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='session-chooser.c' object='unity_greeter-session-chooser.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-session-chooser.obj `if test -f 'session-chooser.c'; then $(CYGPATH_W) 'session-chooser.c'; else $(CYGPATH_W) '$(srcdir)/session-chooser.c'; fi`
 
 unity_greeter-settings.o: settings.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-settings.o -MD -MP -MF $(DEPDIR)/unity_greeter-settings.Tpo -c -o unity_greeter-settings.o `test -f 'settings.c' || echo '$(srcdir)/'`settings.c
@@ -577,6 +611,11 @@ $(srcdir)/fadable.c: $(srcdir)/unity_greeter_vala.stamp
 	@if test -f $@; then :; else \
 	  $(MAKE) $(AM_MAKEFLAGS) $(srcdir)/unity_greeter_vala.stamp; \
 	fi
+$(srcdir)/fadable-box.c: $(srcdir)/unity_greeter_vala.stamp
+	@if test -f $@; then :; else rm -f $(srcdir)/unity_greeter_vala.stamp; fi
+	@if test -f $@; then :; else \
+	  $(MAKE) $(AM_MAKEFLAGS) $(srcdir)/unity_greeter_vala.stamp; \
+	fi
 $(srcdir)/main-window.c: $(srcdir)/unity_greeter_vala.stamp
 	@if test -f $@; then :; else rm -f $(srcdir)/unity_greeter_vala.stamp; fi
 	@if test -f $@; then :; else \
@@ -588,6 +627,11 @@ $(srcdir)/menu.c: $(srcdir)/unity_greeter_vala.stamp
 	  $(MAKE) $(AM_MAKEFLAGS) $(srcdir)/unity_greeter_vala.stamp; \
 	fi
 $(srcdir)/menubar.c: $(srcdir)/unity_greeter_vala.stamp
+	@if test -f $@; then :; else rm -f $(srcdir)/unity_greeter_vala.stamp; fi
+	@if test -f $@; then :; else \
+	  $(MAKE) $(AM_MAKEFLAGS) $(srcdir)/unity_greeter_vala.stamp; \
+	fi
+$(srcdir)/session-chooser.c: $(srcdir)/unity_greeter_vala.stamp
 	@if test -f $@; then :; else rm -f $(srcdir)/unity_greeter_vala.stamp; fi
 	@if test -f $@; then :; else \
 	  $(MAKE) $(AM_MAKEFLAGS) $(srcdir)/unity_greeter_vala.stamp; \
@@ -742,10 +786,12 @@ maintainer-clean-generic:
 	-rm -f dash-box.c
 	-rm -f dash-button.c
 	-rm -f dash-entry.c
+	-rm -f fadable-box.c
 	-rm -f fadable.c
 	-rm -f main-window.c
 	-rm -f menu.c
 	-rm -f menubar.c
+	-rm -f session-chooser.c
 	-rm -f settings-daemon.c
 	-rm -f settings.c
 	-rm -f unity-greeter.c

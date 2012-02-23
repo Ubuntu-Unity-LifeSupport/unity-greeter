@@ -42,11 +42,9 @@ public class UserEntry
 
     /* Keyboard layouts to use for this user by default */
     public List <LightDM.Layout> keyboard_layouts;
-}
 
-private class SessionMenuItem : Gtk.RadioMenuItem
-{
-    public string session_name;
+    /* Default session for this user */
+    public string session;
 }
 
 public class UserList : Gtk.EventBox
@@ -74,10 +72,20 @@ public class UserList : Gtk.EventBox
     private DashEntry prompt_entry;
     private DashButton login_button;
     private Fadable prompt_widget_to_show;
-    private Gtk.Button options_button;
-    private Menu options_menu;
-    private Gdk.Pixbuf options_pixbuf;
-    unowned GLib.SList<SessionMenuItem> session_group = null;
+    private Gtk.Button session_button;
+    private Gtk.Image session_image;
+    private SessionChooser session_chooser;
+ 
+    private enum Mode
+    {
+        LOGIN,
+        TRANSFORM_TO_LOGIN_HIDE,
+        TRANSFORM_TO_LOGIN_SHOW,
+        SCROLLING,
+        SESSIONS,
+        TRANSFORM_TO_SESSIONS_HIDE,
+    }
+    private Mode mode = Mode.LOGIN;
 
     private bool complete = false;
 
@@ -114,29 +122,9 @@ public class UserList : Gtk.EventBox
         get { if (selected_entry == null) return null; return selected_entry.name; }
     }
 
-    public string? session
-    {
-        get
-        {
-            foreach (var item in session_group)
-            {
-                if (item.active)
-                    return item.session_name;
-            }
-            return null;
-        }
-        set
-        {
-            foreach (var item in session_group)
-            {
-                if (item.session_name == value)
-                {
-                    item.active = true;
-                    return;
-                }
-            }
-        }
-    }
+    public string? session {get; private set;}
+
+    private Gdk.Pixbuf? last_session_badge = null;
 
     public UserList (Background bg, MenuBar mb)
     {
@@ -153,18 +141,19 @@ public class UserList : Gtk.EventBox
         login_box.show ();
         add_with_class (login_box);
 
+        session_chooser = new SessionChooser ();
+        session_chooser.session_clicked.connect (session_clicked_cb);
+        session_chooser.fade_done.connect (session_fade_done_cb);
+        session_chooser.show ();
+        UnityGreeter.add_style_class (session_chooser);
+
         prompt_entry = new DashEntry ();
         prompt_entry.caps_lock_warning = true;
 
         prompt_entry.activate.connect (prompt_entry_activate_cb);
         add_with_class (prompt_entry);
 
-        login_button = new DashButton ();
-        var label = new Gtk.Label ("<span font_size=\"large\">%s</span>".printf (/* 'Log In' here is the button for logging in. */
-                                                                             _("Log In")));
-        label.use_markup = true;
-        label.show ();
-        login_button.add (label);
+        login_button = new DashButton (_("Log In")); /* 'Log In' here is the button for logging in. */
         login_button.clicked.connect (login_button_clicked_cb);
         add_with_class (login_button);
 
@@ -177,28 +166,16 @@ public class UserList : Gtk.EventBox
             debug ("Error loading message image: %s", e.message);
         }
 
-        try
-        {
-            options_pixbuf = new Gdk.Pixbuf.from_file (Path.build_filename (Config.PKGDATADIR, "cog.png", null));
-        }
-        catch (Error e)
-        {
-            debug ("Error loading cog image: %s", e.message);
-        }
-
-        options_button = new Gtk.Button ();
-        options_button.focus_on_click = false;
-        options_button.get_accessible ().set_name (_("Session Options"));
-        var image = new Gtk.Image.from_pixbuf (options_pixbuf);
-        image.show ();
-        options_button.relief = Gtk.ReliefStyle.NONE;
-        options_button.add (image);
-        options_button.clicked.connect (options_button_clicked_cb);
-        options_button.show ();
-        add_with_class (options_button);
-
-        options_menu = new Menu (background);
-        UnityGreeter.add_style_class (options_menu);
+        session_button = new Gtk.Button ();
+        session_button.focus_on_click = false;
+        session_button.get_accessible ().set_name (_("Session Options"));
+        session_image = new Gtk.Image.from_pixbuf (SessionChooser.get_badge (session));
+        session_image.show ();
+        session_button.relief = Gtk.ReliefStyle.NONE;
+        session_button.add (session_image);
+        session_button.clicked.connect (session_button_clicked_cb);
+        session_button.show ();
+        add_with_class (session_button);
 
         scroll_timer = new AnimateTimer (AnimateTimer.FAST);
         scroll_timer.animate.connect (scroll_animate_cb);
@@ -214,6 +191,9 @@ public class UserList : Gtk.EventBox
 
     public void scroll (ScrollTarget target)
     {
+        if (mode != Mode.LOGIN && mode != Mode.SCROLLING)
+            return;
+
         switch (target)
         {
         case ScrollTarget.START:
@@ -255,8 +235,8 @@ public class UserList : Gtk.EventBox
     private void redraw_login_box ()
     {
         Gtk.Allocation allocation;
-        get_allocation (out allocation);
-        queue_draw_area (allocation.x + box_x, allocation.y + box_y, box_width * grid_size, box_height * grid_size);
+        login_box.get_allocation (out allocation);
+        queue_draw_area (allocation.x, allocation.y, allocation.width, allocation.height);
     }
 
     public void show_message (string text, bool error = false)
@@ -289,7 +269,7 @@ public class UserList : Gtk.EventBox
         prompt_entry.text = "";
         prompt_entry.sensitive = true;
         prompt_entry.visibility = !secret;
-        if (scroll_timer.is_running)
+        if (mode == Mode.SCROLLING)
             prompt_widget_to_show = prompt_entry;
         else
             prompt_entry.show ();
@@ -312,7 +292,7 @@ public class UserList : Gtk.EventBox
         prompt_entry.hide ();
         login_button.hide ();
         message = "";
-        if (scroll_timer.is_running)
+        if (mode == Mode.SCROLLING)
           prompt_widget_to_show = login_button;
         else
           login_button.show();
@@ -342,17 +322,6 @@ public class UserList : Gtk.EventBox
         redraw_login_box ();
     }
 
-    public void add_session (string name, string label)
-    {
-        var item = new SessionMenuItem ();
-        item.set_group (session_group);
-        item.session_name = name;
-        item.label = label;
-        item.show ();
-        options_menu.append (item);
-        session_group = (GLib.SList<SessionMenuItem>) item.get_group ();
-    }
-
     private UserEntry? find_entry (string name)
     {
         foreach (var entry in entries)
@@ -364,7 +333,7 @@ public class UserList : Gtk.EventBox
         return null;
     }
 
-    public void add_entry (string name, string label, string? background, List <LightDM.Layout>? keyboard_layouts, bool is_active = false, bool has_messages = false)
+    public void add_entry (string name, string label, string? background, List <LightDM.Layout>? keyboard_layouts, bool is_active = false, bool has_messages = false, string? session = null)
     {
         var e = find_entry (name);
         if (e == null)
@@ -379,6 +348,7 @@ public class UserList : Gtk.EventBox
         e.keyboard_layouts = keyboard_layouts.copy ();
         e.is_active = is_active;
         e.has_messages = has_messages;
+        e.session = (session == null) ? "ubuntu" : session;
 
         if (selected_entry == null)
             select_entry (e, 1.0);
@@ -427,23 +397,98 @@ public class UserList : Gtk.EventBox
         start_session ();
     }
 
-    private void options_menu_position_cb (Gtk.Menu menu, out int x, out int y, out bool push_in)
+    private void session_button_clicked_cb ()
     {
-        Gtk.Allocation button_allocation;
-        options_button.get_allocation (out button_allocation);
-
-        get_window ().get_origin (out x, out y);
-        x += button_allocation.x;
-        y += button_allocation.y + button_allocation.height;
-        push_in = true;
+        return_if_fail (mode == Mode.LOGIN);
+        mode = Mode.TRANSFORM_TO_SESSIONS_HIDE;
+        scroll_timer.reset (AnimateTimer.INSTANT);
     }
 
-    private void options_button_clicked_cb ()
+    private void change_session (string session)
     {
-        options_menu.popup (null, null, options_menu_position_cb, 0, Gtk.get_current_event_time ());
+        this.session = session;
+        session_image.set_from_pixbuf (SessionChooser.get_badge (session));
+    }
+
+    private void session_clicked_cb (string? session)
+    {
+        return_if_fail (mode == Mode.SESSIONS);
+
+        mode = Mode.TRANSFORM_TO_LOGIN_HIDE;
+        session_chooser.fade_out ();
+
+        if (session != null)
+            change_session (session);
+    }
+
+    private void session_fade_done_cb ()
+    {
+        /* Either a fade in into SESSIONS mode or a fade out from SESSIONS mode */
+        if (mode == Mode.TRANSFORM_TO_LOGIN_HIDE)
+        {
+            login_box.remove (session_chooser);
+            mode = Mode.TRANSFORM_TO_LOGIN_SHOW;
+            scroll_timer.reset (AnimateTimer.INSTANT);
+
+            if (prompt_entry.visible)
+                prompt_entry.grab_focus ();
+            else if (login_button.visible)
+                login_button.grab_focus ();
+        }
     }
 
     private void scroll_animate_cb (double progress)
+    {
+        switch (mode)
+        {
+        case Mode.SCROLLING:
+            animate_scrolling (progress);
+            break;
+        case Mode.TRANSFORM_TO_SESSIONS_HIDE:
+            animate_to_sessions_hide (progress);
+            break;
+        case Mode.TRANSFORM_TO_LOGIN_SHOW:
+            animate_to_login (progress);
+            break;
+        }
+    }
+
+    private void animate_to_sessions_hide (double progress)
+    {
+        allocate_login_box ();
+
+        /* Stop when we get there */
+        if (progress >= 1.0)
+            finished_to_sessions_hide ();
+
+        redraw_user_list ();
+    }
+
+    private void finished_to_sessions_hide ()
+    {
+        login_box.add (session_chooser);
+        session_chooser.grab_focus ();
+        session_chooser.fade_in ();
+        mode = Mode.SESSIONS;
+    }
+
+    private void animate_to_login (double progress)
+    {
+        allocate_login_box ();
+
+        /* Stop when we get there */
+        if (progress >= 1.0)
+            finished_to_login ();
+
+        redraw_user_list ();
+    }
+
+    private void finished_to_login ()
+    {
+        mode = Mode.LOGIN;
+    }
+
+    private void animate_scrolling (double progress)
     {
         /* Total height of list */
         var h = entries.length ();
@@ -466,27 +511,33 @@ public class UserList : Gtk.EventBox
         /* And finally, redraw */
         redraw_user_list ();
 
-        /* Stop when we get there */
-        if (progress >= 1.0)
-            finished_animating ();
-    }
-
-    private void finished_animating ()
-    {
-        if (prompt_widget_to_show != null) {
+        if (progress >= 0.975 && prompt_widget_to_show != null)
+        {
             prompt_widget_to_show.fade_in ();
             prompt_widget_to_show = null;
         }
-        options_button.show ();
+
+        /* Stop when we get there */
+        if (progress >= 1.0)
+            finished_scrolling ();
+    }
+
+    private void finished_scrolling ()
+    {
+        session_button.show ();
         user_displayed ();
+        mode = Mode.LOGIN;
     }
 
     private void select_entry (UserEntry entry, double direction)
     {
+        last_session_badge = SessionChooser.get_badge (session);
+
         if (!get_realized ())
         {
             /* Just note it for the future if we haven't been realized yet */
             selected_entry = entry;
+            change_session (entry.session);
             return;
         }
 
@@ -495,15 +546,15 @@ public class UserList : Gtk.EventBox
             var old_target = scroll_target_location;
             var new_target = entries.index (entry);
             var new_direction = direction;
-            var new_start = scroll_timer.is_running ? scroll_start_location : scroll_location;
+            var new_start = (mode == Mode.SCROLLING) ? scroll_start_location : scroll_location;
 
-            if (scroll_timer.is_running && scroll_direction != new_direction)
+            if (mode == Mode.SCROLLING && scroll_direction != new_direction)
                 return; /* ignore requests when we're already scrolling the opposite way */
 
             if (scroll_location != new_target)
             {
                 var new_distance = new_direction * (new_target - new_start);
-                if (scroll_timer.is_running)
+                if (mode == Mode.SCROLLING)
                 {
                     var old_distance = new_direction * (old_target - new_start);
                     if (!scroll_timer.extend ((new_distance - old_distance) / old_distance))
@@ -521,7 +572,9 @@ public class UserList : Gtk.EventBox
 
                 prompt_entry.hide ();
                 login_button.hide ();
-                options_button.hide ();
+                session_button.hide ();
+
+                mode = Mode.SCROLLING;
             }
 
             scroll_target_location = new_target;
@@ -532,9 +585,10 @@ public class UserList : Gtk.EventBox
         if (selected_entry != entry)
         {
             selected_entry = entry;
+            change_session (entry.session);
             user_selected (selected_entry.name);
 
-            if (!scroll_timer.is_running)
+            if (mode == Mode.LOGIN)
                 user_displayed (); /* didn't need to move, make sure we trigger side effects */
         }
     }
@@ -548,6 +602,54 @@ public class UserList : Gtk.EventBox
         select_entry (saved_entry, 1);
     }
 
+    private int round_up_to_grid_size (int size)
+    {
+        if (size % grid_size == 0)
+            return size;
+        else
+            return (size / grid_size + 1) * grid_size;
+    }
+
+    private void allocate_login_box ()
+    {
+        Gtk.Allocation allocation;
+        get_allocation (out allocation);
+
+        var child_allocation = Gtk.Allocation ();
+        child_allocation.x = allocation.x + box_x + 6;
+        child_allocation.y = allocation.y + box_y + 6;
+        child_allocation.width = grid_size * box_width - 12;
+        child_allocation.height = grid_size * box_height - 6;
+
+        Gtk.Requisition session_request;
+        session_chooser.get_preferred_size (null, out session_request);
+        var session_height = round_up_to_grid_size (session_request.height + 12);
+        if ((session_height / grid_size) % 2 == 0)
+            session_height += grid_size; /* make sure we expand equally top and bottom */
+        session_height -= 12;
+        session_height = int.max (session_height, child_allocation.height);
+        var session_distance = session_height - child_allocation.height;
+
+        switch (mode)
+        {
+        case Mode.TRANSFORM_TO_SESSIONS_HIDE:
+            child_allocation.height += (int) (scroll_timer.progress * session_distance);
+            child_allocation.y -= (int) (scroll_timer.progress * session_distance) / 2;
+            break;
+        case Mode.SESSIONS:
+        case Mode.TRANSFORM_TO_LOGIN_HIDE:
+            child_allocation.height = session_height;
+            child_allocation.y -= session_distance / 2;
+            break;
+        case Mode.TRANSFORM_TO_LOGIN_SHOW:
+            child_allocation.height = session_height - (int) (scroll_timer.progress * session_distance);
+            child_allocation.y -= (int) ((1.0 - scroll_timer.progress) * session_distance) / 2;
+            break;
+        }
+
+        login_box.size_allocate (child_allocation);
+    }
+
     public override void size_allocate (Gtk.Allocation allocation)
     {
         base.size_allocate (allocation);
@@ -555,13 +657,9 @@ public class UserList : Gtk.EventBox
         if (!get_realized ())
             return;
 
-        var child_allocation = Gtk.Allocation ();
+        allocate_login_box ();
 
-        child_allocation.x = allocation.x + box_x + 6;
-        child_allocation.y = allocation.y + box_y + 6;
-        child_allocation.width = grid_size * box_width - 12;
-        child_allocation.height = grid_size * box_height - 12;
-        login_box.size_allocate (child_allocation);
+        var child_allocation = Gtk.Allocation ();
 
         /* Put prompt entry and login button inside login box */
         child_allocation.x = allocation.x + box_x + grid_size / 2;
@@ -575,10 +673,10 @@ public class UserList : Gtk.EventBox
         child_allocation.y = allocation.y + box_y + grid_size / 4;
         child_allocation.width = grid_size;
         child_allocation.height = grid_size;
-        options_button.size_allocate (child_allocation);
+        session_button.size_allocate (child_allocation);
     }
 
-    private void draw_entry (Cairo.Context c, UserEntry entry, double alpha = 0.5, bool in_box = false)
+    private void draw_entry (Cairo.Context c, UserEntry entry, double alpha = 0.5, bool in_box = false, Gdk.Pixbuf? badge = null)
     {
         c.save ();
         
@@ -620,31 +718,30 @@ public class UserList : Gtk.EventBox
         c.move_to (0, 0);
         Pango.cairo_show_layout (c, entry.layout);
 
-        if (entry.has_messages)
+        if (entry.has_messages && (!in_box || w + 6 + message_pixbuf.get_width () < bw))
         {
             c.translate (w + 6, (h - message_pixbuf.get_height ()) / 2);
             Gdk.cairo_set_source_pixbuf (c, message_pixbuf, 0, 0);
-            c.rectangle (0, 0, message_pixbuf.get_width (), message_pixbuf.get_height ());
             c.paint_with_alpha (alpha);
         }
 
         c.restore ();
 
-        /* Now draw options button if we're animating in the box */
-        if (in_box && scroll_timer.is_running && options_pixbuf != null)
+        /* Now draw session button if we're animating in the box */
+        if (in_box && mode == Mode.SCROLLING && badge != null)
         {
             c.save ();
-            var xpadding = (grid_size - options_pixbuf.width) / 2;
-            var ypadding = (grid_size - options_pixbuf.height) / 2;
+            var xpadding = (grid_size - badge.width) / 2;
+            /* FIXME: The 18px offset here is because the visual assets changed size from 40px to 22px.  It should be fixed properly somewhere... */
+            var ypadding = (grid_size - badge.height) / 2 - 18;
             c.translate (box_width * grid_size - grid_size - grid_size / 4 + xpadding, grid_size / 4 - ypadding - border);
-            Gdk.cairo_set_source_pixbuf (c, options_pixbuf, 0, 0);
+            Gdk.cairo_set_source_pixbuf (c, badge, 0, 0);
             c.paint ();
             c.restore ();
         }
     }
 
-    private void draw_entry_at_position (Cairo.Context c, UserEntry entry,
-                                         double position, bool in_box = false)
+    private void draw_entry_at_position (Cairo.Context c, UserEntry entry, double position, bool in_box = false, Gdk.Pixbuf? badge = null)
     {
         c.save ();
         c.translate (0, position * grid_size);
@@ -653,18 +750,50 @@ public class UserList : Gtk.EventBox
             alpha = 1.0 + position / (n_above + 1);
         else
             alpha = 1.0 - (position - 2) / (n_below + 1);
-        draw_entry (c, entry, alpha, in_box);
+        draw_entry (c, entry, alpha, in_box, badge);
         c.restore ();
     }
 
     public override bool draw (Cairo.Context c)
     {
+        var max_alpha = 1.0;
+        if (mode == Mode.TRANSFORM_TO_SESSIONS_HIDE)
+            max_alpha = 1.0 - scroll_timer.progress;
+        else if (mode == Mode.TRANSFORM_TO_LOGIN_SHOW)
+            max_alpha = scroll_timer.progress;
+
         c.save ();
-        base.draw (c);
+        fixed.propagate_draw (login_box, c); /* Always full alpha */
         c.restore ();
 
-        c.save ();
+        if (mode == Mode.LOGIN ||
+            mode == Mode.SCROLLING ||
+            mode == Mode.TRANSFORM_TO_SESSIONS_HIDE ||
+            mode == Mode.TRANSFORM_TO_LOGIN_SHOW)
+        {
+            c.save ();
+            c.push_group ();
 
+            draw_names (c, NameLocation.OUTSIDE_BOX);
+            draw_box_contents (c);
+            draw_names (c, NameLocation.INSIDE_BOX);
+
+            c.pop_group_to_source ();
+            c.paint_with_alpha (max_alpha);
+            c.restore ();
+        }
+
+        return false;
+    }
+
+    private enum NameLocation
+    {
+        INSIDE_BOX,
+        OUTSIDE_BOX,
+    }
+    private void draw_names (Cairo.Context c, NameLocation where)
+    {
+        c.save ();
         c.translate (box_x, box_y);
 
         var index = 0;
@@ -673,7 +802,7 @@ public class UserList : Gtk.EventBox
             var position = index - scroll_location;
 
             /* Draw entries above the box */
-            if (position < 0)
+            if (where == NameLocation.OUTSIDE_BOX && position < 0)
             {
                 var h_above = (double) (n_above + 1) * grid_size;
                 c.save ();
@@ -686,23 +815,27 @@ public class UserList : Gtk.EventBox
             }
 
             /* Draw entries in the box */
-            if (position > -1 && position < 1 && scroll_timer.is_running)
+            if (where == NameLocation.INSIDE_BOX && position > -1 && position < 1 && mode == Mode.SCROLLING)
             {
                 c.save ();
                 c.translate (0, border);
-                c.rectangle (0, border * 2, box_width * grid_size, box_height * grid_size - border * 5);
+                c.rectangle (border, border * 2, box_width * grid_size - border * 2, box_height * grid_size - border * 2);
                 c.clip ();
 
+                var badge = last_session_badge;
+                if (entry == selected_entry)
+                    badge = SessionChooser.get_badge (session);
+
                 if (position <= 0) /* top of box, normal pace */
-                    draw_entry_at_position (c, entry, position, true);
+                    draw_entry_at_position (c, entry, position, true, badge);
                 else /* bottom of box; pace must put across bottom halfway through animation */
-                    draw_entry_at_position (c, entry, position * box_height * 2, true);
+                    draw_entry_at_position (c, entry, position * box_height * 2, true, badge);
 
                 c.restore ();
             }
 
             /* Draw entries below the box */
-            if (position > 0)
+            if (where == NameLocation.OUTSIDE_BOX && position > 0)
             {
                 var h_below = (double) (n_below + 1) * grid_size;
                 c.save ();
@@ -717,24 +850,35 @@ public class UserList : Gtk.EventBox
             index++;
         }
 
-        /* Selected item */
-        if (selected_entry != null && !scroll_timer.is_running)
+        c.restore ();
+    }
+
+    private void draw_box_contents (Cairo.Context c)
+    {
+        foreach (var child in fixed.get_children ())
         {
-            var text_y = border;
-
-            c.save ();
-            c.rectangle (border, border, box_width * grid_size - border * 2, box_height * grid_size - border * 2);
-            c.clip ();
-
-            c.save ();
-            c.translate (0, text_y);
-            draw_entry (c, selected_entry, 1.0, true);
-            c.restore ();
-
-            c.restore();
+            if (child != login_box)
+                fixed.propagate_draw (child, c);
         }
 
-        if ((error != null || message != null) && !scroll_timer.is_running)
+        c.save ();
+
+        c.translate (box_x, box_y);
+
+        /* Selected item */
+        if (selected_entry != null && mode != Mode.SCROLLING)
+        {
+            c.save ();
+
+            c.rectangle (border, border, box_width * grid_size - border * 2, box_height * grid_size - border * 2);
+            c.clip ();
+            c.translate (0, border);
+            draw_entry (c, selected_entry, 1.0, true);
+
+            c.restore ();
+        }
+
+        if ((error != null || message != null) && mode != Mode.SCROLLING)
         {
             string text;
             if (error == null)
@@ -772,8 +916,6 @@ public class UserList : Gtk.EventBox
         }
 
         c.restore ();
-
-        return false;
     }
 
     private bool inside_entry (double x, double y, double entry_y, UserEntry entry)
@@ -793,6 +935,9 @@ public class UserList : Gtk.EventBox
 
     public override bool button_release_event (Gdk.EventButton event)
     {
+        if (mode != Mode.LOGIN)
+            return false;
+
         var x = event.x - box_x;
         var y = event.y - box_y;
 
