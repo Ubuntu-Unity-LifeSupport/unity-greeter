@@ -1,0 +1,23 @@
+=== modified file 'lightdm/src/menubar.vala'
+--- lightdm/src/menubar.vala	2012-02-15 09:21:45 +0000
++++ lightdm/src/menubar.vala	2012-02-23 20:26:29 +0000
+@@ -142,6 +142,18 @@
+         label.ensure_style ();
+         label.modify_fg (Gtk.StateType.INSENSITIVE, label.get_style ().fg[Gtk.StateType.NORMAL]);
+ 
++        /* Prevent dragging the window by the menubar */
++        try
++        {
++            var style = new Gtk.CssProvider ();
++            style.load_from_data ("* {-GtkWidget-window-dragging: false;}", -1);
++            get_style_context ().add_provider (style, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
++        }
++        catch (Error e)
++        {
++            debug ("Internal error loading session chooser style: %s", e.message);
++        }
++
+         setup_indicators ();
+ 
+         set_size_request (-1, 32);
+

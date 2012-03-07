@@ -1,3 +1,10 @@
+unity-greeter (0.2.4-0ubuntu2) precise; urgency=low
+
+  * debian/patches/dont_dnd_greeter.patch: backport fix for the greeter
+    responding to dnd, it has quite some duplicates (lp: #919398)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Wed, 07 Mar 2012 11:36:25 +0100
+
 unity-greeter (0.2.4-0ubuntu1) precise; urgency=low
 
   * New upstream release
