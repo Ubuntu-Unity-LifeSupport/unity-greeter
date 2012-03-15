@@ -48,7 +48,7 @@ public class FadeTracker : Object
 
     construct
     {
-        timer = new AnimateTimer (AnimateTimer.INSTANT);
+        timer = new AnimateTimer (AnimateTimer.ease_out_quint, AnimateTimer.INSTANT);
         timer.animate.connect (animate_cb);
     }
 

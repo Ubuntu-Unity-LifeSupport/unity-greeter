@@ -7,108 +7,118 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2012-02-22 13:47+0000\n"
-"PO-Revision-Date: 2012-01-24 16:14+0000\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2012-03-14 17:39+0000\n"
+"PO-Revision-Date: 2012-03-04 21:48+0000\n"
+"Last-Translator: Nukartaannguaq Lundblad <Unknown>\n"
 "Language-Team: Greenlandic (Kalaallisut) <kl@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2012-02-23 05:02+0000\n"
-"X-Generator: Launchpad (build 14855)\n"
+"X-Launchpad-Export-Date: 2012-03-15 05:01+0000\n"
+"X-Generator: Launchpad (build 14933)\n"
 
 #: ../src/main-window.vala:42
 msgid "Login Screen"
-msgstr ""
+msgstr "Iserfissaq"
 
-#: ../src/menubar.vala:199
+#: ../src/menubar.vala:211
 msgid "Onscreen keyboard"
-msgstr ""
+msgstr "Skærm-imi naqitassat"
 
-#: ../src/menubar.vala:204
+#: ../src/menubar.vala:216
 msgid "High Contrast"
-msgstr ""
+msgstr "Kontrast anneq"
 
-#: ../src/menubar.vala:210
+#: ../src/menubar.vala:222
 msgid "Screen Reader"
-msgstr ""
+msgstr "Umeruamik atuaasartoq"
+
+#: ../src/session-chooser.vala:63
+msgid "_Back"
+msgstr "_Uterit"
 
 #. Help string for command line --version flag
 #: ../src/unity-greeter.vala:30
 msgid "Show release version"
-msgstr ""
+msgstr "Sanaaq sorliunersoq takuuk"
 
 #. Help string for command line --test-mode flag
 #: ../src/unity-greeter.vala:33
 msgid "Run in test mode"
-msgstr ""
+msgstr "Misiliummik igerlatinguk"
 
-#: ../src/unity-greeter.vala:117 ../src/unity-greeter.vala:139
-msgid "Guest Session"
-msgstr ""
-
-#: ../src/unity-greeter.vala:125
-msgid "Login"
-msgstr ""
-
-#: ../src/unity-greeter.vala:251 ../src/unity-greeter.vala:381
-#: ../src/unity-greeter.vala:400 ../src/unity-greeter.vala:430
+#: ../src/unity-greeter.vala:383 ../src/unity-greeter.vala:518
+#: ../src/unity-greeter.vala:541 ../src/unity-greeter.vala:545
+#: ../src/unity-greeter.vala:549 ../src/unity-greeter.vala:555
+#: ../src/unity-greeter.vala:558 ../src/unity-greeter.vala:585
 msgid "Password:"
-msgstr ""
+msgstr "Isertaat"
 
-#: ../src/unity-greeter.vala:253 ../src/unity-greeter.vala:384
+#: ../src/unity-greeter.vala:385 ../src/unity-greeter.vala:521
 msgid "Username:"
-msgstr ""
+msgstr "Atuisoq"
 
-#: ../src/unity-greeter.vala:318
+#: ../src/unity-greeter.vala:460
 msgid "Invalid password, please try again"
-msgstr ""
+msgstr "Isertaat kukkusuuvoq, misileqqiguk"
 
-#: ../src/unity-greeter.vala:323
+#: ../src/unity-greeter.vala:469
 msgid "Failed to authenticate"
-msgstr ""
-
-#: ../src/unity-greeter.vala:351
-msgid "Other..."
-msgstr ""
+msgstr "isinngittoorpoq"
 
 #. Arguments and description for --help text
-#: ../src/unity-greeter.vala:601
+#: ../src/unity-greeter.vala:819
 msgid "- Unity Greeter"
-msgstr ""
+msgstr "-Unity-mut Tikilluarit"
 
 #. Text printed out when an unknown command-line argument provided
-#: ../src/unity-greeter.vala:612
+#: ../src/unity-greeter.vala:830
 #, c-format
 msgid "Run '%s --help' to see a full list of available command line options."
-msgstr ""
+msgstr "'%s --help' igerlatinguk naalakkiutit qiningassaat takuniarukkit"
 
-#: ../src/user-list.vala:156
-msgid "Log In"
-msgstr ""
+#: ../src/user-list.vala:80
+msgid "Guest Session"
+msgstr "Pulaartutut iserit"
 
-#: ../src/user-list.vala:171
+#: ../src/user-list.vala:242
 msgid "Session Options"
-msgstr ""
+msgstr "Isersimanermi qiningassat"
 
-#: ../src/user-list.vala:278
+#: ../src/user-list.vala:366
 #, c-format
 msgid "Enter password for %s"
-msgstr ""
+msgstr "Isertaat uuga %s toortaruk"
 
-#: ../src/user-list.vala:282
+#: ../src/user-list.vala:370
 msgid "Enter username"
-msgstr ""
+msgstr "Atuisoq allanguk"
 
-#: ../src/user-list.vala:284
+#: ../src/user-list.vala:372
 msgid "Enter password"
-msgstr ""
+msgstr "Isertaat allanguk"
 
-#: ../src/user-list.vala:300
+#: ../src/user-list.vala:385
 #, c-format
 msgid "Login as %s"
+msgstr "%s -tut userit"
+
+#. 'Log In' here is the button for logging in.
+#: ../src/user-list.vala:387
+msgid "Log In"
+msgstr "Iserit"
+
+#: ../src/user-list.vala:391 ../src/user-list.vala:392
+msgid "Retry"
 msgstr ""
 
-#: ../src/user-list.vala:311
+#: ../src/user-list.vala:408
 msgid "Logging in..."
-msgstr ""
+msgstr "Isilerpoq..."
+
+#: ../src/user-list.vala:493
+msgid "Login"
+msgstr "Iserfissaq"
+
+#~ msgid "Other..."
+#~ msgstr "Alla..."

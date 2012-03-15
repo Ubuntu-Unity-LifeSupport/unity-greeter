@@ -1,0 +1,124 @@
+# Punjabi translation for unity-greeter
+# Copyright (c) 2012 Rosetta Contributors and Canonical Ltd 2012
+# This file is distributed under the same license as the unity-greeter package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2012.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: unity-greeter\n"
+"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2012-03-14 17:39+0000\n"
+"PO-Revision-Date: 2012-03-02 00:50+0000\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: Punjabi <pa@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2012-03-15 05:01+0000\n"
+"X-Generator: Launchpad (build 14933)\n"
+
+#: ../src/main-window.vala:42
+msgid "Login Screen"
+msgstr "ਲਾਗਇਨ ਸਕਰੀਨ"
+
+#: ../src/menubar.vala:211
+msgid "Onscreen keyboard"
+msgstr ""
+
+#: ../src/menubar.vala:216
+msgid "High Contrast"
+msgstr "ਵੱਧ ਕਨਟਰਾਸਟ"
+
+#: ../src/menubar.vala:222
+msgid "Screen Reader"
+msgstr "ਸਕਰੀਨ ਰੀਡਰ"
+
+#: ../src/session-chooser.vala:63
+msgid "_Back"
+msgstr "ਪਿੱਛੇ(_B)"
+
+#. Help string for command line --version flag
+#: ../src/unity-greeter.vala:30
+msgid "Show release version"
+msgstr "ਰੀਲਿਜ਼ ਵਰਜਨ ਵੇਖਾਓ"
+
+#. Help string for command line --test-mode flag
+#: ../src/unity-greeter.vala:33
+msgid "Run in test mode"
+msgstr "ਜਾਂਚ ਮੋਡ ਵਿੱਚ ਚਲਾਓ"
+
+#: ../src/unity-greeter.vala:383 ../src/unity-greeter.vala:518
+#: ../src/unity-greeter.vala:541 ../src/unity-greeter.vala:545
+#: ../src/unity-greeter.vala:549 ../src/unity-greeter.vala:555
+#: ../src/unity-greeter.vala:558 ../src/unity-greeter.vala:585
+msgid "Password:"
+msgstr "ਪਾਸਵਰਡ:"
+
+#: ../src/unity-greeter.vala:385 ../src/unity-greeter.vala:521
+msgid "Username:"
+msgstr "ਯੂਜ਼ਰ-ਨਾਂ:"
+
+#: ../src/unity-greeter.vala:460
+msgid "Invalid password, please try again"
+msgstr "ਗਲਤ ਪਾਸਵਰਡ, ਫੇਰ ਕੋਸ਼ਿਸ਼ ਕਰੋ"
+
+#: ../src/unity-greeter.vala:469
+msgid "Failed to authenticate"
+msgstr "ਪਰਮਾਣਿਤ ਹੋਣ ਲਈ ਫੇਲ੍ਹ ਹੈ"
+
+#. Arguments and description for --help text
+#: ../src/unity-greeter.vala:819
+msgid "- Unity Greeter"
+msgstr "- ਯੂਨਟੀ ਸਵਾਗਤੀ"
+
+#. Text printed out when an unknown command-line argument provided
+#: ../src/unity-greeter.vala:830
+#, c-format
+msgid "Run '%s --help' to see a full list of available command line options."
+msgstr "ਪੂਰੀਆਂ ਉਪਲੱਬਧ ਕਮਾਂਡ ਲਾਈਨ ਚੋਣਾਂ ਵੇਖਣ ਵਾਸਤੇ '%s --help' ਚਲਾਓ।"
+
+#: ../src/user-list.vala:80
+msgid "Guest Session"
+msgstr "ਮਹਿਮਾਨ ਸ਼ੈਸ਼ਨ"
+
+#: ../src/user-list.vala:242
+msgid "Session Options"
+msgstr "ਸ਼ੈਸ਼ਨ ਚੋਣਾਂ"
+
+#: ../src/user-list.vala:366
+#, c-format
+msgid "Enter password for %s"
+msgstr "%s ਲਈ ਪਾਸਵਰਡ ਦਿਓ"
+
+#: ../src/user-list.vala:370
+msgid "Enter username"
+msgstr "ਯੂਜ਼ਰ-ਨਾਂ ਦਿਓ"
+
+#: ../src/user-list.vala:372
+msgid "Enter password"
+msgstr "ਪਾਸਵਰਡ ਦਿਓ"
+
+#: ../src/user-list.vala:385
+#, c-format
+msgid "Login as %s"
+msgstr "%s ਵਜੋਂ ਲਾਗਇਨ"
+
+#. 'Log In' here is the button for logging in.
+#: ../src/user-list.vala:387
+msgid "Log In"
+msgstr "ਲਾਗ ਇਨ"
+
+#: ../src/user-list.vala:391 ../src/user-list.vala:392
+msgid "Retry"
+msgstr ""
+
+#: ../src/user-list.vala:408
+msgid "Logging in..."
+msgstr "ਲਾਗਇਨ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ..."
+
+#: ../src/user-list.vala:493
+msgid "Login"
+msgstr "ਲਾਗ-ਇਨ"
+
+#~ msgid "Other..."
+#~ msgstr "ਹੋਰ..."

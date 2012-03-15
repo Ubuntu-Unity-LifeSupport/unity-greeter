@@ -8,6 +8,7 @@ unity_greeter_SOURCES = \
 	indicator.vapi \
 	animate-timer.vala \
 	background.vala \
+	cached-image.vala \
 	dash-box.vala \
 	dash-button.vala \
 	dash-entry.vala \

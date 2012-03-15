@@ -12,6 +12,7 @@ namespace X
 
 namespace Gdk
 {
+    public const int KEY_Escape;
     public const int KEY_Home;
     public const int KEY_End;
     public const int KEY_Page_Up;
@@ -25,8 +26,16 @@ namespace Gdk
     public const int KEY_KP_Up;
     public const int KEY_KP_Down;
     public const int KEY_F10;
-    public const int KEY_s;
+    public const int KEY_0;
+    public const int KEY_g;
+    public const int KEY_G;
     public const int KEY_h;
+    public const int KEY_m;
+    public const int KEY_M;
+    public const int KEY_s;
+    public const int KEY_plus;
+    public const int KEY_minus;
+    public const int KEY_equal;
     public const int CONTROL_MASK;
 }
 

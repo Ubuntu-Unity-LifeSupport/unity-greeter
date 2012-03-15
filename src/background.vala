@@ -247,7 +247,7 @@ public class Background : Gtk.Fixed
     public Background (Cairo.Surface target_surface)
     {
         this.target_surface = target_surface;
-        timer = new AnimateTimer (AnimateTimer.INSTANT);
+        timer = new AnimateTimer (AnimateTimer.ease_in_out, 700);
         timer.animate.connect (animate_cb);
 
         loaders = new HashTable<string?, BackgroundLoader> (str_hash, str_equal);
@@ -426,6 +426,7 @@ public class Background : Gtk.Fixed
             {
                 old = current;
                 current = new_background;
+                timer.stop ();
             }
 
             queue_draw ();

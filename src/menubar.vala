@@ -142,6 +142,18 @@ public class MenuBar : Gtk.MenuBar
         label.ensure_style ();
         label.modify_fg (Gtk.StateType.INSENSITIVE, label.get_style ().fg[Gtk.StateType.NORMAL]);
 
+        /* Prevent dragging the window by the menubar */
+        try
+        {
+            var style = new Gtk.CssProvider ();
+            style.load_from_data ("* {-GtkWidget-window-dragging: false;}", -1);
+            get_style_context ().add_provider (style, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+        }
+        catch (Error e)
+        {
+            debug ("Internal error loading session chooser style: %s", e.message);
+        }
+
         setup_indicators ();
 
         set_size_request (-1, 32);
@@ -430,7 +442,7 @@ public class MenuBar : Gtk.MenuBar
         try
         {
             if (item.active)
-                Process.spawn_command_line_async ("orca --replace --no-setup --disable=splash-window --disable=main-window");
+                Process.spawn_command_line_async ("orca --replace --no-setup --disable splash-window,main-window");
             else
                 Process.spawn_command_line_async ("orca --quit");
         }

@@ -80,7 +80,7 @@ public class SessionChooser : FadableBox
         var pixbuf = get_badge (key);
         if (pixbuf != null)
         {
-            var image = new Gtk.Image.from_pixbuf (pixbuf);
+            var image = new CachedImage (pixbuf);
             hbox.pack_start (image, false, false, 0);
         }
 

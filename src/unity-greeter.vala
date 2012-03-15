@@ -48,11 +48,45 @@ public class UnityGreeter
 
     private LightDM.Greeter greeter;
     private bool prompted = false;
+    private bool clear_messages = false;
 
     /* User to authenticate against */
     private string ?authenticate_user = null;
 
+    private const TestEntry[] test_entries =
+    {
+        { "has-password",       "Has Password",      "*",              "uk;us", false, false, null },
+        { "different-prompt",   "Different Prompt",  "*",              "uk;us", false, false, null },
+        { "no-password",        "No Password",       "*",              "uk;us", false, false, null },
+        { "change-password",    "Change Password",   "*",              "uk;us", false, false, null },
+        { "auth-error",         "Auth Error",        "*",              "uk;us", false, false, null },
+        { "two-factor",         "Two Factor",        "*",              "uk;us", false, false, null },
+        { "info-prompt",        "Info Prompt",       "*",              "uk;us", false, false, null },
+        { "long-info-prompt",   "Long Info Prompt",  "*",              "uk;us", false, false, null },
+        { "wide-info-prompt",   "Wide Info Prompt",  "*",              "uk;us", false, false, null },
+        { "multi-info-prompt",  "Multi Info Prompt", "*",              "uk;us", false, false, null },
+        { "very-very-long-name",    "Long name (far too long to fit)", "*", "uk;us", false, false, null },
+        { "long-name-and-messages", "Long name and messages",          "*", "uk;us", false, true,  null },
+        { "active",             "Active Account",    "*",              "uk;us", true,  false, null },
+        { "has-messages",       "Has Messages",      "*",              "uk;us", false, true,  null },
+        { "gnome",              "GNOME",             "*",              "uk;us", false, false, "gnome-shell" },
+        { "locked",             "Locked Account",    "*",              "uk;us", false, false, null },
+        { "color-background",   "Color Background",  "#dd4814",        "uk;us", false, false, null },
+        { "white-background",   "White Background",  "#ffffff",        "uk;us", false, false, null },
+        { "black-background",   "Black Background",  "#000000",        "uk;us", false, false, null },
+        { "no-background",      "No Background",     null,             "uk;us", false, false, null },
+        { "unicode",            "가나다라마",        "*",              "uk;us", false, false, null },
+        { "system-layout",      "System Layout",     "*",              null,    false, false, null },
+        { "four-layouts",       "Four Layouts",      "*",              "de\tdvorak;ca;gb;fr\toss", false, false, null },
+        { "no-response",        "No Response",       "*",              null,    false, false, null },
+        { "",                   "",                  null,             null,    false, false, null }
+    };
+    private List<string> test_backgrounds;
+    private int n_test_entries = 0;
     private string? test_username = null;
+    private bool test_prompted_sso = false;
+    private bool test_request_new_password = false;
+    private string? test_new_password = null;
     private bool test_is_authenticated = false;
     private Canberra.Context canberra_context;
 
@@ -106,24 +140,35 @@ public class UnityGreeter
 
         if (test_mode)
         {
-            user_list.add_entry ("alice", "가나다라마", "#dd4814", make_layout_list ("kr"), true, false, "gnome");
-            user_list.add_entry ("chris", "Christopher Halse Rogers!!!!!!!!!!!!!!!", "/usr/share/backgrounds/Darkening_Clockwork_by_Matt_Katzenberger.jpg", null, true, true, "kde");
-            user_list.add_entry ("jorge", "Jorge O Castro", "/usr/share/backgrounds/PurpleDancers_by_Emilio_Merlino.jpg", make_layout_list ("us"));
-            user_list.add_entry ("ken", "Ken VanDine", "/usr/share/backgrounds/Small_flowers_by_Dariusz_Duma.jpg", make_layout_list ("uk;us"));
-            user_list.add_entry ("matthew", "Matthew Paul Thomas", "/usr/share/backgrounds/Not_Alone_by_Deacon_MacMillan.jpg", make_layout_list ("gb"), false, true);
-            user_list.add_entry ("otto", "Otto Greenslade", "/usr/share/backgrounds/Mount_Snowdon,_Wales_by_Adam_Vellender.jpg", make_layout_list ("gb"));
-            user_list.add_entry ("pitti", "Martin Pitt", "/usr/share/backgrounds/Stalking_Ocelot_by_Sayantan_Chaudhuri.jpg", make_layout_list ("de\tdvorak;us"));
-            user_list.add_entry ("desrt", "Ryan Lortie", "/usr/share/backgrounds/Power_of_Words_by_Antonio_Litterio.jpg", make_layout_list ("ca"), false, true, "gnome-shell");
-            user_list.add_entry ("*guest", _("Guest Session"), null, null, true);
+            test_backgrounds = new List<string> ();
+            try
+            {
+                var dir = Dir.open ("/usr/share/backgrounds/");
+                while (true)
+                {
+                    var bg = dir.read_name ();
+                    if (bg == null)
+                        break;
+                    test_backgrounds.append ("/usr/share/backgrounds/" + bg);
+                }
+            }
+            catch (FileError e)
+            {
+            }
+
+            while (add_test_entry ());
+            user_list.offer_guest = true;
+            
+            main_window.key_press_event.connect (key_press_cb);
 
             if (last_user != null)
                 user_list.set_active_entry (last_user);
         }
         else
         {
-            if (greeter.hide_users_hint)
-                user_list.add_entry ("*other", _("Login"), null, null, false, false, greeter.default_session_hint);
-            else
+            user_list.default_session = greeter.default_session_hint;
+            user_list.always_show_manual = greeter.show_manual_login_hint;
+            if (!greeter.hide_users_hint)
             {
                 var users = LightDM.UserList.get_instance ();
                 users.user_added.connect (user_added_cb);
@@ -136,7 +181,7 @@ public class UnityGreeter
             if (greeter.has_guest_account_hint)
             {
                 debug ("Adding guest account entry");
-                user_list.add_entry ("*guest", _("Guest Session"), null, null, false, false, greeter.default_session_hint);
+                user_list.offer_guest = true;
             }
 
             if (greeter.select_user_hint != null)
@@ -152,6 +197,79 @@ public class UnityGreeter
 
         start_fake_wm ();
         Gdk.threads_add_idle (ready_cb); 
+    }
+    
+    private bool key_press_cb (Gdk.EventKey event)
+    {
+        if ((event.state & Gdk.CONTROL_MASK) == 0)
+            return false;
+
+        switch (event.keyval)
+        {
+        case Gdk.KEY_plus:
+            add_test_entry ();
+            break;
+        case Gdk.KEY_minus:
+            remove_test_entry ();
+            break;
+        case Gdk.KEY_0:
+            while (remove_test_entry ());
+            user_list.offer_guest = false;
+            break;
+        case Gdk.KEY_equal:
+            while (add_test_entry ());
+            user_list.offer_guest = true;
+            break;
+        case Gdk.KEY_g:
+            user_list.offer_guest = false;
+            break;
+        case Gdk.KEY_G:
+            user_list.offer_guest = true;
+            break;
+        case Gdk.KEY_m:
+            user_list.always_show_manual = false;
+            break;
+        case Gdk.KEY_M:
+            user_list.always_show_manual = true;
+            break;
+        }
+
+        return false;
+    }
+
+    private bool add_test_entry ()
+    {
+        var e = test_entries[n_test_entries];
+        if (e.username == "")
+            return false;
+
+        var background = e.background;
+        if (background == "*")
+        {
+            var background_index = 0;
+            for (var i = 0; i < n_test_entries; i++)
+            {
+                if (test_entries[i].background == "*")
+                    background_index++;
+            }
+            if (test_backgrounds.length () > 0)
+                background = test_backgrounds.nth_data (background_index % test_backgrounds.length ());
+        }
+        user_list.add_entry (e.username, e.real_name, background, make_layout_list (e.layouts), e.is_active, e.has_messages, e.session);
+        n_test_entries++;
+
+        return true;
+    }
+
+    private bool remove_test_entry ()
+    {
+        if (n_test_entries == 0)
+            return false;
+
+        user_list.remove_entry (test_entries[n_test_entries - 1].username);
+        n_test_entries--;
+
+        return true;
     }
 
     public static void add_style_class (Gtk.Widget widget)
@@ -209,10 +327,6 @@ public class UnityGreeter
         if (user.real_name == "")
             label = user.name;
 
-        var session = user.session;
-        if (session == null)
-            session = greeter.default_session_hint;
-
         var layouts = new List <LightDM.Layout> ();
         foreach (var name in user.get_layouts ())
         {
@@ -221,7 +335,7 @@ public class UnityGreeter
                 layouts.append (layout);
         }
 
-        user_list.add_entry (user.name, label, user.background, layouts, user.logged_in, user.has_messages, session);
+        user_list.add_entry (user.name, label, user.background, layouts, user.logged_in, user.has_messages, user.session);
     }
 
     private void user_removed_cb (LightDM.User user)
@@ -239,12 +353,30 @@ public class UnityGreeter
 
     private void show_message_cb (string text, LightDM.MessageType type)
     {
+        if (clear_messages)
+        {
+            user_list.clear_messages ();
+            clear_messages = false;
+        }
         user_list.show_message (text, type == LightDM.MessageType.ERROR);
     }
 
     private void show_prompt_cb (string text, LightDM.PromptType type)
     {
-        update_other_label ();
+        if (clear_messages)
+        {
+            user_list.clear_messages ();
+            clear_messages = false;
+        }
+
+        /* Notify the greeter on what user has been logged */
+        if (user_list.selected == "*other" && user_list.manual_username == null)
+        {
+            if (test_mode)
+                user_list.manual_username = test_username;
+            else
+                user_list.manual_username = greeter.authentication_user;
+        }
 
         prompted = true;
         if (text == "Password: ")
@@ -252,6 +384,9 @@ public class UnityGreeter
         if (text == "login:")
             text = _("Username:");
         user_list.show_prompt (text, type == LightDM.PromptType.SECRET);
+
+        /* Clear messages on the next prompt */
+        clear_messages = true;
     }
 
     private void background_loaded_cb (ParamSpec pspec)
@@ -283,8 +418,6 @@ public class UnityGreeter
 
     private void authentication_complete_cb ()
     {
-        update_other_label ();
-
         bool is_authenticated;
         if (test_mode)
             is_authenticated = test_is_authenticated;
@@ -304,6 +437,11 @@ public class UnityGreeter
                     else
                         user_list.background.notify["alpha"].connect (background_loaded_cb);
                 }
+                else
+                {
+                    debug ("Successfully logged in!  Quitting...");
+                    Gtk.main_quit ();
+                }
             }
             else
             {
@@ -315,13 +453,23 @@ public class UnityGreeter
         {
             if (prompted)
             {
-                user_list.set_error (_("Invalid password, please try again"));
+                /* Show an error if one wasn't provided */
+                if (clear_messages)
+                    user_list.clear_messages ();
+                if (!user_list.have_messages ())
+                    user_list.show_message (_("Invalid password, please try again"), true);
+
+                /* Restart authentication */
                 start_authentication ();
             }
             else
             {
-                user_list.set_error (_("Failed to authenticate"));
-                user_list.show_authenticated ();
+                /* Show an error if one wasn't provided */
+                if (!user_list.have_messages ())
+                    user_list.show_message (_("Failed to authenticate"), true);
+
+                /* Stop authentication */
+                user_list.show_authenticated (false);
             }
         }
     }
@@ -339,41 +487,30 @@ public class UnityGreeter
             debug ("Failed to write state: %s", e.message);
         }
 
-        user_list.set_error (null);
+        user_list.clear_messages ();
         start_authentication ();
-    }
-
-    private void update_other_label ()
-    {
-        if (!greeter.hide_users_hint)
-            return;
-
-        var text = _("Other...");
-        if (test_mode)
-        {
-            if (user_list.selected == "*other" && test_username != null)
-                text = test_username;
-        }
-        else
-        {
-            if (user_list.selected == "*other" && greeter.authentication_user != null)
-                text = greeter.authentication_user;
-        }
-
-        user_list.add_entry ("*other", text, null, null, false, false, greeter.default_session_hint);
     }
 
     private void start_authentication ()
     {
         prompted = false;
 
+        /* Reset manual username */
+        user_list.manual_username = null;
+
+        clear_messages = false;
+
         if (test_mode)
         {
             test_username = null;
             test_is_authenticated = false;
+            test_prompted_sso = false;
+            test_request_new_password = false;
+            test_new_password = null;
 
-            if (user_list.selected == "*other")
+            switch (user_list.selected)
             {
+            case "*other":
                 if (authenticate_user != null)
                 {
                     test_username = authenticate_user;
@@ -382,57 +519,135 @@ public class UnityGreeter
                 }
                 else
                     show_prompt_cb (_("Username:"), LightDM.PromptType.QUESTION);
-            }
-            else if (user_list.selected == "*guest")
-            {
+                break;
+            case "*guest":
                 test_is_authenticated = true;
                 authentication_complete_cb ();
-            }
-            else if (user_list.selected == "bob")
-            {
+                break;
+            case "different-prompt":
+                show_prompt_cb ("Secret word", LightDM.PromptType.SECRET);
+                break;
+            case "no-password":
                 test_is_authenticated = true;
-                test_username = user_list.selected;
                 authentication_complete_cb ();
-            }
-            else
-            {
-                test_username = user_list.selected;
+                break;
+            case "auth-error":
+                show_message_cb ("Authentication Error", LightDM.MessageType.ERROR);
+                test_is_authenticated = false;
+                authentication_complete_cb ();
+                break;
+            case "info-prompt":
+                show_message_cb ("Welcome to Unity Greeter", LightDM.MessageType.INFO);
                 show_prompt_cb (_("Password:"), LightDM.PromptType.SECRET);
+                break;
+            case "long-info-prompt":
+                show_message_cb ("Welcome to Unity Greeter\n\nWe like to annoy you with long messages.\nLike this one\n\nThis is the last line of a multiple line message.", LightDM.MessageType.INFO);
+                show_prompt_cb (_("Password:"), LightDM.PromptType.SECRET);
+                break;
+            case "wide-info-prompt":
+                show_message_cb ("Welcome to Unity Greeter, the greeteriest greeter that ever did appear in these fine lands", LightDM.MessageType.INFO);
+                show_prompt_cb (_("Password:"), LightDM.PromptType.SECRET);
+                break;
+            case "multi-info-prompt":
+                show_message_cb ("Welcome to Unity Greeter", LightDM.MessageType.INFO);
+                show_message_cb ("This is an error", LightDM.MessageType.ERROR);
+                show_message_cb ("You should have seen three messages", LightDM.MessageType.INFO);
+                show_prompt_cb (_("Password:"), LightDM.PromptType.SECRET);
+                break;
+            default:
+                show_prompt_cb (_("Password:"), LightDM.PromptType.SECRET);
+                break;
             }
         }
         else
         {
             if (user_list.selected == "*other")
-            {
-                greeter.authenticate (authenticate_user);
-                authenticate_user = null;
-            }
+                greeter.authenticate ();
             else if (user_list.selected == "*guest")
                 greeter.authenticate_as_guest ();
             else
                 greeter.authenticate (user_list.selected);
         }
-
-        update_other_label ();
     }
 
     private void respond_to_prompt_cb (string text)
     {
-        user_list.set_error (null);
-
         if (test_mode)
         {
             debug ("response %s", text);
-            if (test_username == null)
+            switch (user_list.selected)
             {
-                debug ("username=%s", text);
-                test_username = text;
-                show_prompt_cb (_("Password:"), LightDM.PromptType.SECRET);
-            }
-            else
-            {
+            case "*other":
+                if (test_username == null)
+                {
+                    debug ("username=%s", text);
+                    test_username = text;
+                    show_prompt_cb (_("Password:"), LightDM.PromptType.SECRET);
+                }
+                else
+                {
+                    test_is_authenticated = text == "password";
+                    authentication_complete_cb ();
+                }
+                break;
+            case "two-factor":
+                if (!test_prompted_sso)
+                {
+                    if (text == "password")
+                    {
+                        debug ("prompt otp");
+                        test_prompted_sso = true;
+                        show_prompt_cb ("OTP:", LightDM.PromptType.QUESTION);
+                    }
+                    else
+                    {
+                        test_is_authenticated = false;
+                        authentication_complete_cb ();
+                    }
+                }
+                else
+                {
+                    test_is_authenticated = text == "otp";
+                    authentication_complete_cb ();
+                }
+                break;
+            case "change-password":
+                if (test_new_password != null)
+                {
+                    test_is_authenticated = text == test_new_password;
+                    authentication_complete_cb ();
+                }
+                else if (test_request_new_password)
+                {
+                    test_new_password = text;
+                    show_prompt_cb ("Retype new UNIX password: ", LightDM.PromptType.SECRET);
+                }
+                else
+                {
+                    if (text != "password")
+                    {
+                        test_is_authenticated = false;
+                        authentication_complete_cb ();
+                    }
+                    else
+                    {
+                        test_request_new_password = true;
+                        show_message_cb ("You are required to change your password immediately (root enforced)", LightDM.MessageType.ERROR);
+                        show_prompt_cb ("Enter new UNIX password: ", LightDM.PromptType.SECRET);
+                    }
+                }
+                break;
+            case "no-response":
+                break;
+            case "locked":
+                test_is_authenticated = false;
+                show_message_cb ("Account is locked", LightDM.MessageType.ERROR);
+                authentication_complete_cb ();
+                break;
+            default:
                 test_is_authenticated = text == "password";
                 authentication_complete_cb ();
+                break;
             }
         }
         else
@@ -451,7 +666,10 @@ public class UnityGreeter
         if (is_authenticated)
             authentication_complete_cb ();
         else
+        {
+            user_list.clear_messages ();
             start_authentication ();
+        }
     }
 
     private static Gdk.FilterReturn focus_upon_map (X.Event xevent, Gdk.Event event)
@@ -666,4 +884,15 @@ public class UnityGreeter
 
         return Posix.EXIT_SUCCESS;
     }
+}
+
+private struct TestEntry
+{
+    string username;
+    string real_name;
+    string? background;
+    string? layouts;
+    bool is_active;
+    bool has_messages;
+    string? session;
 }

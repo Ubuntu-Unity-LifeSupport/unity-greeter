@@ -1,3 +1,17 @@
+Overview of changes in unity-greeter 0.2.5
+
+    * Don't allow dragging the window by the top bar
+    * Fix keyboard navigation
+    * Fix prompt entry text not showing in some themes
+    * Fix Orca command line so it works with version 3.3.90+
+    * Show "Retry" instead of "Login" if a no-prompt login fails
+    * Show manual login option when no users available
+    * Show manual login option if hint is present
+    * Show PAM prompts, albeit not in a pretty fashion
+    * Allow pressing Escape to cancel a misbehaving login
+    * Tweaked animations
+    * Update logo to add "LTS"
+
 Overview of changes in unity-greeter 0.2.4
 
     * Don't crash when all monitors are the same size

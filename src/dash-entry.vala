@@ -64,7 +64,7 @@ public class DashEntry : Gtk.Entry, Fadable
         var fg = Gdk.RGBA ();
         var context = get_style_context ();
         if (!gtk_style_context_lookup_color (context, "placeholder_text_color", out fg))
-            fg.parse ("ccc");
+            fg.parse ("#ccc");
         c.set_source_rgba (fg.red, fg.green, fg.blue, fg.alpha);
 
         /* Draw text */

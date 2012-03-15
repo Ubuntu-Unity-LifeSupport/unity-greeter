@@ -5,6 +5,10 @@
       <default>'/usr/share/backgrounds/warty-final-ubuntu.png'</default>
       <summary>Background file to use, either an image path or a color (e.g. #772953)</summary>
     </key>
+    <key name="draw-user-backgrounds" type="b">
+      <default>true</default>
+      <summary>Whether to draw user backgrounds</summary>
+    </key>
     <key name="draw-grid" type="b">
       <default>true</default>
       <summary>Whether to draw an overlay grid</summary>

@@ -37,10 +37,11 @@ POST_UNINSTALL = :
 sbin_PROGRAMS = unity-greeter$(EXEEXT)
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	animate-timer.c background.c dash-box.c dash-button.c \
-	dash-entry.c fadable-box.c fadable.c main-window.c menu.c \
-	menubar.c session-chooser.c settings-daemon.c settings.c \
-	unity-greeter.c unity_greeter_vala.stamp user-list.c
+	animate-timer.c background.c cached-image.c dash-box.c \
+	dash-button.c dash-entry.c fadable-box.c fadable.c \
+	main-window.c menu.c menubar.c session-chooser.c \
+	settings-daemon.c settings.c unity-greeter.c \
+	unity_greeter_vala.stamp user-list.c
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/configure.ac
@@ -54,6 +55,7 @@ am__installdirs = "$(DESTDIR)$(sbindir)"
 PROGRAMS = $(sbin_PROGRAMS)
 am_unity_greeter_OBJECTS = unity_greeter-animate-timer.$(OBJEXT) \
 	unity_greeter-background.$(OBJEXT) \
+	unity_greeter-cached-image.$(OBJEXT) \
 	unity_greeter-dash-box.$(OBJEXT) \
 	unity_greeter-dash-button.$(OBJEXT) \
 	unity_greeter-dash-entry.$(OBJEXT) \
@@ -223,6 +225,7 @@ unity_greeter_SOURCES = \
 	indicator.vapi \
 	animate-timer.vala \
 	background.vala \
+	cached-image.vala \
 	dash-box.vala \
 	dash-button.vala \
 	dash-entry.vala \
@@ -344,6 +347,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-animate-timer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-background.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-cached-image.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-dash-box.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-dash-button.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-dash-entry.Po@am__quote@
@@ -399,6 +403,20 @@ unity_greeter-background.obj: background.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='background.c' object='unity_greeter-background.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-background.obj `if test -f 'background.c'; then $(CYGPATH_W) 'background.c'; else $(CYGPATH_W) '$(srcdir)/background.c'; fi`
+
+unity_greeter-cached-image.o: cached-image.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-cached-image.o -MD -MP -MF $(DEPDIR)/unity_greeter-cached-image.Tpo -c -o unity_greeter-cached-image.o `test -f 'cached-image.c' || echo '$(srcdir)/'`cached-image.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-cached-image.Tpo $(DEPDIR)/unity_greeter-cached-image.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='cached-image.c' object='unity_greeter-cached-image.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-cached-image.o `test -f 'cached-image.c' || echo '$(srcdir)/'`cached-image.c
+
+unity_greeter-cached-image.obj: cached-image.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-cached-image.obj -MD -MP -MF $(DEPDIR)/unity_greeter-cached-image.Tpo -c -o unity_greeter-cached-image.obj `if test -f 'cached-image.c'; then $(CYGPATH_W) 'cached-image.c'; else $(CYGPATH_W) '$(srcdir)/cached-image.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-cached-image.Tpo $(DEPDIR)/unity_greeter-cached-image.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='cached-image.c' object='unity_greeter-cached-image.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-cached-image.obj `if test -f 'cached-image.c'; then $(CYGPATH_W) 'cached-image.c'; else $(CYGPATH_W) '$(srcdir)/cached-image.c'; fi`
 
 unity_greeter-dash-box.o: dash-box.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-dash-box.o -MD -MP -MF $(DEPDIR)/unity_greeter-dash-box.Tpo -c -o unity_greeter-dash-box.o `test -f 'dash-box.c' || echo '$(srcdir)/'`dash-box.c
@@ -587,6 +605,11 @@ $(srcdir)/animate-timer.c: $(srcdir)/unity_greeter_vala.stamp
 	  $(MAKE) $(AM_MAKEFLAGS) $(srcdir)/unity_greeter_vala.stamp; \
 	fi
 $(srcdir)/background.c: $(srcdir)/unity_greeter_vala.stamp
+	@if test -f $@; then :; else rm -f $(srcdir)/unity_greeter_vala.stamp; fi
+	@if test -f $@; then :; else \
+	  $(MAKE) $(AM_MAKEFLAGS) $(srcdir)/unity_greeter_vala.stamp; \
+	fi
+$(srcdir)/cached-image.c: $(srcdir)/unity_greeter_vala.stamp
 	@if test -f $@; then :; else rm -f $(srcdir)/unity_greeter_vala.stamp; fi
 	@if test -f $@; then :; else \
 	  $(MAKE) $(AM_MAKEFLAGS) $(srcdir)/unity_greeter_vala.stamp; \
@@ -783,6 +806,7 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 	-rm -f animate-timer.c
 	-rm -f background.c
+	-rm -f cached-image.c
 	-rm -f dash-box.c
 	-rm -f dash-button.c
 	-rm -f dash-entry.c

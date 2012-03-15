@@ -1,3 +1,22 @@
+unity-greeter (0.2.5-0ubuntu1) precise; urgency=low
+
+  * New upstream release
+    - Don't allow dragging the window by the top bar
+    - Fix keyboard navigation (LP: #952198, LP: #940921)
+    - Fix prompt entry text not showing in some themes
+    - Fix Orca command line so it works with version 3.3.90+
+    - Show "Retry" instead of "Login" if a no-prompt login fails
+    - Show manual login option when no users available (LP: #952557)
+    - Show manual login option if hint is present (LP: #925125)
+    - Show PAM prompts, albeit not in a pretty fashion
+    - Allow pressing Escape to cancel a misbehaving login
+    - Tweaked animations
+    - Update logo to add "LTS" (LP: #943465)
+  * debian/patches/dont_dnd_greeter.patch:
+    - Dropped, included upstream
+
+ -- Michael Terry <mterry@ubuntu.com>  Thu, 15 Mar 2012 09:37:28 -0400
+
 unity-greeter (0.2.4-0ubuntu2) precise; urgency=low
 
   * debian/patches/dont_dnd_greeter.patch: backport fix for the greeter

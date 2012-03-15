@@ -21,6 +21,7 @@
 public class UGSettings
 {
     public static const string KEY_BACKGROUND = "background";
+    public static const string KEY_DRAW_USER_BACKGROUNDS = "draw-user-backgrounds";
     public static const string KEY_DRAW_GRID = "draw-grid";
     public static const string KEY_LOGO = "logo";
     public static const string KEY_BACKGROUND_LOGO = "background-logo";

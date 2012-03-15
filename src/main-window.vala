@@ -64,7 +64,10 @@ public class MainWindow : Gtk.Window
 
         user_list = new UserList (background, menubar);
         user_list.expand = true;
-        user_list.user_displayed.connect (() => {
+        user_list.user_displayed_start.connect (() => {
+            change_background ();
+        });
+        user_list.user_displayed_done.connect (() => {
             menubar.set_layouts (user_list.selected_entry.keyboard_layouts);
             change_background ();
         });
@@ -131,7 +134,8 @@ public class MainWindow : Gtk.Window
     private bool change_background_timeout_cb ()
     {
         string new_background_file;
-        if (menubar.high_contrast)
+        if (menubar.high_contrast ||
+            !UGSettings.get_boolean (UGSettings.KEY_DRAW_USER_BACKGROUNDS))
             new_background_file = null;
         else
             new_background_file = user_list.selected_entry.background;
@@ -144,12 +148,10 @@ public class MainWindow : Gtk.Window
 
     private void change_background ()
     {
-        /* Set background after user stops scrolling */
         if (background.current_background != null)
         {
-            if (change_background_timeout != 0)
-                Source.remove (change_background_timeout);
-            change_background_timeout = Timeout.add (200, change_background_timeout_cb);
+            if (change_background_timeout == 0)
+                change_background_timeout = Idle.add (change_background_timeout_cb);
         }
         else
             change_background_timeout_cb ();
@@ -195,6 +197,9 @@ public class MainWindow : Gtk.Window
     {
         switch (event.keyval)
         {
+        case Gdk.KEY_Escape:
+            user_list.cancel_authentication ();
+            break;
         case Gdk.KEY_Page_Up:
         case Gdk.KEY_KP_Page_Up:
             user_list.scroll (UserList.ScrollTarget.START);
@@ -215,11 +220,7 @@ public class MainWindow : Gtk.Window
             menubar.select_first (false);
             break;
         default:
-            var focus = get_focus ();
-            if (focus != null && focus != this)
-                return focus.key_press_event (event);
-            else
-                return false;
+            return base.key_press_event (event);
         }
 
         return true;

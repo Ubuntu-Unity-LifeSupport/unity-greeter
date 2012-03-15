@@ -19,15 +19,21 @@
 
 public class DashButton : Gtk.Button, Fadable
 {
-    public string text {get; construct; default = "";}
     protected FadeTracker fade_tracker {get; protected set;}
+    private Gtk.Label text_label;
 
-    public DashButton (string text)
+    private string _text = "";
+    public string text
     {
-        Object (text: text);
+        get { return _text; }
+        set
+        {
+            _text = value;
+            text_label.set_markup ("<span font_size=\"large\">%s</span>".printf (value));
+        }
     }
 
-    construct
+    public DashButton (string text)
     {
         fade_tracker = new FadeTracker (this);
 
@@ -40,16 +46,26 @@ public class DashButton : Gtk.Button, Fadable
         hbox.add (label);
 
         // add text
-        label = new Gtk.Label ("<span font_size=\"large\">%s</span>".printf (text));
-        label.use_markup = true;
-        label.hexpand = true;
-        label.halign = Gtk.Align.CENTER;
-        hbox.add (label);
+        text_label = new Gtk.Label ("");
+        text_label.use_markup = true;
+        text_label.hexpand = true;
+        text_label.halign = Gtk.Align.CENTER;
+        hbox.add (text_label);
+        this.text = text;
 
         // add chevron
-        var image = new Gtk.Image.from_file (Path.build_filename (Config.PKGDATADIR, "arrow_right.png", null));
-        sizes.add_widget (image);
-        hbox.add (image);
+        var path = Path.build_filename (Config.PKGDATADIR, "arrow_right.png", null);
+        try
+        {
+            var pixbuf = new Gdk.Pixbuf.from_file (path);
+            var image = new CachedImage (pixbuf);
+            sizes.add_widget (image);
+            hbox.add (image);
+        }
+        catch (Error e)
+        {
+            debug ("Error loading image %s: %s", path, e.message);
+        }
 
         hbox.show_all ();
         add (hbox);

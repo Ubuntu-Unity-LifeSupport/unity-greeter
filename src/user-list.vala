@@ -45,6 +45,22 @@ public class UserEntry
 
     /* Default session for this user */
     public string session;
+
+    /* Cached cairo surfaces */
+    public Cairo.Surface label_in_box_surface;
+    public Cairo.Surface label_out_of_box_surface;
+}
+
+private class AuthenticationMessage
+{
+    public Pango.Layout layout;
+    public bool is_error;
+    
+    public AuthenticationMessage (Pango.Layout layout, bool is_error)
+    {
+        this.layout = layout;
+        this.is_error = is_error;
+    }
 }
 
 public class UserList : Gtk.EventBox
@@ -52,6 +68,34 @@ public class UserList : Gtk.EventBox
     public Background background;
     public MenuBar menubar;
     public UserEntry? selected_entry {get; private set; default = null;}
+
+    private bool _offer_guest = false;
+    public bool offer_guest
+    {
+        get { return _offer_guest; }
+        set
+        {
+            _offer_guest = value;
+            if (value)
+                add_entry ("*guest", _("Guest Session"));
+            else
+                remove_entry ("*guest");
+        }
+    }
+
+    private bool _always_show_manual = false;
+    public bool always_show_manual
+    {
+        get { return _always_show_manual; }
+        set
+        {
+            _always_show_manual = value;
+            if (value)
+                add_manual_entry ();
+            else if (have_users ())
+                remove_entry ("*other");
+        }
+    }
 
     private List<UserEntry> entries = null;
 
@@ -64,8 +108,8 @@ public class UserList : Gtk.EventBox
 
     private AnimateTimer scroll_timer;
 
-    private string? error;
-    private string? message;
+    /* Authentication messages to show */
+    private List<AuthenticationMessage> messages = null;
 
     private Gtk.Fixed fixed;
     private Gtk.Box login_box;
@@ -73,7 +117,7 @@ public class UserList : Gtk.EventBox
     private DashButton login_button;
     private Fadable prompt_widget_to_show;
     private Gtk.Button session_button;
-    private Gtk.Image session_image;
+    private CachedImage session_image;
     private SessionChooser session_chooser;
  
     private enum Mode
@@ -113,7 +157,8 @@ public class UserList : Gtk.EventBox
     }
 
     public signal void user_selected (string? username);
-    public signal void user_displayed ();
+    public signal void user_displayed_start ();
+    public signal void user_displayed_done ();
     public signal void respond_to_prompt (string text);
     public signal void start_session ();
 
@@ -121,8 +166,34 @@ public class UserList : Gtk.EventBox
     {
         get { if (selected_entry == null) return null; return selected_entry.name; }
     }
+    
+    private string? _manual_username = null;
+    public string? manual_username
+    { 
+        get { return _manual_username; }
+        set
+        {
+            _manual_username = value;
+            if (find_entry ("*other") != null)
+                add_manual_entry ();
+        }
+    }
+    
+    public string default_session = "ubuntu";
 
-    public string? session {get; private set;}
+    private string? _session = null;
+    public string? session
+    {
+        get
+        {
+            return _session;
+        }
+        set
+        {
+            _session = value;
+            session_image.set_from_pixbuf (get_badge ());
+        }
+    }
 
     private Gdk.Pixbuf? last_session_badge = null;
 
@@ -153,7 +224,7 @@ public class UserList : Gtk.EventBox
         prompt_entry.activate.connect (prompt_entry_activate_cb);
         add_with_class (prompt_entry);
 
-        login_button = new DashButton (_("Log In")); /* 'Log In' here is the button for logging in. */
+        login_button = new DashButton ("");
         login_button.clicked.connect (login_button_clicked_cb);
         add_with_class (login_button);
 
@@ -169,7 +240,7 @@ public class UserList : Gtk.EventBox
         session_button = new Gtk.Button ();
         session_button.focus_on_click = false;
         session_button.get_accessible ().set_name (_("Session Options"));
-        session_image = new Gtk.Image.from_pixbuf (SessionChooser.get_badge (session));
+        session_image = new CachedImage (get_badge ());
         session_image.show ();
         session_button.relief = Gtk.ReliefStyle.NONE;
         session_button.add (session_image);
@@ -177,7 +248,7 @@ public class UserList : Gtk.EventBox
         session_button.show ();
         add_with_class (session_button);
 
-        scroll_timer = new AnimateTimer (AnimateTimer.FAST);
+        scroll_timer = new AnimateTimer (AnimateTimer.ease_out_quint, AnimateTimer.FAST);
         scroll_timer.animate.connect (scroll_animate_cb);
     }
 
@@ -187,6 +258,11 @@ public class UserList : Gtk.EventBox
         END,
         UP,
         DOWN,
+    }
+
+    public void cancel_authentication ()
+    {
+        user_selected (selected_entry.name);
     }
 
     public void scroll (ScrollTarget target)
@@ -239,10 +315,23 @@ public class UserList : Gtk.EventBox
         queue_draw_area (allocation.x, allocation.y, allocation.width, allocation.height);
     }
 
-    public void show_message (string text, bool error = false)
+    public void show_message (string text, bool is_error = false)
     {
-        message = text;
+        var layout = create_pango_layout (text);
+        layout.set_font_description (Pango.FontDescription.from_string ("Ubuntu 10"));
+        messages.append (new AuthenticationMessage (layout, is_error));
         redraw_login_box ();
+    }
+
+    public bool have_messages ()
+    {
+        return messages != null;
+    }
+
+    public void clear_messages ()
+    {
+        messages = new List<AuthenticationMessage> ();
+        redraw_login_box ();    
     }
 
     public void show_prompt (string text, bool secret = false)
@@ -251,7 +340,7 @@ public class UserList : Gtk.EventBox
         prompt_entry.hide ();
         if (text.contains ("\n"))
         {
-            message = text;
+            show_message (text);
             prompt_entry.constant_placeholder_text = "";
         }
         else
@@ -263,7 +352,6 @@ public class UserList : Gtk.EventBox
                 var len = placeholder.char_count ();
                 placeholder = placeholder.substring (0, placeholder.index_of_nth_char (len - 1));
             }
-            message = "";
             prompt_entry.constant_placeholder_text = placeholder;
         }
         prompt_entry.text = "";
@@ -274,7 +362,7 @@ public class UserList : Gtk.EventBox
         else
             prompt_entry.show ();
         var accessible = prompt_entry.get_accessible ();
-        if (selected_entry.name != null)
+        if (selected_entry != null && selected_entry.name != null)
             accessible.set_name (_("Enter password for %s").printf (selected_entry.layout.get_text ()));
         else
         {
@@ -287,17 +375,26 @@ public class UserList : Gtk.EventBox
         redraw_login_box ();
     }
 
-    public void show_authenticated ()
+    public void show_authenticated (bool successful = true)
     {
         prompt_entry.hide ();
         login_button.hide ();
-        message = "";
-        if (mode == Mode.SCROLLING)
-          prompt_widget_to_show = login_button;
-        else
-          login_button.show();
         var accessible = login_button.get_accessible ();
-        accessible.set_name (_("Login as %s").printf (selected_entry.layout.get_text ()));
+        if (successful)
+        {
+            accessible.set_name (_("Login as %s").printf (selected_entry.layout.get_text ()));
+            /* 'Log In' here is the button for logging in. */
+            login_button.text = _("Log In");
+        }
+        else
+        {
+            accessible.set_name (_("Retry").printf (selected_entry.layout.get_text ()));
+            login_button.text = _("Retry");
+        }
+        if (mode == Mode.SCROLLING)
+            prompt_widget_to_show = login_button;
+        else
+            login_button.show ();
         login_button.grab_focus ();
         redraw_login_box ();
     }
@@ -307,18 +404,12 @@ public class UserList : Gtk.EventBox
         complete = true;
         sensitive = false;
 
-        error = null;
-        message = _("Logging in...");
+        clear_messages ();
+        show_message (_("Logging in..."));
 
         login_button.hide ();
         prompt_entry.hide ();
 
-        redraw_login_box ();
-    }
-
-    public void set_error (string? text)
-    {
-        error = text;
         redraw_login_box ();
     }
 
@@ -333,29 +424,74 @@ public class UserList : Gtk.EventBox
         return null;
     }
 
-    public void add_entry (string name, string label, string? background, List <LightDM.Layout>? keyboard_layouts, bool is_active = false, bool has_messages = false, string? session = null)
+    public void add_entry (string name, string label, string? background = null, List <LightDM.Layout>? keyboard_layouts = null, bool is_active = false, bool has_messages = false, string? session = null)
     {
         var e = find_entry (name);
         if (e == null)
         {
             e = new UserEntry ();
-            entries.append (e);
             e.name = name;
         }
+        else
+            entries.remove (e);
         e.layout = create_pango_layout (label);
         e.layout.set_font_description (Pango.FontDescription.from_string ("Ubuntu 16"));
         e.background = background;
         e.keyboard_layouts = keyboard_layouts.copy ();
         e.is_active = is_active;
         e.has_messages = has_messages;
-        e.session = (session == null) ? "ubuntu" : session;
+        e.session = session;
+        entries.insert_sorted (e, compare_entry);
 
         if (selected_entry == null)
             select_entry (e, 1.0);
         else
             select_entry (selected_entry, 1.0);
 
+        /* Remove manual option when have users */
+        if (have_users () && !always_show_manual)
+            remove_entry ("*other");
+
         redraw_user_list ();
+    }
+
+    private static int compare_entry (UserEntry a, UserEntry b)
+    {
+        if (a.name.has_prefix ("*") || b.name.has_prefix ("*"))
+        {
+           /* Special entries go after normal ones */
+           if (!a.name.has_prefix ("*"))
+               return -1;
+           if (!b.name.has_prefix ("*"))
+               return 1;
+
+           /* Manual comes before guest */
+           if (a.name == "*other")
+               return -1;
+           if (a.name == "*guest")
+               return 1;
+        }
+
+        /* Alphabetical by label */
+        return a.layout.get_text ().ascii_casecmp (b.layout.get_text ());
+    }
+    
+    private bool have_users ()
+    {
+        foreach (var e in entries)
+        {
+            if (!e.name.has_prefix ("*"))
+                return true;
+        }
+        return false;
+    }
+
+    private void add_manual_entry ()
+    {
+        var text = manual_username;
+        if (text == null)
+            text = _("Login");
+        add_entry ("*other", text);
     }
 
     public void set_active_entry (string ?name)
@@ -374,6 +510,11 @@ public class UserList : Gtk.EventBox
         var index = entries.index (entry);
         entries.remove (entry);
 
+        /* Show a manual login if no users */
+        if (!have_users ())
+            add_manual_entry ();
+
+        /* Select previous entry if the selected one was removed */
         if (entry == selected_entry)
         {
             if (index >= entries.length ())
@@ -386,9 +527,8 @@ public class UserList : Gtk.EventBox
 
     private void prompt_entry_activate_cb ()
     {
-        respond_to_prompt (prompt_entry.text);
-        prompt_entry.text = "";
         prompt_entry.sensitive = false;
+        respond_to_prompt (prompt_entry.text);
     }
 
     private void login_button_clicked_cb ()
@@ -404,12 +544,6 @@ public class UserList : Gtk.EventBox
         scroll_timer.reset (AnimateTimer.INSTANT);
     }
 
-    private void change_session (string session)
-    {
-        this.session = session;
-        session_image.set_from_pixbuf (SessionChooser.get_badge (session));
-    }
-
     private void session_clicked_cb (string? session)
     {
         return_if_fail (mode == Mode.SESSIONS);
@@ -418,7 +552,7 @@ public class UserList : Gtk.EventBox
         session_chooser.fade_out ();
 
         if (session != null)
-            change_session (session);
+            this.session = session;
     }
 
     private void session_fade_done_cb ()
@@ -430,10 +564,12 @@ public class UserList : Gtk.EventBox
             mode = Mode.TRANSFORM_TO_LOGIN_SHOW;
             scroll_timer.reset (AnimateTimer.INSTANT);
 
-            if (prompt_entry.visible)
-                prompt_entry.grab_focus ();
-            else if (login_button.visible)
-                login_button.grab_focus ();
+            if (prompt_widget_to_show != null)
+            {
+                prompt_widget_to_show.show ();
+                prompt_widget_to_show.grab_focus ();
+            }
+            session_button.show ();
         }
     }
 
@@ -467,8 +603,21 @@ public class UserList : Gtk.EventBox
     private void finished_to_sessions_hide ()
     {
         login_box.add (session_chooser);
-        session_chooser.grab_focus ();
+
+        /* Hide the other login_box widgets while sessions is visible, to
+           avoid confusing tab-navigation chain.  This would be easier if these
+           were in a proper widget hierarchy, but since they are all just
+           floating around in a GtkFixed, we have to work a little harder. */
+        if (prompt_entry.visible)
+            prompt_widget_to_show = prompt_entry;
+        else if (login_button.visible)
+            prompt_widget_to_show = login_button;
+        prompt_entry.hide ();
+        login_button.hide ();
+        session_button.hide ();
+
         session_chooser.fade_in ();
+        session_chooser.child_focus (Gtk.DirectionType.TAB_FORWARD);
         mode = Mode.SESSIONS;
     }
 
@@ -515,6 +664,7 @@ public class UserList : Gtk.EventBox
         {
             prompt_widget_to_show.fade_in ();
             prompt_widget_to_show = null;
+            user_displayed_start ();
         }
 
         /* Stop when we get there */
@@ -525,45 +675,33 @@ public class UserList : Gtk.EventBox
     private void finished_scrolling ()
     {
         session_button.show ();
-        user_displayed ();
+        user_displayed_done ();
         mode = Mode.LOGIN;
     }
 
     private void select_entry (UserEntry entry, double direction)
     {
-        last_session_badge = SessionChooser.get_badge (session);
+        last_session_badge = get_badge ();
 
         if (!get_realized ())
         {
             /* Just note it for the future if we haven't been realized yet */
             selected_entry = entry;
-            change_session (entry.session);
+            session = entry.session;
             return;
         }
 
         if (scroll_target_location != entries.index (entry))
         {
-            var old_target = scroll_target_location;
             var new_target = entries.index (entry);
             var new_direction = direction;
-            var new_start = (mode == Mode.SCROLLING) ? scroll_start_location : scroll_location;
-
-            if (mode == Mode.SCROLLING && scroll_direction != new_direction)
-                return; /* ignore requests when we're already scrolling the opposite way */
+            var new_start = scroll_location;
 
             if (scroll_location != new_target)
             {
                 var new_distance = new_direction * (new_target - new_start);
-                if (mode == Mode.SCROLLING)
-                {
-                    var old_distance = new_direction * (old_target - new_start);
-                    if (!scroll_timer.extend ((new_distance - old_distance) / old_distance))
-                        return;
-                }
-                else if (new_distance > 1)
-                    scroll_timer.reset (600);
-                else
-                    scroll_timer.reset (400);
+                // Base rate is 350 (250 + 100).  If we find ourselves going further, slow down animation
+                scroll_timer.reset (250 + int.min((int)(100 * (new_distance)), 500));
 
                 if (prompt_entry.visible)
                     prompt_widget_to_show = prompt_entry;
@@ -585,12 +723,20 @@ public class UserList : Gtk.EventBox
         if (selected_entry != entry)
         {
             selected_entry = entry;
-            change_session (entry.session);
+            session = entry.session;
             user_selected (selected_entry.name);
 
             if (mode == Mode.LOGIN)
-                user_displayed (); /* didn't need to move, make sure we trigger side effects */
+                user_displayed_done (); /* didn't need to move, make sure we trigger side effects */
         }
+    }
+    
+    private Gdk.Pixbuf? get_badge ()
+    {
+        if (session == null)
+            return SessionChooser.get_badge (default_session);
+        else
+            return SessionChooser.get_badge (session);    
     }
 
     public override void realize ()
@@ -676,6 +822,47 @@ public class UserList : Gtk.EventBox
         session_button.size_allocate (child_allocation);
     }
 
+    private Cairo.Surface entry_ensure_label_surface (UserEntry entry, Cairo.Context orig_c, bool in_box)
+    {
+        if (in_box && entry.label_in_box_surface != null)
+            return entry.label_in_box_surface;
+        else if (!in_box && entry.label_out_of_box_surface != null)
+            return entry.label_out_of_box_surface;
+
+        int w, h;
+        entry.layout.get_pixel_size (out w, out h);
+
+        var bw = (box_width - (in_box ? 1.5 : 0.5)) * grid_size;
+
+        var surface = new Cairo.Surface.similar (orig_c.get_target (), Cairo.Content.COLOR_ALPHA, (int)(bw+1), h);
+        var c = new Cairo.Context (surface);
+
+        if (w > bw)
+        {
+            var mask = new Cairo.Pattern.linear (0, 0, bw, 0);
+            if (in_box)
+            {
+                mask.add_color_stop_rgba (1.0 - 27.0 / bw, 1.0, 1.0, 1.0, 1.0);
+                mask.add_color_stop_rgba (1.0 - 21.6 / bw, 1.0, 1.0, 1.0, 0.5);
+            }
+            else
+                mask.add_color_stop_rgba (1.0 - 64.0 / bw, 1.0, 1.0, 1.0, 1.0);
+            mask.add_color_stop_rgba (1.0, 1.0, 1.0, 1.0, 0.0);
+            c.set_source (mask);
+        }
+        else
+            c.set_source_rgba (1.0, 1.0, 1.0, 1.0);
+
+        Pango.cairo_show_layout (c, entry.layout);
+
+        if (in_box)
+            entry.label_in_box_surface = surface;
+        else
+            entry.label_out_of_box_surface = surface;
+
+        return surface;
+    }
+
     private void draw_entry (Cairo.Context c, UserEntry entry, double alpha = 0.5, bool in_box = false, Gdk.Pixbuf? badge = null)
     {
         c.save ();
@@ -696,32 +883,18 @@ public class UserList : Gtk.EventBox
         int w, h;
         entry.layout.get_pixel_size (out w, out h);
 
-        /* Trim label if too wide */
-        var bw = (box_width - (in_box ? 1.1 : 0.5)) * grid_size;
-        if (w > bw)
-        {
-            var mask = new Cairo.Pattern.linear (0, 0, bw, 0);
-            if (in_box)
-            {
-                mask.add_color_stop_rgba (1.0 - 27.0 / bw, 1.0, 1.0, 1.0, 1.0);
-                mask.add_color_stop_rgba (1.0 - 21.6 / bw, 1.0, 1.0, 1.0, 0.5);
-            }
-            else
-                mask.add_color_stop_rgba (1.0 - 64.0 / bw, 1.0, 1.0, 1.0, alpha);
-            mask.add_color_stop_rgba (1.0, 1.0, 1.0, 1.0, 0.0);
-            c.set_source (mask);
-        }
-        else
-            c.set_source_rgba (1.0, 1.0, 1.0, alpha);
+        var label_x = grid_size / 2;
+        var label_y = (grid_size - h) / 2 + border;
+        var label_surface = entry_ensure_label_surface (entry, c, in_box);
+        c.set_source_surface (label_surface, label_x, label_y);
+        c.paint_with_alpha (alpha);
 
-        c.translate (grid_size / 2, (grid_size - h) / 2 + border);
-        c.move_to (0, 0);
-        Pango.cairo_show_layout (c, entry.layout);
-
-        if (entry.has_messages && (!in_box || w + 6 + message_pixbuf.get_width () < bw))
+        var bw = (int) ((box_width - (in_box ? 1.5 : 0.5)) * grid_size);
+        if (entry.has_messages && (!in_box || label_x + w + 6 + message_pixbuf.get_width () < bw))
         {
-            c.translate (w + 6, (h - message_pixbuf.get_height ()) / 2);
-            Gdk.cairo_set_source_pixbuf (c, message_pixbuf, 0, 0);
+            c.translate (label_x + w + 6, label_y + (h - message_pixbuf.get_height ()) / 2);
+            var surface = CachedImage.get_cached_surface (c, message_pixbuf);
+            c.set_source_surface (surface, 0, 0);
             c.paint_with_alpha (alpha);
         }
 
@@ -735,7 +908,8 @@ public class UserList : Gtk.EventBox
             /* FIXME: The 18px offset here is because the visual assets changed size from 40px to 22px.  It should be fixed properly somewhere... */
             var ypadding = (grid_size - badge.height) / 2 - 18;
             c.translate (box_width * grid_size - grid_size - grid_size / 4 + xpadding, grid_size / 4 - ypadding - border);
-            Gdk.cairo_set_source_pixbuf (c, badge, 0, 0);
+            var surface = CachedImage.get_cached_surface (c, badge);
+            c.set_source_surface (surface, 0, 0);
             c.paint ();
             c.restore ();
         }
@@ -802,7 +976,7 @@ public class UserList : Gtk.EventBox
             var position = index - scroll_location;
 
             /* Draw entries above the box */
-            if (where == NameLocation.OUTSIDE_BOX && position < 0)
+            if (where == NameLocation.OUTSIDE_BOX && position < 0 && position > -1 * (int)(n_above + 1))
             {
                 var h_above = (double) (n_above + 1) * grid_size;
                 c.save ();
@@ -824,7 +998,7 @@ public class UserList : Gtk.EventBox
 
                 var badge = last_session_badge;
                 if (entry == selected_entry)
-                    badge = SessionChooser.get_badge (session);
+                    badge = get_badge ();
 
                 if (position <= 0) /* top of box, normal pace */
                     draw_entry_at_position (c, entry, position, true, badge);
@@ -835,7 +1009,7 @@ public class UserList : Gtk.EventBox
             }
 
             /* Draw entries below the box */
-            if (where == NameLocation.OUTSIDE_BOX && position > 0)
+            if (where == NameLocation.OUTSIDE_BOX && position > 0 && position < n_below + 1)
             {
                 var h_below = (double) (n_below + 1) * grid_size;
                 c.save ();
@@ -878,41 +1052,45 @@ public class UserList : Gtk.EventBox
             c.restore ();
         }
 
-        if ((error != null || message != null) && mode != Mode.SCROLLING)
+        if (mode != Mode.SCROLLING)
         {
-            string text;
-            if (error == null)
-                text = message;
-            else
-                text = error;
-
-            var layout = create_pango_layout (text);
-            layout.set_font_description (Pango.FontDescription.from_string ("Ubuntu 10"));
-            int w, h;
-            layout.get_pixel_size (out w, out h);
-
-            c.move_to (grid_size / 2, grid_size * 1.25 - h + border);
-
-            var r = 1.0;
-            var g = 1.0;
-            var b = 1.0;
-            if (error != null)
+            var vertical_offset = 0.0;
+            foreach (var m in messages)
             {
-                r = 1.0;
-                g = 0.0;
-                b = 0.0;
+                int w, h;
+                m.layout.get_pixel_size (out w, out h);
+                vertical_offset += h;
             }
-            var bw = (box_width - 0.5) * grid_size;
-            if (w > bw)
+
+            foreach (var m in messages)
             {
-                var mask = new Cairo.Pattern.linear (0, 0, bw, 0);
-                mask.add_color_stop_rgba (1.0 - 0.5 * grid_size / bw, r, g, b, 1.0);
-                mask.add_color_stop_rgba (1.0, r, g, b, 0.0);
-                c.set_source (mask);
+                int w, h;
+                m.layout.get_pixel_size (out w, out h);
+
+                c.move_to (grid_size / 2, grid_size * 1.25 - vertical_offset + border);
+                vertical_offset -= h;
+
+                var r = 1.0;
+                var g = 1.0;
+                var b = 1.0;
+                if (m.is_error)
+                {
+                    r = 1.0;
+                    g = 0.0;
+                    b = 0.0;
+                }
+                var bw = (box_width - 0.5) * grid_size;
+                if (w > bw)
+                {
+                    var mask = new Cairo.Pattern.linear (0, 0, bw, 0);
+                    mask.add_color_stop_rgba (1.0 - 0.5 * grid_size / bw, r, g, b, 1.0);
+                    mask.add_color_stop_rgba (1.0, r, g, b, 0.0);
+                    c.set_source (mask);
+                }
+                else
+                    c.set_source_rgb (r, g, b);
+                Pango.cairo_show_layout (c, m.layout);
             }
-            else
-                c.set_source_rgb (r, g, b);
-            Pango.cairo_show_layout (c, layout);
         }
 
         c.restore ();

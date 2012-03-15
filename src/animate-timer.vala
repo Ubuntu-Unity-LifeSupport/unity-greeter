@@ -20,6 +20,9 @@
 
 private class AnimateTimer : Object
 {
+    /* x and y are 0.0 to 1.0 */
+    public delegate double EasingFunc (double x);
+
     /* The following are the same intervals that Unity uses */
     public static const int INSTANT = 150; /* Good for animations that don't convey any information */
     public static const int FAST =    250; /* Good for animations that convey duplicated information */
@@ -27,6 +30,7 @@ private class AnimateTimer : Object
     public static const int SLOW =   1000; /* Good for animations that convey information that is only presented in the animation */
 
     /* speed is in milliseconds */
+    public unowned EasingFunc easing_func {get; private set;}
     public int speed {get; set;}
     public bool is_running { get { return timeout != 0; } }
     public double progress {get; private set;}
@@ -34,10 +38,24 @@ private class AnimateTimer : Object
     /* progress is from 0.0 to 1.0 */
     public signal void animate (double progress);
 
+    /* AnimateTimer requires two things: an easing function and a speed.
+
+       The speed is just the duration of the animation in milliseconds.
+
+       The easing function describes how fast the animation occurs at different
+       parts of the duration.
+
+       See http://hosted.zeh.com.br/tweener/docs/en-us/misc/transitions.html
+       for examples of various easing functions.
+
+       A few are provided with this class, notably ease_in_out and
+       ease_out_quint.
+    */
     /* speed is in milliseconds */
-    public AnimateTimer (int speed)
+    public AnimateTimer (EasingFunc func, int speed)
     {
         Object (speed: speed);
+        this.easing_func = func;
     }
 
     /* temp_speed is in milliseconds */
@@ -57,38 +75,6 @@ private class AnimateTimer : Object
         length = temp_speed * TimeSpan.MILLISECOND;
     }
 
-    /* This tells us the consumer of our progress reports is changing the
-       goalposts on us.  So we need to adjust our reports accordingly.
-       'extra_progress' is how much progress is being added to the animation.
-     */
-    public bool extend (double new_progress)
-    {
-        /* As an example, say a consumer is animating from point A to point C in
-           150ms.  This is two points to cover, and at 75ms, they will be 0.5 done.
-
-           Now, they extend it to point D.  This adds an extra point, which is half
-           the original progress.  So now they call extend (0.5).
-
-           We extend in the middle, so we need the slope at halfway through our
-           progress function.  That is a constant we have (see calculate_progress
-           for details).  So we'd need to add the same amount of normalized time
-           to our process as progress, which is 0.5 / HALFWAY_VELOCITY = 0.318 in
-           this example.  Which is (length * 0.318) = 47.7ms more time to add.
-
-           Now we have 197.7ms as length of our animation.  Which changes the
-           progress values we give out.  We further need to adjust our progress
-           function to take this 'pause' in the middle of the function into
-           account.
-        */
-
-        if (progress > HALFWAY_PROGRESS)
-            return false;
-
-        extra_progress += new_progress;
-        extra_time = (TimeSpan)(length * extra_progress / HALFWAY_VELOCITY);
-        return true;
-    }
-
     public void stop ()
     {
         if (timeout != 0)
@@ -101,13 +87,6 @@ private class AnimateTimer : Object
     private TimeSpan length = 0;
     private TimeSpan extra_time = 0;
     private double extra_progress = 0.0;
-
-    /* Derivative of our easing function at 0.5 (the halfway point).
-       See calculate_progress() for functions. */
-    private static const double HALFWAY_VELOCITY = 1.5708;
-
-    /* The y value of our easing function at 0.5 (the halway point) */
-    private static const double HALFWAY_PROGRESS = 0.75;
 
     private bool animate_cb ()
     {
@@ -129,94 +108,39 @@ private class AnimateTimer : Object
     /* Returns 0.0 to 1.0 where 1.0 is at or past end_time */
     private double normalize_time (TimeSpan now)
     {
-        var total = length;
-        var halfway = start_time + length / 2;
-        if (now > halfway)
-            now -= extra_time;
-
-        return (((double)(now - start_time)) / total).clamp (0.0, 1.0);
-    }
-
-    /* Incoming progress count is original, un-extra-time enhanced progress */
-    private double normalize_progress (double p)
-    {
-        /* So without extra time, progress goes from 0.0 to 1.0.  But with
-           extra time, the beginning and end want to keep the same function,
-           just squeezed into a smaller place in the graph.  So we figure out
-           that mapping here. */
-        var extra_mapped = extra_progress / (1.0 + extra_progress);
-        var half_mapped = HALFWAY_PROGRESS / (1.0 + extra_progress);
-        if (p < HALFWAY_PROGRESS)
-            return p * (half_mapped / HALFWAY_PROGRESS);
-        else
-        {
-            var end = 1.0 - half_mapped - extra_mapped;
-            return (p - HALFWAY_PROGRESS) * (end / (1 - HALFWAY_PROGRESS)) + half_mapped + extra_mapped;
-        }
+        return (((double)(now - start_time)) / length).clamp (0.0, 1.0);
     }
 
     /* Returns 0.0 to 1.0 where 1.0 is done.
        time is not normalized yet! */
     private double calculate_progress (TimeSpan time)
     {
-        /* Use a sine wave function similar to what Unity uses.  They call it
-           'easing' and is designed to make the animation start and end slower
-           than in the middle. 
-
-           ((1 - Math.cos (Math.PI * time)) / 2) is the basic sine curve for
-           easing, used by Unity and others.  By squaring that and reversing
-           the curve (by using 1 - x and 1 - y), we get a more exaggerated
-           slowdown.
-
-           For clarity, here is the whole function:
-            y = 1 - ((1 - cos (pi * (1 - x))) / 2) ^ 2
-
-           Here is the derivative of that function (useful for calculating
-           slope at a given point, used elsewhere in this class):
-            y = (pi * (cos (pi * (x - 1)) - 1)) * sin (pi * (x - 1)) / 2 
-
-           */
-
-        /* But due to the ability to add extra time into the equation, we
-           are actually three functions:
-           1) x=[0,A) = normal
-           2) x=[A,B] = halfway slope
-           3) x=(B,1.0] = picks up where first function left off */
-
-        var y = 0.0;
-        var orig_half_point = start_time + length / 2;
-
-        if (time > start_time + length + extra_time)
-        {
-            y = 1.0;
-        }
-        else if (time < orig_half_point)
-        {
-            var x = normalize_time (time);
-            y = easing_function (x);
-            y = normalize_progress (y);
-        }
-        else if (time < orig_half_point + extra_time)
-        {
-            var xpercent = (time - orig_half_point) / (double)extra_time;
-            y = (xpercent * extra_progress + HALFWAY_PROGRESS) / (1.0 + extra_progress);
-        }
-        else
-        {
-            var x = normalize_time (time);
-            y = easing_function (x);
-            y = normalize_progress (y);
-        }
-
+        var x = normalize_time (time);
+        var y = easing_func (x);
         return y.clamp (0.0, 1.0);
     }
 
-    private double easing_function (double x)
+    public static double ease_in_out (double x)
     {
-        var y = (1 - Math.cos (Math.PI * (1.0 - x))) / 2;
-        y = y * y;
-        y = 1.0 - y;
-        return y;
+        return (1 - Math.cos (Math.PI * x)) / 2;
+    }
+
+    /*public static double ease_in_quad (double x)
+    {
+        return Math.pow (x, 2);
+    }*/
+    /*public static double ease_out_quad (double x)
+    {
+        return -1 * Math.pow (x - 1, 2) + 1;
+    }*/
+
+    /*public static double ease_in_quint (double x)
+    {
+        return Math.pow (x, 5);
+    }*/
+    public static double ease_out_quint (double x)
+    {
+        return Math.pow (x - 1, 5) + 1;
     }
 }
 
