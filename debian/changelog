@@ -1,3 +1,12 @@
+unity-greeter (0.2.5-0ubuntu2) precise; urgency=low
+
+  * debian/patches/fix_login_corruption.patch:
+    - Fix setting of root window background pixmap.  Fixes "corruption"
+      seen between unity-greeter and Unity start, which was actually just
+      random bits of VRAM in an uninitialised pixmap.  (LP: #931967)
+
+ -- Christopher James Halse Rogers <raof@ubuntu.com>  Tue, 20 Mar 2012 18:51:43 +1100
+
 unity-greeter (0.2.5-0ubuntu1) precise; urgency=low
 
   * New upstream release
