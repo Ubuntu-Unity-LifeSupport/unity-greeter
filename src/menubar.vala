@@ -241,7 +241,18 @@ public class MenuBar : Gtk.MenuBar
         if (desc == null || desc == "")
         {
             var parts = layout.name.split ("\t", 2);
-            desc = parts[0];
+            if (parts[0] == layout.name)
+                desc = layout.name;
+            else
+            {
+                // Lookup parent layout, get its short_description
+                var parent_layout = UnityGreeter.get_layout_by_name (parts[0]);
+                if (parent_layout.short_description == null ||
+                    parent_layout.short_description == "")
+                    desc = parts[0];
+                else
+                    desc = parent_layout.short_description;
+            }
         }
         keyboard_label.label = desc;
 

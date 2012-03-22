@@ -1,3 +1,9 @@
+Overview of changes in unity-greeter 0.2.6
+
+    * Fix the corruption between unity-greeter and Unity loading
+    * Fix crash when reloading background images
+    * Fix displayed name of keyboard layout with some variants
+
 Overview of changes in unity-greeter 0.2.5
 
     * Don't allow dragging the window by the top bar

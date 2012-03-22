@@ -39,7 +39,7 @@ public class UnityGreeter
     private File state_file;
     private KeyFile state;
 
-    private static Cairo.Surface background_surface;
+    private static Cairo.XlibSurface background_surface;
 
     private SettingsDaemon settings_daemon;
 
@@ -78,6 +78,7 @@ public class UnityGreeter
         { "unicode",            "가나다라마",        "*",              "uk;us", false, false, null },
         { "system-layout",      "System Layout",     "*",              null,    false, false, null },
         { "four-layouts",       "Four Layouts",      "*",              "de\tdvorak;ca;gb;fr\toss", false, false, null },
+        { "hy-layout",          "Layout Is 'hy'",    "*",              "am\teastern-alt", false, false, null }, // inherits parent layout's short_desc
         { "no-response",        "No Response",       "*",              null,    false, false, null },
         { "",                   "",                  null,             null,    false, false, null }
     };
@@ -294,7 +295,7 @@ public class UnityGreeter
         return layouts;
     }
 
-    private LightDM.Layout? get_layout_by_name (string name)
+    public static LightDM.Layout? get_layout_by_name (string name)
     {
         foreach (var layout in LightDM.get_layouts ())
         {
@@ -402,9 +403,9 @@ public class UnityGreeter
     {
         /* Set the background */
         var c = new Cairo.Context (background_surface);
-        user_list.background.draw (c);
+        user_list.background.draw_full (c, Background.DrawFlags.NONE);
         c = null;
-        refresh_background (Gdk.Screen.get_default ());
+        refresh_background (Gdk.Screen.get_default (), background_surface);
 
         try
         {
@@ -439,6 +440,12 @@ public class UnityGreeter
                 }
                 else
                 {
+                    /* Set the background */
+                    var c = new Cairo.Context (background_surface);
+                    user_list.background.draw_full (c, Background.DrawFlags.NONE);
+                    c = null;
+                    refresh_background (Gdk.Screen.get_default (), background_surface);
+
                     debug ("Successfully logged in!  Quitting...");
                     Gtk.main_quit ();
                 }
@@ -694,19 +701,12 @@ public class UnityGreeter
         root.add_filter ((Gdk.FilterFunc) focus_upon_map);
     }
 
-    private static Cairo.Surface? create_root_surface (Gdk.Screen screen)
+    private static Cairo.XlibSurface? create_root_surface (Gdk.Screen screen)
     {
         var visual = screen.get_system_visual ();
 
-        /* Open a new connection so with Retain Permanent so the pixmap remains when the greeter quits */
-        Gdk.flush ();
-        var display = new X.Display (screen.get_display ().get_name ());
-        if (display == null)
-        {
-            warning ("Failed to create root pixmap");
-            return null;
-        }
-        display.set_close_down_mode (X.RetainPermanent);
+        unowned X.Display display = Gdk.X11Display.get_xdisplay (screen.get_display ());
+
         var pixmap = X.CreatePixmap (display,
                                      Gdk.X11Window.get_xid (screen.get_root_window ()),
                                      screen.width (),
@@ -714,25 +714,28 @@ public class UnityGreeter
                                      visual.get_depth ());
 
         /* Convert into a Cairo surface */
-        unowned X.Display xdisplay = Gdk.X11Display.get_xdisplay (screen.get_display ());
-        var surface = new Cairo.XlibSurface (xdisplay,
+        var surface = new Cairo.XlibSurface (display,
                                              pixmap,
                                              Gdk.X11Visual.get_xvisual (visual),
                                              screen.width (), screen.height ());
 
-        /* Use this pixmap for the background */
-        X.SetWindowBackgroundPixmap (xdisplay,
-                                     Gdk.X11Window.get_xid (screen.get_root_window ()),
-                                     surface.get_drawable ());
-
-
         return surface;  
     }
 
-    private void refresh_background (Gdk.Screen screen)
+    private void refresh_background (Gdk.Screen screen, Cairo.XlibSurface surface)
     {
         Gdk.flush ();
-        X.ClearWindow (Gdk.X11Display.get_xdisplay (screen.get_display ()), Gdk.X11Window.get_xid (screen.get_root_window ()));
+
+        unowned X.Display display = Gdk.X11Display.get_xdisplay (screen.get_display ());
+
+        /* Ensure Cairo has actually finished its drawing */
+        surface.flush ();
+        /* Use this pixmap for the background */
+        X.SetWindowBackgroundPixmap (display,
+                                     Gdk.X11Window.get_xid (screen.get_root_window ()),
+                                     surface.get_drawable ());
+
+        X.ClearWindow (display, Gdk.X11Window.get_xid (screen.get_root_window ()));
     }
 
     private static void log_cb (string? log_domain, LogLevelFlags log_level, string message)

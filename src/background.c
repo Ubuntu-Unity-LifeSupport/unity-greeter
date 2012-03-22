@@ -50,7 +50,6 @@ typedef struct _BackgroundLoaderPrivate BackgroundLoaderPrivate;
 #define _g_error_free0(var) ((var == NULL) ? NULL : (var = (g_error_free (var), NULL)))
 #define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
 #define _cairo_destroy0(var) ((var == NULL) ? NULL : (var = (cairo_destroy (var), NULL)))
-typedef struct _ParamSpecBackgroundLoader ParamSpecBackgroundLoader;
 
 #define TYPE_MONITOR (monitor_get_type ())
 #define MONITOR(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_MONITOR, Monitor))
@@ -88,12 +87,10 @@ typedef struct _AnimateTimerClass AnimateTimerClass;
 #define BACKGROUND_TYPE_DRAW_FLAGS (background_draw_flags_get_type ())
 #define __g_list_free__monitor_unref0_0(var) ((var == NULL) ? NULL : (var = (_g_list_free__monitor_unref0_ (var), NULL)))
 #define _monitor_unref0(var) ((var == NULL) ? NULL : (var = (monitor_unref (var), NULL)))
-#define _background_loader_unref0(var) ((var == NULL) ? NULL : (var = (background_loader_unref (var), NULL)))
 #define _g_hash_table_unref0(var) ((var == NULL) ? NULL : (var = (g_hash_table_unref (var), NULL)))
 
 struct _BackgroundLoader {
-	GTypeInstance parent_instance;
-	volatile int ref_count;
+	GObject parent_instance;
 	BackgroundLoaderPrivate * priv;
 	gint* widths;
 	gint widths_length1;
@@ -107,8 +104,7 @@ struct _BackgroundLoader {
 };
 
 struct _BackgroundLoaderClass {
-	GTypeClass parent_class;
-	void (*finalize) (BackgroundLoader *self);
+	GObjectClass parent_class;
 };
 
 struct _BackgroundLoaderPrivate {
@@ -122,10 +118,6 @@ struct _BackgroundLoaderPrivate {
 	gint _images_size_;
 	gboolean finished;
 	guint ready_id;
-};
-
-struct _ParamSpecBackgroundLoader {
-	GParamSpec parent_instance;
 };
 
 struct _Monitor {
@@ -187,16 +179,12 @@ static gpointer background_loader_parent_class = NULL;
 static gpointer monitor_parent_class = NULL;
 static gpointer background_parent_class = NULL;
 
-gpointer background_loader_ref (gpointer instance);
-void background_loader_unref (gpointer instance);
-GParamSpec* param_spec_background_loader (const gchar* name, const gchar* nick, const gchar* blurb, GType object_type, GParamFlags flags);
-void value_set_background_loader (GValue* value, gpointer v_object);
-void value_take_background_loader (GValue* value, gpointer v_object);
-gpointer value_get_background_loader (const GValue* value);
 GType background_loader_get_type (void) G_GNUC_CONST;
 #define BACKGROUND_LOADER_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TYPE_BACKGROUND_LOADER, BackgroundLoaderPrivate))
 enum  {
-	BACKGROUND_LOADER_DUMMY_PROPERTY
+	BACKGROUND_LOADER_DUMMY_PROPERTY,
+	BACKGROUND_LOADER_FILENAME,
+	BACKGROUND_LOADER_LOGO
 };
 BackgroundLoader* background_loader_new (cairo_surface_t* target_surface, const gchar* filename, gint* widths, int widths_length1, gint* heights, int heights_length1, gboolean draw_grid);
 BackgroundLoader* background_loader_construct (GType object_type, cairo_surface_t* target_surface, const gchar* filename, gint* widths, int widths_length1, gint* heights, int heights_length1, gboolean draw_grid);
@@ -216,7 +204,9 @@ gint get_grid_offset (gint size);
 cairo_surface_t* background_loader_get_logo (BackgroundLoader* self);
 #define grid_size 40
 void background_loader_set_logo (BackgroundLoader* self, cairo_surface_t* value);
-static void background_loader_finalize (BackgroundLoader* obj);
+static void background_loader_finalize (GObject* obj);
+static void _vala_background_loader_get_property (GObject * object, guint property_id, GValue * value, GParamSpec * pspec);
+static void _vala_background_loader_set_property (GObject * object, guint property_id, const GValue * value, GParamSpec * pspec);
 gpointer monitor_ref (gpointer instance);
 void monitor_unref (gpointer instance);
 GParamSpec* param_spec_monitor (const gchar* name, const gchar* nick, const gchar* blurb, GType object_type, GParamFlags flags);
@@ -252,7 +242,7 @@ AnimateTimer* animate_timer_construct (GType object_type, AnimateTimerEasingFunc
 static void background_animate_cb (Background* self, gdouble progress);
 static void _background_animate_cb_animate_timer_animate (AnimateTimer* _sender, gdouble progress, gpointer self);
 static void _g_free0_ (gpointer var);
-static void _background_loader_unref0_ (gpointer var);
+static void _g_object_unref0_ (gpointer var);
 static void __lambda2_ (Background* self);
 static void background_reload (Background* self);
 static void ___lambda2__g_object_notify (GObject* _sender, GParamSpec* pspec, gpointer self);
@@ -303,7 +293,7 @@ static gint* _vala_array_dup2 (gint* self, int length) {
 
 
 BackgroundLoader* background_loader_construct (GType object_type, cairo_surface_t* target_surface, const gchar* filename, gint* widths, int widths_length1, gint* heights, int heights_length1, gboolean draw_grid) {
-	BackgroundLoader* self = NULL;
+	BackgroundLoader * self = NULL;
 	cairo_surface_t* _tmp0_;
 	cairo_surface_t* _tmp1_;
 	const gchar* _tmp2_;
@@ -324,7 +314,7 @@ BackgroundLoader* background_loader_construct (GType object_type, cairo_surface_
 	gboolean _tmp11_;
 	g_return_val_if_fail (target_surface != NULL, NULL);
 	g_return_val_if_fail (filename != NULL, NULL);
-	self = (BackgroundLoader*) g_type_create_instance (object_type);
+	self = (BackgroundLoader*) g_object_new (object_type, NULL);
 	_tmp0_ = target_surface;
 	_tmp1_ = _cairo_surface_reference0 (_tmp0_);
 	_cairo_surface_destroy0 (self->priv->target_surface);
@@ -555,6 +545,7 @@ gboolean background_loader_load (BackgroundLoader* self) {
 		{
 			GThread* _tmp46_ = NULL;
 			GThread* _tmp47_;
+			g_object_ref ((GObject*) self);
 			_tmp46_ = g_thread_create (_background_loader_load_and_scale_gthread_func, self, TRUE, &_inner_error_);
 			_tmp47_ = _tmp46_;
 			if (_inner_error_ != NULL) {
@@ -574,6 +565,7 @@ gboolean background_loader_load (BackgroundLoader* self) {
 			GError* e = NULL;
 			e = _inner_error_;
 			_inner_error_ = NULL;
+			g_object_unref ((GObject*) self);
 			self->priv->finished = TRUE;
 			result = TRUE;
 			_g_error_free0 (e);
@@ -677,11 +669,12 @@ static gboolean background_loader_ready_cb (BackgroundLoader* self) {
 	GThread* _tmp1_;
 	g_return_val_if_fail (self != NULL, FALSE);
 	_tmp0_ = self->priv->_filename;
-	g_debug ("background.vala:110: Render of background %s complete", _tmp0_);
+	g_debug ("background.vala:112: Render of background %s complete", _tmp0_);
 	_tmp1_ = self->priv->thread;
 	g_thread_join (_tmp1_);
 	self->priv->thread = NULL;
 	self->priv->finished = TRUE;
+	g_object_unref ((GObject*) self);
 	{
 		gint i;
 		i = 0;
@@ -836,7 +829,7 @@ static void* background_loader_load_and_scale (BackgroundLoader* self) {
 		_inner_error_ = NULL;
 		_tmp18_ = e;
 		_tmp19_ = _tmp18_->message;
-		g_debug ("background.vala:137: Error loading background: %s", _tmp19_);
+		g_debug ("background.vala:140: Error loading background: %s", _tmp19_);
 		_g_error_free0 (e);
 	}
 	__finally1:
@@ -1096,6 +1089,7 @@ static void background_loader_set_filename (BackgroundLoader* self, const gchar*
 	_tmp1_ = g_strdup (_tmp0_);
 	_g_free0 (self->priv->_filename);
 	self->priv->_filename = _tmp1_;
+	g_object_notify ((GObject *) self, "filename");
 }
 
 
@@ -1117,134 +1111,28 @@ void background_loader_set_logo (BackgroundLoader* self, cairo_surface_t* value)
 	_tmp1_ = _cairo_surface_reference0 (_tmp0_);
 	_cairo_surface_destroy0 (self->priv->_logo);
 	self->priv->_logo = _tmp1_;
-}
-
-
-static void value_background_loader_init (GValue* value) {
-	value->data[0].v_pointer = NULL;
-}
-
-
-static void value_background_loader_free_value (GValue* value) {
-	if (value->data[0].v_pointer) {
-		background_loader_unref (value->data[0].v_pointer);
-	}
-}
-
-
-static void value_background_loader_copy_value (const GValue* src_value, GValue* dest_value) {
-	if (src_value->data[0].v_pointer) {
-		dest_value->data[0].v_pointer = background_loader_ref (src_value->data[0].v_pointer);
-	} else {
-		dest_value->data[0].v_pointer = NULL;
-	}
-}
-
-
-static gpointer value_background_loader_peek_pointer (const GValue* value) {
-	return value->data[0].v_pointer;
-}
-
-
-static gchar* value_background_loader_collect_value (GValue* value, guint n_collect_values, GTypeCValue* collect_values, guint collect_flags) {
-	if (collect_values[0].v_pointer) {
-		BackgroundLoader* object;
-		object = collect_values[0].v_pointer;
-		if (object->parent_instance.g_class == NULL) {
-			return g_strconcat ("invalid unclassed object pointer for value type `", G_VALUE_TYPE_NAME (value), "'", NULL);
-		} else if (!g_value_type_compatible (G_TYPE_FROM_INSTANCE (object), G_VALUE_TYPE (value))) {
-			return g_strconcat ("invalid object type `", g_type_name (G_TYPE_FROM_INSTANCE (object)), "' for value type `", G_VALUE_TYPE_NAME (value), "'", NULL);
-		}
-		value->data[0].v_pointer = background_loader_ref (object);
-	} else {
-		value->data[0].v_pointer = NULL;
-	}
-	return NULL;
-}
-
-
-static gchar* value_background_loader_lcopy_value (const GValue* value, guint n_collect_values, GTypeCValue* collect_values, guint collect_flags) {
-	BackgroundLoader** object_p;
-	object_p = collect_values[0].v_pointer;
-	if (!object_p) {
-		return g_strdup_printf ("value location for `%s' passed as NULL", G_VALUE_TYPE_NAME (value));
-	}
-	if (!value->data[0].v_pointer) {
-		*object_p = NULL;
-	} else if (collect_flags & G_VALUE_NOCOPY_CONTENTS) {
-		*object_p = value->data[0].v_pointer;
-	} else {
-		*object_p = background_loader_ref (value->data[0].v_pointer);
-	}
-	return NULL;
-}
-
-
-GParamSpec* param_spec_background_loader (const gchar* name, const gchar* nick, const gchar* blurb, GType object_type, GParamFlags flags) {
-	ParamSpecBackgroundLoader* spec;
-	g_return_val_if_fail (g_type_is_a (object_type, TYPE_BACKGROUND_LOADER), NULL);
-	spec = g_param_spec_internal (G_TYPE_PARAM_OBJECT, name, nick, blurb, flags);
-	G_PARAM_SPEC (spec)->value_type = object_type;
-	return G_PARAM_SPEC (spec);
-}
-
-
-gpointer value_get_background_loader (const GValue* value) {
-	g_return_val_if_fail (G_TYPE_CHECK_VALUE_TYPE (value, TYPE_BACKGROUND_LOADER), NULL);
-	return value->data[0].v_pointer;
-}
-
-
-void value_set_background_loader (GValue* value, gpointer v_object) {
-	BackgroundLoader* old;
-	g_return_if_fail (G_TYPE_CHECK_VALUE_TYPE (value, TYPE_BACKGROUND_LOADER));
-	old = value->data[0].v_pointer;
-	if (v_object) {
-		g_return_if_fail (G_TYPE_CHECK_INSTANCE_TYPE (v_object, TYPE_BACKGROUND_LOADER));
-		g_return_if_fail (g_value_type_compatible (G_TYPE_FROM_INSTANCE (v_object), G_VALUE_TYPE (value)));
-		value->data[0].v_pointer = v_object;
-		background_loader_ref (value->data[0].v_pointer);
-	} else {
-		value->data[0].v_pointer = NULL;
-	}
-	if (old) {
-		background_loader_unref (old);
-	}
-}
-
-
-void value_take_background_loader (GValue* value, gpointer v_object) {
-	BackgroundLoader* old;
-	g_return_if_fail (G_TYPE_CHECK_VALUE_TYPE (value, TYPE_BACKGROUND_LOADER));
-	old = value->data[0].v_pointer;
-	if (v_object) {
-		g_return_if_fail (G_TYPE_CHECK_INSTANCE_TYPE (v_object, TYPE_BACKGROUND_LOADER));
-		g_return_if_fail (g_value_type_compatible (G_TYPE_FROM_INSTANCE (v_object), G_VALUE_TYPE (value)));
-		value->data[0].v_pointer = v_object;
-	} else {
-		value->data[0].v_pointer = NULL;
-	}
-	if (old) {
-		background_loader_unref (old);
-	}
+	g_object_notify ((GObject *) self, "logo");
 }
 
 
 static void background_loader_class_init (BackgroundLoaderClass * klass) {
 	background_loader_parent_class = g_type_class_peek_parent (klass);
-	BACKGROUND_LOADER_CLASS (klass)->finalize = background_loader_finalize;
 	g_type_class_add_private (klass, sizeof (BackgroundLoaderPrivate));
+	G_OBJECT_CLASS (klass)->get_property = _vala_background_loader_get_property;
+	G_OBJECT_CLASS (klass)->set_property = _vala_background_loader_set_property;
+	G_OBJECT_CLASS (klass)->finalize = background_loader_finalize;
+	g_object_class_install_property (G_OBJECT_CLASS (klass), BACKGROUND_LOADER_FILENAME, g_param_spec_string ("filename", "filename", "filename", NULL, G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB | G_PARAM_READABLE));
+	g_object_class_install_property (G_OBJECT_CLASS (klass), BACKGROUND_LOADER_LOGO, g_param_spec_pointer ("logo", "logo", "logo", G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB | G_PARAM_READABLE | G_PARAM_WRITABLE));
 	g_signal_new ("loaded", TYPE_BACKGROUND_LOADER, G_SIGNAL_RUN_LAST, 0, NULL, NULL, g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
 }
 
 
 static void background_loader_instance_init (BackgroundLoader * self) {
 	self->priv = BACKGROUND_LOADER_GET_PRIVATE (self);
-	self->ref_count = 1;
 }
 
 
-static void background_loader_finalize (BackgroundLoader* obj) {
+static void background_loader_finalize (GObject* obj) {
 	BackgroundLoader * self;
 	guint _tmp0_;
 	self = BACKGROUND_LOADER (obj);
@@ -1262,37 +1150,52 @@ static void background_loader_finalize (BackgroundLoader* obj) {
 	self->patterns = (_vala_array_free (self->patterns, self->patterns_length1, (GDestroyNotify) cairo_pattern_destroy), NULL);
 	_cairo_surface_destroy0 (self->priv->target_surface);
 	self->priv->images = (_vala_array_free (self->priv->images, self->priv->images_length1, (GDestroyNotify) g_object_unref), NULL);
+	G_OBJECT_CLASS (background_loader_parent_class)->finalize (obj);
 }
 
 
 GType background_loader_get_type (void) {
 	static volatile gsize background_loader_type_id__volatile = 0;
 	if (g_once_init_enter (&background_loader_type_id__volatile)) {
-		static const GTypeValueTable g_define_type_value_table = { value_background_loader_init, value_background_loader_free_value, value_background_loader_copy_value, value_background_loader_peek_pointer, "p", value_background_loader_collect_value, "p", value_background_loader_lcopy_value };
-		static const GTypeInfo g_define_type_info = { sizeof (BackgroundLoaderClass), (GBaseInitFunc) NULL, (GBaseFinalizeFunc) NULL, (GClassInitFunc) background_loader_class_init, (GClassFinalizeFunc) NULL, NULL, sizeof (BackgroundLoader), 0, (GInstanceInitFunc) background_loader_instance_init, &g_define_type_value_table };
-		static const GTypeFundamentalInfo g_define_type_fundamental_info = { (G_TYPE_FLAG_CLASSED | G_TYPE_FLAG_INSTANTIATABLE | G_TYPE_FLAG_DERIVABLE | G_TYPE_FLAG_DEEP_DERIVABLE) };
+		static const GTypeInfo g_define_type_info = { sizeof (BackgroundLoaderClass), (GBaseInitFunc) NULL, (GBaseFinalizeFunc) NULL, (GClassInitFunc) background_loader_class_init, (GClassFinalizeFunc) NULL, NULL, sizeof (BackgroundLoader), 0, (GInstanceInitFunc) background_loader_instance_init, NULL };
 		GType background_loader_type_id;
-		background_loader_type_id = g_type_register_fundamental (g_type_fundamental_next (), "BackgroundLoader", &g_define_type_info, &g_define_type_fundamental_info, 0);
+		background_loader_type_id = g_type_register_static (G_TYPE_OBJECT, "BackgroundLoader", &g_define_type_info, 0);
 		g_once_init_leave (&background_loader_type_id__volatile, background_loader_type_id);
 	}
 	return background_loader_type_id__volatile;
 }
 
 
-gpointer background_loader_ref (gpointer instance) {
-	BackgroundLoader* self;
-	self = instance;
-	g_atomic_int_inc (&self->ref_count);
-	return instance;
+static void _vala_background_loader_get_property (GObject * object, guint property_id, GValue * value, GParamSpec * pspec) {
+	BackgroundLoader * self;
+	self = BACKGROUND_LOADER (object);
+	switch (property_id) {
+		case BACKGROUND_LOADER_FILENAME:
+		g_value_set_string (value, background_loader_get_filename (self));
+		break;
+		case BACKGROUND_LOADER_LOGO:
+		g_value_set_pointer (value, background_loader_get_logo (self));
+		break;
+		default:
+		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+		break;
+	}
 }
 
 
-void background_loader_unref (gpointer instance) {
-	BackgroundLoader* self;
-	self = instance;
-	if (g_atomic_int_dec_and_test (&self->ref_count)) {
-		BACKGROUND_LOADER_GET_CLASS (self)->finalize (self);
-		g_type_free_instance ((GTypeInstance *) self);
+static void _vala_background_loader_set_property (GObject * object, guint property_id, const GValue * value, GParamSpec * pspec) {
+	BackgroundLoader * self;
+	self = BACKGROUND_LOADER (object);
+	switch (property_id) {
+		case BACKGROUND_LOADER_FILENAME:
+		background_loader_set_filename (self, g_value_get_string (value));
+		break;
+		case BACKGROUND_LOADER_LOGO:
+		background_loader_set_logo (self, g_value_get_pointer (value));
+		break;
+		default:
+		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+		break;
 	}
 }
 
@@ -1520,8 +1423,8 @@ static void _g_free0_ (gpointer var) {
 }
 
 
-static void _background_loader_unref0_ (gpointer var) {
-	(var == NULL) ? NULL : (var = (background_loader_unref (var), NULL));
+static void _g_object_unref0_ (gpointer var) {
+	(var == NULL) ? NULL : (var = (g_object_unref (var), NULL));
 }
 
 
@@ -1557,7 +1460,7 @@ Background* background_construct (GType object_type, cairo_surface_t* target_sur
 	g_signal_connect_object (_tmp3_, "animate", (GCallback) _background_animate_cb_animate_timer_animate, self, 0);
 	_tmp4_ = g_str_hash;
 	_tmp5_ = g_str_equal;
-	_tmp6_ = g_hash_table_new_full (_tmp4_, _tmp5_, _g_free0_, _background_loader_unref0_);
+	_tmp6_ = g_hash_table_new_full (_tmp4_, _tmp5_, _g_free0_, _g_object_unref0_);
 	_g_hash_table_unref0 (self->priv->loaders);
 	self->priv->loaders = _tmp6_;
 	g_signal_connect_object ((GObject*) self, "notify::current-background", (GCallback) ___lambda2__g_object_notify, self, 0);
@@ -1677,7 +1580,7 @@ static cairo_surface_t* background_load_image (Background* self, const gchar* fi
 		_tmp17_ = filename;
 		_tmp18_ = e;
 		_tmp19_ = _tmp18_->message;
-		g_debug ("background.vala:280: Failed to load background component %s: %s", _tmp17_, _tmp19_);
+		g_debug ("background.vala:283: Failed to load background component %s: %s", _tmp17_, _tmp19_);
 		_g_error_free0 (e);
 	}
 	__finally2:
@@ -1777,12 +1680,12 @@ static void background_real_size_allocate (GtkWidget* base, GtkAllocation* alloc
 		GHashTable* _tmp10_;
 		BackgroundLoader* _tmp11_ = NULL;
 		BackgroundLoader* _tmp12_;
-		g_debug ("background.vala:308: Regenerating backgrounds");
+		g_debug ("background.vala:311: Regenerating backgrounds");
 		_tmp10_ = self->priv->loaders;
 		g_hash_table_remove_all (_tmp10_);
 		_tmp11_ = background_load_background (self, NULL);
 		_tmp12_ = _tmp11_;
-		_background_loader_unref0 (_tmp12_);
+		_g_object_unref0 (_tmp12_);
 		background_reload (self);
 	}
 }
@@ -1816,8 +1719,8 @@ static gboolean background_real_draw (GtkWidget* base, cairo_t* c) {
 }
 
 
-static gpointer _background_loader_ref0 (gpointer self) {
-	return self ? background_loader_ref (self) : NULL;
+static gpointer _g_object_ref0 (gpointer self) {
+	return self ? g_object_ref (self) : NULL;
 }
 
 
@@ -1901,7 +1804,7 @@ void background_draw_full (Background* self, cairo_t* c, BackgroundDrawFlags fla
 			_tmp16_ = _tmp15_;
 			_tmp17_ = g_strdup (_tmp16_);
 			_tmp18_ = new_background;
-			_tmp19_ = _background_loader_ref0 (_tmp18_);
+			_tmp19_ = _g_object_ref0 (_tmp18_);
 			g_hash_table_insert (_tmp13_, _tmp17_, _tmp19_);
 		}
 		_tmp20_ = self->priv->old;
@@ -1910,15 +1813,15 @@ void background_draw_full (Background* self, cairo_t* c, BackgroundDrawFlags fla
 			BackgroundLoader* _tmp22_;
 			BackgroundLoader* _tmp23_;
 			_tmp22_ = new_background;
-			_tmp23_ = _background_loader_ref0 (_tmp22_);
-			_background_loader_unref0 (self->priv->old);
+			_tmp23_ = _g_object_ref0 (_tmp22_);
+			_g_object_unref0 (self->priv->old);
 			self->priv->old = _tmp23_;
 		}
 		_tmp24_ = new_background;
-		_tmp25_ = _background_loader_ref0 (_tmp24_);
-		_background_loader_unref0 (self->priv->current);
+		_tmp25_ = _g_object_ref0 (_tmp24_);
+		_g_object_unref0 (self->priv->current);
 		self->priv->current = _tmp25_;
-		_background_loader_unref0 (new_background);
+		_g_object_unref0 (new_background);
 	}
 	_tmp28_ = self->priv->current;
 	_tmp29_ = background_loader_load (_tmp28_);
@@ -2252,8 +2155,8 @@ static void background_animate_cb (Background* self, gdouble progress) {
 		BackgroundLoader* _tmp2_;
 		BackgroundLoader* _tmp3_;
 		_tmp2_ = self->priv->current;
-		_tmp3_ = _background_loader_ref0 (_tmp2_);
-		_background_loader_unref0 (self->priv->old);
+		_tmp3_ = _g_object_ref0 (_tmp2_);
+		_g_object_unref0 (self->priv->old);
 		self->priv->old = _tmp3_;
 	}
 }
@@ -2281,18 +2184,18 @@ static void background_reload (Background* self) {
 			BackgroundLoader* _tmp8_;
 			AnimateTimer* _tmp9_;
 			_tmp5_ = self->priv->current;
-			_tmp6_ = _background_loader_ref0 (_tmp5_);
-			_background_loader_unref0 (self->priv->old);
+			_tmp6_ = _g_object_ref0 (_tmp5_);
+			_g_object_unref0 (self->priv->old);
 			self->priv->old = _tmp6_;
 			_tmp7_ = new_background;
-			_tmp8_ = _background_loader_ref0 (_tmp7_);
-			_background_loader_unref0 (self->priv->current);
+			_tmp8_ = _g_object_ref0 (_tmp7_);
+			_g_object_unref0 (self->priv->current);
 			self->priv->current = _tmp8_;
 			_tmp9_ = self->priv->timer;
 			animate_timer_stop (_tmp9_);
 		}
 		gtk_widget_queue_draw ((GtkWidget*) self);
-		_background_loader_unref0 (new_background);
+		_g_object_unref0 (new_background);
 	}
 }
 
@@ -2326,7 +2229,7 @@ static BackgroundLoader* background_load_background (Background* self, const gch
 	_tmp2_ = self->priv->loaders;
 	_tmp3_ = filename;
 	_tmp4_ = g_hash_table_lookup (_tmp2_, _tmp3_);
-	_tmp5_ = _background_loader_ref0 ((BackgroundLoader*) _tmp4_);
+	_tmp5_ = _g_object_ref0 ((BackgroundLoader*) _tmp4_);
 	b = _tmp5_;
 	_tmp6_ = b;
 	if (_tmp6_ == NULL) {
@@ -2448,7 +2351,7 @@ static BackgroundLoader* background_load_background (Background* self, const gch
 		_tmp35__length1 = heights_length1;
 		_tmp36_ = self->priv->_draw_grid;
 		_tmp37_ = background_loader_new (_tmp32_, _tmp33_, _tmp34_, _tmp34__length1, _tmp35_, _tmp35__length1, _tmp36_);
-		_background_loader_unref0 (b);
+		_g_object_unref0 (b);
 		b = _tmp37_;
 		_tmp38_ = b;
 		_tmp39_ = self->priv->version_logo_surface;
@@ -2461,7 +2364,7 @@ static BackgroundLoader* background_load_background (Background* self, const gch
 		_tmp43_ = filename;
 		_tmp44_ = g_strdup (_tmp43_);
 		_tmp45_ = b;
-		_tmp46_ = _background_loader_ref0 (_tmp45_);
+		_tmp46_ = _g_object_ref0 (_tmp45_);
 		g_hash_table_insert (_tmp42_, _tmp44_, _tmp46_);
 		heights = (g_free (heights), NULL);
 		widths = (g_free (widths), NULL);
@@ -2722,8 +2625,8 @@ static void background_finalize (GObject* obj) {
 	__g_list_free__monitor_unref0_0 (self->priv->monitors);
 	_monitor_unref0 (self->priv->active_monitor);
 	_g_object_unref0 (self->priv->timer);
-	_background_loader_unref0 (self->priv->current);
-	_background_loader_unref0 (self->priv->old);
+	_g_object_unref0 (self->priv->current);
+	_g_object_unref0 (self->priv->old);
 	_g_hash_table_unref0 (self->priv->loaders);
 	_cairo_surface_destroy0 (self->priv->version_logo_surface);
 	_cairo_surface_destroy0 (self->priv->background_logo_surface);

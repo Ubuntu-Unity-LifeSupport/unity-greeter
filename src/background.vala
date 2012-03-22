@@ -18,7 +18,7 @@
  *          Michael Terry <michael.terry@canonical.com>
  */
 
-class BackgroundLoader
+class BackgroundLoader : Object
 {
     public string filename {get; private set;}
     public Cairo.Surface logo {get; set;}
@@ -76,10 +76,12 @@ class BackgroundLoader
         {
             try
             {
+                this.ref();
                 thread = Thread<void*>.create<void*> (load_and_scale, true);
             }
             catch (ThreadError e)
             {
+                this.unref();
                 finished = true;
                 return true;
             }
@@ -98,7 +100,7 @@ class BackgroundLoader
         return null;
     }
 
-    ~Background ()
+    ~BackgroundLoader ()
     {
         if (ready_id > 0)
             Source.remove (ready_id);
@@ -112,6 +114,7 @@ class BackgroundLoader
         thread.join ();
         thread = null;
         finished = true;
+        this.unref();
 
         for (var i = 0; i < widths.length; i++)
         {

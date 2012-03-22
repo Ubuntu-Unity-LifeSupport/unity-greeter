@@ -1,3 +1,16 @@
+unity-greeter (0.2.6-0ubuntu1) precise; urgency=low
+
+  * New upstream bug-fix release
+    - Fix the corruption between unity-greeter and Unity loading
+      (LP: #931967)
+    - Fix crash when reloading background images (LP: #942227)
+    - Fix displayed name of keyboard layout with some variants
+      (LP: #960538)
+  * debian/patches/fix_login_corruption.patch:
+    - Dropped, applied upstream
+
+ -- Michael Terry <mterry@ubuntu.com>  Thu, 22 Mar 2012 09:44:16 -0400
+
 unity-greeter (0.2.5-0ubuntu2) precise; urgency=low
 
   * debian/patches/fix_login_corruption.patch:
