@@ -679,13 +679,17 @@ public class UnityGreeter
         }
     }
 
-    private static Gdk.FilterReturn focus_upon_map (X.Event xevent, Gdk.Event event)
+    private Gdk.FilterReturn focus_upon_map (X.Event xevent, Gdk.Event event)
     {
         if (xevent.type == X.EventType.MapNotify)
         {
             var display = Gdk.Display.get_default ();
             var win = Gdk.X11Window.foreign_new_for_display (display, xevent.xmap.window);
-            win.focus(Gdk.CURRENT_TIME);
+
+            if (win.get_accept_focus ())
+                win.focus (Gdk.CURRENT_TIME);
+            else
+                user_list.focus_prompt ();
         }
         return Gdk.FilterReturn.CONTINUE;
     }

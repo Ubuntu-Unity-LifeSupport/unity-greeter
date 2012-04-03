@@ -1,3 +1,15 @@
+unity-greeter (0.2.7-0ubuntu1) precise; urgency=low
+
+  * New upstream bug-fix release
+    - "Pressing escape key on lightdm greeter restarts xserver"
+      (LP: #962932)
+    - "unity-greeter crashed with SIGSEGV in background_loader_ready_cb"
+      (LP: #946674)
+    - "Onscreen Keyboard cannot be used to input password in
+      unity-greeter" (LP: #878184)
+
+ -- Michael Terry <mterry@ubuntu.com>  Tue, 03 Apr 2012 15:50:50 -0400
+
 unity-greeter (0.2.6-0ubuntu1) precise; urgency=low
 
   * New upstream bug-fix release

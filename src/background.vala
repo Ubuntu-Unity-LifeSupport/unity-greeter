@@ -57,6 +57,10 @@ class BackgroundLoader : Object
         if (thread != null)
             return false;
 
+        /* No monitor data */
+        if (widths.length == 0)
+            return false;
+
         var text = "Making background %s at %dx%d".printf (filename, widths[0], heights[0]);
         for (var i = 1; i < widths.length; i++)
             text += ",%dx%d".printf (widths[i], heights[i]);
@@ -114,7 +118,6 @@ class BackgroundLoader : Object
         thread.join ();
         thread = null;
         finished = true;
-        this.unref();
 
         for (var i = 0; i < widths.length; i++)
         {
@@ -124,6 +127,7 @@ class BackgroundLoader : Object
 
         loaded ();
 
+        this.unref();
         return false;
     }
 

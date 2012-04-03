@@ -250,6 +250,11 @@ public class UserList : Gtk.EventBox
 
         scroll_timer = new AnimateTimer (AnimateTimer.ease_out_quint, AnimateTimer.FAST);
         scroll_timer.animate.connect (scroll_animate_cb);
+
+        // Start with manual entry, because no users have been added yet.
+        // It will be auto-removed when those are added (unless we're told to
+        // always show a manual entry).
+        add_manual_entry ();
     }
 
     public enum ScrollTarget
@@ -371,8 +376,13 @@ public class UserList : Gtk.EventBox
             else
                 accessible.set_name (_("Enter password"));
         }
-        prompt_entry.grab_focus ();
+        focus_prompt ();
         redraw_login_box ();
+    }
+
+    public void focus_prompt ()
+    {
+        prompt_entry.grab_focus ();
     }
 
     public void show_authenticated (bool successful = true)

@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2012-03-21 19:25+0000\n"
+"POT-Creation-Date: 2012-03-30 05:08+0000\n"
 "PO-Revision-Date: 2012-03-02 00:50+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: Punjabi <pa@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2012-03-22 05:48+0000\n"
-"X-Generator: Launchpad (build 14981)\n"
+"X-Launchpad-Export-Date: 2012-03-31 05:27+0000\n"
+"X-Generator: Launchpad (build 15032)\n"
 
 #: ../src/main-window.vala:42
 msgid "Login Screen"
@@ -47,32 +47,32 @@ msgstr "ਰੀਲਿਜ਼ ਵਰਜਨ ਵੇਖਾਓ"
 msgid "Run in test mode"
 msgstr "ਜਾਂਚ ਮੋਡ ਵਿੱਚ ਚਲਾਓ"
 
-#: ../src/unity-greeter.vala:383 ../src/unity-greeter.vala:524
-#: ../src/unity-greeter.vala:547 ../src/unity-greeter.vala:551
-#: ../src/unity-greeter.vala:555 ../src/unity-greeter.vala:561
-#: ../src/unity-greeter.vala:564 ../src/unity-greeter.vala:591
+#: ../src/unity-greeter.vala:384 ../src/unity-greeter.vala:525
+#: ../src/unity-greeter.vala:548 ../src/unity-greeter.vala:552
+#: ../src/unity-greeter.vala:556 ../src/unity-greeter.vala:562
+#: ../src/unity-greeter.vala:565 ../src/unity-greeter.vala:592
 msgid "Password:"
 msgstr "ਪਾਸਵਰਡ:"
 
-#: ../src/unity-greeter.vala:385 ../src/unity-greeter.vala:527
+#: ../src/unity-greeter.vala:386 ../src/unity-greeter.vala:528
 msgid "Username:"
 msgstr "ਯੂਜ਼ਰ-ਨਾਂ:"
 
-#: ../src/unity-greeter.vala:466
+#: ../src/unity-greeter.vala:467
 msgid "Invalid password, please try again"
 msgstr "ਗਲਤ ਪਾਸਵਰਡ, ਫੇਰ ਕੋਸ਼ਿਸ਼ ਕਰੋ"
 
-#: ../src/unity-greeter.vala:475
+#: ../src/unity-greeter.vala:476
 msgid "Failed to authenticate"
 msgstr "ਪਰਮਾਣਿਤ ਹੋਣ ਲਈ ਫੇਲ੍ਹ ਹੈ"
 
 #. Arguments and description for --help text
-#: ../src/unity-greeter.vala:821
+#: ../src/unity-greeter.vala:826
 msgid "- Unity Greeter"
 msgstr "- ਯੂਨਟੀ ਸਵਾਗਤੀ"
 
 #. Text printed out when an unknown command-line argument provided
-#: ../src/unity-greeter.vala:832
+#: ../src/unity-greeter.vala:837
 #, c-format
 msgid "Run '%s --help' to see a full list of available command line options."
 msgstr "ਪੂਰੀਆਂ ਉਪਲੱਬਧ ਕਮਾਂਡ ਲਾਈਨ ਚੋਣਾਂ ਵੇਖਣ ਵਾਸਤੇ '%s --help' ਚਲਾਓ।"
@@ -85,38 +85,38 @@ msgstr "ਮਹਿਮਾਨ ਸ਼ੈਸ਼ਨ"
 msgid "Session Options"
 msgstr "ਸ਼ੈਸ਼ਨ ਚੋਣਾਂ"
 
-#: ../src/user-list.vala:366
+#: ../src/user-list.vala:371
 #, c-format
 msgid "Enter password for %s"
 msgstr "%s ਲਈ ਪਾਸਵਰਡ ਦਿਓ"
 
-#: ../src/user-list.vala:370
+#: ../src/user-list.vala:375
 msgid "Enter username"
 msgstr "ਯੂਜ਼ਰ-ਨਾਂ ਦਿਓ"
 
-#: ../src/user-list.vala:372
+#: ../src/user-list.vala:377
 msgid "Enter password"
 msgstr "ਪਾਸਵਰਡ ਦਿਓ"
 
-#: ../src/user-list.vala:385
+#: ../src/user-list.vala:395
 #, c-format
 msgid "Login as %s"
 msgstr "%s ਵਜੋਂ ਲਾਗਇਨ"
 
 #. 'Log In' here is the button for logging in.
-#: ../src/user-list.vala:387
+#: ../src/user-list.vala:397
 msgid "Log In"
 msgstr "ਲਾਗ ਇਨ"
 
-#: ../src/user-list.vala:391 ../src/user-list.vala:392
+#: ../src/user-list.vala:401 ../src/user-list.vala:402
 msgid "Retry"
 msgstr ""
 
-#: ../src/user-list.vala:408
+#: ../src/user-list.vala:418
 msgid "Logging in..."
 msgstr "ਲਾਗਇਨ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ..."
 
-#: ../src/user-list.vala:493
+#: ../src/user-list.vala:503
 msgid "Login"
 msgstr "ਲਾਗ-ਇਨ"
 

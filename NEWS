@@ -1,3 +1,9 @@
+Overview of changes in unity-greeter 0.2.7
+
+    * Fix onscreen keyboard not working
+    * Fix crashes when manual login is enabled
+    * Show manual login when guest is only other user
+
 Overview of changes in unity-greeter 0.2.6
 
     * Fix the corruption between unity-greeter and Unity loading
