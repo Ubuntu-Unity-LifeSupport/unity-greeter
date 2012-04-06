@@ -1,0 +1,97 @@
+Index: unity-greeter-0.2.7/src/dash-button.vala
+===================================================================
+--- unity-greeter-0.2.7.orig/src/dash-button.vala	2012-03-13 15:20:12.000000000 -0400
++++ unity-greeter-0.2.7/src/dash-button.vala	2012-04-06 10:00:29.592143172 -0400
+@@ -29,7 +29,7 @@
+         set
+         {
+             _text = value;
+-            text_label.set_markup ("<span font_size=\"large\">%s</span>".printf (value));
++            text_label.set_markup ("<span font=\"Ubuntu 16\">%s</span>".printf (value));
+         }
+     }
+ 
+@@ -59,6 +59,7 @@
+         {
+             var pixbuf = new Gdk.Pixbuf.from_file (path);
+             var image = new CachedImage (pixbuf);
++            image.valign = Gtk.Align.CENTER;
+             sizes.add_widget (image);
+             hbox.add (image);
+         }
+@@ -69,6 +70,17 @@
+ 
+         hbox.show_all ();
+         add (hbox);
++
++        try
++        {
++            var style = new Gtk.CssProvider ();
++            style.load_from_data ("* {padding: 3px;}", -1);
++            this.get_style_context ().add_provider (style, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
++        }
++        catch (Error e)
++        {
++            debug ("Internal error loading session chooser style: %s", e.message);
++        }
+     }
+ 
+     public override bool draw (Cairo.Context c)
+Index: unity-greeter-0.2.7/src/dash-entry.vala
+===================================================================
+--- unity-greeter-0.2.7.orig/src/dash-entry.vala	2012-03-09 09:36:53.000000000 -0500
++++ unity-greeter-0.2.7/src/dash-entry.vala	2012-04-06 10:00:29.592143172 -0400
+@@ -35,6 +35,8 @@
+ 
+         changed.connect (changed_cb);
+         icon_press.connect (icon_press_cb);
++
++        override_font (Pango.FontDescription.from_string ("Ubuntu 14"));
+     }
+ 
+     public override bool draw (Cairo.Context c)
+@@ -69,7 +71,7 @@
+ 
+         /* Draw text */
+         var layout = create_pango_layout (constant_placeholder_text);
+-        layout.set_font_description (Pango.FontDescription.from_string ("Ubuntu 14"));
++        layout.set_font_description (Pango.FontDescription.from_string ("Ubuntu 16"));
+         Pango.cairo_show_layout (c, layout);
+     }
+ 
+Index: unity-greeter-0.2.7/src/user-list.vala
+===================================================================
+--- unity-greeter-0.2.7.orig/src/user-list.vala	2012-04-03 15:28:03.000000000 -0400
++++ unity-greeter-0.2.7/src/user-list.vala	2012-04-06 10:00:29.596143172 -0400
+@@ -819,10 +819,11 @@
+ 
+         /* Put prompt entry and login button inside login box */
+         child_allocation.x = allocation.x + box_x + grid_size / 2;
+-        child_allocation.y = allocation.y + box_y + grid_size * 2 - grid_size / 2;
++        child_allocation.y = allocation.y + box_y + grid_size * 2 - grid_size / 4;
+         child_allocation.width = grid_size * (box_width - 1);
+-        child_allocation.height = grid_size;
++        prompt_entry.get_preferred_height (null, out child_allocation.height);
+         prompt_entry.size_allocate (child_allocation);
++        login_button.get_preferred_height (null, out child_allocation.height);
+         login_button.size_allocate (child_allocation);
+ 
+         child_allocation.x = allocation.x + box_x + box_width * grid_size - grid_size - grid_size / 4;
+@@ -894,7 +895,7 @@
+         entry.layout.get_pixel_size (out w, out h);
+ 
+         var label_x = grid_size / 2;
+-        var label_y = (grid_size - h) / 2 + border;
++        var label_y = grid_size / 4 + border;
+         var label_surface = entry_ensure_label_surface (entry, c, in_box);
+         c.set_source_surface (label_surface, label_x, label_y);
+         c.paint_with_alpha (alpha);
+@@ -1077,7 +1078,7 @@
+                 int w, h;
+                 m.layout.get_pixel_size (out w, out h);
+ 
+-                c.move_to (grid_size / 2, grid_size * 1.25 - vertical_offset + border);
++                c.move_to (grid_size / 2, grid_size * 1.5 - vertical_offset + border);
+                 vertical_offset -= h;
+ 
+                 var r = 1.0;

@@ -1,3 +1,12 @@
+unity-greeter (0.2.7-0ubuntu2) precise; urgency=low
+
+  * debian/patches/ui-tweaks.patch:
+    - Make some design-team-requested minor tweaks to login box layout.
+      Moves username labels down a bit and makes password entry bigger.
+      Patch taken from upstream.  (UIFe, LP: #975153)
+
+ -- Michael Terry <mterry@ubuntu.com>  Fri, 06 Apr 2012 10:01:26 -0400
+
 unity-greeter (0.2.7-0ubuntu1) precise; urgency=low
 
   * New upstream bug-fix release
