@@ -819,10 +819,11 @@ public class UserList : Gtk.EventBox
 
         /* Put prompt entry and login button inside login box */
         child_allocation.x = allocation.x + box_x + grid_size / 2;
-        child_allocation.y = allocation.y + box_y + grid_size * 2 - grid_size / 2;
+        child_allocation.y = allocation.y + box_y + grid_size * 2 - grid_size / 4;
         child_allocation.width = grid_size * (box_width - 1);
-        child_allocation.height = grid_size;
+        prompt_entry.get_preferred_height (null, out child_allocation.height);
         prompt_entry.size_allocate (child_allocation);
+        login_button.get_preferred_height (null, out child_allocation.height);
         login_button.size_allocate (child_allocation);
 
         child_allocation.x = allocation.x + box_x + box_width * grid_size - grid_size - grid_size / 4;
@@ -894,7 +895,7 @@ public class UserList : Gtk.EventBox
         entry.layout.get_pixel_size (out w, out h);
 
         var label_x = grid_size / 2;
-        var label_y = (grid_size - h) / 2 + border;
+        var label_y = grid_size / 4 + border;
         var label_surface = entry_ensure_label_surface (entry, c, in_box);
         c.set_source_surface (label_surface, label_x, label_y);
         c.paint_with_alpha (alpha);
@@ -1077,7 +1078,7 @@ public class UserList : Gtk.EventBox
                 int w, h;
                 m.layout.get_pixel_size (out w, out h);
 
-                c.move_to (grid_size / 2, grid_size * 1.25 - vertical_offset + border);
+                c.move_to (grid_size / 2, grid_size * 1.5 - vertical_offset + border);
                 vertical_offset -= h;
 
                 var r = 1.0;

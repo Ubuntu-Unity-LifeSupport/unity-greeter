@@ -231,6 +231,8 @@ enum  {
 	BACKGROUND_ALPHA
 };
 GType background_draw_flags_get_type (void) G_GNUC_CONST;
+gchar* ug_settings_get_string (const gchar* key);
+#define UG_SETTINGS_KEY_BACKGROUND_COLOR "background-color"
 static void _monitor_unref0_ (gpointer var);
 static void _g_list_free__monitor_unref0_ (GList* self);
 Background* background_new (cairo_surface_t* target_surface);
@@ -2610,9 +2612,9 @@ static void background_class_init (BackgroundClass * klass) {
 
 
 static void background_instance_init (Background * self) {
-	gchar* _tmp0_;
+	gchar* _tmp0_ = NULL;
 	self->priv = BACKGROUND_GET_PRIVATE (self);
-	_tmp0_ = g_strdup ("#2C001E");
+	_tmp0_ = ug_settings_get_string (UG_SETTINGS_KEY_BACKGROUND_COLOR);
 	self->priv->_default_background = _tmp0_;
 	self->priv->_current_background = NULL;
 	self->priv->_draw_grid = TRUE;

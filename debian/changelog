@@ -1,3 +1,16 @@
+unity-greeter (0.2.8-0ubuntu1) precise-proposed; urgency=low
+
+  * New upstream release:
+    - Add play-ready-sound option to control making a sound when the greeter
+      loads (LP: #949782)
+    - Add background-color option to set the background color before the
+      background is rendered (LP: #969059)
+    - some minor design fixups
+  * debian/patches/ui-tweaks.patch:
+    - Applied upstream
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Wed, 18 Apr 2012 17:21:34 +1000
+
 unity-greeter (0.2.7-0ubuntu2) precise; urgency=low
 
   * debian/patches/ui-tweaks.patch:

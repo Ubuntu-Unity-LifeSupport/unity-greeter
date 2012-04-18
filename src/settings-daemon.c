@@ -416,7 +416,7 @@ static gboolean settings_daemon_run_co (SettingsDaemonRunData* _data_) {
 		_data_->_tmp0_ = g_dbus_proxy_new_for_bus_sync (G_BUS_TYPE_SESSION, G_DBUS_PROXY_FLAGS_NONE, NULL, "org.gnome.SettingsDaemon", "/org/gnome/SettingsDaemon", "org.gnome.SettingsDaemon", NULL, &_data_->_inner_error_);
 		_data_->proxy = _data_->_tmp0_;
 		if (_data_->_inner_error_ != NULL) {
-			goto __catch10_g_error;
+			goto __catch11_g_error;
 		}
 		_data_->_tmp1_ = _data_->proxy;
 		_data_->_state_ = 1;
@@ -429,12 +429,12 @@ static gboolean settings_daemon_run_co (SettingsDaemonRunData* _data_) {
 		_g_variant_unref0 (_data_->_tmp3_);
 		if (_data_->_inner_error_ != NULL) {
 			_g_object_unref0 (_data_->proxy);
-			goto __catch10_g_error;
+			goto __catch11_g_error;
 		}
 		_g_object_unref0 (_data_->proxy);
 	}
-	goto __finally10;
-	__catch10_g_error:
+	goto __finally11;
+	__catch11_g_error:
 	{
 		_data_->e = _data_->_inner_error_;
 		_data_->_inner_error_ = NULL;
@@ -444,7 +444,7 @@ static gboolean settings_daemon_run_co (SettingsDaemonRunData* _data_) {
 "us: %s", _data_->_tmp5_);
 		_g_error_free0 (_data_->e);
 	}
-	__finally10:
+	__finally11:
 	if (_data_->_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _data_->_inner_error_->message, g_quark_to_string (_data_->_inner_error_->domain), _data_->_inner_error_->code);
 		g_clear_error (&_data_->_inner_error_);

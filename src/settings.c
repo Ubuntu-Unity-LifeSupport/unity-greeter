@@ -73,6 +73,7 @@ enum  {
 	UG_SETTINGS_DUMMY_PROPERTY
 };
 #define UG_SETTINGS_KEY_BACKGROUND "background"
+#define UG_SETTINGS_KEY_BACKGROUND_COLOR "background-color"
 #define UG_SETTINGS_KEY_DRAW_USER_BACKGROUNDS "draw-user-backgrounds"
 #define UG_SETTINGS_KEY_DRAW_GRID "draw-grid"
 #define UG_SETTINGS_KEY_LOGO "logo"
@@ -87,6 +88,7 @@ enum  {
 #define UG_SETTINGS_KEY_ONSCREEN_KEYBOARD "onscreen-keyboard"
 #define UG_SETTINGS_KEY_HIGH_CONTRAST "high-contrast"
 #define UG_SETTINGS_KEY_SCREEN_READER "screen-reader"
+#define UG_SETTINGS_KEY_PLAY_READY_SOUND "play-ready-sound"
 #define UG_SETTINGS_SCHEMA "com.canonical.unity-greeter"
 gboolean ug_settings_get_boolean (const gchar* key);
 gdouble ug_settings_get_double (const gchar* key);

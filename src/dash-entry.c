@@ -247,7 +247,7 @@ static void dash_entry_draw_prompt_text (DashEntry* self, cairo_t* c) {
 	_tmp19_ = self->priv->_constant_placeholder_text;
 	_tmp20_ = gtk_widget_create_pango_layout ((GtkWidget*) self, _tmp19_);
 	layout = _tmp20_;
-	_tmp21_ = pango_font_description_from_string ("Ubuntu 14");
+	_tmp21_ = pango_font_description_from_string ("Ubuntu 16");
 	_tmp22_ = _tmp21_;
 	pango_layout_set_font_description (layout, _tmp22_);
 	_pango_font_description_free0 (_tmp22_);
@@ -379,6 +379,8 @@ static GObject * dash_entry_constructor (GType type, guint n_construct_propertie
 	DashEntry * self;
 	FadeTracker* _tmp0_;
 	FadeTracker* _tmp1_;
+	PangoFontDescription* _tmp2_ = NULL;
+	PangoFontDescription* _tmp3_;
 	parent_class = G_OBJECT_CLASS (dash_entry_parent_class);
 	obj = parent_class->constructor (type, n_construct_properties, construct_properties);
 	self = DASH_ENTRY (obj);
@@ -389,6 +391,10 @@ static GObject * dash_entry_constructor (GType type, guint n_construct_propertie
 	gtk_entry_set_icon_activatable ((GtkEntry*) self, GTK_ENTRY_ICON_SECONDARY, TRUE);
 	g_signal_connect_object ((GtkEditable*) self, "changed", (GCallback) _dash_entry_changed_cb_gtk_editable_changed, self, 0);
 	g_signal_connect_object ((GtkEntry*) self, "icon-press", (GCallback) _dash_entry_icon_press_cb_gtk_entry_icon_press, self, 0);
+	_tmp2_ = pango_font_description_from_string ("Ubuntu 14");
+	_tmp3_ = _tmp2_;
+	gtk_widget_override_font ((GtkWidget*) self, _tmp3_);
+	_pango_font_description_free0 (_tmp3_);
 	return obj;
 }
 

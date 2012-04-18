@@ -21,6 +21,7 @@
 public class UGSettings
 {
     public static const string KEY_BACKGROUND = "background";
+    public static const string KEY_BACKGROUND_COLOR = "background-color";
     public static const string KEY_DRAW_USER_BACKGROUNDS = "draw-user-backgrounds";
     public static const string KEY_DRAW_GRID = "draw-grid";
     public static const string KEY_LOGO = "logo";
@@ -35,6 +36,7 @@ public class UGSettings
     public static const string KEY_ONSCREEN_KEYBOARD = "onscreen-keyboard";
     public static const string KEY_HIGH_CONTRAST = "high-contrast";
     public static const string KEY_SCREEN_READER = "screen-reader";
+    public static const string KEY_PLAY_READY_SOUND = "play-ready-sound";
 
     public static bool get_boolean (string key)
     {

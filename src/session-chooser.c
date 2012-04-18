@@ -346,15 +346,15 @@ static void session_chooser_add_session (SessionChooser* self, const gchar* key,
 		gtk_css_provider_load_from_data (style, "* {padding: 3px;}", (gssize) (-1), &_inner_error_);
 		if (_inner_error_ != NULL) {
 			_g_object_unref0 (style);
-			goto __catch8_g_error;
+			goto __catch9_g_error;
 		}
 		_tmp25_ = item;
 		_tmp26_ = gtk_widget_get_style_context ((GtkWidget*) _tmp25_);
 		gtk_style_context_add_provider (_tmp26_, (GtkStyleProvider*) style, (guint) GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 		_g_object_unref0 (style);
 	}
-	goto __finally8;
-	__catch8_g_error:
+	goto __finally9;
+	__catch9_g_error:
 	{
 		GError* e = NULL;
 		GError* _tmp27_;
@@ -367,7 +367,7 @@ static void session_chooser_add_session (SessionChooser* self, const gchar* key,
 ": %s", _tmp28_);
 		_g_error_free0 (e);
 	}
-	__finally8:
+	__finally9:
 	if (_inner_error_ != NULL) {
 		_g_object_unref0 (label);
 		_g_object_unref0 (pixbuf);
@@ -564,7 +564,7 @@ GdkPixbuf* session_chooser_get_badge (const gchar* session) {
 			_g_free0 (_tmp23_);
 			_tmp26_ = _tmp25_;
 			if (_inner_error_ != NULL) {
-				goto __catch9_g_error;
+				goto __catch10_g_error;
 			}
 			_g_object_unref0 (pixbuf);
 			pixbuf = _tmp26_;
@@ -575,8 +575,8 @@ GdkPixbuf* session_chooser_get_badge (const gchar* session) {
 			_tmp31_ = _g_object_ref0 (_tmp30_);
 			g_hash_table_insert (_tmp27_, _tmp29_, _tmp31_);
 		}
-		goto __finally9;
-		__catch9_g_error:
+		goto __finally10;
+		__catch10_g_error:
 		{
 			GError* e = NULL;
 			const gchar* _tmp32_;
@@ -590,7 +590,7 @@ GdkPixbuf* session_chooser_get_badge (const gchar* session) {
 			g_debug ("session-chooser.vala:162: Error loading badge %s: %s", _tmp32_, _tmp34_);
 			_g_error_free0 (e);
 		}
-		__finally9:
+		__finally10:
 		if (_inner_error_ != NULL) {
 			_g_object_unref0 (pixbuf);
 			_g_free0 (name);

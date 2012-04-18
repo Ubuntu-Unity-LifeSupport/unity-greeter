@@ -37,7 +37,7 @@ public class MainWindow : Gtk.Window
         add_accel_group (accel_group);
 
         var bg_color = Gdk.RGBA ();
-        bg_color.parse ("#2C001E");
+        bg_color.parse (UGSettings.get_string (UGSettings.KEY_BACKGROUND_COLOR));
         override_background_color (Gtk.StateFlags.NORMAL, bg_color);
         get_accessible ().set_name (_("Login Screen"));
         has_resize_grip = false;

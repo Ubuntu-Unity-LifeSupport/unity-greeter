@@ -187,6 +187,7 @@ DashButton* dash_button_construct (GType object_type, const gchar* text) {
 		CachedImage* image;
 		CachedImage* _tmp18_;
 		CachedImage* _tmp19_;
+		CachedImage* _tmp20_;
 		_tmp15_ = gdk_pixbuf_new_from_file (path, &_inner_error_);
 		pixbuf = _tmp15_;
 		if (_inner_error_ != NULL) {
@@ -196,9 +197,11 @@ DashButton* dash_button_construct (GType object_type, const gchar* text) {
 		_tmp17_ = g_object_ref_sink (_tmp16_);
 		image = _tmp17_;
 		_tmp18_ = image;
-		gtk_size_group_add_widget (sizes, (GtkWidget*) _tmp18_);
+		gtk_widget_set_valign ((GtkWidget*) _tmp18_, GTK_ALIGN_CENTER);
 		_tmp19_ = image;
-		gtk_container_add ((GtkContainer*) hbox, (GtkWidget*) _tmp19_);
+		gtk_size_group_add_widget (sizes, (GtkWidget*) _tmp19_);
+		_tmp20_ = image;
+		gtk_container_add ((GtkContainer*) hbox, (GtkWidget*) _tmp20_);
 		_g_object_unref0 (image);
 		_g_object_unref0 (pixbuf);
 	}
@@ -206,13 +209,13 @@ DashButton* dash_button_construct (GType object_type, const gchar* text) {
 	__catch3_g_error:
 	{
 		GError* e = NULL;
-		GError* _tmp20_;
-		const gchar* _tmp21_;
+		GError* _tmp21_;
+		const gchar* _tmp22_;
 		e = _inner_error_;
 		_inner_error_ = NULL;
-		_tmp20_ = e;
-		_tmp21_ = _tmp20_->message;
-		g_debug ("dash-button.vala:67: Error loading image %s: %s", path, _tmp21_);
+		_tmp21_ = e;
+		_tmp22_ = _tmp21_->message;
+		g_debug ("dash-button.vala:68: Error loading image %s: %s", path, _tmp22_);
 		_g_error_free0 (e);
 	}
 	__finally3:
@@ -227,6 +230,44 @@ DashButton* dash_button_construct (GType object_type, const gchar* text) {
 	}
 	gtk_widget_show_all ((GtkWidget*) hbox);
 	gtk_container_add ((GtkContainer*) self, (GtkWidget*) hbox);
+	{
+		GtkCssProvider* _tmp23_;
+		GtkCssProvider* style;
+		GtkStyleContext* _tmp24_ = NULL;
+		_tmp23_ = gtk_css_provider_new ();
+		style = _tmp23_;
+		gtk_css_provider_load_from_data (style, "* {padding: 3px;}", (gssize) (-1), &_inner_error_);
+		if (_inner_error_ != NULL) {
+			_g_object_unref0 (style);
+			goto __catch4_g_error;
+		}
+		_tmp24_ = gtk_widget_get_style_context ((GtkWidget*) self);
+		gtk_style_context_add_provider (_tmp24_, (GtkStyleProvider*) style, (guint) GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+		_g_object_unref0 (style);
+	}
+	goto __finally4;
+	__catch4_g_error:
+	{
+		GError* e = NULL;
+		GError* _tmp25_;
+		const gchar* _tmp26_;
+		e = _inner_error_;
+		_inner_error_ = NULL;
+		_tmp25_ = e;
+		_tmp26_ = _tmp25_->message;
+		g_debug ("dash-button.vala:82: Internal error loading session chooser style: %s", _tmp26_);
+		_g_error_free0 (e);
+	}
+	__finally4:
+	if (_inner_error_ != NULL) {
+		_g_free0 (path);
+		_g_object_unref0 (label);
+		_g_object_unref0 (sizes);
+		_g_object_unref0 (hbox);
+		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
+		g_clear_error (&_inner_error_);
+		return NULL;
+	}
 	_g_free0 (path);
 	_g_object_unref0 (label);
 	_g_object_unref0 (sizes);
@@ -323,7 +364,7 @@ void dash_button_set_text (DashButton* self, const gchar* value) {
 	self->priv->_text = _tmp1_;
 	_tmp2_ = self->priv->text_label;
 	_tmp3_ = value;
-	_tmp4_ = g_strdup_printf ("<span font_size=\"large\">%s</span>", _tmp3_);
+	_tmp4_ = g_strdup_printf ("<span font=\"Ubuntu 16\">%s</span>", _tmp3_);
 	_tmp5_ = _tmp4_;
 	gtk_label_set_markup (_tmp2_, _tmp5_);
 	_g_free0 (_tmp5_);

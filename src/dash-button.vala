@@ -29,7 +29,7 @@ public class DashButton : Gtk.Button, Fadable
         set
         {
             _text = value;
-            text_label.set_markup ("<span font_size=\"large\">%s</span>".printf (value));
+            text_label.set_markup ("<span font=\"Ubuntu 16\">%s</span>".printf (value));
         }
     }
 
@@ -59,6 +59,7 @@ public class DashButton : Gtk.Button, Fadable
         {
             var pixbuf = new Gdk.Pixbuf.from_file (path);
             var image = new CachedImage (pixbuf);
+            image.valign = Gtk.Align.CENTER;
             sizes.add_widget (image);
             hbox.add (image);
         }
@@ -69,6 +70,17 @@ public class DashButton : Gtk.Button, Fadable
 
         hbox.show_all ();
         add (hbox);
+
+        try
+        {
+            var style = new Gtk.CssProvider ();
+            style.load_from_data ("* {padding: 3px;}", -1);
+            this.get_style_context ().add_provider (style, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+        }
+        catch (Error e)
+        {
+            debug ("Internal error loading session chooser style: %s", e.message);
+        }
     }
 
     public override bool draw (Cairo.Context c)

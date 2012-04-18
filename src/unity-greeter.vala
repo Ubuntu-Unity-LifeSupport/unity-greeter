@@ -311,11 +311,13 @@ public class UnityGreeter
 
         /* Launch canberra */
         Canberra.Context.create (out canberra_context);
-        canberra_context.play (0,
-                               Canberra.PROP_CANBERRA_XDG_THEME_NAME,
-                               "ubuntu",
-                               Canberra.PROP_EVENT_ID,
-                               "system-ready");
+
+        if (UGSettings.get_boolean (UGSettings.KEY_PLAY_READY_SOUND))
+            canberra_context.play (0,
+                                   Canberra.PROP_CANBERRA_XDG_THEME_NAME,
+                                   "ubuntu",
+                                   Canberra.PROP_EVENT_ID,
+                                   "system-ready");
 
         return false;
     }

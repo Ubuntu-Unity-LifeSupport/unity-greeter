@@ -1,3 +1,11 @@
+Overview of changes in unity-greeter 0.2.8
+
+    * Add play-ready-sound option to control making a sound when the greeter
+      loads
+    * Add background-color option to set the background color before the
+      background is rendered
+    * some minor design fixups
+
 Overview of changes in unity-greeter 0.2.7
 
     * Fix onscreen keyboard not working

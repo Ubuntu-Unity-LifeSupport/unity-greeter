@@ -35,6 +35,8 @@ public class DashEntry : Gtk.Entry, Fadable
 
         changed.connect (changed_cb);
         icon_press.connect (icon_press_cb);
+
+        override_font (Pango.FontDescription.from_string ("Ubuntu 14"));
     }
 
     public override bool draw (Cairo.Context c)
@@ -69,7 +71,7 @@ public class DashEntry : Gtk.Entry, Fadable
 
         /* Draw text */
         var layout = create_pango_layout (constant_placeholder_text);
-        layout.set_font_description (Pango.FontDescription.from_string ("Ubuntu 14"));
+        layout.set_font_description (Pango.FontDescription.from_string ("Ubuntu 16"));
         Pango.cairo_show_layout (c, layout);
     }
 

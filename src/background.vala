@@ -227,7 +227,7 @@ public class Background : Gtk.Fixed
         GRID,
     }
 
-    public string default_background {get; set; default = "#2C001E";}
+    public string default_background {get; set; default = UGSettings.get_string (UGSettings.KEY_BACKGROUND_COLOR);}
     public string? current_background {get; set; default = null;}
     public bool draw_grid {get; set; default = true;}
     public double alpha {get; private set; default = 1.0;}
