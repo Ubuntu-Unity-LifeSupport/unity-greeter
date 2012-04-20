@@ -1,3 +1,18 @@
+unity-greeter (0.2.8-0ubuntu2) quantal; urgency=low
+
+  * debian/patches/recognize-kde-plasma.patch:
+    - Recognize the "kde-plasma" session as "kde" so it gets a properly
+      branded icon in the greeter.  LP: #986339
+  * debian/patches/show-changed-default-badge.patch:
+    - When the default session is changed in lightdm.conf, don't still
+      show the Ubuntu badge.  LP: #978428
+  * debian/patches/fix-hung-logging-in.patch:
+    - Sometimes users will get stuck on a "Logging in..." screen.  This
+      fixes that by ensuring that we don't wait for a background to fade
+      in that never will.  LP: #986967
+
+ -- Michael Terry <mterry@ubuntu.com>  Fri, 20 Apr 2012 14:51:06 -0400
+
 unity-greeter (0.2.8-0ubuntu1) precise-proposed; urgency=low
 
   * New upstream release:

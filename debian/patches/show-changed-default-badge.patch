@@ -1,0 +1,28 @@
+=== modified file 'src/user-list.vala'
+Index: unity-greeter-0.2.8/src/user-list.vala
+===================================================================
+--- unity-greeter-0.2.8.orig/src/user-list.vala	2012-04-16 00:20:33.000000000 -0700
++++ unity-greeter-0.2.8/src/user-list.vala	2012-05-03 14:46:22.375224481 -0700
+@@ -178,8 +178,20 @@
+                 add_manual_entry ();
+         }
+     }
+-    
+-    public string default_session = "ubuntu";
++
++    private string _default_session = "ubuntu";
++    public string default_session
++    {
++        get
++        {
++            return _default_session;
++        }
++        set
++        {
++            _default_session = value;
++            session_image.set_from_pixbuf (get_badge ());
++        }
++    }
+ 
+     private string? _session = null;
+     public string? session
