@@ -433,6 +433,7 @@ public class Background : Gtk.Fixed
             {
                 old = current;
                 current = new_background;
+                alpha = 1.0; /* if the timer isn't going, we should always be at 1.0 */
                 timer.stop ();
             }
 

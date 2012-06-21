@@ -14,9 +14,11 @@ unity_greeter_SOURCES = \
 	dash-entry.vala \
 	fadable.vala \
 	fadable-box.vala \
+	fading-label.vala \
 	main-window.vala \
 	menu.vala \
 	menubar.vala \
+	prompt-box.vala \
 	session-chooser.vala \
 	settings.vala \
 	settings-daemon.vala \

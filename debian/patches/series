@@ -1,4 +1,1 @@
 run_unity_support_test.patch
-recognize-kde-plasma.patch
-show-changed-default-badge.patch
-fix-hung-logging-in.patch

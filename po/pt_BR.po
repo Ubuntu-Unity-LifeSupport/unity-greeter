@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2012-04-17 07:20+0000\n"
-"PO-Revision-Date: 2012-01-24 16:14+0000\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2012-06-19 05:11+0000\n"
+"PO-Revision-Date: 2012-05-22 13:28+0000\n"
+"Last-Translator: Tiago Hillebrandt <tiagohillebrandt@gmail.com>\n"
 "Language-Team: Brazilian Portuguese <pt_BR@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2012-04-18 05:09+0000\n"
-"X-Generator: Launchpad (build 15108)\n"
+"X-Launchpad-Export-Date: 2012-06-20 05:05+0000\n"
+"X-Generator: Launchpad (build 15435)\n"
 
 #: ../src/main-window.vala:42
 msgid "Login Screen"
@@ -23,15 +23,19 @@ msgstr "Tela de início de sessão"
 
 #: ../src/menubar.vala:211
 msgid "Onscreen keyboard"
-msgstr ""
+msgstr "Teclado na tela"
 
 #: ../src/menubar.vala:216
 msgid "High Contrast"
-msgstr ""
+msgstr "Alto contraste"
 
 #: ../src/menubar.vala:222
 msgid "Screen Reader"
-msgstr ""
+msgstr "Leitor de tela"
+
+#: ../src/user-list.vala:254
+msgid "Session Options"
+msgstr "Opções de sessão"
 
 #: ../src/session-chooser.vala:63
 msgid "_Back"
@@ -45,77 +49,76 @@ msgstr "Mostrar versão do lançamento"
 #. Help string for command line --test-mode flag
 #: ../src/unity-greeter.vala:33
 msgid "Run in test mode"
-msgstr ""
+msgstr "Executar em modo de teste"
 
 #: ../src/unity-greeter.vala:386 ../src/unity-greeter.vala:527
 #: ../src/unity-greeter.vala:550 ../src/unity-greeter.vala:554
 #: ../src/unity-greeter.vala:558 ../src/unity-greeter.vala:564
 #: ../src/unity-greeter.vala:567 ../src/unity-greeter.vala:594
 msgid "Password:"
-msgstr ""
+msgstr "Senha:"
 
 #: ../src/unity-greeter.vala:388 ../src/unity-greeter.vala:530
 msgid "Username:"
-msgstr ""
+msgstr "Nome de usuário:"
 
 #: ../src/unity-greeter.vala:469
 msgid "Invalid password, please try again"
-msgstr ""
+msgstr "Senha inválida, por favor tente novamente."
 
 #: ../src/unity-greeter.vala:478
 msgid "Failed to authenticate"
-msgstr ""
+msgstr "Falha ao autenticar"
+
+#: ../src/unity-greeter.vala:568
+msgid "Favorite Color:"
+msgstr "Cor favorita:"
 
 #. Arguments and description for --help text
 #: ../src/unity-greeter.vala:828
 msgid "- Unity Greeter"
-msgstr ""
+msgstr "- Tela de boas-vindas do Unity"
 
 #. Text printed out when an unknown command-line argument provided
 #: ../src/unity-greeter.vala:839
 #, c-format
 msgid "Run '%s --help' to see a full list of available command line options."
 msgstr ""
+"Execute '%s --help' para ver a lista completa de opções disponíveis para "
+"linha de comando."
 
 #: ../src/user-list.vala:80
 msgid "Guest Session"
-msgstr ""
+msgstr "Sessão convidado"
 
-#: ../src/user-list.vala:242
-msgid "Session Options"
-msgstr ""
-
-#: ../src/user-list.vala:371
+#: ../src/user-list.vala:383
 #, c-format
 msgid "Enter password for %s"
-msgstr ""
-
-#: ../src/user-list.vala:375
-msgid "Enter username"
-msgstr ""
-
-#: ../src/user-list.vala:377
-msgid "Enter password"
-msgstr ""
-
-#: ../src/user-list.vala:395
-#, c-format
-msgid "Login as %s"
-msgstr ""
+msgstr "Informe a senha para %s"
 
 #. 'Log In' here is the button for logging in.
-#: ../src/user-list.vala:397
+#: ../src/user-list.vala:409
 msgid "Log In"
-msgstr ""
+msgstr "Iniciar sessão"
 
-#: ../src/user-list.vala:401 ../src/user-list.vala:402
+#: ../src/user-list.vala:407
+#, c-format
+msgid "Login as %s"
+msgstr "Iniciar sessão como %s"
+
+#: ../src/user-list.vala:413 ../src/user-list.vala:414
 msgid "Retry"
 msgstr "Repetir"
 
-#: ../src/user-list.vala:418
-msgid "Logging in..."
+#: ../src/user-list.vala:322
+#, c-format
+msgid "Retry as %s"
 msgstr ""
 
-#: ../src/user-list.vala:503
+#: ../src/user-list.vala:430
+msgid "Logging in..."
+msgstr "Iniciando a sessão..."
+
+#: ../src/user-list.vala:515
 msgid "Login"
-msgstr ""
+msgstr "Iniciar sessão"

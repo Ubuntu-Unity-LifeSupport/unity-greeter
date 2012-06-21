@@ -21,7 +21,7 @@ public class FadeTracker : Object
 {
     public signal void done ();
 
-    public double alpha {get; private set; default = 1.0;}
+    public double alpha {get; set; default = 1.0;}
     public Gtk.Widget widget {get; construct;}
 
     public enum Mode
@@ -89,5 +89,12 @@ public interface Fadable : Gtk.Widget
     public void fade_out ()
     {
         fade_tracker.reset (FadeTracker.Mode.FADE_OUT);
+    }
+
+    // In case you want to control fade manually
+    public void set_alpha (double alpha)
+    {
+        fade_tracker.alpha = alpha;
+        queue_draw ();
     }
 }

@@ -23,9 +23,9 @@
 #include <glib.h>
 #include <glib-object.h>
 #include <gtk/gtk.h>
-#include <cairo.h>
 #include <float.h>
 #include <math.h>
+#include <cairo.h>
 
 
 #define TYPE_DASH_BOX (dash_box_get_type ())
@@ -48,7 +48,39 @@ typedef struct _DashBoxPrivate DashBoxPrivate;
 
 typedef struct _Background Background;
 typedef struct _BackgroundClass BackgroundClass;
+
+#define TYPE_FADE_TRACKER (fade_tracker_get_type ())
+#define FADE_TRACKER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_FADE_TRACKER, FadeTracker))
+#define FADE_TRACKER_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_FADE_TRACKER, FadeTrackerClass))
+#define IS_FADE_TRACKER(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_FADE_TRACKER))
+#define IS_FADE_TRACKER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_FADE_TRACKER))
+#define FADE_TRACKER_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_FADE_TRACKER, FadeTrackerClass))
+
+typedef struct _FadeTracker FadeTracker;
+typedef struct _FadeTrackerClass FadeTrackerClass;
+
+#define DASH_BOX_TYPE_MODE (dash_box_mode_get_type ())
+
+#define TYPE_FADABLE_BOX (fadable_box_get_type ())
+#define FADABLE_BOX(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_FADABLE_BOX, FadableBox))
+#define FADABLE_BOX_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_FADABLE_BOX, FadableBoxClass))
+#define IS_FADABLE_BOX(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_FADABLE_BOX))
+#define IS_FADABLE_BOX_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_FADABLE_BOX))
+#define FADABLE_BOX_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_FADABLE_BOX, FadableBoxClass))
+
+typedef struct _FadableBox FadableBox;
+typedef struct _FadableBoxClass FadableBoxClass;
 #define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
+
+#define FADE_TRACKER_TYPE_MODE (fade_tracker_mode_get_type ())
+
+#define TYPE_FADABLE (fadable_get_type ())
+#define FADABLE(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_FADABLE, Fadable))
+#define IS_FADABLE(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_FADABLE))
+#define FADABLE_GET_INTERFACE(obj) (G_TYPE_INSTANCE_GET_INTERFACE ((obj), TYPE_FADABLE, FadableIface))
+
+typedef struct _Fadable Fadable;
+typedef struct _FadableIface FadableIface;
 
 #define BACKGROUND_TYPE_DRAW_FLAGS (background_draw_flags_get_type ())
 
@@ -61,8 +93,35 @@ struct _DashBoxClass {
 	GtkBoxClass parent_class;
 };
 
+typedef enum  {
+	DASH_BOX_MODE_NORMAL,
+	DASH_BOX_MODE_PUSH_FADE_OUT,
+	DASH_BOX_MODE_PUSH_FADE_IN,
+	DASH_BOX_MODE_POP_FADE_OUT,
+	DASH_BOX_MODE_POP_FADE_IN
+} DashBoxMode;
+
 struct _DashBoxPrivate {
 	Background* _background;
+	gboolean _has_content;
+	gdouble _base_alpha;
+	GtkWidget* pushed;
+	GtkWidget* orig;
+	FadeTracker* orig_tracker;
+	gint orig_height;
+	DashBoxMode mode;
+	FadableBox* fader;
+};
+
+typedef enum  {
+	FADE_TRACKER_MODE_FADE_IN,
+	FADE_TRACKER_MODE_FADE_OUT
+} FadeTrackerMode;
+
+struct _FadableIface {
+	GTypeInterface parent_iface;
+	FadeTracker* (*get_fade_tracker) (Fadable* self);
+	void (*set_fade_tracker) (Fadable* self, FadeTracker* value);
 };
 
 typedef enum  {
@@ -75,24 +134,69 @@ static gpointer dash_box_parent_class = NULL;
 
 GType dash_box_get_type (void) G_GNUC_CONST;
 GType background_get_type (void) G_GNUC_CONST;
+GType fade_tracker_get_type (void) G_GNUC_CONST;
+static GType dash_box_mode_get_type (void) G_GNUC_UNUSED;
+GType fadable_box_get_type (void) G_GNUC_CONST;
 #define DASH_BOX_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TYPE_DASH_BOX, DashBoxPrivate))
 enum  {
 	DASH_BOX_DUMMY_PROPERTY,
-	DASH_BOX_BACKGROUND
+	DASH_BOX_BACKGROUND,
+	DASH_BOX_HAS_CONTENT,
+	DASH_BOX_BASE_ALPHA
 };
 DashBox* dash_box_new (Background* bg);
 DashBox* dash_box_construct (GType object_type, Background* bg);
+void dash_box_set_base (DashBox* self, GtkWidget* w);
+FadeTracker* fade_tracker_new (GtkWidget* widget);
+FadeTracker* fade_tracker_construct (GType object_type, GtkWidget* widget);
+static void ___lambda5_ (DashBox* self);
+gdouble fade_tracker_get_alpha (FadeTracker* self);
+static void dash_box_set_base_alpha (DashBox* self, gdouble value);
+static void ____lambda5__g_object_notify (GObject* _sender, GParamSpec* pspec, gpointer self);
+static void dash_box_fade_done_cb (DashBox* self);
+static void _dash_box_fade_done_cb_fade_tracker_done (FadeTracker* _sender, gpointer self);
+void dash_box_push (DashBox* self, GtkWidget* w);
+static void dash_box_set_has_content (DashBox* self, gboolean value);
+GType fade_tracker_mode_get_type (void) G_GNUC_CONST;
+void fade_tracker_reset (FadeTracker* self, FadeTrackerMode mode);
+void dash_box_pop (DashBox* self);
+GType fadable_get_type (void) G_GNUC_CONST;
+void fadable_fade_out (Fadable* self);
+void fadable_fade_in (Fadable* self);
+static gint dash_box_round_to_grid (DashBox* self, gint size);
+#define grid_size 40
+static void dash_box_real_get_preferred_height (GtkWidget* base, gint* min, gint* nat);
+#define USER_LIST_BOX_HEIGHT 3
+#define USER_LIST_BORDER 6
+static void dash_box_real_get_preferred_width (GtkWidget* base, gint* min, gint* nat);
+#define USER_LIST_BOX_WIDTH 7
 static gboolean dash_box_real_draw (GtkWidget* base, cairo_t* c);
 Background* dash_box_get_background (DashBox* self);
 GType background_draw_flags_get_type (void) G_GNUC_CONST;
 void background_draw_full (Background* self, cairo_t* c, BackgroundDrawFlags flags);
-#define grid_size 40
+gdouble dash_box_get_base_alpha (DashBox* self);
 static void dash_box_cairo_rounded_rectangle (DashBox* self, cairo_t* c, gdouble x, gdouble y, gdouble width, gdouble height, gdouble radius);
 static void dash_box_set_background (DashBox* self, Background* value);
+gboolean dash_box_get_has_content (DashBox* self);
 static GObject * dash_box_constructor (GType type, guint n_construct_properties, GObjectConstructParam * construct_properties);
+FadableBox* fadable_box_new (void);
+FadableBox* fadable_box_construct (GType object_type);
+static void _dash_box_fade_done_cb_fadable_box_fade_done (FadableBox* _sender, gpointer self);
 static void dash_box_finalize (GObject* obj);
 static void _vala_dash_box_get_property (GObject * object, guint property_id, GValue * value, GParamSpec * pspec);
 static void _vala_dash_box_set_property (GObject * object, guint property_id, const GValue * value, GParamSpec * pspec);
+
+
+static GType dash_box_mode_get_type (void) {
+	static volatile gsize dash_box_mode_type_id__volatile = 0;
+	if (g_once_init_enter (&dash_box_mode_type_id__volatile)) {
+		static const GEnumValue values[] = {{DASH_BOX_MODE_NORMAL, "DASH_BOX_MODE_NORMAL", "normal"}, {DASH_BOX_MODE_PUSH_FADE_OUT, "DASH_BOX_MODE_PUSH_FADE_OUT", "push-fade-out"}, {DASH_BOX_MODE_PUSH_FADE_IN, "DASH_BOX_MODE_PUSH_FADE_IN", "push-fade-in"}, {DASH_BOX_MODE_POP_FADE_OUT, "DASH_BOX_MODE_POP_FADE_OUT", "pop-fade-out"}, {DASH_BOX_MODE_POP_FADE_IN, "DASH_BOX_MODE_POP_FADE_IN", "pop-fade-in"}, {0, NULL, NULL}};
+		GType dash_box_mode_type_id;
+		dash_box_mode_type_id = g_enum_register_static ("DashBoxMode", values);
+		g_once_init_leave (&dash_box_mode_type_id__volatile, dash_box_mode_type_id);
+	}
+	return dash_box_mode_type_id__volatile;
+}
 
 
 DashBox* dash_box_construct (GType object_type, Background* bg) {
@@ -110,29 +214,306 @@ DashBox* dash_box_new (Background* bg) {
 }
 
 
+static gpointer _g_object_ref0 (gpointer self) {
+	return self ? g_object_ref (self) : NULL;
+}
+
+
+static void ___lambda5_ (DashBox* self) {
+	FadeTracker* _tmp0_;
+	gdouble _tmp1_;
+	gdouble _tmp2_;
+	_tmp0_ = self->priv->orig_tracker;
+	_tmp1_ = fade_tracker_get_alpha (_tmp0_);
+	_tmp2_ = _tmp1_;
+	dash_box_set_base_alpha (self, _tmp2_);
+	gtk_widget_queue_draw ((GtkWidget*) self);
+}
+
+
+static void ____lambda5__g_object_notify (GObject* _sender, GParamSpec* pspec, gpointer self) {
+	___lambda5_ (self);
+}
+
+
+static void _dash_box_fade_done_cb_fade_tracker_done (FadeTracker* _sender, gpointer self) {
+	dash_box_fade_done_cb (self);
+}
+
+
+void dash_box_set_base (DashBox* self, GtkWidget* w) {
+	GtkWidget* _tmp0_;
+	DashBoxMode _tmp1_;
+	GtkWidget* _tmp2_;
+	GtkWidget* _tmp3_;
+	GtkWidget* _tmp4_;
+	g_return_if_fail (self != NULL);
+	_tmp0_ = self->priv->pushed;
+	g_return_if_fail (_tmp0_ == NULL);
+	_tmp1_ = self->priv->mode;
+	g_return_if_fail (_tmp1_ == DASH_BOX_MODE_NORMAL);
+	_tmp2_ = w;
+	_tmp3_ = _g_object_ref0 (_tmp2_);
+	_g_object_unref0 (self->priv->orig);
+	self->priv->orig = _tmp3_;
+	_tmp4_ = self->priv->orig;
+	if (_tmp4_ != NULL) {
+		GtkWidget* _tmp5_;
+		FadeTracker* _tmp6_;
+		FadeTracker* _tmp7_;
+		FadeTracker* _tmp8_;
+		FadeTracker* _tmp9_;
+		gdouble _tmp10_;
+		gdouble _tmp11_;
+		_tmp5_ = self->priv->orig;
+		_tmp6_ = fade_tracker_new (_tmp5_);
+		_g_object_unref0 (self->priv->orig_tracker);
+		self->priv->orig_tracker = _tmp6_;
+		_tmp7_ = self->priv->orig_tracker;
+		g_signal_connect_object ((GObject*) _tmp7_, "notify::alpha", (GCallback) ____lambda5__g_object_notify, self, 0);
+		_tmp8_ = self->priv->orig_tracker;
+		g_signal_connect_object (_tmp8_, "done", (GCallback) _dash_box_fade_done_cb_fade_tracker_done, self, 0);
+		_tmp9_ = self->priv->orig_tracker;
+		_tmp10_ = fade_tracker_get_alpha (_tmp9_);
+		_tmp11_ = _tmp10_;
+		dash_box_set_base_alpha (self, _tmp11_);
+	} else {
+		_g_object_unref0 (self->priv->orig_tracker);
+		self->priv->orig_tracker = NULL;
+		dash_box_set_base_alpha (self, 1.0);
+	}
+	gtk_widget_queue_resize ((GtkWidget*) self);
+}
+
+
+void dash_box_push (DashBox* self, GtkWidget* w) {
+	GtkWidget* _tmp0_;
+	GtkWidget* _tmp1_;
+	DashBoxMode _tmp2_;
+	gint _tmp3_ = 0;
+	GtkWidget* _tmp4_;
+	GtkWidget* _tmp5_;
+	FadeTracker* _tmp6_;
+	g_return_if_fail (self != NULL);
+	g_return_if_fail (w != NULL);
+	_tmp0_ = self->priv->pushed;
+	g_return_if_fail (_tmp0_ == NULL);
+	_tmp1_ = self->priv->orig;
+	g_return_if_fail (_tmp1_ != NULL);
+	_tmp2_ = self->priv->mode;
+	g_return_if_fail (_tmp2_ == DASH_BOX_MODE_NORMAL);
+	gtk_widget_get_preferred_height ((GtkWidget*) self, NULL, &_tmp3_);
+	self->priv->orig_height = _tmp3_;
+	_tmp4_ = w;
+	_tmp5_ = _g_object_ref0 (_tmp4_);
+	_g_object_unref0 (self->priv->pushed);
+	self->priv->pushed = _tmp5_;
+	self->priv->mode = DASH_BOX_MODE_PUSH_FADE_OUT;
+	dash_box_set_has_content (self, TRUE);
+	_tmp6_ = self->priv->orig_tracker;
+	fade_tracker_reset (_tmp6_, FADE_TRACKER_MODE_FADE_OUT);
+	gtk_widget_queue_resize ((GtkWidget*) self);
+}
+
+
+void dash_box_pop (DashBox* self) {
+	GtkWidget* _tmp0_;
+	GtkWidget* _tmp1_;
+	DashBoxMode _tmp2_;
+	FadableBox* _tmp3_;
+	g_return_if_fail (self != NULL);
+	_tmp0_ = self->priv->pushed;
+	g_return_if_fail (_tmp0_ != NULL);
+	_tmp1_ = self->priv->orig;
+	g_return_if_fail (_tmp1_ != NULL);
+	_tmp2_ = self->priv->mode;
+	g_return_if_fail (_tmp2_ == DASH_BOX_MODE_NORMAL);
+	self->priv->mode = DASH_BOX_MODE_POP_FADE_OUT;
+	_tmp3_ = self->priv->fader;
+	fadable_fade_out ((Fadable*) _tmp3_);
+}
+
+
+static void dash_box_fade_done_cb (DashBox* self) {
+	DashBoxMode _tmp0_;
+	g_return_if_fail (self != NULL);
+	_tmp0_ = self->priv->mode;
+	switch (_tmp0_) {
+		case DASH_BOX_MODE_PUSH_FADE_OUT:
+		{
+			GtkWidget* _tmp1_;
+			FadableBox* _tmp2_;
+			GtkWidget* _tmp3_;
+			FadableBox* _tmp4_;
+			self->priv->mode = DASH_BOX_MODE_PUSH_FADE_IN;
+			_tmp1_ = self->priv->pushed;
+			gtk_widget_show (_tmp1_);
+			_tmp2_ = self->priv->fader;
+			_tmp3_ = self->priv->pushed;
+			gtk_container_add ((GtkContainer*) _tmp2_, _tmp3_);
+			_tmp4_ = self->priv->fader;
+			fadable_fade_in ((Fadable*) _tmp4_);
+			break;
+		}
+		case DASH_BOX_MODE_PUSH_FADE_IN:
+		{
+			GtkWidget* _tmp5_;
+			self->priv->mode = DASH_BOX_MODE_NORMAL;
+			_tmp5_ = self->priv->pushed;
+			gtk_widget_grab_focus (_tmp5_);
+			break;
+		}
+		case DASH_BOX_MODE_POP_FADE_OUT:
+		{
+			FadableBox* _tmp6_;
+			GtkWidget* _tmp7_;
+			FadeTracker* _tmp8_;
+			self->priv->mode = DASH_BOX_MODE_POP_FADE_IN;
+			_tmp6_ = self->priv->fader;
+			_tmp7_ = self->priv->pushed;
+			gtk_container_remove ((GtkContainer*) _tmp6_, _tmp7_);
+			_tmp8_ = self->priv->orig_tracker;
+			fade_tracker_reset (_tmp8_, FADE_TRACKER_MODE_FADE_IN);
+			break;
+		}
+		case DASH_BOX_MODE_POP_FADE_IN:
+		{
+			self->priv->mode = DASH_BOX_MODE_NORMAL;
+			_g_object_unref0 (self->priv->pushed);
+			self->priv->pushed = NULL;
+			dash_box_set_has_content (self, FALSE);
+			gtk_widget_queue_resize ((GtkWidget*) self);
+			break;
+		}
+		default:
+		break;
+	}
+}
+
+
+static gint dash_box_round_to_grid (DashBox* self, gint size) {
+	gint result = 0;
+	gint _tmp0_;
+	gint num_grids;
+	gint _tmp1_;
+	gint remainder;
+	gint _tmp2_;
+	gint _tmp4_;
+	gint _tmp6_;
+	g_return_val_if_fail (self != NULL, 0);
+	_tmp0_ = size;
+	num_grids = _tmp0_ / grid_size;
+	_tmp1_ = size;
+	remainder = _tmp1_ % grid_size;
+	_tmp2_ = remainder;
+	if (_tmp2_ > 0) {
+		gint _tmp3_;
+		_tmp3_ = num_grids;
+		num_grids = _tmp3_ + 1;
+	}
+	_tmp4_ = num_grids;
+	if ((_tmp4_ % 2) == 0) {
+		gint _tmp5_;
+		_tmp5_ = num_grids;
+		num_grids = _tmp5_ + 1;
+	}
+	_tmp6_ = num_grids;
+	result = _tmp6_ * grid_size;
+	return result;
+}
+
+
+static void dash_box_real_get_preferred_height (GtkWidget* base, gint* min, gint* nat) {
+	DashBox * self;
+	gint _vala_min = 0;
+	gint _vala_nat = 0;
+	GtkWidget* _tmp0_;
+	self = (DashBox*) base;
+	_tmp0_ = self->priv->orig;
+	if (_tmp0_ == NULL) {
+		_vala_min = (grid_size * USER_LIST_BOX_HEIGHT) - (USER_LIST_BORDER * 2);
+		_vala_nat = (grid_size * USER_LIST_BOX_HEIGHT) - (USER_LIST_BORDER * 2);
+	} else {
+		GtkWidget* _tmp1_;
+		gint _tmp8_;
+		gint _tmp9_ = 0;
+		gint _tmp10_;
+		gint _tmp11_ = 0;
+		_tmp1_ = self->priv->pushed;
+		if (_tmp1_ == NULL) {
+			GtkWidget* _tmp2_;
+			gint _tmp3_ = 0;
+			gint _tmp4_ = 0;
+			_tmp2_ = self->priv->orig;
+			gtk_widget_get_preferred_height (_tmp2_, &_tmp3_, &_tmp4_);
+			_vala_min = _tmp3_;
+			_vala_nat = _tmp4_;
+		} else {
+			GtkWidget* _tmp5_;
+			gint _tmp6_ = 0;
+			gint _tmp7_ = 0;
+			_tmp5_ = self->priv->pushed;
+			gtk_widget_get_preferred_height (_tmp5_, &_tmp6_, &_tmp7_);
+			_vala_min = _tmp6_;
+			_vala_nat = _tmp7_;
+		}
+		_tmp8_ = _vala_min;
+		_tmp9_ = dash_box_round_to_grid (self, _tmp8_);
+		_vala_min = _tmp9_ - (USER_LIST_BORDER * 2);
+		_tmp10_ = _vala_nat;
+		_tmp11_ = dash_box_round_to_grid (self, _tmp10_);
+		_vala_nat = _tmp11_ - (USER_LIST_BORDER * 2);
+	}
+	if (min) {
+		*min = _vala_min;
+	}
+	if (nat) {
+		*nat = _vala_nat;
+	}
+}
+
+
+static void dash_box_real_get_preferred_width (GtkWidget* base, gint* min, gint* nat) {
+	DashBox * self;
+	gint _vala_min = 0;
+	gint _vala_nat = 0;
+	self = (DashBox*) base;
+	_vala_min = (grid_size * USER_LIST_BOX_WIDTH) - (USER_LIST_BORDER * 2);
+	_vala_nat = (grid_size * USER_LIST_BOX_WIDTH) - (USER_LIST_BORDER * 2);
+	if (min) {
+		*min = _vala_min;
+	}
+	if (nat) {
+		*nat = _vala_nat;
+	}
+}
+
+
 static gboolean dash_box_real_draw (GtkWidget* base, cairo_t* c) {
 	DashBox * self;
 	gboolean result = FALSE;
 	Background* _tmp0_;
-	cairo_t* _tmp11_;
-	GtkAllocation allocation = {0};
-	GtkAllocation _tmp12_ = {0};
-	GtkAllocation _tmp13_;
-	gint _tmp14_;
-	gint box_w;
-	GtkAllocation _tmp15_;
-	gint _tmp16_;
-	gint box_h;
 	gdouble box_r;
-	cairo_t* _tmp17_;
-	cairo_t* _tmp18_;
-	cairo_t* _tmp19_;
-	cairo_t* _tmp20_;
-	cairo_t* _tmp21_;
-	cairo_t* _tmp22_;
-	cairo_t* _tmp23_;
-	cairo_t* _tmp24_;
-	gboolean _tmp25_ = FALSE;
+	gint box_y;
+	gint box_w = 0;
+	gint box_h = 0;
+	gint _tmp11_ = 0;
+	gint _tmp12_ = 0;
+	DashBoxMode _tmp13_;
+	cairo_t* _tmp29_;
+	cairo_t* _tmp30_;
+	gint _tmp31_;
+	gint _tmp32_;
+	gint _tmp33_;
+	gdouble _tmp34_;
+	cairo_t* _tmp35_;
+	cairo_t* _tmp36_;
+	cairo_t* _tmp37_;
+	cairo_t* _tmp38_;
+	cairo_t* _tmp39_;
+	cairo_t* _tmp40_;
+	cairo_t* _tmp41_;
+	gboolean _tmp42_ = FALSE;
 	self = (DashBox*) base;
 	g_return_val_if_fail (c != NULL, FALSE);
 	_tmp0_ = self->priv->_background;
@@ -165,34 +546,79 @@ static gboolean dash_box_real_draw (GtkWidget* base, cairo_t* c) {
 		_tmp10_ = c;
 		cairo_restore (_tmp10_);
 	}
-	_tmp11_ = c;
-	cairo_save (_tmp11_);
-	gtk_widget_get_allocation ((GtkWidget*) self, &_tmp12_);
-	allocation = _tmp12_;
-	_tmp13_ = allocation;
-	_tmp14_ = _tmp13_.width;
-	box_w = _tmp14_;
-	_tmp15_ = allocation;
-	_tmp16_ = _tmp15_.height;
-	box_h = _tmp16_;
 	box_r = 0.2 * grid_size;
-	_tmp17_ = c;
-	dash_box_cairo_rounded_rectangle (self, _tmp17_, (gdouble) 0, (gdouble) 0, (gdouble) box_w, (gdouble) box_h, box_r);
-	_tmp18_ = c;
-	cairo_set_source_rgba (_tmp18_, 0.1, 0.1, 0.1, 0.4);
-	_tmp19_ = c;
-	cairo_fill_preserve (_tmp19_);
-	_tmp20_ = c;
-	cairo_set_source_rgba (_tmp20_, 0.4, 0.4, 0.4, 0.4);
-	_tmp21_ = c;
-	cairo_set_line_width (_tmp21_, (gdouble) 1);
-	_tmp22_ = c;
-	cairo_stroke (_tmp22_);
-	_tmp23_ = c;
-	cairo_restore (_tmp23_);
-	_tmp24_ = c;
-	_tmp25_ = GTK_WIDGET_CLASS (dash_box_parent_class)->draw ((GtkWidget*) GTK_BOX (self), _tmp24_);
-	result = _tmp25_;
+	box_y = 0;
+	gtk_widget_get_preferred_width ((GtkWidget*) self, NULL, &_tmp11_);
+	box_w = _tmp11_;
+	gtk_widget_get_preferred_height ((GtkWidget*) self, NULL, &_tmp12_);
+	box_h = _tmp12_;
+	_tmp13_ = self->priv->mode;
+	if (_tmp13_ == DASH_BOX_MODE_PUSH_FADE_OUT) {
+		gint _tmp14_;
+		gint _tmp15_;
+		gint _tmp16_;
+		gdouble _tmp17_;
+		gint new_box_h;
+		gint _tmp18_;
+		gint _tmp19_;
+		gint _tmp20_;
+		_tmp14_ = box_h;
+		_tmp15_ = box_h;
+		_tmp16_ = self->priv->orig_height;
+		_tmp17_ = self->priv->_base_alpha;
+		new_box_h = _tmp14_ - ((gint) ((_tmp15_ - _tmp16_) * _tmp17_));
+		_tmp18_ = box_h;
+		_tmp19_ = new_box_h;
+		box_y = (_tmp18_ - _tmp19_) / 2;
+		_tmp20_ = new_box_h;
+		box_h = _tmp20_;
+	} else {
+		DashBoxMode _tmp21_;
+		_tmp21_ = self->priv->mode;
+		if (_tmp21_ == DASH_BOX_MODE_POP_FADE_IN) {
+			gint _tmp22_;
+			gint _tmp23_;
+			gint _tmp24_;
+			gdouble _tmp25_;
+			gint new_box_h;
+			gint _tmp26_;
+			gint _tmp27_;
+			gint _tmp28_;
+			_tmp22_ = box_h;
+			_tmp23_ = box_h;
+			_tmp24_ = self->priv->orig_height;
+			_tmp25_ = self->priv->_base_alpha;
+			new_box_h = _tmp22_ - ((gint) ((_tmp23_ - _tmp24_) * _tmp25_));
+			_tmp26_ = box_h;
+			_tmp27_ = new_box_h;
+			box_y = (_tmp26_ - _tmp27_) / 2;
+			_tmp28_ = new_box_h;
+			box_h = _tmp28_;
+		}
+	}
+	_tmp29_ = c;
+	cairo_save (_tmp29_);
+	_tmp30_ = c;
+	_tmp31_ = box_y;
+	_tmp32_ = box_w;
+	_tmp33_ = box_h;
+	_tmp34_ = box_r;
+	dash_box_cairo_rounded_rectangle (self, _tmp30_, (gdouble) 0, (gdouble) _tmp31_, (gdouble) _tmp32_, (gdouble) _tmp33_, _tmp34_);
+	_tmp35_ = c;
+	cairo_set_source_rgba (_tmp35_, 0.1, 0.1, 0.1, 0.4);
+	_tmp36_ = c;
+	cairo_fill_preserve (_tmp36_);
+	_tmp37_ = c;
+	cairo_set_source_rgba (_tmp37_, 0.4, 0.4, 0.4, 0.4);
+	_tmp38_ = c;
+	cairo_set_line_width (_tmp38_, (gdouble) 1);
+	_tmp39_ = c;
+	cairo_stroke (_tmp39_);
+	_tmp40_ = c;
+	cairo_restore (_tmp40_);
+	_tmp41_ = c;
+	_tmp42_ = GTK_WIDGET_CLASS (dash_box_parent_class)->draw ((GtkWidget*) GTK_BOX (self), _tmp41_);
+	result = _tmp42_;
 	return result;
 }
 
@@ -294,11 +720,6 @@ Background* dash_box_get_background (DashBox* self) {
 }
 
 
-static gpointer _g_object_ref0 (gpointer self) {
-	return self ? g_object_ref (self) : NULL;
-}
-
-
 static void dash_box_set_background (DashBox* self, Background* value) {
 	Background* _tmp0_;
 	Background* _tmp1_;
@@ -311,14 +732,72 @@ static void dash_box_set_background (DashBox* self, Background* value) {
 }
 
 
+gboolean dash_box_get_has_content (DashBox* self) {
+	gboolean result;
+	gboolean _tmp0_;
+	g_return_val_if_fail (self != NULL, FALSE);
+	_tmp0_ = self->priv->_has_content;
+	result = _tmp0_;
+	return result;
+}
+
+
+static void dash_box_set_has_content (DashBox* self, gboolean value) {
+	gboolean _tmp0_;
+	g_return_if_fail (self != NULL);
+	_tmp0_ = value;
+	self->priv->_has_content = _tmp0_;
+	g_object_notify ((GObject *) self, "has-content");
+}
+
+
+gdouble dash_box_get_base_alpha (DashBox* self) {
+	gdouble result;
+	gdouble _tmp0_;
+	g_return_val_if_fail (self != NULL, 0.0);
+	_tmp0_ = self->priv->_base_alpha;
+	result = _tmp0_;
+	return result;
+}
+
+
+static void dash_box_set_base_alpha (DashBox* self, gdouble value) {
+	gdouble _tmp0_;
+	g_return_if_fail (self != NULL);
+	_tmp0_ = value;
+	self->priv->_base_alpha = _tmp0_;
+	g_object_notify ((GObject *) self, "base-alpha");
+}
+
+
+static void _dash_box_fade_done_cb_fadable_box_fade_done (FadableBox* _sender, gpointer self) {
+	dash_box_fade_done_cb (self);
+}
+
+
 static GObject * dash_box_constructor (GType type, guint n_construct_properties, GObjectConstructParam * construct_properties) {
 	GObject * obj;
 	GObjectClass * parent_class;
 	DashBox * self;
+	FadableBox* _tmp0_;
+	FadableBox* _tmp1_;
+	FadableBox* _tmp2_;
+	FadableBox* _tmp3_;
+	FadableBox* _tmp4_;
 	parent_class = G_OBJECT_CLASS (dash_box_parent_class);
 	obj = parent_class->constructor (type, n_construct_properties, construct_properties);
 	self = DASH_BOX (obj);
-	gtk_orientable_set_orientation ((GtkOrientable*) self, GTK_ORIENTATION_VERTICAL);
+	_tmp0_ = fadable_box_new ();
+	_tmp1_ = g_object_ref_sink (_tmp0_);
+	_g_object_unref0 (self->priv->fader);
+	self->priv->fader = _tmp1_;
+	_tmp2_ = self->priv->fader;
+	gtk_widget_show ((GtkWidget*) _tmp2_);
+	_tmp3_ = self->priv->fader;
+	g_signal_connect_object (_tmp3_, "fade-done", (GCallback) _dash_box_fade_done_cb_fadable_box_fade_done, self, 0);
+	_tmp4_ = self->priv->fader;
+	gtk_container_add ((GtkContainer*) self, (GtkWidget*) _tmp4_);
+	self->priv->mode = DASH_BOX_MODE_NORMAL;
 	return obj;
 }
 
@@ -326,18 +805,24 @@ static GObject * dash_box_constructor (GType type, guint n_construct_properties,
 static void dash_box_class_init (DashBoxClass * klass) {
 	dash_box_parent_class = g_type_class_peek_parent (klass);
 	g_type_class_add_private (klass, sizeof (DashBoxPrivate));
+	GTK_WIDGET_CLASS (klass)->get_preferred_height = dash_box_real_get_preferred_height;
+	GTK_WIDGET_CLASS (klass)->get_preferred_width = dash_box_real_get_preferred_width;
 	GTK_WIDGET_CLASS (klass)->draw = dash_box_real_draw;
 	G_OBJECT_CLASS (klass)->get_property = _vala_dash_box_get_property;
 	G_OBJECT_CLASS (klass)->set_property = _vala_dash_box_set_property;
 	G_OBJECT_CLASS (klass)->constructor = dash_box_constructor;
 	G_OBJECT_CLASS (klass)->finalize = dash_box_finalize;
 	g_object_class_install_property (G_OBJECT_CLASS (klass), DASH_BOX_BACKGROUND, g_param_spec_object ("background", "background", "background", TYPE_BACKGROUND, G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB | G_PARAM_READABLE | G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
+	g_object_class_install_property (G_OBJECT_CLASS (klass), DASH_BOX_HAS_CONTENT, g_param_spec_boolean ("has-content", "has-content", "has-content", FALSE, G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB | G_PARAM_READABLE));
+	g_object_class_install_property (G_OBJECT_CLASS (klass), DASH_BOX_BASE_ALPHA, g_param_spec_double ("base-alpha", "base-alpha", "base-alpha", -G_MAXDOUBLE, G_MAXDOUBLE, 1.0, G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB | G_PARAM_READABLE));
 }
 
 
 static void dash_box_instance_init (DashBox * self) {
 	self->priv = DASH_BOX_GET_PRIVATE (self);
 	self->priv->_background = NULL;
+	self->priv->_has_content = FALSE;
+	self->priv->_base_alpha = 1.0;
 }
 
 
@@ -345,6 +830,10 @@ static void dash_box_finalize (GObject* obj) {
 	DashBox * self;
 	self = DASH_BOX (obj);
 	_g_object_unref0 (self->priv->_background);
+	_g_object_unref0 (self->priv->pushed);
+	_g_object_unref0 (self->priv->orig);
+	_g_object_unref0 (self->priv->orig_tracker);
+	_g_object_unref0 (self->priv->fader);
 	G_OBJECT_CLASS (dash_box_parent_class)->finalize (obj);
 }
 
@@ -368,6 +857,12 @@ static void _vala_dash_box_get_property (GObject * object, guint property_id, GV
 		case DASH_BOX_BACKGROUND:
 		g_value_set_object (value, dash_box_get_background (self));
 		break;
+		case DASH_BOX_HAS_CONTENT:
+		g_value_set_boolean (value, dash_box_get_has_content (self));
+		break;
+		case DASH_BOX_BASE_ALPHA:
+		g_value_set_double (value, dash_box_get_base_alpha (self));
+		break;
 		default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
 		break;
@@ -381,6 +876,12 @@ static void _vala_dash_box_set_property (GObject * object, guint property_id, co
 	switch (property_id) {
 		case DASH_BOX_BACKGROUND:
 		dash_box_set_background (self, g_value_get_object (value));
+		break;
+		case DASH_BOX_HAS_CONTENT:
+		dash_box_set_has_content (self, g_value_get_boolean (value));
+		break;
+		case DASH_BOX_BASE_ALPHA:
+		dash_box_set_base_alpha (self, g_value_get_double (value));
 		break;
 		default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);

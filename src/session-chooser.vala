@@ -31,8 +31,8 @@ public class SessionChooser : FadableBox
 
         if (UnityGreeter.test_mode)
         {
-            add_session ("gnome", "Ubuntu");
-            add_session ("gnome-shell", "GNOME");
+            add_session ("ubuntu", "Ubuntu");
+            add_session ("gnome", "GNOME");
             add_session ("kde", "KDE");
         }
         else
@@ -113,14 +113,14 @@ public class SessionChooser : FadableBox
         {
         case "ubuntu":
         case "ubuntu-2d":
-        /* NOTE: For legacy reasons 'gnome' is actually Ubuntu */
-        case "gnome":
             return "ubuntu_badge.png";
         case "gnome-classic":
         case "gnome-fallback":
         case "gnome-shell":
+        case "gnome":
             return "gnome_badge.png";
         case "kde":
+        case "kde-plasma":
             return "kde_badge.png";
         case "xterm":
             return "recovery_console_badge.png";

@@ -1,3 +1,12 @@
+Overview of changes in unity-greeter 12.10.0
+
+    * Update version logo
+    * Don't write garbage data to state cache file
+    * Remove workaround for gnome session being Unity
+    * Make sure background alpha is never stuck at non-1.0 value, blocking login
+    * Update badge when default_session changes, just like we do when the
+      session changes
+
 Overview of changes in unity-greeter 0.2.8
 
     * Add play-ready-sound option to control making a sound when the greeter

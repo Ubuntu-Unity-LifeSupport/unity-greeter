@@ -2,16 +2,19 @@
 # Please keep this file sorted alphabetically.
 src/animate-timer.vala
 src/background.vala
+src/cached-image.vala
 src/dash-box.vala
 src/dash-button.vala
 src/dash-entry.vala
-src/fadable.vala
 src/fadable-box.vala
+src/fadable.vala
+src/fading-label.vala
 src/main-window.vala
 src/menubar.vala
 src/menu.vala
+src/prompt-box.vala
 src/session-chooser.vala
-src/settings.vala
 src/settings-daemon.vala
+src/settings.vala
 src/unity-greeter.vala
 src/user-list.vala

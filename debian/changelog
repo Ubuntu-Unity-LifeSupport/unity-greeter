@@ -1,3 +1,18 @@
+unity-greeter (12.10.0-0ubuntu1) quantal; urgency=low
+
+  * New upstream release:
+    - Update version logo
+    - Don't write garbage data to state cache file
+    - Remove workaround for gnome session being Unity
+  * debian/control:
+    - Use standards version 3.9.3
+  * debian/patches/recognize-kde-plasma.patch:
+  * debian/patches/show-changed-default-badge.patch:
+  * debian/patches/fix-hung-logging-in.patch:
+    - Applied upstream
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Thu, 21 Jun 2012 16:38:32 +1200
+
 unity-greeter (0.2.8-0ubuntu2) quantal; urgency=low
 
   * debian/patches/recognize-kde-plasma.patch:

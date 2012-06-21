@@ -25,16 +25,13 @@
 #include <glib-object.h>
 #include <stdlib.h>
 #include <string.h>
-#include <pango/pango.h>
+#include <gtk/gtk.h>
 #include <lightdm.h>
 #include <cairo.h>
-#include <gtk/gtk.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <float.h>
 #include <math.h>
-#include <atk/atk.h>
 #include <glib/gi18n-lib.h>
-#include <pango/pangocairo.h>
 #include <gdk/gdk.h>
 #include <gobject/gvaluecollector.h>
 
@@ -49,23 +46,31 @@
 typedef struct _UserEntry UserEntry;
 typedef struct _UserEntryClass UserEntryClass;
 typedef struct _UserEntryPrivate UserEntryPrivate;
+
+#define TYPE_FADABLE_BOX (fadable_box_get_type ())
+#define FADABLE_BOX(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_FADABLE_BOX, FadableBox))
+#define FADABLE_BOX_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_FADABLE_BOX, FadableBoxClass))
+#define IS_FADABLE_BOX(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_FADABLE_BOX))
+#define IS_FADABLE_BOX_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_FADABLE_BOX))
+#define FADABLE_BOX_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_FADABLE_BOX, FadableBoxClass))
+
+typedef struct _FadableBox FadableBox;
+typedef struct _FadableBoxClass FadableBoxClass;
+
+#define TYPE_PROMPT_BOX (prompt_box_get_type ())
+#define PROMPT_BOX(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_PROMPT_BOX, PromptBox))
+#define PROMPT_BOX_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_PROMPT_BOX, PromptBoxClass))
+#define IS_PROMPT_BOX(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_PROMPT_BOX))
+#define IS_PROMPT_BOX_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_PROMPT_BOX))
+#define PROMPT_BOX_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_PROMPT_BOX, PromptBoxClass))
+
+typedef struct _PromptBox PromptBox;
+typedef struct _PromptBoxClass PromptBoxClass;
 #define _g_free0(var) (var = (g_free (var), NULL))
 #define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
 #define __g_list_free__g_object_unref0_0(var) ((var == NULL) ? NULL : (var = (_g_list_free__g_object_unref0_ (var), NULL)))
 #define _cairo_surface_destroy0(var) ((var == NULL) ? NULL : (var = (cairo_surface_destroy (var), NULL)))
 typedef struct _ParamSpecUserEntry ParamSpecUserEntry;
-
-#define TYPE_AUTHENTICATION_MESSAGE (authentication_message_get_type ())
-#define AUTHENTICATION_MESSAGE(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_AUTHENTICATION_MESSAGE, AuthenticationMessage))
-#define AUTHENTICATION_MESSAGE_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_AUTHENTICATION_MESSAGE, AuthenticationMessageClass))
-#define IS_AUTHENTICATION_MESSAGE(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_AUTHENTICATION_MESSAGE))
-#define IS_AUTHENTICATION_MESSAGE_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_AUTHENTICATION_MESSAGE))
-#define AUTHENTICATION_MESSAGE_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_AUTHENTICATION_MESSAGE, AuthenticationMessageClass))
-
-typedef struct _AuthenticationMessage AuthenticationMessage;
-typedef struct _AuthenticationMessageClass AuthenticationMessageClass;
-typedef struct _AuthenticationMessagePrivate AuthenticationMessagePrivate;
-typedef struct _ParamSpecAuthenticationMessage ParamSpecAuthenticationMessage;
 
 #define TYPE_USER_LIST (user_list_get_type ())
 #define USER_LIST(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_USER_LIST, UserList))
@@ -108,25 +113,32 @@ typedef struct _MenuBarClass MenuBarClass;
 typedef struct _AnimateTimer AnimateTimer;
 typedef struct _AnimateTimerClass AnimateTimerClass;
 
-#define TYPE_DASH_ENTRY (dash_entry_get_type ())
-#define DASH_ENTRY(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_DASH_ENTRY, DashEntry))
-#define DASH_ENTRY_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_DASH_ENTRY, DashEntryClass))
-#define IS_DASH_ENTRY(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_DASH_ENTRY))
-#define IS_DASH_ENTRY_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_DASH_ENTRY))
-#define DASH_ENTRY_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_DASH_ENTRY, DashEntryClass))
+#define TYPE_DASH_BOX (dash_box_get_type ())
+#define DASH_BOX(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_DASH_BOX, DashBox))
+#define DASH_BOX_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_DASH_BOX, DashBoxClass))
+#define IS_DASH_BOX(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_DASH_BOX))
+#define IS_DASH_BOX_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_DASH_BOX))
+#define DASH_BOX_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_DASH_BOX, DashBoxClass))
 
-typedef struct _DashEntry DashEntry;
-typedef struct _DashEntryClass DashEntryClass;
+typedef struct _DashBox DashBox;
+typedef struct _DashBoxClass DashBoxClass;
 
-#define TYPE_DASH_BUTTON (dash_button_get_type ())
-#define DASH_BUTTON(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_DASH_BUTTON, DashButton))
-#define DASH_BUTTON_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_DASH_BUTTON, DashButtonClass))
-#define IS_DASH_BUTTON(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_DASH_BUTTON))
-#define IS_DASH_BUTTON_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_DASH_BUTTON))
-#define DASH_BUTTON_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_DASH_BUTTON, DashButtonClass))
+#define TYPE_SESSION_CHOOSER (session_chooser_get_type ())
+#define SESSION_CHOOSER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_SESSION_CHOOSER, SessionChooser))
+#define SESSION_CHOOSER_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_SESSION_CHOOSER, SessionChooserClass))
+#define IS_SESSION_CHOOSER(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_SESSION_CHOOSER))
+#define IS_SESSION_CHOOSER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_SESSION_CHOOSER))
+#define SESSION_CHOOSER_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_SESSION_CHOOSER, SessionChooserClass))
 
-typedef struct _DashButton DashButton;
-typedef struct _DashButtonClass DashButtonClass;
+typedef struct _SessionChooser SessionChooser;
+typedef struct _SessionChooserClass SessionChooserClass;
+
+#define USER_LIST_TYPE_MODE (user_list_mode_get_type ())
+
+#define USER_LIST_TYPE_SCROLL_TARGET (user_list_scroll_target_get_type ())
+#define _user_entry_unref0(var) ((var == NULL) ? NULL : (var = (user_entry_unref (var), NULL)))
+#define __g_list_free__user_entry_unref0_0(var) ((var == NULL) ? NULL : (var = (_g_list_free__user_entry_unref0_ (var), NULL)))
+#define _g_error_free0(var) ((var == NULL) ? NULL : (var = (g_error_free (var), NULL)))
 
 #define TYPE_FADABLE (fadable_get_type ())
 #define FADABLE(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_FADABLE, Fadable))
@@ -145,68 +157,15 @@ typedef struct _FadableIface FadableIface;
 
 typedef struct _FadeTracker FadeTracker;
 typedef struct _FadeTrackerClass FadeTrackerClass;
-
-#define TYPE_CACHED_IMAGE (cached_image_get_type ())
-#define CACHED_IMAGE(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_CACHED_IMAGE, CachedImage))
-#define CACHED_IMAGE_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_CACHED_IMAGE, CachedImageClass))
-#define IS_CACHED_IMAGE(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_CACHED_IMAGE))
-#define IS_CACHED_IMAGE_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_CACHED_IMAGE))
-#define CACHED_IMAGE_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_CACHED_IMAGE, CachedImageClass))
-
-typedef struct _CachedImage CachedImage;
-typedef struct _CachedImageClass CachedImageClass;
-
-#define TYPE_FADABLE_BOX (fadable_box_get_type ())
-#define FADABLE_BOX(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_FADABLE_BOX, FadableBox))
-#define FADABLE_BOX_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_FADABLE_BOX, FadableBoxClass))
-#define IS_FADABLE_BOX(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_FADABLE_BOX))
-#define IS_FADABLE_BOX_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_FADABLE_BOX))
-#define FADABLE_BOX_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_FADABLE_BOX, FadableBoxClass))
-
-typedef struct _FadableBox FadableBox;
-typedef struct _FadableBoxClass FadableBoxClass;
-
-#define TYPE_SESSION_CHOOSER (session_chooser_get_type ())
-#define SESSION_CHOOSER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_SESSION_CHOOSER, SessionChooser))
-#define SESSION_CHOOSER_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_SESSION_CHOOSER, SessionChooserClass))
-#define IS_SESSION_CHOOSER(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_SESSION_CHOOSER))
-#define IS_SESSION_CHOOSER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_SESSION_CHOOSER))
-#define SESSION_CHOOSER_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_SESSION_CHOOSER, SessionChooserClass))
-
-typedef struct _SessionChooser SessionChooser;
-typedef struct _SessionChooserClass SessionChooserClass;
-
-#define USER_LIST_TYPE_MODE (user_list_mode_get_type ())
-
-#define USER_LIST_TYPE_SCROLL_TARGET (user_list_scroll_target_get_type ())
-
-#define USER_LIST_TYPE_NAME_LOCATION (user_list_name_location_get_type ())
-#define _user_entry_unref0(var) ((var == NULL) ? NULL : (var = (user_entry_unref (var), NULL)))
-#define __g_list_free__user_entry_unref0_0(var) ((var == NULL) ? NULL : (var = (_g_list_free__user_entry_unref0_ (var), NULL)))
-#define __g_list_free__authentication_message_unref0_0(var) ((var == NULL) ? NULL : (var = (_g_list_free__authentication_message_unref0_ (var), NULL)))
-
-#define TYPE_DASH_BOX (dash_box_get_type ())
-#define DASH_BOX(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_DASH_BOX, DashBox))
-#define DASH_BOX_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_DASH_BOX, DashBoxClass))
-#define IS_DASH_BOX(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_DASH_BOX))
-#define IS_DASH_BOX_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_DASH_BOX))
-#define DASH_BOX_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_DASH_BOX, DashBoxClass))
-
-typedef struct _DashBox DashBox;
-typedef struct _DashBoxClass DashBoxClass;
-#define _g_error_free0(var) ((var == NULL) ? NULL : (var = (g_error_free (var), NULL)))
-#define _pango_font_description_free0(var) ((var == NULL) ? NULL : (var = (pango_font_description_free (var), NULL)))
-#define _cairo_pattern_destroy0(var) ((var == NULL) ? NULL : (var = (cairo_pattern_destroy (var), NULL)))
-#define _cairo_destroy0(var) ((var == NULL) ? NULL : (var = (cairo_destroy (var), NULL)))
 #define _g_list_free0(var) ((var == NULL) ? NULL : (var = (g_list_free (var), NULL)))
-#define _authentication_message_unref0(var) ((var == NULL) ? NULL : (var = (authentication_message_unref (var), NULL)))
 
 struct _UserEntry {
 	GTypeInstance parent_instance;
 	volatile int ref_count;
 	UserEntryPrivate * priv;
 	gchar* name;
-	PangoLayout* layout;
+	gchar* label;
+	PromptBox* prompt_box;
 	gchar* background;
 	gboolean is_active;
 	gboolean has_messages;
@@ -225,48 +184,20 @@ struct _ParamSpecUserEntry {
 	GParamSpec parent_instance;
 };
 
-struct _AuthenticationMessage {
-	GTypeInstance parent_instance;
-	volatile int ref_count;
-	AuthenticationMessagePrivate * priv;
-	PangoLayout* layout;
-	gboolean is_error;
-};
-
-struct _AuthenticationMessageClass {
-	GTypeClass parent_class;
-	void (*finalize) (AuthenticationMessage *self);
-};
-
-struct _ParamSpecAuthenticationMessage {
-	GParamSpec parent_instance;
-};
-
 struct _UserList {
 	GtkEventBox parent_instance;
 	UserListPrivate * priv;
 	Background* background;
 	MenuBar* menubar;
-	gchar* default_session;
 };
 
 struct _UserListClass {
 	GtkEventBoxClass parent_class;
 };
 
-struct _FadableIface {
-	GTypeInterface parent_iface;
-	FadeTracker* (*get_fade_tracker) (Fadable* self);
-	void (*set_fade_tracker) (Fadable* self, FadeTracker* value);
-};
-
 typedef enum  {
 	USER_LIST_MODE_LOGIN,
-	USER_LIST_MODE_TRANSFORM_TO_LOGIN_HIDE,
-	USER_LIST_MODE_TRANSFORM_TO_LOGIN_SHOW,
-	USER_LIST_MODE_SCROLLING,
-	USER_LIST_MODE_SESSIONS,
-	USER_LIST_MODE_TRANSFORM_TO_SESSIONS_HIDE
+	USER_LIST_MODE_SCROLLING
 } UserListMode;
 
 struct _UserListPrivate {
@@ -280,23 +211,16 @@ struct _UserListPrivate {
 	gdouble scroll_location;
 	gdouble scroll_direction;
 	AnimateTimer* scroll_timer;
-	GList* messages;
 	GtkFixed* fixed;
-	GtkBox* login_box;
-	DashEntry* prompt_entry;
-	DashButton* login_button;
-	Fadable* prompt_widget_to_show;
-	GtkButton* session_button;
-	CachedImage* session_image;
+	DashBox* login_box;
+	PromptBox* prompt_widget_to_show;
 	SessionChooser* session_chooser;
 	UserListMode mode;
 	gboolean complete;
-	gint border;
-	gint box_width;
 	guint n_above;
 	guint n_below;
-	gint box_height;
 	gchar* _manual_username;
+	gchar* _default_session;
 	gchar* _session;
 	GdkPixbuf* last_session_badge;
 };
@@ -308,15 +232,15 @@ typedef enum  {
 	USER_LIST_SCROLL_TARGET_DOWN
 } UserListScrollTarget;
 
-typedef enum  {
-	USER_LIST_NAME_LOCATION_INSIDE_BOX,
-	USER_LIST_NAME_LOCATION_OUTSIDE_BOX
-} UserListNameLocation;
-
 typedef gdouble (*AnimateTimerEasingFunc) (gdouble x, void* user_data);
+struct _FadableIface {
+	GTypeInterface parent_iface;
+	FadeTracker* (*get_fade_tracker) (Fadable* self);
+	void (*set_fade_tracker) (Fadable* self, FadeTracker* value);
+};
+
 
 static gpointer user_entry_parent_class = NULL;
-static gpointer authentication_message_parent_class = NULL;
 static gpointer user_list_parent_class = NULL;
 
 gint get_grid_offset (gint size);
@@ -328,6 +252,8 @@ void value_set_user_entry (GValue* value, gpointer v_object);
 void value_take_user_entry (GValue* value, gpointer v_object);
 gpointer value_get_user_entry (const GValue* value);
 GType user_entry_get_type (void) G_GNUC_CONST;
+GType fadable_box_get_type (void) G_GNUC_CONST;
+GType prompt_box_get_type (void) G_GNUC_CONST;
 enum  {
 	USER_ENTRY_DUMMY_PROPERTY
 };
@@ -336,29 +262,11 @@ static void _g_list_free__g_object_unref0_ (GList* self);
 UserEntry* user_entry_new (void);
 UserEntry* user_entry_construct (GType object_type);
 static void user_entry_finalize (UserEntry* obj);
-gpointer authentication_message_ref (gpointer instance);
-void authentication_message_unref (gpointer instance);
-GParamSpec* param_spec_authentication_message (const gchar* name, const gchar* nick, const gchar* blurb, GType object_type, GParamFlags flags);
-void value_set_authentication_message (GValue* value, gpointer v_object);
-void value_take_authentication_message (GValue* value, gpointer v_object);
-gpointer value_get_authentication_message (const GValue* value);
-GType authentication_message_get_type (void) G_GNUC_CONST;
-enum  {
-	AUTHENTICATION_MESSAGE_DUMMY_PROPERTY
-};
-AuthenticationMessage* authentication_message_new (PangoLayout* layout, gboolean is_error);
-AuthenticationMessage* authentication_message_construct (GType object_type, PangoLayout* layout, gboolean is_error);
-static void authentication_message_finalize (AuthenticationMessage* obj);
 GType user_list_get_type (void) G_GNUC_CONST;
 GType background_get_type (void) G_GNUC_CONST;
 GType menu_bar_get_type (void) G_GNUC_CONST;
 GType animate_timer_get_type (void) G_GNUC_CONST;
-GType dash_entry_get_type (void) G_GNUC_CONST;
-GType dash_button_get_type (void) G_GNUC_CONST;
-GType fade_tracker_get_type (void) G_GNUC_CONST;
-GType fadable_get_type (void) G_GNUC_CONST;
-GType cached_image_get_type (void) G_GNUC_CONST;
-GType fadable_box_get_type (void) G_GNUC_CONST;
+GType dash_box_get_type (void) G_GNUC_CONST;
 GType session_chooser_get_type (void) G_GNUC_CONST;
 static GType user_list_mode_get_type (void) G_GNUC_UNUSED;
 #define USER_LIST_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TYPE_USER_LIST, UserListPrivate))
@@ -369,67 +277,67 @@ enum  {
 	USER_LIST_ALWAYS_SHOW_MANUAL,
 	USER_LIST_SELECTED,
 	USER_LIST_MANUAL_USERNAME,
+	USER_LIST_DEFAULT_SESSION,
 	USER_LIST_SESSION
 };
 GType user_list_scroll_target_get_type (void) G_GNUC_CONST;
-static GType user_list_name_location_get_type (void) G_GNUC_UNUSED;
 static void _user_entry_unref0_ (gpointer var);
 static void _g_list_free__user_entry_unref0_ (GList* self);
-static void _authentication_message_unref0_ (gpointer var);
-static void _g_list_free__authentication_message_unref0_ (GList* self);
+#define USER_LIST_BORDER 6
+#define USER_LIST_BOX_WIDTH 7
+#define USER_LIST_BOX_HEIGHT 3
 UserList* user_list_new (Background* bg, MenuBar* mb);
 UserList* user_list_construct (GType object_type, Background* bg, MenuBar* mb);
 DashBox* dash_box_new (Background* bg);
 DashBox* dash_box_construct (GType object_type, Background* bg);
-GType dash_box_get_type (void) G_GNUC_CONST;
+static void __lambda16_ (UserList* self);
+static void ___lambda16__g_object_notify (GObject* _sender, GParamSpec* pspec, gpointer self);
 static void user_list_add_with_class (UserList* self, GtkWidget* widget);
 SessionChooser* session_chooser_new (void);
 SessionChooser* session_chooser_construct (GType object_type);
 static void user_list_session_clicked_cb (UserList* self, const gchar* session);
 static void _user_list_session_clicked_cb_session_chooser_session_clicked (SessionChooser* _sender, const gchar* session, gpointer self);
-static void user_list_session_fade_done_cb (UserList* self);
-static void _user_list_session_fade_done_cb_fadable_box_fade_done (FadableBox* _sender, gpointer self);
 void unity_greeter_add_style_class (GtkWidget* widget);
-DashEntry* dash_entry_new (void);
-DashEntry* dash_entry_construct (GType object_type);
-static void user_list_prompt_entry_activate_cb (UserList* self);
-static void _user_list_prompt_entry_activate_cb_gtk_entry_activate (GtkEntry* _sender, gpointer self);
-DashButton* dash_button_new (const gchar* text);
-DashButton* dash_button_construct (GType object_type, const gchar* text);
-static void user_list_login_button_clicked_cb (UserList* self);
-static void _user_list_login_button_clicked_cb_gtk_button_clicked (GtkButton* _sender, gpointer self);
-static GdkPixbuf* user_list_get_badge (UserList* self);
-CachedImage* cached_image_new (GdkPixbuf* pixbuf);
-CachedImage* cached_image_construct (GType object_type, GdkPixbuf* pixbuf);
-static void user_list_session_button_clicked_cb (UserList* self);
-static void _user_list_session_button_clicked_cb_gtk_button_clicked (GtkButton* _sender, gpointer self);
 gdouble animate_timer_ease_out_quint (gdouble x);
 static gdouble _animate_timer_ease_out_quint_animate_timer_easing_func (gdouble x, gpointer self);
 #define ANIMATE_TIMER_FAST 250
 AnimateTimer* animate_timer_new (AnimateTimerEasingFunc func, void* func_target, gint speed);
 AnimateTimer* animate_timer_construct (GType object_type, AnimateTimerEasingFunc func, void* func_target, gint speed);
-static void user_list_scroll_animate_cb (UserList* self, gdouble progress);
-static void _user_list_scroll_animate_cb_animate_timer_animate (AnimateTimer* _sender, gdouble progress, gpointer self);
+static void user_list_animate_scrolling (UserList* self, gdouble progress);
+static void _user_list_animate_scrolling_animate_timer_animate (AnimateTimer* _sender, gdouble progress, gpointer self);
 static void user_list_add_manual_entry (UserList* self);
 void user_list_cancel_authentication (UserList* self);
 UserEntry* user_list_get_selected_entry (UserList* self);
 void user_list_scroll (UserList* self, UserListScrollTarget target);
+gboolean dash_box_get_has_content (DashBox* self);
 static void user_list_select_entry (UserList* self, UserEntry* entry, gdouble direction);
-static void user_list_redraw_user_list (UserList* self);
-static gint user_list_get_box_y (UserList* self);
-static gint user_list_get_box_x (UserList* self);
 static void user_list_redraw_login_box (UserList* self);
 void user_list_show_message (UserList* self, const gchar* text, gboolean is_error);
+void prompt_box_add_message (PromptBox* self, const gchar* text, gboolean is_error);
 gboolean user_list_have_messages (UserList* self);
+gboolean prompt_box_get_has_messages (PromptBox* self);
 void user_list_clear_messages (UserList* self);
+void prompt_box_clear (PromptBox* self);
 void user_list_show_prompt (UserList* self, const gchar* text, gboolean secret);
-void dash_entry_set_constant_placeholder_text (DashEntry* self, const gchar* value);
+void prompt_box_add_prompt (PromptBox* self, const gchar* text, const gchar* accessible_text, gboolean is_secret);
+void prompt_box_show_prompts (PromptBox* self);
 void user_list_focus_prompt (UserList* self);
 void user_list_show_authenticated (UserList* self, gboolean successful);
-void dash_button_set_text (DashButton* self, const gchar* value);
+void prompt_box_add_button (PromptBox* self, const gchar* text, const gchar* accessible_text);
 void user_list_login_complete (UserList* self);
 static UserEntry* user_list_find_entry (UserList* self, const gchar* name);
 void user_list_add_entry (UserList* self, const gchar* name, const gchar* label, const gchar* background, GList* keyboard_layouts, gboolean is_active, gboolean has_messages, const gchar* session);
+PromptBox* prompt_box_new (void);
+PromptBox* prompt_box_construct (GType object_type);
+void prompt_box_set_name (PromptBox* self, const gchar* name);
+void prompt_box_set_show_message_icon (PromptBox* self, gboolean show);
+void prompt_box_set_is_active (PromptBox* self, gboolean active);
+static void user_list_prompt_box_respond_cb (UserList* self, const gchar* response);
+static void _user_list_prompt_box_respond_cb_prompt_box_respond (PromptBox* _sender, const gchar* response, gpointer self);
+static void user_list_prompt_box_login_cb (UserList* self);
+static void _user_list_prompt_box_login_cb_prompt_box_login (PromptBox* _sender, gpointer self);
+static void user_list_prompt_box_show_options_cb (UserList* self);
+static void _user_list_prompt_box_show_options_cb_prompt_box_show_options (PromptBox* _sender, gpointer self);
 static gint user_list_compare_entry (UserEntry* a, UserEntry* b);
 static gint _user_list_compare_entry_gcompare_func (gconstpointer a, gconstpointer b);
 static gboolean user_list_have_users (UserList* self);
@@ -437,33 +345,37 @@ gboolean user_list_get_always_show_manual (UserList* self);
 void user_list_remove_entry (UserList* self, const gchar* name);
 const gchar* user_list_get_manual_username (UserList* self);
 void user_list_set_active_entry (UserList* self, const gchar* name);
-void animate_timer_reset (AnimateTimer* self, gint temp_speed);
-#define ANIMATE_TIMER_INSTANT 150
-void fadable_fade_out (Fadable* self);
+void dash_box_push (DashBox* self, GtkWidget* w);
+void dash_box_pop (DashBox* self);
 void user_list_set_session (UserList* self, const gchar* value);
-static void user_list_animate_scrolling (UserList* self, gdouble progress);
-static void user_list_animate_to_sessions_hide (UserList* self, gdouble progress);
-static void user_list_animate_to_login (UserList* self, gdouble progress);
-static void user_list_allocate_login_box (UserList* self);
-static void user_list_finished_to_sessions_hide (UserList* self);
-void fadable_fade_in (Fadable* self);
-static void user_list_finished_to_login (UserList* self);
+static gint user_list_get_login_box_height (UserList* self);
+static gint user_list_get_login_box_height_grids (UserList* self);
+static gint user_list_get_login_box_x (UserList* self);
+static gint user_list_get_box_x (UserList* self);
+static gint user_list_get_login_box_y (UserList* self);
+static gint user_list_get_box_y (UserList* self);
+static gint user_list_get_position_y (UserList* self, gdouble position);
+static void user_list_move_entry (UserList* self, UserEntry* entry, gdouble position);
+GType fade_tracker_get_type (void) G_GNUC_CONST;
+GType fadable_get_type (void) G_GNUC_CONST;
+void fadable_set_alpha (Fadable* self, gdouble alpha);
+static void user_list_move_names (UserList* self);
+static void user_list_setup_prompt_box (UserList* self);
+void prompt_box_fade_in_prompts (PromptBox* self);
 static void user_list_finished_scrolling (UserList* self);
+void dash_box_set_base (DashBox* self, GtkWidget* w);
+static GdkPixbuf* user_list_get_badge (UserList* self);
 static void user_list_set_selected_entry (UserList* self, UserEntry* value);
+void animate_timer_reset (AnimateTimer* self, gint temp_speed);
 const gchar* user_list_get_session (UserList* self);
 GdkPixbuf* session_chooser_get_badge (const gchar* session);
+const gchar* user_list_get_default_session (UserList* self);
 static void user_list_real_realize (GtkWidget* base);
-static gint user_list_round_up_to_grid_size (UserList* self, gint size);
-gdouble animate_timer_get_progress (AnimateTimer* self);
+static void user_list_allocate_login_box (UserList* self);
+void prompt_box_set_zone (PromptBox* self, GtkWidget* zone);
 static void user_list_real_size_allocate (GtkWidget* base, GtkAllocation* allocation);
-static cairo_surface_t* user_list_entry_ensure_label_surface (UserList* self, UserEntry* entry, cairo_t* orig_c, gboolean in_box);
-static void user_list_draw_entry (UserList* self, cairo_t* c, UserEntry* entry, gdouble alpha, gboolean in_box, GdkPixbuf* badge);
-gboolean menu_bar_get_high_contrast (MenuBar* self);
-cairo_surface_t* cached_image_get_cached_surface (cairo_t* c, GdkPixbuf* pixbuf);
-static void user_list_draw_entry_at_position (UserList* self, cairo_t* c, UserEntry* entry, gdouble position, gboolean in_box, GdkPixbuf* badge);
 static gboolean user_list_real_draw (GtkWidget* base, cairo_t* c);
-static void user_list_draw_names (UserList* self, cairo_t* c, UserListNameLocation where);
-static void user_list_draw_box_contents (UserList* self, cairo_t* c);
+gdouble dash_box_get_base_alpha (DashBox* self);
 static gboolean user_list_inside_entry (UserList* self, gdouble x, gdouble y, gdouble entry_y, UserEntry* entry);
 static gboolean user_list_real_button_release_event (GtkWidget* base, GdkEventButton* event);
 gboolean user_list_get_offer_guest (UserList* self);
@@ -471,6 +383,8 @@ void user_list_set_offer_guest (UserList* self, gboolean value);
 void user_list_set_always_show_manual (UserList* self, gboolean value);
 const gchar* user_list_get_selected (UserList* self);
 void user_list_set_manual_username (UserList* self, const gchar* value);
+void user_list_set_default_session (UserList* self, const gchar* value);
+void prompt_box_set_options_image (PromptBox* self, GdkPixbuf* image);
 static void user_list_finalize (GObject* obj);
 static void _vala_user_list_get_property (GObject * object, guint property_id, GValue * value, GParamSpec * pspec);
 static void _vala_user_list_set_property (GObject * object, guint property_id, const GValue * value, GParamSpec * pspec);
@@ -633,7 +547,8 @@ static void user_entry_finalize (UserEntry* obj) {
 	UserEntry * self;
 	self = USER_ENTRY (obj);
 	_g_free0 (self->name);
-	_g_object_unref0 (self->layout);
+	_g_free0 (self->label);
+	_g_object_unref0 (self->prompt_box);
 	_g_free0 (self->background);
 	__g_list_free__g_object_unref0_0 (self->keyboard_layouts);
 	_g_free0 (self->session);
@@ -674,197 +589,10 @@ void user_entry_unref (gpointer instance) {
 }
 
 
-static gpointer _g_object_ref0 (gpointer self) {
-	return self ? g_object_ref (self) : NULL;
-}
-
-
-AuthenticationMessage* authentication_message_construct (GType object_type, PangoLayout* layout, gboolean is_error) {
-	AuthenticationMessage* self = NULL;
-	PangoLayout* _tmp0_;
-	PangoLayout* _tmp1_;
-	gboolean _tmp2_;
-	g_return_val_if_fail (layout != NULL, NULL);
-	self = (AuthenticationMessage*) g_type_create_instance (object_type);
-	_tmp0_ = layout;
-	_tmp1_ = _g_object_ref0 (_tmp0_);
-	_g_object_unref0 (self->layout);
-	self->layout = _tmp1_;
-	_tmp2_ = is_error;
-	self->is_error = _tmp2_;
-	return self;
-}
-
-
-AuthenticationMessage* authentication_message_new (PangoLayout* layout, gboolean is_error) {
-	return authentication_message_construct (TYPE_AUTHENTICATION_MESSAGE, layout, is_error);
-}
-
-
-static void value_authentication_message_init (GValue* value) {
-	value->data[0].v_pointer = NULL;
-}
-
-
-static void value_authentication_message_free_value (GValue* value) {
-	if (value->data[0].v_pointer) {
-		authentication_message_unref (value->data[0].v_pointer);
-	}
-}
-
-
-static void value_authentication_message_copy_value (const GValue* src_value, GValue* dest_value) {
-	if (src_value->data[0].v_pointer) {
-		dest_value->data[0].v_pointer = authentication_message_ref (src_value->data[0].v_pointer);
-	} else {
-		dest_value->data[0].v_pointer = NULL;
-	}
-}
-
-
-static gpointer value_authentication_message_peek_pointer (const GValue* value) {
-	return value->data[0].v_pointer;
-}
-
-
-static gchar* value_authentication_message_collect_value (GValue* value, guint n_collect_values, GTypeCValue* collect_values, guint collect_flags) {
-	if (collect_values[0].v_pointer) {
-		AuthenticationMessage* object;
-		object = collect_values[0].v_pointer;
-		if (object->parent_instance.g_class == NULL) {
-			return g_strconcat ("invalid unclassed object pointer for value type `", G_VALUE_TYPE_NAME (value), "'", NULL);
-		} else if (!g_value_type_compatible (G_TYPE_FROM_INSTANCE (object), G_VALUE_TYPE (value))) {
-			return g_strconcat ("invalid object type `", g_type_name (G_TYPE_FROM_INSTANCE (object)), "' for value type `", G_VALUE_TYPE_NAME (value), "'", NULL);
-		}
-		value->data[0].v_pointer = authentication_message_ref (object);
-	} else {
-		value->data[0].v_pointer = NULL;
-	}
-	return NULL;
-}
-
-
-static gchar* value_authentication_message_lcopy_value (const GValue* value, guint n_collect_values, GTypeCValue* collect_values, guint collect_flags) {
-	AuthenticationMessage** object_p;
-	object_p = collect_values[0].v_pointer;
-	if (!object_p) {
-		return g_strdup_printf ("value location for `%s' passed as NULL", G_VALUE_TYPE_NAME (value));
-	}
-	if (!value->data[0].v_pointer) {
-		*object_p = NULL;
-	} else if (collect_flags & G_VALUE_NOCOPY_CONTENTS) {
-		*object_p = value->data[0].v_pointer;
-	} else {
-		*object_p = authentication_message_ref (value->data[0].v_pointer);
-	}
-	return NULL;
-}
-
-
-GParamSpec* param_spec_authentication_message (const gchar* name, const gchar* nick, const gchar* blurb, GType object_type, GParamFlags flags) {
-	ParamSpecAuthenticationMessage* spec;
-	g_return_val_if_fail (g_type_is_a (object_type, TYPE_AUTHENTICATION_MESSAGE), NULL);
-	spec = g_param_spec_internal (G_TYPE_PARAM_OBJECT, name, nick, blurb, flags);
-	G_PARAM_SPEC (spec)->value_type = object_type;
-	return G_PARAM_SPEC (spec);
-}
-
-
-gpointer value_get_authentication_message (const GValue* value) {
-	g_return_val_if_fail (G_TYPE_CHECK_VALUE_TYPE (value, TYPE_AUTHENTICATION_MESSAGE), NULL);
-	return value->data[0].v_pointer;
-}
-
-
-void value_set_authentication_message (GValue* value, gpointer v_object) {
-	AuthenticationMessage* old;
-	g_return_if_fail (G_TYPE_CHECK_VALUE_TYPE (value, TYPE_AUTHENTICATION_MESSAGE));
-	old = value->data[0].v_pointer;
-	if (v_object) {
-		g_return_if_fail (G_TYPE_CHECK_INSTANCE_TYPE (v_object, TYPE_AUTHENTICATION_MESSAGE));
-		g_return_if_fail (g_value_type_compatible (G_TYPE_FROM_INSTANCE (v_object), G_VALUE_TYPE (value)));
-		value->data[0].v_pointer = v_object;
-		authentication_message_ref (value->data[0].v_pointer);
-	} else {
-		value->data[0].v_pointer = NULL;
-	}
-	if (old) {
-		authentication_message_unref (old);
-	}
-}
-
-
-void value_take_authentication_message (GValue* value, gpointer v_object) {
-	AuthenticationMessage* old;
-	g_return_if_fail (G_TYPE_CHECK_VALUE_TYPE (value, TYPE_AUTHENTICATION_MESSAGE));
-	old = value->data[0].v_pointer;
-	if (v_object) {
-		g_return_if_fail (G_TYPE_CHECK_INSTANCE_TYPE (v_object, TYPE_AUTHENTICATION_MESSAGE));
-		g_return_if_fail (g_value_type_compatible (G_TYPE_FROM_INSTANCE (v_object), G_VALUE_TYPE (value)));
-		value->data[0].v_pointer = v_object;
-	} else {
-		value->data[0].v_pointer = NULL;
-	}
-	if (old) {
-		authentication_message_unref (old);
-	}
-}
-
-
-static void authentication_message_class_init (AuthenticationMessageClass * klass) {
-	authentication_message_parent_class = g_type_class_peek_parent (klass);
-	AUTHENTICATION_MESSAGE_CLASS (klass)->finalize = authentication_message_finalize;
-}
-
-
-static void authentication_message_instance_init (AuthenticationMessage * self) {
-	self->ref_count = 1;
-}
-
-
-static void authentication_message_finalize (AuthenticationMessage* obj) {
-	AuthenticationMessage * self;
-	self = AUTHENTICATION_MESSAGE (obj);
-	_g_object_unref0 (self->layout);
-}
-
-
-GType authentication_message_get_type (void) {
-	static volatile gsize authentication_message_type_id__volatile = 0;
-	if (g_once_init_enter (&authentication_message_type_id__volatile)) {
-		static const GTypeValueTable g_define_type_value_table = { value_authentication_message_init, value_authentication_message_free_value, value_authentication_message_copy_value, value_authentication_message_peek_pointer, "p", value_authentication_message_collect_value, "p", value_authentication_message_lcopy_value };
-		static const GTypeInfo g_define_type_info = { sizeof (AuthenticationMessageClass), (GBaseInitFunc) NULL, (GBaseFinalizeFunc) NULL, (GClassInitFunc) authentication_message_class_init, (GClassFinalizeFunc) NULL, NULL, sizeof (AuthenticationMessage), 0, (GInstanceInitFunc) authentication_message_instance_init, &g_define_type_value_table };
-		static const GTypeFundamentalInfo g_define_type_fundamental_info = { (G_TYPE_FLAG_CLASSED | G_TYPE_FLAG_INSTANTIATABLE | G_TYPE_FLAG_DERIVABLE | G_TYPE_FLAG_DEEP_DERIVABLE) };
-		GType authentication_message_type_id;
-		authentication_message_type_id = g_type_register_fundamental (g_type_fundamental_next (), "AuthenticationMessage", &g_define_type_info, &g_define_type_fundamental_info, 0);
-		g_once_init_leave (&authentication_message_type_id__volatile, authentication_message_type_id);
-	}
-	return authentication_message_type_id__volatile;
-}
-
-
-gpointer authentication_message_ref (gpointer instance) {
-	AuthenticationMessage* self;
-	self = instance;
-	g_atomic_int_inc (&self->ref_count);
-	return instance;
-}
-
-
-void authentication_message_unref (gpointer instance) {
-	AuthenticationMessage* self;
-	self = instance;
-	if (g_atomic_int_dec_and_test (&self->ref_count)) {
-		AUTHENTICATION_MESSAGE_GET_CLASS (self)->finalize (self);
-		g_type_free_instance ((GTypeInstance *) self);
-	}
-}
-
-
 static GType user_list_mode_get_type (void) {
 	static volatile gsize user_list_mode_type_id__volatile = 0;
 	if (g_once_init_enter (&user_list_mode_type_id__volatile)) {
-		static const GEnumValue values[] = {{USER_LIST_MODE_LOGIN, "USER_LIST_MODE_LOGIN", "login"}, {USER_LIST_MODE_TRANSFORM_TO_LOGIN_HIDE, "USER_LIST_MODE_TRANSFORM_TO_LOGIN_HIDE", "transform-to-login-hide"}, {USER_LIST_MODE_TRANSFORM_TO_LOGIN_SHOW, "USER_LIST_MODE_TRANSFORM_TO_LOGIN_SHOW", "transform-to-login-show"}, {USER_LIST_MODE_SCROLLING, "USER_LIST_MODE_SCROLLING", "scrolling"}, {USER_LIST_MODE_SESSIONS, "USER_LIST_MODE_SESSIONS", "sessions"}, {USER_LIST_MODE_TRANSFORM_TO_SESSIONS_HIDE, "USER_LIST_MODE_TRANSFORM_TO_SESSIONS_HIDE", "transform-to-sessions-hide"}, {0, NULL, NULL}};
+		static const GEnumValue values[] = {{USER_LIST_MODE_LOGIN, "USER_LIST_MODE_LOGIN", "login"}, {USER_LIST_MODE_SCROLLING, "USER_LIST_MODE_SCROLLING", "scrolling"}, {0, NULL, NULL}};
 		GType user_list_mode_type_id;
 		user_list_mode_type_id = g_enum_register_static ("UserListMode", values);
 		g_once_init_leave (&user_list_mode_type_id__volatile, user_list_mode_type_id);
@@ -885,18 +613,6 @@ GType user_list_scroll_target_get_type (void) {
 }
 
 
-static GType user_list_name_location_get_type (void) {
-	static volatile gsize user_list_name_location_type_id__volatile = 0;
-	if (g_once_init_enter (&user_list_name_location_type_id__volatile)) {
-		static const GEnumValue values[] = {{USER_LIST_NAME_LOCATION_INSIDE_BOX, "USER_LIST_NAME_LOCATION_INSIDE_BOX", "inside-box"}, {USER_LIST_NAME_LOCATION_OUTSIDE_BOX, "USER_LIST_NAME_LOCATION_OUTSIDE_BOX", "outside-box"}, {0, NULL, NULL}};
-		GType user_list_name_location_type_id;
-		user_list_name_location_type_id = g_enum_register_static ("UserListNameLocation", values);
-		g_once_init_leave (&user_list_name_location_type_id__volatile, user_list_name_location_type_id);
-	}
-	return user_list_name_location_type_id__volatile;
-}
-
-
 static void _user_entry_unref0_ (gpointer var) {
 	(var == NULL) ? NULL : (var = (user_entry_unref (var), NULL));
 }
@@ -908,39 +624,23 @@ static void _g_list_free__user_entry_unref0_ (GList* self) {
 }
 
 
-static void _authentication_message_unref0_ (gpointer var) {
-	(var == NULL) ? NULL : (var = (authentication_message_unref (var), NULL));
+static gpointer _g_object_ref0 (gpointer self) {
+	return self ? g_object_ref (self) : NULL;
 }
 
 
-static void _g_list_free__authentication_message_unref0_ (GList* self) {
-	g_list_foreach (self, (GFunc) _authentication_message_unref0_, NULL);
-	g_list_free (self);
+static void __lambda16_ (UserList* self) {
+	gtk_widget_queue_draw ((GtkWidget*) self);
+}
+
+
+static void ___lambda16__g_object_notify (GObject* _sender, GParamSpec* pspec, gpointer self) {
+	__lambda16_ (self);
 }
 
 
 static void _user_list_session_clicked_cb_session_chooser_session_clicked (SessionChooser* _sender, const gchar* session, gpointer self) {
 	user_list_session_clicked_cb (self, session);
-}
-
-
-static void _user_list_session_fade_done_cb_fadable_box_fade_done (FadableBox* _sender, gpointer self) {
-	user_list_session_fade_done_cb (self);
-}
-
-
-static void _user_list_prompt_entry_activate_cb_gtk_entry_activate (GtkEntry* _sender, gpointer self) {
-	user_list_prompt_entry_activate_cb (self);
-}
-
-
-static void _user_list_login_button_clicked_cb_gtk_button_clicked (GtkButton* _sender, gpointer self) {
-	user_list_login_button_clicked_cb (self);
-}
-
-
-static void _user_list_session_button_clicked_cb_gtk_button_clicked (GtkButton* _sender, gpointer self) {
-	user_list_session_button_clicked_cb (self);
 }
 
 
@@ -951,8 +651,8 @@ static gdouble _animate_timer_ease_out_quint_animate_timer_easing_func (gdouble 
 }
 
 
-static void _user_list_scroll_animate_cb_animate_timer_animate (AnimateTimer* _sender, gdouble progress, gpointer self) {
-	user_list_scroll_animate_cb (self, progress);
+static void _user_list_animate_scrolling_animate_timer_animate (AnimateTimer* _sender, gdouble progress, gpointer self) {
+	user_list_animate_scrolling (self, progress);
 }
 
 
@@ -968,43 +668,17 @@ UserList* user_list_construct (GType object_type, Background* bg, MenuBar* mb) {
 	GtkFixed* _tmp7_;
 	Background* _tmp8_;
 	DashBox* _tmp9_;
-	GtkBox* _tmp10_;
-	GtkBox* _tmp11_;
-	GtkBox* _tmp12_;
-	SessionChooser* _tmp13_;
+	DashBox* _tmp10_;
+	DashBox* _tmp11_;
+	DashBox* _tmp12_;
+	DashBox* _tmp13_;
 	SessionChooser* _tmp14_;
 	SessionChooser* _tmp15_;
 	SessionChooser* _tmp16_;
 	SessionChooser* _tmp17_;
 	SessionChooser* _tmp18_;
-	DashEntry* _tmp19_;
-	DashEntry* _tmp20_;
-	DashEntry* _tmp21_;
-	DashEntry* _tmp22_;
-	DashEntry* _tmp23_;
-	DashButton* _tmp24_;
-	DashButton* _tmp25_;
-	DashButton* _tmp26_;
-	DashButton* _tmp27_;
-	GtkButton* _tmp35_;
-	GtkButton* _tmp36_;
-	GtkButton* _tmp37_;
-	GtkButton* _tmp38_;
-	AtkObject* _tmp39_ = NULL;
-	const gchar* _tmp40_ = NULL;
-	GdkPixbuf* _tmp41_ = NULL;
-	GdkPixbuf* _tmp42_;
-	CachedImage* _tmp43_;
-	CachedImage* _tmp44_;
-	CachedImage* _tmp45_;
-	GtkButton* _tmp46_;
-	GtkButton* _tmp47_;
-	CachedImage* _tmp48_;
-	GtkButton* _tmp49_;
-	GtkButton* _tmp50_;
-	GtkButton* _tmp51_;
-	AnimateTimer* _tmp52_;
-	AnimateTimer* _tmp53_;
+	AnimateTimer* _tmp26_;
+	AnimateTimer* _tmp27_;
 	GError * _inner_error_ = NULL;
 	g_return_val_if_fail (bg != NULL, NULL);
 	g_return_val_if_fail (mb != NULL, NULL);
@@ -1029,115 +703,67 @@ UserList* user_list_construct (GType object_type, Background* bg, MenuBar* mb) {
 	gtk_container_add ((GtkContainer*) self, (GtkWidget*) _tmp7_);
 	_tmp8_ = self->background;
 	_tmp9_ = dash_box_new (_tmp8_);
-	_tmp10_ = (GtkBox*) g_object_ref_sink (_tmp9_);
+	_tmp10_ = g_object_ref_sink (_tmp9_);
 	_g_object_unref0 (self->priv->login_box);
 	self->priv->login_box = _tmp10_;
 	_tmp11_ = self->priv->login_box;
-	gtk_widget_show ((GtkWidget*) _tmp11_);
+	g_signal_connect_object ((GObject*) _tmp11_, "notify::base-alpha", (GCallback) ___lambda16__g_object_notify, self, 0);
 	_tmp12_ = self->priv->login_box;
-	user_list_add_with_class (self, (GtkWidget*) _tmp12_);
-	_tmp13_ = session_chooser_new ();
-	_tmp14_ = g_object_ref_sink (_tmp13_);
+	gtk_widget_show ((GtkWidget*) _tmp12_);
+	_tmp13_ = self->priv->login_box;
+	user_list_add_with_class (self, (GtkWidget*) _tmp13_);
+	_tmp14_ = session_chooser_new ();
+	_tmp15_ = g_object_ref_sink (_tmp14_);
 	_g_object_unref0 (self->priv->session_chooser);
-	self->priv->session_chooser = _tmp14_;
-	_tmp15_ = self->priv->session_chooser;
-	g_signal_connect_object (_tmp15_, "session-clicked", (GCallback) _user_list_session_clicked_cb_session_chooser_session_clicked, self, 0);
+	self->priv->session_chooser = _tmp15_;
 	_tmp16_ = self->priv->session_chooser;
-	g_signal_connect_object ((FadableBox*) _tmp16_, "fade-done", (GCallback) _user_list_session_fade_done_cb_fadable_box_fade_done, self, 0);
+	g_signal_connect_object (_tmp16_, "session-clicked", (GCallback) _user_list_session_clicked_cb_session_chooser_session_clicked, self, 0);
 	_tmp17_ = self->priv->session_chooser;
 	gtk_widget_show ((GtkWidget*) _tmp17_);
 	_tmp18_ = self->priv->session_chooser;
 	unity_greeter_add_style_class ((GtkWidget*) _tmp18_);
-	_tmp19_ = dash_entry_new ();
-	_tmp20_ = g_object_ref_sink (_tmp19_);
-	_g_object_unref0 (self->priv->prompt_entry);
-	self->priv->prompt_entry = _tmp20_;
-	_tmp21_ = self->priv->prompt_entry;
-	g_object_set ((GtkEntry*) _tmp21_, "caps-lock-warning", TRUE, NULL);
-	_tmp22_ = self->priv->prompt_entry;
-	g_signal_connect_object ((GtkEntry*) _tmp22_, "activate", (GCallback) _user_list_prompt_entry_activate_cb_gtk_entry_activate, self, 0);
-	_tmp23_ = self->priv->prompt_entry;
-	user_list_add_with_class (self, (GtkWidget*) _tmp23_);
-	_tmp24_ = dash_button_new ("");
-	_tmp25_ = g_object_ref_sink (_tmp24_);
-	_g_object_unref0 (self->priv->login_button);
-	self->priv->login_button = _tmp25_;
-	_tmp26_ = self->priv->login_button;
-	g_signal_connect_object ((GtkButton*) _tmp26_, "clicked", (GCallback) _user_list_login_button_clicked_cb_gtk_button_clicked, self, 0);
-	_tmp27_ = self->priv->login_button;
-	user_list_add_with_class (self, (GtkWidget*) _tmp27_);
 	{
-		gchar* _tmp28_ = NULL;
-		gchar* _tmp29_;
-		GdkPixbuf* _tmp30_;
-		GdkPixbuf* _tmp31_;
-		GdkPixbuf* _tmp32_;
-		_tmp28_ = g_build_filename (PKGDATADIR, "message.png", NULL, NULL);
-		_tmp29_ = _tmp28_;
-		_tmp30_ = gdk_pixbuf_new_from_file (_tmp29_, &_inner_error_);
-		_tmp31_ = _tmp30_;
-		_g_free0 (_tmp29_);
-		_tmp32_ = _tmp31_;
+		gchar* _tmp19_ = NULL;
+		gchar* _tmp20_;
+		GdkPixbuf* _tmp21_;
+		GdkPixbuf* _tmp22_;
+		GdkPixbuf* _tmp23_;
+		_tmp19_ = g_build_filename (PKGDATADIR, "message.png", NULL, NULL);
+		_tmp20_ = _tmp19_;
+		_tmp21_ = gdk_pixbuf_new_from_file (_tmp20_, &_inner_error_);
+		_tmp22_ = _tmp21_;
+		_g_free0 (_tmp20_);
+		_tmp23_ = _tmp22_;
 		if (_inner_error_ != NULL) {
-			goto __catch20_g_error;
+			goto __catch21_g_error;
 		}
 		_g_object_unref0 (self->priv->message_pixbuf);
-		self->priv->message_pixbuf = _tmp32_;
+		self->priv->message_pixbuf = _tmp23_;
 	}
-	goto __finally20;
-	__catch20_g_error:
+	goto __finally21;
+	__catch21_g_error:
 	{
 		GError* e = NULL;
-		GError* _tmp33_;
-		const gchar* _tmp34_;
+		GError* _tmp24_;
+		const gchar* _tmp25_;
 		e = _inner_error_;
 		_inner_error_ = NULL;
-		_tmp33_ = e;
-		_tmp34_ = _tmp33_->message;
-		g_debug ("user-list.vala:237: Error loading message image: %s", _tmp34_);
+		_tmp24_ = e;
+		_tmp25_ = _tmp24_->message;
+		g_debug ("user-list.vala:221: Error loading message image: %s", _tmp25_);
 		_g_error_free0 (e);
 	}
-	__finally20:
+	__finally21:
 	if (_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
 		return NULL;
 	}
-	_tmp35_ = (GtkButton*) gtk_button_new ();
-	_tmp36_ = g_object_ref_sink (_tmp35_);
-	_g_object_unref0 (self->priv->session_button);
-	self->priv->session_button = _tmp36_;
-	_tmp37_ = self->priv->session_button;
-	gtk_button_set_focus_on_click (_tmp37_, FALSE);
-	_tmp38_ = self->priv->session_button;
-	_tmp39_ = gtk_widget_get_accessible ((GtkWidget*) _tmp38_);
-	_tmp40_ = _ ("Session Options");
-	atk_object_set_name (_tmp39_, _tmp40_);
-	_tmp41_ = user_list_get_badge (self);
-	_tmp42_ = _tmp41_;
-	_tmp43_ = cached_image_new (_tmp42_);
-	_tmp44_ = g_object_ref_sink (_tmp43_);
-	_g_object_unref0 (self->priv->session_image);
-	self->priv->session_image = _tmp44_;
-	_g_object_unref0 (_tmp42_);
-	_tmp45_ = self->priv->session_image;
-	gtk_widget_show ((GtkWidget*) _tmp45_);
-	_tmp46_ = self->priv->session_button;
-	gtk_button_set_relief (_tmp46_, GTK_RELIEF_NONE);
-	_tmp47_ = self->priv->session_button;
-	_tmp48_ = self->priv->session_image;
-	gtk_container_add ((GtkContainer*) _tmp47_, (GtkWidget*) _tmp48_);
-	_tmp49_ = self->priv->session_button;
-	g_signal_connect_object (_tmp49_, "clicked", (GCallback) _user_list_session_button_clicked_cb_gtk_button_clicked, self, 0);
-	_tmp50_ = self->priv->session_button;
-	gtk_widget_show ((GtkWidget*) _tmp50_);
-	_tmp51_ = self->priv->session_button;
-	user_list_add_with_class (self, (GtkWidget*) _tmp51_);
-	_tmp52_ = animate_timer_new (_animate_timer_ease_out_quint_animate_timer_easing_func, NULL, ANIMATE_TIMER_FAST);
+	_tmp26_ = animate_timer_new (_animate_timer_ease_out_quint_animate_timer_easing_func, NULL, ANIMATE_TIMER_FAST);
 	_g_object_unref0 (self->priv->scroll_timer);
-	self->priv->scroll_timer = _tmp52_;
-	_tmp53_ = self->priv->scroll_timer;
-	g_signal_connect_object (_tmp53_, "animate", (GCallback) _user_list_scroll_animate_cb_animate_timer_animate, self, 0);
+	self->priv->scroll_timer = _tmp26_;
+	_tmp27_ = self->priv->scroll_timer;
+	g_signal_connect_object (_tmp27_, "animate", (GCallback) _user_list_animate_scrolling_animate_timer_animate, self, 0);
 	user_list_add_manual_entry (self);
 	return self;
 }
@@ -1159,101 +785,95 @@ void user_list_cancel_authentication (UserList* self) {
 
 
 void user_list_scroll (UserList* self, UserListScrollTarget target) {
-	gboolean _tmp0_ = FALSE;
-	UserListMode _tmp1_;
-	gboolean _tmp3_;
-	UserListScrollTarget _tmp4_;
+	DashBox* _tmp0_;
+	gboolean _tmp1_;
+	gboolean _tmp2_;
+	UserListScrollTarget _tmp3_;
 	g_return_if_fail (self != NULL);
-	_tmp1_ = self->priv->mode;
-	if (_tmp1_ != USER_LIST_MODE_LOGIN) {
-		UserListMode _tmp2_;
-		_tmp2_ = self->priv->mode;
-		_tmp0_ = _tmp2_ != USER_LIST_MODE_SCROLLING;
-	} else {
-		_tmp0_ = FALSE;
-	}
-	_tmp3_ = _tmp0_;
-	if (_tmp3_) {
+	_tmp0_ = self->priv->login_box;
+	_tmp1_ = dash_box_get_has_content (_tmp0_);
+	_tmp2_ = _tmp1_;
+	if (_tmp2_) {
 		return;
 	}
-	_tmp4_ = target;
-	switch (_tmp4_) {
+	_tmp3_ = target;
+	switch (_tmp3_) {
 		case USER_LIST_SCROLL_TARGET_START:
 		{
-			GList* _tmp5_;
-			gconstpointer _tmp6_ = NULL;
-			_tmp5_ = self->priv->entries;
-			_tmp6_ = g_list_nth_data (_tmp5_, (guint) 0);
-			user_list_select_entry (self, (UserEntry*) _tmp6_, -1.0);
+			GList* _tmp4_;
+			gconstpointer _tmp5_ = NULL;
+			_tmp4_ = self->priv->entries;
+			_tmp5_ = g_list_nth_data (_tmp4_, (guint) 0);
+			user_list_select_entry (self, (UserEntry*) _tmp5_, -1.0);
 			break;
 		}
 		case USER_LIST_SCROLL_TARGET_END:
 		{
+			GList* _tmp6_;
 			GList* _tmp7_;
-			GList* _tmp8_;
-			guint _tmp9_ = 0U;
-			gconstpointer _tmp10_ = NULL;
+			guint _tmp8_ = 0U;
+			gconstpointer _tmp9_ = NULL;
+			_tmp6_ = self->priv->entries;
 			_tmp7_ = self->priv->entries;
-			_tmp8_ = self->priv->entries;
-			_tmp9_ = g_list_length (_tmp8_);
-			_tmp10_ = g_list_nth_data (_tmp7_, _tmp9_ - 1);
-			user_list_select_entry (self, (UserEntry*) _tmp10_, 1.0);
+			_tmp8_ = g_list_length (_tmp7_);
+			_tmp9_ = g_list_nth_data (_tmp6_, _tmp8_ - 1);
+			user_list_select_entry (self, (UserEntry*) _tmp9_, 1.0);
 			break;
 		}
 		case USER_LIST_SCROLL_TARGET_UP:
 		{
-			GList* _tmp11_;
-			UserEntry* _tmp12_;
-			gint _tmp13_ = 0;
+			GList* _tmp10_;
+			UserEntry* _tmp11_;
+			gint _tmp12_ = 0;
 			gint index;
-			gint _tmp14_;
-			GList* _tmp15_;
-			gint _tmp16_;
-			gconstpointer _tmp17_ = NULL;
-			_tmp11_ = self->priv->entries;
-			_tmp12_ = self->priv->_selected_entry;
-			_tmp13_ = g_list_index (_tmp11_, _tmp12_);
-			index = _tmp13_ - 1;
-			_tmp14_ = index;
-			if (_tmp14_ < 0) {
+			gint _tmp13_;
+			GList* _tmp14_;
+			gint _tmp15_;
+			gconstpointer _tmp16_ = NULL;
+			_tmp10_ = self->priv->entries;
+			_tmp11_ = self->priv->_selected_entry;
+			_tmp12_ = g_list_index (_tmp10_, _tmp11_);
+			index = _tmp12_ - 1;
+			_tmp13_ = index;
+			if (_tmp13_ < 0) {
 				index = 0;
 			}
-			_tmp15_ = self->priv->entries;
-			_tmp16_ = index;
-			_tmp17_ = g_list_nth_data (_tmp15_, (guint) _tmp16_);
-			user_list_select_entry (self, (UserEntry*) _tmp17_, -1.0);
+			_tmp14_ = self->priv->entries;
+			_tmp15_ = index;
+			_tmp16_ = g_list_nth_data (_tmp14_, (guint) _tmp15_);
+			user_list_select_entry (self, (UserEntry*) _tmp16_, -1.0);
 			break;
 		}
 		case USER_LIST_SCROLL_TARGET_DOWN:
 		{
-			GList* _tmp18_;
-			UserEntry* _tmp19_;
-			gint _tmp20_ = 0;
+			GList* _tmp17_;
+			UserEntry* _tmp18_;
+			gint _tmp19_ = 0;
 			gint index;
-			gint _tmp21_;
-			GList* _tmp22_;
-			guint _tmp23_ = 0U;
-			GList* _tmp26_;
-			gint _tmp27_;
-			gconstpointer _tmp28_ = NULL;
-			_tmp18_ = self->priv->entries;
-			_tmp19_ = self->priv->_selected_entry;
-			_tmp20_ = g_list_index (_tmp18_, _tmp19_);
-			index = _tmp20_ + 1;
-			_tmp21_ = index;
-			_tmp22_ = self->priv->entries;
-			_tmp23_ = g_list_length (_tmp22_);
-			if (_tmp21_ >= ((gint) _tmp23_)) {
-				GList* _tmp24_;
-				guint _tmp25_ = 0U;
-				_tmp24_ = self->priv->entries;
-				_tmp25_ = g_list_length (_tmp24_);
-				index = ((gint) _tmp25_) - 1;
+			gint _tmp20_;
+			GList* _tmp21_;
+			guint _tmp22_ = 0U;
+			GList* _tmp25_;
+			gint _tmp26_;
+			gconstpointer _tmp27_ = NULL;
+			_tmp17_ = self->priv->entries;
+			_tmp18_ = self->priv->_selected_entry;
+			_tmp19_ = g_list_index (_tmp17_, _tmp18_);
+			index = _tmp19_ + 1;
+			_tmp20_ = index;
+			_tmp21_ = self->priv->entries;
+			_tmp22_ = g_list_length (_tmp21_);
+			if (_tmp20_ >= ((gint) _tmp22_)) {
+				GList* _tmp23_;
+				guint _tmp24_ = 0U;
+				_tmp23_ = self->priv->entries;
+				_tmp24_ = g_list_length (_tmp23_);
+				index = ((gint) _tmp24_) - 1;
 			}
-			_tmp26_ = self->priv->entries;
-			_tmp27_ = index;
-			_tmp28_ = g_list_nth_data (_tmp26_, (guint) _tmp27_);
-			user_list_select_entry (self, (UserEntry*) _tmp28_, 1.0);
+			_tmp25_ = self->priv->entries;
+			_tmp26_ = index;
+			_tmp27_ = g_list_nth_data (_tmp25_, (guint) _tmp26_);
+			user_list_select_entry (self, (UserEntry*) _tmp27_, 1.0);
 			break;
 		}
 		default:
@@ -1276,49 +896,9 @@ static void user_list_add_with_class (UserList* self, GtkWidget* widget) {
 }
 
 
-static void user_list_redraw_user_list (UserList* self) {
-	gint _tmp0_;
-	gint _tmp1_;
-	guint _tmp2_;
-	gint y;
-	guint _tmp3_;
-	gint _tmp4_;
-	guint _tmp5_;
-	gint height;
-	GtkAllocation allocation = {0};
-	GtkAllocation _tmp6_ = {0};
-	GtkAllocation _tmp7_;
-	gint _tmp8_;
-	gint _tmp9_;
-	gint _tmp10_;
-	GtkAllocation _tmp11_;
-	gint _tmp12_;
-	gint _tmp13_;
-	g_return_if_fail (self != NULL);
-	_tmp0_ = user_list_get_box_y (self);
-	_tmp1_ = _tmp0_;
-	_tmp2_ = self->priv->n_above;
-	y = _tmp1_ - (((gint) (_tmp2_ + 1)) * grid_size);
-	_tmp3_ = self->priv->n_above;
-	_tmp4_ = self->priv->box_height;
-	_tmp5_ = self->priv->n_below;
-	height = ((gint) ((((_tmp3_ + 1) + _tmp4_) + _tmp5_) + 1)) * grid_size;
-	gtk_widget_get_allocation ((GtkWidget*) self, &_tmp6_);
-	allocation = _tmp6_;
-	_tmp7_ = allocation;
-	_tmp8_ = _tmp7_.x;
-	_tmp9_ = user_list_get_box_x (self);
-	_tmp10_ = _tmp9_;
-	_tmp11_ = allocation;
-	_tmp12_ = _tmp11_.y;
-	_tmp13_ = self->priv->box_width;
-	gtk_widget_queue_draw_area ((GtkWidget*) self, _tmp8_ + _tmp10_, _tmp12_ + y, _tmp13_ * grid_size, height);
-}
-
-
 static void user_list_redraw_login_box (UserList* self) {
 	GtkAllocation allocation = {0};
-	GtkBox* _tmp0_;
+	DashBox* _tmp0_;
 	GtkAllocation _tmp1_ = {0};
 	GtkAllocation _tmp2_;
 	gint _tmp3_;
@@ -1345,445 +925,209 @@ static void user_list_redraw_login_box (UserList* self) {
 
 
 void user_list_show_message (UserList* self, const gchar* text, gboolean is_error) {
-	const gchar* _tmp0_;
-	PangoLayout* _tmp1_ = NULL;
-	PangoLayout* layout;
-	PangoFontDescription* _tmp2_ = NULL;
-	PangoFontDescription* _tmp3_;
-	gboolean _tmp4_;
-	AuthenticationMessage* _tmp5_;
+	UserEntry* _tmp0_;
+	PromptBox* _tmp1_;
+	const gchar* _tmp2_;
+	gboolean _tmp3_;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (text != NULL);
-	_tmp0_ = text;
-	_tmp1_ = gtk_widget_create_pango_layout ((GtkWidget*) self, _tmp0_);
-	layout = _tmp1_;
-	_tmp2_ = pango_font_description_from_string ("Ubuntu 10");
-	_tmp3_ = _tmp2_;
-	pango_layout_set_font_description (layout, _tmp3_);
-	_pango_font_description_free0 (_tmp3_);
-	_tmp4_ = is_error;
-	_tmp5_ = authentication_message_new (layout, _tmp4_);
-	self->priv->messages = g_list_append (self->priv->messages, _tmp5_);
-	user_list_redraw_login_box (self);
-	_g_object_unref0 (layout);
+	_tmp0_ = self->priv->_selected_entry;
+	_tmp1_ = _tmp0_->prompt_box;
+	_tmp2_ = text;
+	_tmp3_ = is_error;
+	prompt_box_add_message (_tmp1_, _tmp2_, _tmp3_);
 }
 
 
 gboolean user_list_have_messages (UserList* self) {
 	gboolean result = FALSE;
-	GList* _tmp0_;
+	UserEntry* _tmp0_;
+	PromptBox* _tmp1_;
+	gboolean _tmp2_;
+	gboolean _tmp3_;
 	g_return_val_if_fail (self != NULL, FALSE);
-	_tmp0_ = self->priv->messages;
-	result = _tmp0_ != NULL;
+	_tmp0_ = self->priv->_selected_entry;
+	_tmp1_ = _tmp0_->prompt_box;
+	_tmp2_ = prompt_box_get_has_messages (_tmp1_);
+	_tmp3_ = _tmp2_;
+	result = _tmp3_;
 	return result;
 }
 
 
 void user_list_clear_messages (UserList* self) {
+	UserEntry* _tmp0_;
+	PromptBox* _tmp1_;
 	g_return_if_fail (self != NULL);
-	__g_list_free__authentication_message_unref0_0 (self->priv->messages);
-	self->priv->messages = NULL;
-	user_list_redraw_login_box (self);
-}
-
-
-static gboolean string_contains (const gchar* self, const gchar* needle) {
-	gboolean result = FALSE;
-	const gchar* _tmp0_;
-	gchar* _tmp1_ = NULL;
-	g_return_val_if_fail (self != NULL, FALSE);
-	g_return_val_if_fail (needle != NULL, FALSE);
-	_tmp0_ = needle;
-	_tmp1_ = strstr ((gchar*) self, (gchar*) _tmp0_);
-	result = _tmp1_ != NULL;
-	return result;
-}
-
-
-static glong string_strnlen (gchar* str, glong maxlen) {
-	glong result = 0L;
-	gchar* _tmp0_;
-	glong _tmp1_;
-	gchar* _tmp2_ = NULL;
-	gchar* end;
-	gchar* _tmp3_;
-	_tmp0_ = str;
-	_tmp1_ = maxlen;
-	_tmp2_ = memchr (_tmp0_, 0, (gsize) _tmp1_);
-	end = _tmp2_;
-	_tmp3_ = end;
-	if (_tmp3_ == NULL) {
-		glong _tmp4_;
-		_tmp4_ = maxlen;
-		result = _tmp4_;
-		return result;
-	} else {
-		gchar* _tmp5_;
-		gchar* _tmp6_;
-		_tmp5_ = end;
-		_tmp6_ = str;
-		result = (glong) (_tmp5_ - _tmp6_);
-		return result;
-	}
-}
-
-
-static gchar* string_substring (const gchar* self, glong offset, glong len) {
-	gchar* result = NULL;
-	glong string_length = 0L;
-	gboolean _tmp0_ = FALSE;
-	glong _tmp1_;
-	gboolean _tmp3_;
-	glong _tmp9_;
-	glong _tmp15_;
-	glong _tmp18_;
-	glong _tmp19_;
-	glong _tmp20_;
-	glong _tmp21_;
-	glong _tmp22_;
-	gchar* _tmp23_ = NULL;
-	g_return_val_if_fail (self != NULL, NULL);
-	_tmp1_ = offset;
-	if (_tmp1_ >= ((glong) 0)) {
-		glong _tmp2_;
-		_tmp2_ = len;
-		_tmp0_ = _tmp2_ >= ((glong) 0);
-	} else {
-		_tmp0_ = FALSE;
-	}
-	_tmp3_ = _tmp0_;
-	if (_tmp3_) {
-		glong _tmp4_;
-		glong _tmp5_;
-		glong _tmp6_ = 0L;
-		_tmp4_ = offset;
-		_tmp5_ = len;
-		_tmp6_ = string_strnlen ((gchar*) self, _tmp4_ + _tmp5_);
-		string_length = _tmp6_;
-	} else {
-		gint _tmp7_;
-		gint _tmp8_;
-		_tmp7_ = strlen (self);
-		_tmp8_ = _tmp7_;
-		string_length = (glong) _tmp8_;
-	}
-	_tmp9_ = offset;
-	if (_tmp9_ < ((glong) 0)) {
-		glong _tmp10_;
-		glong _tmp11_;
-		glong _tmp12_;
-		_tmp10_ = string_length;
-		_tmp11_ = offset;
-		offset = _tmp10_ + _tmp11_;
-		_tmp12_ = offset;
-		g_return_val_if_fail (_tmp12_ >= ((glong) 0), NULL);
-	} else {
-		glong _tmp13_;
-		glong _tmp14_;
-		_tmp13_ = offset;
-		_tmp14_ = string_length;
-		g_return_val_if_fail (_tmp13_ <= _tmp14_, NULL);
-	}
-	_tmp15_ = len;
-	if (_tmp15_ < ((glong) 0)) {
-		glong _tmp16_;
-		glong _tmp17_;
-		_tmp16_ = string_length;
-		_tmp17_ = offset;
-		len = _tmp16_ - _tmp17_;
-	}
-	_tmp18_ = offset;
-	_tmp19_ = len;
-	_tmp20_ = string_length;
-	g_return_val_if_fail ((_tmp18_ + _tmp19_) <= _tmp20_, NULL);
-	_tmp21_ = offset;
-	_tmp22_ = len;
-	_tmp23_ = g_strndup (((gchar*) self) + _tmp21_, (gsize) _tmp22_);
-	result = _tmp23_;
-	return result;
-}
-
-
-static gint string_index_of_nth_char (const gchar* self, glong c) {
-	gint result = 0;
-	glong _tmp0_;
-	gchar* _tmp1_ = NULL;
-	g_return_val_if_fail (self != NULL, 0);
-	_tmp0_ = c;
-	_tmp1_ = g_utf8_offset_to_pointer (self, _tmp0_);
-	result = (gint) (_tmp1_ - ((gchar*) self));
-	return result;
+	_tmp0_ = self->priv->_selected_entry;
+	_tmp1_ = _tmp0_->prompt_box;
+	prompt_box_clear (_tmp1_);
 }
 
 
 void user_list_show_prompt (UserList* self, const gchar* text, gboolean secret) {
-	DashButton* _tmp0_;
-	DashEntry* _tmp1_;
-	const gchar* _tmp2_;
-	gboolean _tmp3_ = FALSE;
-	DashEntry* _tmp23_;
-	DashEntry* _tmp24_;
-	DashEntry* _tmp25_;
-	gboolean _tmp26_;
-	UserListMode _tmp27_;
-	DashEntry* _tmp31_;
-	AtkObject* _tmp32_ = NULL;
-	AtkObject* _tmp33_;
-	AtkObject* accessible;
-	gboolean _tmp34_ = FALSE;
-	UserEntry* _tmp35_;
-	gboolean _tmp38_;
+	gchar* accessible_text;
+	gboolean _tmp0_ = FALSE;
+	UserEntry* _tmp1_;
+	gboolean _tmp4_;
+	UserEntry* _tmp9_;
+	PromptBox* _tmp10_;
+	const gchar* _tmp11_;
+	const gchar* _tmp12_;
+	gboolean _tmp13_;
+	UserListMode _tmp14_;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (text != NULL);
-	_tmp0_ = self->priv->login_button;
-	gtk_widget_hide ((GtkWidget*) _tmp0_);
-	_tmp1_ = self->priv->prompt_entry;
-	gtk_widget_hide ((GtkWidget*) _tmp1_);
-	_tmp2_ = text;
-	_tmp3_ = string_contains (_tmp2_, "\n");
-	if (_tmp3_) {
-		const gchar* _tmp4_;
-		DashEntry* _tmp5_;
-		_tmp4_ = text;
-		user_list_show_message (self, _tmp4_, FALSE);
-		_tmp5_ = self->priv->prompt_entry;
-		dash_entry_set_constant_placeholder_text (_tmp5_, "");
+	accessible_text = NULL;
+	_tmp1_ = self->priv->_selected_entry;
+	if (_tmp1_ != NULL) {
+		UserEntry* _tmp2_;
+		const gchar* _tmp3_;
+		_tmp2_ = self->priv->_selected_entry;
+		_tmp3_ = _tmp2_->name;
+		_tmp0_ = _tmp3_ != NULL;
 	} else {
-		const gchar* _tmp6_;
-		gchar* _tmp7_;
-		gchar* placeholder;
-		gboolean _tmp8_ = FALSE;
-		const gchar* _tmp9_;
-		gboolean _tmp10_ = FALSE;
-		gboolean _tmp13_;
-		DashEntry* _tmp21_;
-		const gchar* _tmp22_;
-		_tmp6_ = text;
-		_tmp7_ = g_strdup (_tmp6_);
-		placeholder = _tmp7_;
-		_tmp9_ = placeholder;
-		_tmp10_ = g_str_has_suffix (_tmp9_, ":");
-		if (_tmp10_) {
-			_tmp8_ = TRUE;
-		} else {
-			const gchar* _tmp11_;
-			gboolean _tmp12_ = FALSE;
-			_tmp11_ = placeholder;
-			_tmp12_ = g_str_has_suffix (_tmp11_, "：");
-			_tmp8_ = _tmp12_;
-		}
-		_tmp13_ = _tmp8_;
-		if (_tmp13_) {
-			const gchar* _tmp14_;
-			gint _tmp15_ = 0;
-			gint len;
-			const gchar* _tmp16_;
-			const gchar* _tmp17_;
-			gint _tmp18_;
-			gint _tmp19_ = 0;
-			gchar* _tmp20_ = NULL;
-			_tmp14_ = placeholder;
-			_tmp15_ = g_utf8_strlen (_tmp14_, (gssize) (-1));
-			len = _tmp15_;
-			_tmp16_ = placeholder;
-			_tmp17_ = placeholder;
-			_tmp18_ = len;
-			_tmp19_ = string_index_of_nth_char (_tmp17_, (glong) (_tmp18_ - 1));
-			_tmp20_ = string_substring (_tmp16_, (glong) 0, (glong) _tmp19_);
-			_g_free0 (placeholder);
-			placeholder = _tmp20_;
-		}
-		_tmp21_ = self->priv->prompt_entry;
-		_tmp22_ = placeholder;
-		dash_entry_set_constant_placeholder_text (_tmp21_, _tmp22_);
-		_g_free0 (placeholder);
+		_tmp0_ = FALSE;
 	}
-	_tmp23_ = self->priv->prompt_entry;
-	gtk_entry_set_text ((GtkEntry*) _tmp23_, "");
-	_tmp24_ = self->priv->prompt_entry;
-	gtk_widget_set_sensitive ((GtkWidget*) _tmp24_, TRUE);
-	_tmp25_ = self->priv->prompt_entry;
-	_tmp26_ = secret;
-	gtk_entry_set_visibility ((GtkEntry*) _tmp25_, !_tmp26_);
-	_tmp27_ = self->priv->mode;
-	if (_tmp27_ == USER_LIST_MODE_SCROLLING) {
-		DashEntry* _tmp28_;
-		Fadable* _tmp29_;
-		_tmp28_ = self->priv->prompt_entry;
-		_tmp29_ = _g_object_ref0 ((Fadable*) _tmp28_);
+	_tmp4_ = _tmp0_;
+	if (_tmp4_) {
+		const gchar* _tmp5_ = NULL;
+		UserEntry* _tmp6_;
+		const gchar* _tmp7_;
+		gchar* _tmp8_ = NULL;
+		_tmp5_ = _ ("Enter password for %s");
+		_tmp6_ = self->priv->_selected_entry;
+		_tmp7_ = _tmp6_->label;
+		_tmp8_ = g_strdup_printf (_tmp5_, _tmp7_);
+		_g_free0 (accessible_text);
+		accessible_text = _tmp8_;
+	}
+	_tmp9_ = self->priv->_selected_entry;
+	_tmp10_ = _tmp9_->prompt_box;
+	_tmp11_ = text;
+	_tmp12_ = accessible_text;
+	_tmp13_ = secret;
+	prompt_box_add_prompt (_tmp10_, _tmp11_, _tmp12_, _tmp13_);
+	_tmp14_ = self->priv->mode;
+	if (_tmp14_ == USER_LIST_MODE_SCROLLING) {
+		UserEntry* _tmp15_;
+		PromptBox* _tmp16_;
+		PromptBox* _tmp17_;
+		_tmp15_ = self->priv->_selected_entry;
+		_tmp16_ = _tmp15_->prompt_box;
+		_tmp17_ = _g_object_ref0 (_tmp16_);
 		_g_object_unref0 (self->priv->prompt_widget_to_show);
-		self->priv->prompt_widget_to_show = _tmp29_;
+		self->priv->prompt_widget_to_show = _tmp17_;
 	} else {
-		DashEntry* _tmp30_;
-		_tmp30_ = self->priv->prompt_entry;
-		gtk_widget_show ((GtkWidget*) _tmp30_);
-	}
-	_tmp31_ = self->priv->prompt_entry;
-	_tmp32_ = gtk_widget_get_accessible ((GtkWidget*) _tmp31_);
-	_tmp33_ = _g_object_ref0 (_tmp32_);
-	accessible = _tmp33_;
-	_tmp35_ = self->priv->_selected_entry;
-	if (_tmp35_ != NULL) {
-		UserEntry* _tmp36_;
-		const gchar* _tmp37_;
-		_tmp36_ = self->priv->_selected_entry;
-		_tmp37_ = _tmp36_->name;
-		_tmp34_ = _tmp37_ != NULL;
-	} else {
-		_tmp34_ = FALSE;
-	}
-	_tmp38_ = _tmp34_;
-	if (_tmp38_) {
-		AtkObject* _tmp39_;
-		const gchar* _tmp40_ = NULL;
-		UserEntry* _tmp41_;
-		PangoLayout* _tmp42_;
-		const gchar* _tmp43_ = NULL;
-		gchar* _tmp44_ = NULL;
-		gchar* _tmp45_;
-		_tmp39_ = accessible;
-		_tmp40_ = _ ("Enter password for %s");
-		_tmp41_ = self->priv->_selected_entry;
-		_tmp42_ = _tmp41_->layout;
-		_tmp43_ = pango_layout_get_text (_tmp42_);
-		_tmp44_ = g_strdup_printf (_tmp40_, _tmp43_);
-		_tmp45_ = _tmp44_;
-		atk_object_set_name (_tmp39_, _tmp45_);
-		_g_free0 (_tmp45_);
-	} else {
-		DashEntry* _tmp46_;
-		gboolean _tmp47_;
-		gboolean _tmp48_;
-		_tmp46_ = self->priv->prompt_entry;
-		_tmp47_ = gtk_entry_get_visibility ((GtkEntry*) _tmp46_);
-		_tmp48_ = _tmp47_;
-		if (_tmp48_) {
-			AtkObject* _tmp49_;
-			const gchar* _tmp50_ = NULL;
-			_tmp49_ = accessible;
-			_tmp50_ = _ ("Enter username");
-			atk_object_set_name (_tmp49_, _tmp50_);
-		} else {
-			AtkObject* _tmp51_;
-			const gchar* _tmp52_ = NULL;
-			_tmp51_ = accessible;
-			_tmp52_ = _ ("Enter password");
-			atk_object_set_name (_tmp51_, _tmp52_);
-		}
+		UserEntry* _tmp18_;
+		PromptBox* _tmp19_;
+		_tmp18_ = self->priv->_selected_entry;
+		_tmp19_ = _tmp18_->prompt_box;
+		prompt_box_show_prompts (_tmp19_);
 	}
 	user_list_focus_prompt (self);
 	user_list_redraw_login_box (self);
-	_g_object_unref0 (accessible);
+	_g_free0 (accessible_text);
 }
 
 
 void user_list_focus_prompt (UserList* self) {
-	DashEntry* _tmp0_;
+	UserEntry* _tmp0_;
+	PromptBox* _tmp1_;
+	UserEntry* _tmp2_;
+	PromptBox* _tmp3_;
 	g_return_if_fail (self != NULL);
-	_tmp0_ = self->priv->prompt_entry;
-	gtk_widget_grab_focus ((GtkWidget*) _tmp0_);
+	_tmp0_ = self->priv->_selected_entry;
+	_tmp1_ = _tmp0_->prompt_box;
+	gtk_widget_set_sensitive ((GtkWidget*) _tmp1_, TRUE);
+	_tmp2_ = self->priv->_selected_entry;
+	_tmp3_ = _tmp2_->prompt_box;
+	gtk_widget_grab_focus ((GtkWidget*) _tmp3_);
 }
 
 
 void user_list_show_authenticated (UserList* self, gboolean successful) {
-	DashEntry* _tmp0_;
-	DashButton* _tmp1_;
-	DashButton* _tmp2_;
-	AtkObject* _tmp3_ = NULL;
-	AtkObject* _tmp4_;
-	AtkObject* accessible;
-	gboolean _tmp5_;
-	UserListMode _tmp24_;
-	DashButton* _tmp28_;
+	gboolean _tmp0_;
+	UserListMode _tmp17_;
 	g_return_if_fail (self != NULL);
-	_tmp0_ = self->priv->prompt_entry;
-	gtk_widget_hide ((GtkWidget*) _tmp0_);
-	_tmp1_ = self->priv->login_button;
-	gtk_widget_hide ((GtkWidget*) _tmp1_);
-	_tmp2_ = self->priv->login_button;
-	_tmp3_ = gtk_widget_get_accessible ((GtkWidget*) _tmp2_);
-	_tmp4_ = _g_object_ref0 (_tmp3_);
-	accessible = _tmp4_;
-	_tmp5_ = successful;
-	if (_tmp5_) {
-		AtkObject* _tmp6_;
-		const gchar* _tmp7_ = NULL;
-		UserEntry* _tmp8_;
-		PangoLayout* _tmp9_;
-		const gchar* _tmp10_ = NULL;
-		gchar* _tmp11_ = NULL;
-		gchar* _tmp12_;
-		DashButton* _tmp13_;
-		const gchar* _tmp14_ = NULL;
-		_tmp6_ = accessible;
-		_tmp7_ = _ ("Login as %s");
-		_tmp8_ = self->priv->_selected_entry;
-		_tmp9_ = _tmp8_->layout;
-		_tmp10_ = pango_layout_get_text (_tmp9_);
-		_tmp11_ = g_strdup_printf (_tmp7_, _tmp10_);
-		_tmp12_ = _tmp11_;
-		atk_object_set_name (_tmp6_, _tmp12_);
-		_g_free0 (_tmp12_);
-		_tmp13_ = self->priv->login_button;
-		_tmp14_ = _ ("Log In");
-		dash_button_set_text (_tmp13_, _tmp14_);
+	_tmp0_ = successful;
+	if (_tmp0_) {
+		UserEntry* _tmp1_;
+		PromptBox* _tmp2_;
+		const gchar* _tmp3_ = NULL;
+		const gchar* _tmp4_ = NULL;
+		UserEntry* _tmp5_;
+		const gchar* _tmp6_;
+		gchar* _tmp7_ = NULL;
+		gchar* _tmp8_;
+		_tmp1_ = self->priv->_selected_entry;
+		_tmp2_ = _tmp1_->prompt_box;
+		_tmp3_ = _ ("Log In");
+		_tmp4_ = _ ("Login as %s");
+		_tmp5_ = self->priv->_selected_entry;
+		_tmp6_ = _tmp5_->label;
+		_tmp7_ = g_strdup_printf (_tmp4_, _tmp6_);
+		_tmp8_ = _tmp7_;
+		prompt_box_add_button (_tmp2_, _tmp3_, _tmp8_);
+		_g_free0 (_tmp8_);
 	} else {
-		AtkObject* _tmp15_;
-		const gchar* _tmp16_ = NULL;
-		UserEntry* _tmp17_;
-		PangoLayout* _tmp18_;
-		const gchar* _tmp19_ = NULL;
-		gchar* _tmp20_ = NULL;
-		gchar* _tmp21_;
-		DashButton* _tmp22_;
-		const gchar* _tmp23_ = NULL;
-		_tmp15_ = accessible;
-		_tmp16_ = _ ("Retry");
-		_tmp17_ = self->priv->_selected_entry;
-		_tmp18_ = _tmp17_->layout;
-		_tmp19_ = pango_layout_get_text (_tmp18_);
-		_tmp20_ = g_strdup_printf (_tmp16_, _tmp19_);
-		_tmp21_ = _tmp20_;
-		atk_object_set_name (_tmp15_, _tmp21_);
-		_g_free0 (_tmp21_);
-		_tmp22_ = self->priv->login_button;
-		_tmp23_ = _ ("Retry");
-		dash_button_set_text (_tmp22_, _tmp23_);
+		UserEntry* _tmp9_;
+		PromptBox* _tmp10_;
+		const gchar* _tmp11_ = NULL;
+		const gchar* _tmp12_ = NULL;
+		UserEntry* _tmp13_;
+		const gchar* _tmp14_;
+		gchar* _tmp15_ = NULL;
+		gchar* _tmp16_;
+		_tmp9_ = self->priv->_selected_entry;
+		_tmp10_ = _tmp9_->prompt_box;
+		_tmp11_ = _ ("Retry");
+		_tmp12_ = _ ("Retry as %s");
+		_tmp13_ = self->priv->_selected_entry;
+		_tmp14_ = _tmp13_->label;
+		_tmp15_ = g_strdup_printf (_tmp12_, _tmp14_);
+		_tmp16_ = _tmp15_;
+		prompt_box_add_button (_tmp10_, _tmp11_, _tmp16_);
+		_g_free0 (_tmp16_);
 	}
-	_tmp24_ = self->priv->mode;
-	if (_tmp24_ == USER_LIST_MODE_SCROLLING) {
-		DashButton* _tmp25_;
-		Fadable* _tmp26_;
-		_tmp25_ = self->priv->login_button;
-		_tmp26_ = _g_object_ref0 ((Fadable*) _tmp25_);
+	_tmp17_ = self->priv->mode;
+	if (_tmp17_ == USER_LIST_MODE_SCROLLING) {
+		UserEntry* _tmp18_;
+		PromptBox* _tmp19_;
+		PromptBox* _tmp20_;
+		_tmp18_ = self->priv->_selected_entry;
+		_tmp19_ = _tmp18_->prompt_box;
+		_tmp20_ = _g_object_ref0 (_tmp19_);
 		_g_object_unref0 (self->priv->prompt_widget_to_show);
-		self->priv->prompt_widget_to_show = _tmp26_;
+		self->priv->prompt_widget_to_show = _tmp20_;
 	} else {
-		DashButton* _tmp27_;
-		_tmp27_ = self->priv->login_button;
-		gtk_widget_show ((GtkWidget*) _tmp27_);
+		UserEntry* _tmp21_;
+		PromptBox* _tmp22_;
+		_tmp21_ = self->priv->_selected_entry;
+		_tmp22_ = _tmp21_->prompt_box;
+		prompt_box_show_prompts (_tmp22_);
 	}
-	_tmp28_ = self->priv->login_button;
-	gtk_widget_grab_focus ((GtkWidget*) _tmp28_);
+	user_list_focus_prompt (self);
 	user_list_redraw_login_box (self);
-	_g_object_unref0 (accessible);
 }
 
 
 void user_list_login_complete (UserList* self) {
-	const gchar* _tmp0_ = NULL;
-	DashButton* _tmp1_;
-	DashEntry* _tmp2_;
+	UserEntry* _tmp0_;
+	PromptBox* _tmp1_;
+	UserEntry* _tmp2_;
+	PromptBox* _tmp3_;
+	const gchar* _tmp4_ = NULL;
 	g_return_if_fail (self != NULL);
 	self->priv->complete = TRUE;
 	gtk_widget_set_sensitive ((GtkWidget*) self, FALSE);
-	user_list_clear_messages (self);
-	_tmp0_ = _ ("Logging in...");
-	user_list_show_message (self, _tmp0_, FALSE);
-	_tmp1_ = self->priv->login_button;
-	gtk_widget_hide ((GtkWidget*) _tmp1_);
-	_tmp2_ = self->priv->prompt_entry;
-	gtk_widget_hide ((GtkWidget*) _tmp2_);
+	_tmp0_ = self->priv->_selected_entry;
+	_tmp1_ = _tmp0_->prompt_box;
+	prompt_box_clear (_tmp1_);
+	_tmp2_ = self->priv->_selected_entry;
+	_tmp3_ = _tmp2_->prompt_box;
+	_tmp4_ = _ ("Logging in...");
+	prompt_box_add_message (_tmp3_, _tmp4_, FALSE);
 	user_list_redraw_login_box (self);
 }
 
@@ -1828,6 +1172,21 @@ static UserEntry* user_list_find_entry (UserList* self, const gchar* name) {
 }
 
 
+static void _user_list_prompt_box_respond_cb_prompt_box_respond (PromptBox* _sender, const gchar* response, gpointer self) {
+	user_list_prompt_box_respond_cb (self, response);
+}
+
+
+static void _user_list_prompt_box_login_cb_prompt_box_login (PromptBox* _sender, gpointer self) {
+	user_list_prompt_box_login_cb (self);
+}
+
+
+static void _user_list_prompt_box_show_options_cb_prompt_box_show_options (PromptBox* _sender, gpointer self) {
+	user_list_prompt_box_show_options_cb (self);
+}
+
+
 static gint _user_list_compare_entry_gcompare_func (gconstpointer a, gconstpointer b) {
 	gint result;
 	result = user_list_compare_entry (a, b);
@@ -1842,30 +1201,50 @@ void user_list_add_entry (UserList* self, const gchar* name, const gchar* label,
 	UserEntry* _tmp2_;
 	UserEntry* _tmp8_;
 	const gchar* _tmp9_;
-	PangoLayout* _tmp10_ = NULL;
+	gchar* _tmp10_;
 	UserEntry* _tmp11_;
-	PangoLayout* _tmp12_;
-	PangoFontDescription* _tmp13_ = NULL;
-	PangoFontDescription* _tmp14_;
-	UserEntry* _tmp15_;
-	const gchar* _tmp16_;
-	gchar* _tmp17_;
-	UserEntry* _tmp18_;
-	GList* _tmp19_;
-	GList* _tmp20_ = NULL;
+	const gchar* _tmp12_;
+	gchar* _tmp13_;
+	UserEntry* _tmp14_;
+	GList* _tmp15_;
+	GList* _tmp16_ = NULL;
+	UserEntry* _tmp17_;
+	gboolean _tmp18_;
+	UserEntry* _tmp19_;
+	gboolean _tmp20_;
 	UserEntry* _tmp21_;
-	gboolean _tmp22_;
-	UserEntry* _tmp23_;
-	gboolean _tmp24_;
-	UserEntry* _tmp25_;
-	const gchar* _tmp26_;
-	gchar* _tmp27_;
-	UserEntry* _tmp28_;
+	const gchar* _tmp22_;
+	gchar* _tmp23_;
+	UserEntry* _tmp24_;
+	PromptBox* _tmp25_;
+	PromptBox* _tmp26_;
+	UserEntry* _tmp27_;
+	PromptBox* _tmp28_;
 	UserEntry* _tmp29_;
-	UserEntry* _tmp30_;
-	gboolean _tmp33_ = FALSE;
-	gboolean _tmp34_ = FALSE;
+	PromptBox* _tmp30_;
+	const gchar* _tmp31_;
+	UserEntry* _tmp32_;
+	PromptBox* _tmp33_;
+	gboolean _tmp34_;
+	UserEntry* _tmp35_;
+	PromptBox* _tmp36_;
 	gboolean _tmp37_;
+	UserEntry* _tmp38_;
+	PromptBox* _tmp39_;
+	UserEntry* _tmp40_;
+	PromptBox* _tmp41_;
+	UserEntry* _tmp42_;
+	PromptBox* _tmp43_;
+	UserEntry* _tmp44_;
+	PromptBox* _tmp45_;
+	UserEntry* _tmp46_;
+	PromptBox* _tmp47_;
+	UserEntry* _tmp48_;
+	UserEntry* _tmp49_;
+	UserEntry* _tmp50_;
+	gboolean _tmp53_ = FALSE;
+	gboolean _tmp54_ = FALSE;
+	gboolean _tmp57_;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (name != NULL);
 	g_return_if_fail (label != NULL);
@@ -1893,64 +1272,93 @@ void user_list_add_entry (UserList* self, const gchar* name, const gchar* label,
 	}
 	_tmp8_ = e;
 	_tmp9_ = label;
-	_tmp10_ = gtk_widget_create_pango_layout ((GtkWidget*) self, _tmp9_);
-	_g_object_unref0 (_tmp8_->layout);
-	_tmp8_->layout = _tmp10_;
+	_tmp10_ = g_strdup (_tmp9_);
+	_g_free0 (_tmp8_->label);
+	_tmp8_->label = _tmp10_;
 	_tmp11_ = e;
-	_tmp12_ = _tmp11_->layout;
-	_tmp13_ = pango_font_description_from_string ("Ubuntu 16");
-	_tmp14_ = _tmp13_;
-	pango_layout_set_font_description (_tmp12_, _tmp14_);
-	_pango_font_description_free0 (_tmp14_);
-	_tmp15_ = e;
-	_tmp16_ = background;
-	_tmp17_ = g_strdup (_tmp16_);
-	_g_free0 (_tmp15_->background);
-	_tmp15_->background = _tmp17_;
-	_tmp18_ = e;
-	_tmp19_ = keyboard_layouts;
-	_tmp20_ = g_list_copy (_tmp19_);
-	__g_list_free__g_object_unref0_0 (_tmp18_->keyboard_layouts);
-	_tmp18_->keyboard_layouts = _tmp20_;
+	_tmp12_ = background;
+	_tmp13_ = g_strdup (_tmp12_);
+	_g_free0 (_tmp11_->background);
+	_tmp11_->background = _tmp13_;
+	_tmp14_ = e;
+	_tmp15_ = keyboard_layouts;
+	_tmp16_ = g_list_copy (_tmp15_);
+	__g_list_free__g_object_unref0_0 (_tmp14_->keyboard_layouts);
+	_tmp14_->keyboard_layouts = _tmp16_;
+	_tmp17_ = e;
+	_tmp18_ = is_active;
+	_tmp17_->is_active = _tmp18_;
+	_tmp19_ = e;
+	_tmp20_ = has_messages;
+	_tmp19_->has_messages = _tmp20_;
 	_tmp21_ = e;
-	_tmp22_ = is_active;
-	_tmp21_->is_active = _tmp22_;
-	_tmp23_ = e;
-	_tmp24_ = has_messages;
-	_tmp23_->has_messages = _tmp24_;
-	_tmp25_ = e;
-	_tmp26_ = session;
-	_tmp27_ = g_strdup (_tmp26_);
-	_g_free0 (_tmp25_->session);
-	_tmp25_->session = _tmp27_;
-	_tmp28_ = e;
-	_tmp29_ = _user_entry_ref0 (_tmp28_);
-	self->priv->entries = g_list_insert_sorted (self->priv->entries, _tmp29_, _user_list_compare_entry_gcompare_func);
-	_tmp30_ = self->priv->_selected_entry;
-	if (_tmp30_ == NULL) {
-		UserEntry* _tmp31_;
-		_tmp31_ = e;
-		user_list_select_entry (self, _tmp31_, 1.0);
+	_tmp22_ = session;
+	_tmp23_ = g_strdup (_tmp22_);
+	_g_free0 (_tmp21_->session);
+	_tmp21_->session = _tmp23_;
+	_tmp24_ = e;
+	_tmp25_ = prompt_box_new ();
+	_tmp26_ = g_object_ref_sink (_tmp25_);
+	_g_object_unref0 (_tmp24_->prompt_box);
+	_tmp24_->prompt_box = _tmp26_;
+	_tmp27_ = e;
+	_tmp28_ = _tmp27_->prompt_box;
+	g_object_set ((GtkWidget*) _tmp28_, "expand", TRUE, NULL);
+	_tmp29_ = e;
+	_tmp30_ = _tmp29_->prompt_box;
+	_tmp31_ = label;
+	prompt_box_set_name (_tmp30_, _tmp31_);
+	_tmp32_ = e;
+	_tmp33_ = _tmp32_->prompt_box;
+	_tmp34_ = has_messages;
+	prompt_box_set_show_message_icon (_tmp33_, _tmp34_);
+	_tmp35_ = e;
+	_tmp36_ = _tmp35_->prompt_box;
+	_tmp37_ = is_active;
+	prompt_box_set_is_active (_tmp36_, _tmp37_);
+	_tmp38_ = e;
+	_tmp39_ = _tmp38_->prompt_box;
+	g_signal_connect_object (_tmp39_, "respond", (GCallback) _user_list_prompt_box_respond_cb_prompt_box_respond, self, 0);
+	_tmp40_ = e;
+	_tmp41_ = _tmp40_->prompt_box;
+	g_signal_connect_object (_tmp41_, "login", (GCallback) _user_list_prompt_box_login_cb_prompt_box_login, self, 0);
+	_tmp42_ = e;
+	_tmp43_ = _tmp42_->prompt_box;
+	g_signal_connect_object (_tmp43_, "show-options", (GCallback) _user_list_prompt_box_show_options_cb_prompt_box_show_options, self, 0);
+	_tmp44_ = e;
+	_tmp45_ = _tmp44_->prompt_box;
+	gtk_widget_set_size_request ((GtkWidget*) _tmp45_, (grid_size * USER_LIST_BOX_WIDTH) - (USER_LIST_BORDER * 2), -1);
+	_tmp46_ = e;
+	_tmp47_ = _tmp46_->prompt_box;
+	user_list_add_with_class (self, (GtkWidget*) _tmp47_);
+	_tmp48_ = e;
+	_tmp49_ = _user_entry_ref0 (_tmp48_);
+	self->priv->entries = g_list_insert_sorted (self->priv->entries, _tmp49_, _user_list_compare_entry_gcompare_func);
+	_tmp50_ = self->priv->_selected_entry;
+	if (_tmp50_ == NULL) {
+		UserEntry* _tmp51_;
+		_tmp51_ = e;
+		user_list_select_entry (self, _tmp51_, 1.0);
 	} else {
-		UserEntry* _tmp32_;
-		_tmp32_ = self->priv->_selected_entry;
-		user_list_select_entry (self, _tmp32_, 1.0);
+		UserEntry* _tmp52_;
+		_tmp52_ = self->priv->_selected_entry;
+		user_list_select_entry (self, _tmp52_, 1.0);
 	}
-	_tmp34_ = user_list_have_users (self);
-	if (_tmp34_) {
-		gboolean _tmp35_;
-		gboolean _tmp36_;
-		_tmp35_ = user_list_get_always_show_manual (self);
-		_tmp36_ = _tmp35_;
-		_tmp33_ = !_tmp36_;
+	_tmp54_ = user_list_have_users (self);
+	if (_tmp54_) {
+		gboolean _tmp55_;
+		gboolean _tmp56_;
+		_tmp55_ = user_list_get_always_show_manual (self);
+		_tmp56_ = _tmp55_;
+		_tmp53_ = !_tmp56_;
 	} else {
-		_tmp33_ = FALSE;
+		_tmp53_ = FALSE;
 	}
-	_tmp37_ = _tmp33_;
-	if (_tmp37_) {
+	_tmp57_ = _tmp53_;
+	if (_tmp57_) {
 		user_list_remove_entry (self, "*other");
 	}
-	user_list_redraw_user_list (self);
+	gtk_widget_queue_draw ((GtkWidget*) self);
 	_user_entry_unref0 (e);
 }
 
@@ -1963,12 +1371,10 @@ static gint user_list_compare_entry (UserEntry* a, UserEntry* b) {
 	gboolean _tmp3_ = FALSE;
 	gboolean _tmp7_;
 	UserEntry* _tmp18_;
-	PangoLayout* _tmp19_;
-	const gchar* _tmp20_ = NULL;
-	UserEntry* _tmp21_;
-	PangoLayout* _tmp22_;
-	const gchar* _tmp23_ = NULL;
-	gint _tmp24_ = 0;
+	const gchar* _tmp19_;
+	UserEntry* _tmp20_;
+	const gchar* _tmp21_;
+	gint _tmp22_ = 0;
 	g_return_val_if_fail (a != NULL, 0);
 	g_return_val_if_fail (b != NULL, 0);
 	_tmp1_ = a;
@@ -2025,13 +1431,11 @@ static gint user_list_compare_entry (UserEntry* a, UserEntry* b) {
 		}
 	}
 	_tmp18_ = a;
-	_tmp19_ = _tmp18_->layout;
-	_tmp20_ = pango_layout_get_text (_tmp19_);
-	_tmp21_ = b;
-	_tmp22_ = _tmp21_->layout;
-	_tmp23_ = pango_layout_get_text (_tmp22_);
-	_tmp24_ = g_ascii_strcasecmp (_tmp20_, _tmp23_);
-	result = _tmp24_;
+	_tmp19_ = _tmp18_->label;
+	_tmp20_ = b;
+	_tmp21_ = _tmp20_->label;
+	_tmp22_ = g_ascii_strcasecmp (_tmp19_, _tmp21_);
+	result = _tmp22_;
 	return result;
 }
 
@@ -2127,9 +1531,11 @@ void user_list_remove_entry (UserList* self, const gchar* name) {
 	gint _tmp5_ = 0;
 	gint index;
 	UserEntry* _tmp6_;
-	gboolean _tmp7_ = FALSE;
+	PromptBox* _tmp7_;
 	UserEntry* _tmp8_;
-	UserEntry* _tmp9_;
+	gboolean _tmp9_ = FALSE;
+	UserEntry* _tmp10_;
+	UserEntry* _tmp11_;
 	g_return_if_fail (self != NULL);
 	_tmp0_ = name;
 	_tmp1_ = user_list_find_entry (self, _tmp0_);
@@ -2144,240 +1550,378 @@ void user_list_remove_entry (UserList* self, const gchar* name) {
 	_tmp5_ = g_list_index (_tmp3_, _tmp4_);
 	index = _tmp5_;
 	_tmp6_ = entry;
-	self->priv->entries = g_list_remove (self->priv->entries, _tmp6_);
-	_tmp7_ = user_list_have_users (self);
-	if (!_tmp7_) {
+	_tmp7_ = _tmp6_->prompt_box;
+	gtk_widget_destroy ((GtkWidget*) _tmp7_);
+	_tmp8_ = entry;
+	self->priv->entries = g_list_remove (self->priv->entries, _tmp8_);
+	_tmp9_ = user_list_have_users (self);
+	if (!_tmp9_) {
 		user_list_add_manual_entry (self);
 	}
-	_tmp8_ = entry;
-	_tmp9_ = self->priv->_selected_entry;
-	if (_tmp8_ == _tmp9_) {
-		gint _tmp10_;
-		GList* _tmp11_;
-		guint _tmp12_ = 0U;
-		GList* _tmp14_;
-		gint _tmp15_;
-		gconstpointer _tmp16_ = NULL;
-		_tmp10_ = index;
-		_tmp11_ = self->priv->entries;
-		_tmp12_ = g_list_length (_tmp11_);
-		if (((guint) _tmp10_) >= _tmp12_) {
-			gint _tmp13_;
-			_tmp13_ = index;
-			index = _tmp13_ - 1;
+	_tmp10_ = entry;
+	_tmp11_ = self->priv->_selected_entry;
+	if (_tmp10_ == _tmp11_) {
+		gint _tmp12_;
+		GList* _tmp13_;
+		guint _tmp14_ = 0U;
+		GList* _tmp16_;
+		gint _tmp17_;
+		gconstpointer _tmp18_ = NULL;
+		_tmp12_ = index;
+		_tmp13_ = self->priv->entries;
+		_tmp14_ = g_list_length (_tmp13_);
+		if (((guint) _tmp12_) >= _tmp14_) {
+			gint _tmp15_;
+			_tmp15_ = index;
+			index = _tmp15_ - 1;
 		}
-		_tmp14_ = self->priv->entries;
-		_tmp15_ = index;
-		_tmp16_ = g_list_nth_data (_tmp14_, (guint) _tmp15_);
-		user_list_select_entry (self, (UserEntry*) _tmp16_, -1.0);
+		_tmp16_ = self->priv->entries;
+		_tmp17_ = index;
+		_tmp18_ = g_list_nth_data (_tmp16_, (guint) _tmp17_);
+		user_list_select_entry (self, (UserEntry*) _tmp18_, -1.0);
 	}
-	user_list_redraw_user_list (self);
+	gtk_widget_queue_draw ((GtkWidget*) self);
 	_user_entry_unref0 (entry);
 }
 
 
-static void user_list_prompt_entry_activate_cb (UserList* self) {
-	DashEntry* _tmp0_;
-	DashEntry* _tmp1_;
+static void user_list_prompt_box_respond_cb (UserList* self, const gchar* response) {
+	UserEntry* _tmp0_;
+	PromptBox* _tmp1_;
 	const gchar* _tmp2_;
-	const gchar* _tmp3_;
 	g_return_if_fail (self != NULL);
-	_tmp0_ = self->priv->prompt_entry;
-	gtk_widget_set_sensitive ((GtkWidget*) _tmp0_, FALSE);
-	_tmp1_ = self->priv->prompt_entry;
-	_tmp2_ = gtk_entry_get_text ((GtkEntry*) _tmp1_);
-	_tmp3_ = _tmp2_;
-	g_signal_emit_by_name (self, "respond-to-prompt", _tmp3_);
+	g_return_if_fail (response != NULL);
+	_tmp0_ = self->priv->_selected_entry;
+	_tmp1_ = _tmp0_->prompt_box;
+	gtk_widget_set_sensitive ((GtkWidget*) _tmp1_, FALSE);
+	_tmp2_ = response;
+	g_signal_emit_by_name (self, "respond-to-prompt", _tmp2_);
 }
 
 
-static void user_list_login_button_clicked_cb (UserList* self) {
+static void user_list_prompt_box_login_cb (UserList* self) {
 	UserEntry* _tmp0_;
 	const gchar* _tmp1_;
 	g_return_if_fail (self != NULL);
 	_tmp0_ = self->priv->_selected_entry;
 	_tmp1_ = _tmp0_->name;
-	g_debug ("user-list.vala:546: Start session for %s", _tmp1_);
+	g_debug ("user-list.vala:490: Start session for %s", _tmp1_);
 	g_signal_emit_by_name (self, "start-session");
 }
 
 
-static void user_list_session_button_clicked_cb (UserList* self) {
-	UserListMode _tmp0_;
-	AnimateTimer* _tmp1_;
+static void user_list_prompt_box_show_options_cb (UserList* self) {
+	DashBox* _tmp0_;
+	SessionChooser* _tmp1_;
 	g_return_if_fail (self != NULL);
-	_tmp0_ = self->priv->mode;
-	g_return_if_fail (_tmp0_ == USER_LIST_MODE_LOGIN);
-	self->priv->mode = USER_LIST_MODE_TRANSFORM_TO_SESSIONS_HIDE;
-	_tmp1_ = self->priv->scroll_timer;
-	animate_timer_reset (_tmp1_, ANIMATE_TIMER_INSTANT);
+	_tmp0_ = self->priv->login_box;
+	_tmp1_ = self->priv->session_chooser;
+	dash_box_push (_tmp0_, (GtkWidget*) _tmp1_);
 }
 
 
 static void user_list_session_clicked_cb (UserList* self, const gchar* session) {
-	UserListMode _tmp0_;
-	SessionChooser* _tmp1_;
-	const gchar* _tmp2_;
-	g_return_if_fail (self != NULL);
-	_tmp0_ = self->priv->mode;
-	g_return_if_fail (_tmp0_ == USER_LIST_MODE_SESSIONS);
-	self->priv->mode = USER_LIST_MODE_TRANSFORM_TO_LOGIN_HIDE;
-	_tmp1_ = self->priv->session_chooser;
-	fadable_fade_out ((Fadable*) _tmp1_);
-	_tmp2_ = session;
-	if (_tmp2_ != NULL) {
-		const gchar* _tmp3_;
-		_tmp3_ = session;
-		user_list_set_session (self, _tmp3_);
-	}
-}
-
-
-static void user_list_session_fade_done_cb (UserList* self) {
-	UserListMode _tmp0_;
-	g_return_if_fail (self != NULL);
-	_tmp0_ = self->priv->mode;
-	if (_tmp0_ == USER_LIST_MODE_TRANSFORM_TO_LOGIN_HIDE) {
-		GtkBox* _tmp1_;
-		SessionChooser* _tmp2_;
-		AnimateTimer* _tmp3_;
-		Fadable* _tmp4_;
-		GtkButton* _tmp7_;
-		_tmp1_ = self->priv->login_box;
-		_tmp2_ = self->priv->session_chooser;
-		gtk_container_remove ((GtkContainer*) _tmp1_, (GtkWidget*) _tmp2_);
-		self->priv->mode = USER_LIST_MODE_TRANSFORM_TO_LOGIN_SHOW;
-		_tmp3_ = self->priv->scroll_timer;
-		animate_timer_reset (_tmp3_, ANIMATE_TIMER_INSTANT);
-		_tmp4_ = self->priv->prompt_widget_to_show;
-		if (_tmp4_ != NULL) {
-			Fadable* _tmp5_;
-			Fadable* _tmp6_;
-			_tmp5_ = self->priv->prompt_widget_to_show;
-			gtk_widget_show ((GtkWidget*) _tmp5_);
-			_tmp6_ = self->priv->prompt_widget_to_show;
-			gtk_widget_grab_focus ((GtkWidget*) _tmp6_);
-		}
-		_tmp7_ = self->priv->session_button;
-		gtk_widget_show ((GtkWidget*) _tmp7_);
-	}
-}
-
-
-static void user_list_scroll_animate_cb (UserList* self, gdouble progress) {
-	UserListMode _tmp0_;
-	g_return_if_fail (self != NULL);
-	_tmp0_ = self->priv->mode;
-	switch (_tmp0_) {
-		case USER_LIST_MODE_SCROLLING:
-		{
-			gdouble _tmp1_;
-			_tmp1_ = progress;
-			user_list_animate_scrolling (self, _tmp1_);
-			break;
-		}
-		case USER_LIST_MODE_TRANSFORM_TO_SESSIONS_HIDE:
-		{
-			gdouble _tmp2_;
-			_tmp2_ = progress;
-			user_list_animate_to_sessions_hide (self, _tmp2_);
-			break;
-		}
-		case USER_LIST_MODE_TRANSFORM_TO_LOGIN_SHOW:
-		{
-			gdouble _tmp3_;
-			_tmp3_ = progress;
-			user_list_animate_to_login (self, _tmp3_);
-			break;
-		}
-		default:
-		break;
-	}
-}
-
-
-static void user_list_animate_to_sessions_hide (UserList* self, gdouble progress) {
-	gdouble _tmp0_;
-	g_return_if_fail (self != NULL);
-	user_list_allocate_login_box (self);
-	_tmp0_ = progress;
-	if (_tmp0_ >= 1.0) {
-		user_list_finished_to_sessions_hide (self);
-	}
-	user_list_redraw_user_list (self);
-}
-
-
-static void user_list_finished_to_sessions_hide (UserList* self) {
-	GtkBox* _tmp0_;
-	SessionChooser* _tmp1_;
-	DashEntry* _tmp2_;
-	gboolean _tmp3_;
-	gboolean _tmp4_;
-	DashEntry* _tmp12_;
-	DashButton* _tmp13_;
-	GtkButton* _tmp14_;
-	SessionChooser* _tmp15_;
-	SessionChooser* _tmp16_;
+	DashBox* _tmp0_;
+	const gchar* _tmp1_;
 	g_return_if_fail (self != NULL);
 	_tmp0_ = self->priv->login_box;
-	_tmp1_ = self->priv->session_chooser;
-	gtk_container_add ((GtkContainer*) _tmp0_, (GtkWidget*) _tmp1_);
-	_tmp2_ = self->priv->prompt_entry;
-	_tmp3_ = gtk_widget_get_visible ((GtkWidget*) _tmp2_);
-	_tmp4_ = _tmp3_;
-	if (_tmp4_) {
-		DashEntry* _tmp5_;
-		Fadable* _tmp6_;
-		_tmp5_ = self->priv->prompt_entry;
-		_tmp6_ = _g_object_ref0 ((Fadable*) _tmp5_);
-		_g_object_unref0 (self->priv->prompt_widget_to_show);
-		self->priv->prompt_widget_to_show = _tmp6_;
+	dash_box_pop (_tmp0_);
+	_tmp1_ = session;
+	if (_tmp1_ != NULL) {
+		const gchar* _tmp2_;
+		_tmp2_ = session;
+		user_list_set_session (self, _tmp2_);
+	}
+}
+
+
+static gint user_list_get_login_box_height (UserList* self) {
+	gint result = 0;
+	gint height = 0;
+	DashBox* _tmp0_;
+	gint _tmp1_ = 0;
+	g_return_val_if_fail (self != NULL, 0);
+	_tmp0_ = self->priv->login_box;
+	gtk_widget_get_preferred_height ((GtkWidget*) _tmp0_, NULL, &_tmp1_);
+	height = _tmp1_;
+	result = height;
+	return result;
+}
+
+
+static gint user_list_get_login_box_height_grids (UserList* self) {
+	gint result = 0;
+	gint _tmp0_ = 0;
+	gint height;
+	g_return_val_if_fail (self != NULL, 0);
+	_tmp0_ = user_list_get_login_box_height (self);
+	height = _tmp0_;
+	result = (height / grid_size) + 1;
+	return result;
+}
+
+
+static gint user_list_get_login_box_x (UserList* self) {
+	gint result = 0;
+	gint _tmp0_;
+	gint _tmp1_;
+	g_return_val_if_fail (self != NULL, 0);
+	_tmp0_ = user_list_get_box_x (self);
+	_tmp1_ = _tmp0_;
+	result = _tmp1_ + USER_LIST_BORDER;
+	return result;
+}
+
+
+static gint user_list_get_login_box_y (UserList* self) {
+	gint result = 0;
+	gint _tmp0_;
+	gint _tmp1_;
+	g_return_val_if_fail (self != NULL, 0);
+	_tmp0_ = user_list_get_box_y (self);
+	_tmp1_ = _tmp0_;
+	result = _tmp1_ + USER_LIST_BORDER;
+	return result;
+}
+
+
+static gint user_list_get_position_y (UserList* self, gdouble position) {
+	gint result = 0;
+	gdouble _tmp0_;
+	gdouble grid_number;
+	gboolean _tmp1_ = FALSE;
+	gdouble _tmp2_;
+	gboolean _tmp4_;
+	gint _tmp12_ = 0;
+	gdouble _tmp13_;
+	g_return_val_if_fail (self != NULL, 0);
+	_tmp0_ = position;
+	grid_number = _tmp0_;
+	_tmp2_ = position;
+	if (_tmp2_ >= 0.0) {
+		gdouble _tmp3_;
+		_tmp3_ = position;
+		_tmp1_ = _tmp3_ < 1.0;
 	} else {
-		DashButton* _tmp7_;
-		gboolean _tmp8_;
-		gboolean _tmp9_;
-		_tmp7_ = self->priv->login_button;
-		_tmp8_ = gtk_widget_get_visible ((GtkWidget*) _tmp7_);
-		_tmp9_ = _tmp8_;
-		if (_tmp9_) {
-			DashButton* _tmp10_;
-			Fadable* _tmp11_;
-			_tmp10_ = self->priv->login_button;
-			_tmp11_ = _g_object_ref0 ((Fadable*) _tmp10_);
-			_g_object_unref0 (self->priv->prompt_widget_to_show);
-			self->priv->prompt_widget_to_show = _tmp11_;
+		_tmp1_ = FALSE;
+	}
+	_tmp4_ = _tmp1_;
+	if (_tmp4_) {
+		gint _tmp5_ = 0;
+		gint grids;
+		gdouble _tmp6_;
+		gint _tmp7_;
+		_tmp5_ = user_list_get_login_box_height_grids (self);
+		grids = _tmp5_;
+		_tmp6_ = position;
+		_tmp7_ = grids;
+		grid_number = _tmp6_ * _tmp7_;
+	} else {
+		gdouble _tmp8_;
+		_tmp8_ = position;
+		if (_tmp8_ >= 1.0) {
+			gint _tmp9_ = 0;
+			gint grids;
+			gdouble _tmp10_;
+			gint _tmp11_;
+			_tmp9_ = user_list_get_login_box_height_grids (self);
+			grids = _tmp9_;
+			_tmp10_ = position;
+			_tmp11_ = grids;
+			grid_number = (_tmp10_ + _tmp11_) - 1.0;
 		}
 	}
-	_tmp12_ = self->priv->prompt_entry;
-	gtk_widget_hide ((GtkWidget*) _tmp12_);
-	_tmp13_ = self->priv->login_button;
-	gtk_widget_hide ((GtkWidget*) _tmp13_);
-	_tmp14_ = self->priv->session_button;
-	gtk_widget_hide ((GtkWidget*) _tmp14_);
-	_tmp15_ = self->priv->session_chooser;
-	fadable_fade_in ((Fadable*) _tmp15_);
-	_tmp16_ = self->priv->session_chooser;
-	gtk_widget_child_focus ((GtkWidget*) _tmp16_, GTK_DIR_TAB_FORWARD);
-	self->priv->mode = USER_LIST_MODE_SESSIONS;
+	_tmp12_ = user_list_get_login_box_y (self);
+	_tmp13_ = grid_number;
+	result = _tmp12_ + ((gint) (_tmp13_ * grid_size));
+	return result;
 }
 
 
-static void user_list_animate_to_login (UserList* self, gdouble progress) {
+static void user_list_move_entry (UserList* self, UserEntry* entry, gdouble position) {
+	gdouble alpha;
 	gdouble _tmp0_;
+	UserEntry* _tmp5_;
+	PromptBox* _tmp6_;
+	gdouble _tmp7_;
+	GtkAllocation child_allocation = {0};
+	UserEntry* _tmp8_;
+	PromptBox* _tmp9_;
+	GtkAllocation _tmp10_;
+	gint _tmp11_;
+	gint _tmp12_ = 0;
+	gint _tmp13_ = 0;
+	gdouble _tmp14_;
+	gint _tmp15_ = 0;
+	GtkFixed* _tmp16_;
+	UserEntry* _tmp17_;
+	PromptBox* _tmp18_;
+	GtkAllocation _tmp19_;
+	gint _tmp20_;
+	GtkAllocation _tmp21_;
+	gint _tmp22_;
+	UserEntry* _tmp23_;
+	PromptBox* _tmp24_;
+	GtkAllocation _tmp25_;
+	UserEntry* _tmp26_;
+	PromptBox* _tmp27_;
 	g_return_if_fail (self != NULL);
-	user_list_allocate_login_box (self);
-	_tmp0_ = progress;
-	if (_tmp0_ >= 1.0) {
-		user_list_finished_to_login (self);
+	g_return_if_fail (entry != NULL);
+	alpha = 1.0;
+	_tmp0_ = position;
+	if (_tmp0_ < ((gdouble) 0)) {
+		gdouble _tmp1_;
+		guint _tmp2_;
+		_tmp1_ = position;
+		_tmp2_ = self->priv->n_above;
+		alpha = 1.0 + (_tmp1_ / (_tmp2_ + 1));
+	} else {
+		gdouble _tmp3_;
+		guint _tmp4_;
+		_tmp3_ = position;
+		_tmp4_ = self->priv->n_below;
+		alpha = 1.0 - (_tmp3_ / (_tmp4_ + 1));
 	}
-	user_list_redraw_user_list (self);
+	_tmp5_ = entry;
+	_tmp6_ = _tmp5_->prompt_box;
+	_tmp7_ = alpha;
+	fadable_set_alpha ((Fadable*) _tmp6_, _tmp7_);
+	memset (&child_allocation, 0, sizeof (GtkAllocation));
+	child_allocation.width = (grid_size * USER_LIST_BOX_WIDTH) - (USER_LIST_BORDER * 2);
+	_tmp8_ = entry;
+	_tmp9_ = _tmp8_->prompt_box;
+	_tmp10_ = child_allocation;
+	_tmp11_ = _tmp10_.width;
+	gtk_widget_get_preferred_height_for_width ((GtkWidget*) _tmp9_, _tmp11_, NULL, &_tmp12_);
+	child_allocation.height = _tmp12_;
+	_tmp13_ = user_list_get_login_box_x (self);
+	child_allocation.x = _tmp13_;
+	_tmp14_ = position;
+	_tmp15_ = user_list_get_position_y (self, _tmp14_);
+	child_allocation.y = _tmp15_;
+	_tmp16_ = self->priv->fixed;
+	_tmp17_ = entry;
+	_tmp18_ = _tmp17_->prompt_box;
+	_tmp19_ = child_allocation;
+	_tmp20_ = _tmp19_.x;
+	_tmp21_ = child_allocation;
+	_tmp22_ = _tmp21_.y;
+	gtk_fixed_move (_tmp16_, (GtkWidget*) _tmp18_, _tmp20_, _tmp22_);
+	_tmp23_ = entry;
+	_tmp24_ = _tmp23_->prompt_box;
+	_tmp25_ = child_allocation;
+	gtk_widget_size_allocate ((GtkWidget*) _tmp24_, &_tmp25_);
+	_tmp26_ = entry;
+	_tmp27_ = _tmp26_->prompt_box;
+	gtk_widget_show ((GtkWidget*) _tmp27_);
 }
 
 
-static void user_list_finished_to_login (UserList* self) {
+static void user_list_move_names (UserList* self) {
+	gint index;
+	GList* _tmp0_;
 	g_return_if_fail (self != NULL);
-	self->priv->mode = USER_LIST_MODE_LOGIN;
+	index = 0;
+	_tmp0_ = self->priv->entries;
+	{
+		GList* entry_collection = NULL;
+		GList* entry_it = NULL;
+		entry_collection = _tmp0_;
+		for (entry_it = entry_collection; entry_it != NULL; entry_it = entry_it->next) {
+			UserEntry* _tmp1_;
+			UserEntry* entry = NULL;
+			_tmp1_ = _user_entry_ref0 ((UserEntry*) entry_it->data);
+			entry = _tmp1_;
+			{
+				gint _tmp2_;
+				gdouble _tmp3_;
+				gdouble position;
+				UserEntry* _tmp4_;
+				PromptBox* _tmp5_;
+				gboolean _tmp6_ = FALSE;
+				gdouble _tmp7_;
+				gboolean _tmp10_;
+				gboolean _tmp13_ = FALSE;
+				gboolean _tmp14_ = FALSE;
+				gdouble _tmp15_;
+				gboolean _tmp17_;
+				gboolean _tmp19_;
+				gboolean _tmp22_ = FALSE;
+				gdouble _tmp23_;
+				gboolean _tmp26_;
+				gint _tmp29_;
+				_tmp2_ = index;
+				_tmp3_ = self->priv->scroll_location;
+				position = _tmp2_ - _tmp3_;
+				_tmp4_ = entry;
+				_tmp5_ = _tmp4_->prompt_box;
+				gtk_widget_hide ((GtkWidget*) _tmp5_);
+				_tmp7_ = position;
+				if (_tmp7_ <= ((gdouble) (-1))) {
+					gdouble _tmp8_;
+					guint _tmp9_;
+					_tmp8_ = position;
+					_tmp9_ = self->priv->n_above;
+					_tmp6_ = _tmp8_ > ((gdouble) ((-1) * ((gint) (_tmp9_ + 1))));
+				} else {
+					_tmp6_ = FALSE;
+				}
+				_tmp10_ = _tmp6_;
+				if (_tmp10_) {
+					UserEntry* _tmp11_;
+					gdouble _tmp12_;
+					_tmp11_ = entry;
+					_tmp12_ = position;
+					user_list_move_entry (self, _tmp11_, _tmp12_);
+				}
+				_tmp15_ = position;
+				if (_tmp15_ > ((gdouble) (-1))) {
+					gdouble _tmp16_;
+					_tmp16_ = position;
+					_tmp14_ = _tmp16_ < ((gdouble) 1);
+				} else {
+					_tmp14_ = FALSE;
+				}
+				_tmp17_ = _tmp14_;
+				if (_tmp17_) {
+					UserListMode _tmp18_;
+					_tmp18_ = self->priv->mode;
+					_tmp13_ = _tmp18_ == USER_LIST_MODE_SCROLLING;
+				} else {
+					_tmp13_ = FALSE;
+				}
+				_tmp19_ = _tmp13_;
+				if (_tmp19_) {
+					UserEntry* _tmp20_;
+					gdouble _tmp21_;
+					_tmp20_ = entry;
+					_tmp21_ = position;
+					user_list_move_entry (self, _tmp20_, _tmp21_);
+				}
+				_tmp23_ = position;
+				if (_tmp23_ >= ((gdouble) 1)) {
+					gdouble _tmp24_;
+					guint _tmp25_;
+					_tmp24_ = position;
+					_tmp25_ = self->priv->n_below;
+					_tmp22_ = _tmp24_ < ((gdouble) (_tmp25_ + 1));
+				} else {
+					_tmp22_ = FALSE;
+				}
+				_tmp26_ = _tmp22_;
+				if (_tmp26_) {
+					UserEntry* _tmp27_;
+					gdouble _tmp28_;
+					_tmp27_ = entry;
+					_tmp28_ = position;
+					user_list_move_entry (self, _tmp27_, _tmp28_);
+				}
+				_tmp29_ = index;
+				index = _tmp29_ + 1;
+				_user_entry_unref0 (entry);
+			}
+		}
+	}
 }
 
 
@@ -2442,10 +1986,11 @@ static void user_list_animate_scrolling (UserList* self, gdouble progress) {
 		_tmp19_ = h;
 		self->priv->scroll_location = _tmp18_ + _tmp19_;
 	}
-	user_list_redraw_user_list (self);
+	user_list_move_names (self);
+	gtk_widget_queue_draw ((GtkWidget*) self);
 	_tmp21_ = progress;
 	if (_tmp21_ >= 0.975) {
-		Fadable* _tmp22_;
+		PromptBox* _tmp22_;
 		_tmp22_ = self->priv->prompt_widget_to_show;
 		_tmp20_ = _tmp22_ != NULL;
 	} else {
@@ -2453,9 +1998,10 @@ static void user_list_animate_scrolling (UserList* self, gdouble progress) {
 	}
 	_tmp23_ = _tmp20_;
 	if (_tmp23_) {
-		Fadable* _tmp24_;
+		PromptBox* _tmp24_;
+		user_list_setup_prompt_box (self);
 		_tmp24_ = self->priv->prompt_widget_to_show;
-		fadable_fade_in (_tmp24_);
+		prompt_box_fade_in_prompts (_tmp24_);
 		_g_object_unref0 (self->priv->prompt_widget_to_show);
 		self->priv->prompt_widget_to_show = NULL;
 		g_signal_emit_by_name (self, "user-displayed-start");
@@ -2468,12 +2014,16 @@ static void user_list_animate_scrolling (UserList* self, gdouble progress) {
 
 
 static void user_list_finished_scrolling (UserList* self) {
-	GtkButton* _tmp0_;
+	DashBox* _tmp0_;
+	UserEntry* _tmp1_;
+	PromptBox* _tmp2_;
 	g_return_if_fail (self != NULL);
-	_tmp0_ = self->priv->session_button;
-	gtk_widget_show ((GtkWidget*) _tmp0_);
 	g_signal_emit_by_name (self, "user-displayed-done");
 	self->priv->mode = USER_LIST_MODE_LOGIN;
+	_tmp0_ = self->priv->login_box;
+	_tmp1_ = self->priv->_selected_entry;
+	_tmp2_ = _tmp1_->prompt_box;
+	dash_box_set_base (_tmp0_, (GtkWidget*) _tmp2_);
 }
 
 
@@ -2484,8 +2034,8 @@ static void user_list_select_entry (UserList* self, UserEntry* entry, gdouble di
 	GList* _tmp6_;
 	UserEntry* _tmp7_;
 	gint _tmp8_ = 0;
-	UserEntry* _tmp38_;
-	UserEntry* _tmp39_;
+	UserEntry* _tmp26_;
+	UserEntry* _tmp27_;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (entry != NULL);
 	_tmp0_ = user_list_get_badge (self);
@@ -2518,9 +2068,10 @@ static void user_list_select_entry (UserList* self, UserEntry* entry, gdouble di
 		gdouble new_start;
 		gdouble _tmp14_;
 		gint _tmp15_;
-		gint _tmp35_;
-		gdouble _tmp36_;
-		gdouble _tmp37_;
+		gint _tmp22_;
+		gdouble _tmp23_;
+		gdouble _tmp24_;
+		DashBox* _tmp25_;
 		_tmp9_ = self->priv->entries;
 		_tmp10_ = entry;
 		_tmp11_ = g_list_index (_tmp9_, _tmp10_);
@@ -2539,12 +2090,6 @@ static void user_list_select_entry (UserList* self, UserEntry* entry, gdouble di
 			AnimateTimer* _tmp19_;
 			gdouble _tmp20_;
 			gint _tmp21_ = 0;
-			DashEntry* _tmp22_;
-			gboolean _tmp23_;
-			gboolean _tmp24_;
-			DashEntry* _tmp32_;
-			DashButton* _tmp33_;
-			GtkButton* _tmp34_;
 			_tmp16_ = new_direction;
 			_tmp17_ = new_target;
 			_tmp18_ = new_start;
@@ -2553,69 +2098,84 @@ static void user_list_select_entry (UserList* self, UserEntry* entry, gdouble di
 			_tmp20_ = new_distance;
 			_tmp21_ = MIN ((gint) (100 * _tmp20_), 500);
 			animate_timer_reset (_tmp19_, 250 + _tmp21_);
-			_tmp22_ = self->priv->prompt_entry;
-			_tmp23_ = gtk_widget_get_visible ((GtkWidget*) _tmp22_);
-			_tmp24_ = _tmp23_;
-			if (_tmp24_) {
-				DashEntry* _tmp25_;
-				Fadable* _tmp26_;
-				_tmp25_ = self->priv->prompt_entry;
-				_tmp26_ = _g_object_ref0 ((Fadable*) _tmp25_);
-				_g_object_unref0 (self->priv->prompt_widget_to_show);
-				self->priv->prompt_widget_to_show = _tmp26_;
-			} else {
-				DashButton* _tmp27_;
-				gboolean _tmp28_;
-				gboolean _tmp29_;
-				_tmp27_ = self->priv->login_button;
-				_tmp28_ = gtk_widget_get_visible ((GtkWidget*) _tmp27_);
-				_tmp29_ = _tmp28_;
-				if (_tmp29_) {
-					DashButton* _tmp30_;
-					Fadable* _tmp31_;
-					_tmp30_ = self->priv->login_button;
-					_tmp31_ = _g_object_ref0 ((Fadable*) _tmp30_);
-					_g_object_unref0 (self->priv->prompt_widget_to_show);
-					self->priv->prompt_widget_to_show = _tmp31_;
-				}
-			}
-			_tmp32_ = self->priv->prompt_entry;
-			gtk_widget_hide ((GtkWidget*) _tmp32_);
-			_tmp33_ = self->priv->login_button;
-			gtk_widget_hide ((GtkWidget*) _tmp33_);
-			_tmp34_ = self->priv->session_button;
-			gtk_widget_hide ((GtkWidget*) _tmp34_);
 			self->priv->mode = USER_LIST_MODE_SCROLLING;
 		}
-		_tmp35_ = new_target;
-		self->priv->scroll_target_location = (gdouble) _tmp35_;
-		_tmp36_ = new_direction;
-		self->priv->scroll_direction = _tmp36_;
-		_tmp37_ = new_start;
-		self->priv->scroll_start_location = _tmp37_;
+		_tmp22_ = new_target;
+		self->priv->scroll_target_location = (gdouble) _tmp22_;
+		_tmp23_ = new_direction;
+		self->priv->scroll_direction = _tmp23_;
+		_tmp24_ = new_start;
+		self->priv->scroll_start_location = _tmp24_;
+		_tmp25_ = self->priv->login_box;
+		dash_box_set_base (_tmp25_, NULL);
 	}
-	_tmp38_ = self->priv->_selected_entry;
-	_tmp39_ = entry;
-	if (_tmp38_ != _tmp39_) {
-		UserEntry* _tmp40_;
-		UserEntry* _tmp41_;
-		const gchar* _tmp42_;
-		UserEntry* _tmp43_;
-		const gchar* _tmp44_;
-		UserListMode _tmp45_;
-		_tmp40_ = entry;
-		user_list_set_selected_entry (self, _tmp40_);
-		_tmp41_ = entry;
-		_tmp42_ = _tmp41_->session;
-		user_list_set_session (self, _tmp42_);
-		_tmp43_ = self->priv->_selected_entry;
-		_tmp44_ = _tmp43_->name;
-		g_signal_emit_by_name (self, "user-selected", _tmp44_);
-		_tmp45_ = self->priv->mode;
-		if (_tmp45_ == USER_LIST_MODE_LOGIN) {
-			g_signal_emit_by_name (self, "user-displayed-done");
+	_tmp26_ = self->priv->_selected_entry;
+	_tmp27_ = entry;
+	if (_tmp26_ != _tmp27_) {
+		UserEntry* _tmp28_;
+		UserEntry* _tmp31_;
+		UserEntry* _tmp32_;
+		const gchar* _tmp33_;
+		UserEntry* _tmp34_;
+		const gchar* _tmp35_;
+		UserListMode _tmp36_;
+		_tmp28_ = self->priv->_selected_entry;
+		if (_tmp28_ != NULL) {
+			UserEntry* _tmp29_;
+			PromptBox* _tmp30_;
+			_tmp29_ = self->priv->_selected_entry;
+			_tmp30_ = _tmp29_->prompt_box;
+			prompt_box_clear (_tmp30_);
+		}
+		_tmp31_ = entry;
+		user_list_set_selected_entry (self, _tmp31_);
+		_tmp32_ = entry;
+		_tmp33_ = _tmp32_->session;
+		user_list_set_session (self, _tmp33_);
+		user_list_setup_prompt_box (self);
+		_tmp34_ = self->priv->_selected_entry;
+		_tmp35_ = _tmp34_->name;
+		g_signal_emit_by_name (self, "user-selected", _tmp35_);
+		_tmp36_ = self->priv->mode;
+		if (_tmp36_ == USER_LIST_MODE_LOGIN) {
+			AnimateTimer* _tmp37_;
+			_tmp37_ = self->priv->scroll_timer;
+			animate_timer_reset (_tmp37_, 0);
+			self->priv->mode = USER_LIST_MODE_SCROLLING;
 		}
 	}
+}
+
+
+static void user_list_setup_prompt_box (UserList* self) {
+	UserEntry* _tmp0_;
+	PromptBox* _tmp1_;
+	UserEntry* _tmp2_;
+	const gchar* _tmp3_;
+	UserEntry* _tmp4_;
+	PromptBox* _tmp5_;
+	UserEntry* _tmp6_;
+	gboolean _tmp7_;
+	UserEntry* _tmp8_;
+	PromptBox* _tmp9_;
+	UserEntry* _tmp10_;
+	gboolean _tmp11_;
+	g_return_if_fail (self != NULL);
+	_tmp0_ = self->priv->_selected_entry;
+	_tmp1_ = _tmp0_->prompt_box;
+	_tmp2_ = self->priv->_selected_entry;
+	_tmp3_ = _tmp2_->label;
+	prompt_box_set_name (_tmp1_, _tmp3_);
+	_tmp4_ = self->priv->_selected_entry;
+	_tmp5_ = _tmp4_->prompt_box;
+	_tmp6_ = self->priv->_selected_entry;
+	_tmp7_ = _tmp6_->has_messages;
+	prompt_box_set_show_message_icon (_tmp5_, _tmp7_);
+	_tmp8_ = self->priv->_selected_entry;
+	_tmp9_ = _tmp8_->prompt_box;
+	_tmp10_ = self->priv->_selected_entry;
+	_tmp11_ = _tmp10_->is_active;
+	prompt_box_set_is_active (_tmp9_, _tmp11_);
 }
 
 
@@ -2628,19 +2188,21 @@ static GdkPixbuf* user_list_get_badge (UserList* self) {
 	_tmp1_ = _tmp0_;
 	if (_tmp1_ == NULL) {
 		const gchar* _tmp2_;
-		GdkPixbuf* _tmp3_ = NULL;
-		_tmp2_ = self->default_session;
-		_tmp3_ = session_chooser_get_badge (_tmp2_);
-		result = _tmp3_;
+		const gchar* _tmp3_;
+		GdkPixbuf* _tmp4_ = NULL;
+		_tmp2_ = user_list_get_default_session (self);
+		_tmp3_ = _tmp2_;
+		_tmp4_ = session_chooser_get_badge (_tmp3_);
+		result = _tmp4_;
 		return result;
 	} else {
-		const gchar* _tmp4_;
 		const gchar* _tmp5_;
-		GdkPixbuf* _tmp6_ = NULL;
-		_tmp4_ = user_list_get_session (self);
-		_tmp5_ = _tmp4_;
-		_tmp6_ = session_chooser_get_badge (_tmp5_);
-		result = _tmp6_;
+		const gchar* _tmp6_;
+		GdkPixbuf* _tmp7_ = NULL;
+		_tmp5_ = user_list_get_session (self);
+		_tmp6_ = _tmp5_;
+		_tmp7_ = session_chooser_get_badge (_tmp6_);
+		result = _tmp7_;
 		return result;
 	}
 }
@@ -2662,174 +2224,79 @@ static void user_list_real_realize (GtkWidget* base) {
 }
 
 
-static gint user_list_round_up_to_grid_size (UserList* self, gint size) {
-	gint result = 0;
-	gint _tmp0_;
-	g_return_val_if_fail (self != NULL, 0);
-	_tmp0_ = size;
-	if ((_tmp0_ % grid_size) == 0) {
-		gint _tmp1_;
-		_tmp1_ = size;
-		result = _tmp1_;
-		return result;
-	} else {
-		gint _tmp2_;
-		_tmp2_ = size;
-		result = ((_tmp2_ / grid_size) + 1) * grid_size;
-		return result;
-	}
-}
-
-
 static void user_list_allocate_login_box (UserList* self) {
 	GtkAllocation allocation = {0};
 	GtkAllocation _tmp0_ = {0};
 	GtkAllocation child_allocation = {0};
-	GtkAllocation _tmp1_;
-	gint _tmp2_;
-	gint _tmp3_;
-	gint _tmp4_;
+	DashBox* _tmp1_;
+	gint _tmp2_ = 0;
+	DashBox* _tmp3_;
+	gint _tmp4_ = 0;
 	GtkAllocation _tmp5_;
 	gint _tmp6_;
-	gint _tmp7_;
-	gint _tmp8_;
+	gint _tmp7_ = 0;
+	GtkAllocation _tmp8_;
 	gint _tmp9_;
-	gint _tmp10_;
-	GtkRequisition session_request = {0};
-	SessionChooser* _tmp11_;
-	GtkRequisition _tmp12_ = {0};
-	GtkRequisition _tmp13_;
+	gint _tmp10_ = 0;
+	GtkFixed* _tmp11_;
+	DashBox* _tmp12_;
+	GtkAllocation _tmp13_;
 	gint _tmp14_;
-	gint _tmp15_ = 0;
-	gint session_height;
+	GtkAllocation _tmp15_;
 	gint _tmp16_;
-	gint _tmp18_;
-	gint _tmp19_;
-	GtkAllocation _tmp20_;
-	gint _tmp21_;
-	gint _tmp22_ = 0;
-	gint _tmp23_;
-	GtkAllocation _tmp24_;
-	gint _tmp25_;
-	gint session_distance;
-	UserListMode _tmp26_;
-	GtkBox* _tmp50_;
-	GtkAllocation _tmp51_;
+	DashBox* _tmp17_;
+	GtkAllocation _tmp18_;
+	GList* _tmp19_;
 	g_return_if_fail (self != NULL);
 	gtk_widget_get_allocation ((GtkWidget*) self, &_tmp0_);
 	allocation = _tmp0_;
 	memset (&child_allocation, 0, sizeof (GtkAllocation));
-	_tmp1_ = allocation;
-	_tmp2_ = _tmp1_.x;
-	_tmp3_ = user_list_get_box_x (self);
-	_tmp4_ = _tmp3_;
-	child_allocation.x = (_tmp2_ + _tmp4_) + 6;
+	_tmp1_ = self->priv->login_box;
+	gtk_widget_get_preferred_width ((GtkWidget*) _tmp1_, NULL, &_tmp2_);
+	child_allocation.width = _tmp2_;
+	_tmp3_ = self->priv->login_box;
+	gtk_widget_get_preferred_height ((GtkWidget*) _tmp3_, NULL, &_tmp4_);
+	child_allocation.height = _tmp4_;
 	_tmp5_ = allocation;
-	_tmp6_ = _tmp5_.y;
-	_tmp7_ = user_list_get_box_y (self);
-	_tmp8_ = _tmp7_;
-	child_allocation.y = (_tmp6_ + _tmp8_) + 6;
-	_tmp9_ = self->priv->box_width;
-	child_allocation.width = (grid_size * _tmp9_) - 12;
-	_tmp10_ = self->priv->box_height;
-	child_allocation.height = (grid_size * _tmp10_) - 6;
-	_tmp11_ = self->priv->session_chooser;
-	gtk_widget_get_preferred_size ((GtkWidget*) _tmp11_, NULL, &_tmp12_);
-	session_request = _tmp12_;
-	_tmp13_ = session_request;
-	_tmp14_ = _tmp13_.height;
-	_tmp15_ = user_list_round_up_to_grid_size (self, _tmp14_ + 12);
-	session_height = _tmp15_;
-	_tmp16_ = session_height;
-	if (((_tmp16_ / grid_size) % 2) == 0) {
-		gint _tmp17_;
-		_tmp17_ = session_height;
-		session_height = _tmp17_ + grid_size;
+	_tmp6_ = _tmp5_.x;
+	_tmp7_ = user_list_get_login_box_x (self);
+	child_allocation.x = _tmp6_ + _tmp7_;
+	_tmp8_ = allocation;
+	_tmp9_ = _tmp8_.y;
+	_tmp10_ = user_list_get_login_box_y (self);
+	child_allocation.y = _tmp9_ + _tmp10_;
+	_tmp11_ = self->priv->fixed;
+	_tmp12_ = self->priv->login_box;
+	_tmp13_ = child_allocation;
+	_tmp14_ = _tmp13_.x;
+	_tmp15_ = child_allocation;
+	_tmp16_ = _tmp15_.y;
+	gtk_fixed_move (_tmp11_, (GtkWidget*) _tmp12_, _tmp14_, _tmp16_);
+	_tmp17_ = self->priv->login_box;
+	_tmp18_ = child_allocation;
+	gtk_widget_size_allocate ((GtkWidget*) _tmp17_, &_tmp18_);
+	_tmp19_ = self->priv->entries;
+	{
+		GList* entry_collection = NULL;
+		GList* entry_it = NULL;
+		entry_collection = _tmp19_;
+		for (entry_it = entry_collection; entry_it != NULL; entry_it = entry_it->next) {
+			UserEntry* _tmp20_;
+			UserEntry* entry = NULL;
+			_tmp20_ = _user_entry_ref0 ((UserEntry*) entry_it->data);
+			entry = _tmp20_;
+			{
+				UserEntry* _tmp21_;
+				PromptBox* _tmp22_;
+				DashBox* _tmp23_;
+				_tmp21_ = entry;
+				_tmp22_ = _tmp21_->prompt_box;
+				_tmp23_ = self->priv->login_box;
+				prompt_box_set_zone (_tmp22_, (GtkWidget*) _tmp23_);
+				_user_entry_unref0 (entry);
+			}
+		}
 	}
-	_tmp18_ = session_height;
-	session_height = _tmp18_ - 12;
-	_tmp19_ = session_height;
-	_tmp20_ = child_allocation;
-	_tmp21_ = _tmp20_.height;
-	_tmp22_ = MAX (_tmp19_, _tmp21_);
-	session_height = _tmp22_;
-	_tmp23_ = session_height;
-	_tmp24_ = child_allocation;
-	_tmp25_ = _tmp24_.height;
-	session_distance = _tmp23_ - _tmp25_;
-	_tmp26_ = self->priv->mode;
-	switch (_tmp26_) {
-		case USER_LIST_MODE_TRANSFORM_TO_SESSIONS_HIDE:
-		{
-			gint _tmp27_;
-			AnimateTimer* _tmp28_;
-			gdouble _tmp29_;
-			gdouble _tmp30_;
-			gint _tmp31_;
-			gint _tmp32_;
-			AnimateTimer* _tmp33_;
-			gdouble _tmp34_;
-			gdouble _tmp35_;
-			gint _tmp36_;
-			_tmp27_ = child_allocation.height;
-			_tmp28_ = self->priv->scroll_timer;
-			_tmp29_ = animate_timer_get_progress (_tmp28_);
-			_tmp30_ = _tmp29_;
-			_tmp31_ = session_distance;
-			child_allocation.height = _tmp27_ + ((gint) (_tmp30_ * _tmp31_));
-			_tmp32_ = child_allocation.y;
-			_tmp33_ = self->priv->scroll_timer;
-			_tmp34_ = animate_timer_get_progress (_tmp33_);
-			_tmp35_ = _tmp34_;
-			_tmp36_ = session_distance;
-			child_allocation.y = _tmp32_ - (((gint) (_tmp35_ * _tmp36_)) / 2);
-			break;
-		}
-		case USER_LIST_MODE_SESSIONS:
-		case USER_LIST_MODE_TRANSFORM_TO_LOGIN_HIDE:
-		{
-			gint _tmp37_;
-			gint _tmp38_;
-			gint _tmp39_;
-			_tmp37_ = session_height;
-			child_allocation.height = _tmp37_;
-			_tmp38_ = child_allocation.y;
-			_tmp39_ = session_distance;
-			child_allocation.y = _tmp38_ - (_tmp39_ / 2);
-			break;
-		}
-		case USER_LIST_MODE_TRANSFORM_TO_LOGIN_SHOW:
-		{
-			gint _tmp40_;
-			AnimateTimer* _tmp41_;
-			gdouble _tmp42_;
-			gdouble _tmp43_;
-			gint _tmp44_;
-			gint _tmp45_;
-			AnimateTimer* _tmp46_;
-			gdouble _tmp47_;
-			gdouble _tmp48_;
-			gint _tmp49_;
-			_tmp40_ = session_height;
-			_tmp41_ = self->priv->scroll_timer;
-			_tmp42_ = animate_timer_get_progress (_tmp41_);
-			_tmp43_ = _tmp42_;
-			_tmp44_ = session_distance;
-			child_allocation.height = _tmp40_ - ((gint) (_tmp43_ * _tmp44_));
-			_tmp45_ = child_allocation.y;
-			_tmp46_ = self->priv->scroll_timer;
-			_tmp47_ = animate_timer_get_progress (_tmp46_);
-			_tmp48_ = _tmp47_;
-			_tmp49_ = session_distance;
-			child_allocation.y = _tmp45_ - (((gint) ((1.0 - _tmp48_) * _tmp49_)) / 2);
-			break;
-		}
-		default:
-		break;
-	}
-	_tmp50_ = self->priv->login_box;
-	_tmp51_ = child_allocation;
-	gtk_widget_size_allocate ((GtkWidget*) _tmp50_, &_tmp51_);
 }
 
 
@@ -2837,35 +2304,6 @@ static void user_list_real_size_allocate (GtkWidget* base, GtkAllocation* alloca
 	UserList * self;
 	GtkAllocation _tmp0_;
 	gboolean _tmp1_ = FALSE;
-	GtkAllocation child_allocation = {0};
-	GtkAllocation _tmp2_;
-	gint _tmp3_;
-	gint _tmp4_;
-	gint _tmp5_;
-	GtkAllocation _tmp6_;
-	gint _tmp7_;
-	gint _tmp8_;
-	gint _tmp9_;
-	gint _tmp10_;
-	DashEntry* _tmp11_;
-	gint _tmp12_ = 0;
-	DashEntry* _tmp13_;
-	GtkAllocation _tmp14_;
-	DashButton* _tmp15_;
-	gint _tmp16_ = 0;
-	DashButton* _tmp17_;
-	GtkAllocation _tmp18_;
-	GtkAllocation _tmp19_;
-	gint _tmp20_;
-	gint _tmp21_;
-	gint _tmp22_;
-	gint _tmp23_;
-	GtkAllocation _tmp24_;
-	gint _tmp25_;
-	gint _tmp26_;
-	gint _tmp27_;
-	GtkButton* _tmp28_;
-	GtkAllocation _tmp29_;
 	self = (UserList*) base;
 	g_return_if_fail (allocation != NULL);
 	_tmp0_ = *allocation;
@@ -2875,635 +2313,102 @@ static void user_list_real_size_allocate (GtkWidget* base, GtkAllocation* alloca
 		return;
 	}
 	user_list_allocate_login_box (self);
-	memset (&child_allocation, 0, sizeof (GtkAllocation));
-	_tmp2_ = *allocation;
-	_tmp3_ = _tmp2_.x;
-	_tmp4_ = user_list_get_box_x (self);
-	_tmp5_ = _tmp4_;
-	child_allocation.x = (_tmp3_ + _tmp5_) + (grid_size / 2);
-	_tmp6_ = *allocation;
-	_tmp7_ = _tmp6_.y;
-	_tmp8_ = user_list_get_box_y (self);
-	_tmp9_ = _tmp8_;
-	child_allocation.y = ((_tmp7_ + _tmp9_) + (grid_size * 2)) - (grid_size / 4);
-	_tmp10_ = self->priv->box_width;
-	child_allocation.width = grid_size * (_tmp10_ - 1);
-	_tmp11_ = self->priv->prompt_entry;
-	gtk_widget_get_preferred_height ((GtkWidget*) _tmp11_, NULL, &_tmp12_);
-	child_allocation.height = _tmp12_;
-	_tmp13_ = self->priv->prompt_entry;
-	_tmp14_ = child_allocation;
-	gtk_widget_size_allocate ((GtkWidget*) _tmp13_, &_tmp14_);
-	_tmp15_ = self->priv->login_button;
-	gtk_widget_get_preferred_height ((GtkWidget*) _tmp15_, NULL, &_tmp16_);
-	child_allocation.height = _tmp16_;
-	_tmp17_ = self->priv->login_button;
-	_tmp18_ = child_allocation;
-	gtk_widget_size_allocate ((GtkWidget*) _tmp17_, &_tmp18_);
-	_tmp19_ = *allocation;
-	_tmp20_ = _tmp19_.x;
-	_tmp21_ = user_list_get_box_x (self);
-	_tmp22_ = _tmp21_;
-	_tmp23_ = self->priv->box_width;
-	child_allocation.x = (((_tmp20_ + _tmp22_) + (_tmp23_ * grid_size)) - grid_size) - (grid_size / 4);
-	_tmp24_ = *allocation;
-	_tmp25_ = _tmp24_.y;
-	_tmp26_ = user_list_get_box_y (self);
-	_tmp27_ = _tmp26_;
-	child_allocation.y = (_tmp25_ + _tmp27_) + (grid_size / 4);
-	child_allocation.width = grid_size;
-	child_allocation.height = grid_size;
-	_tmp28_ = self->priv->session_button;
-	_tmp29_ = child_allocation;
-	gtk_widget_size_allocate ((GtkWidget*) _tmp28_, &_tmp29_);
-}
-
-
-static gpointer _cairo_surface_reference0 (gpointer self) {
-	return self ? cairo_surface_reference (self) : NULL;
-}
-
-
-static cairo_surface_t* user_list_entry_ensure_label_surface (UserList* self, UserEntry* entry, cairo_t* orig_c, gboolean in_box) {
-	cairo_surface_t* result = NULL;
-	gboolean _tmp0_ = FALSE;
-	gboolean _tmp1_;
-	gboolean _tmp4_;
-	gint w = 0;
-	gint h = 0;
-	UserEntry* _tmp16_;
-	PangoLayout* _tmp17_;
-	gint _tmp18_ = 0;
-	gint _tmp19_ = 0;
-	gdouble _tmp20_ = 0.0;
-	gboolean _tmp21_;
-	gint _tmp22_;
-	gdouble _tmp23_;
-	gdouble bw;
-	cairo_t* _tmp24_;
-	cairo_surface_t* _tmp25_ = NULL;
-	gdouble _tmp26_;
-	gint _tmp27_;
-	cairo_surface_t* _tmp28_;
-	cairo_surface_t* surface;
-	cairo_surface_t* _tmp29_;
-	cairo_t* _tmp30_;
-	cairo_t* c;
-	gint _tmp31_;
-	gdouble _tmp32_;
-	cairo_t* _tmp46_;
-	UserEntry* _tmp47_;
-	PangoLayout* _tmp48_;
-	gboolean _tmp49_;
-	g_return_val_if_fail (self != NULL, NULL);
-	g_return_val_if_fail (entry != NULL, NULL);
-	g_return_val_if_fail (orig_c != NULL, NULL);
-	_tmp1_ = in_box;
-	if (_tmp1_) {
-		UserEntry* _tmp2_;
-		cairo_surface_t* _tmp3_;
-		_tmp2_ = entry;
-		_tmp3_ = _tmp2_->label_in_box_surface;
-		_tmp0_ = _tmp3_ != NULL;
-	} else {
-		_tmp0_ = FALSE;
-	}
-	_tmp4_ = _tmp0_;
-	if (_tmp4_) {
-		UserEntry* _tmp5_;
-		cairo_surface_t* _tmp6_;
-		cairo_surface_t* _tmp7_;
-		_tmp5_ = entry;
-		_tmp6_ = _tmp5_->label_in_box_surface;
-		_tmp7_ = _cairo_surface_reference0 (_tmp6_);
-		result = _tmp7_;
-		return result;
-	} else {
-		gboolean _tmp8_ = FALSE;
-		gboolean _tmp9_;
-		gboolean _tmp12_;
-		_tmp9_ = in_box;
-		if (!_tmp9_) {
-			UserEntry* _tmp10_;
-			cairo_surface_t* _tmp11_;
-			_tmp10_ = entry;
-			_tmp11_ = _tmp10_->label_out_of_box_surface;
-			_tmp8_ = _tmp11_ != NULL;
-		} else {
-			_tmp8_ = FALSE;
-		}
-		_tmp12_ = _tmp8_;
-		if (_tmp12_) {
-			UserEntry* _tmp13_;
-			cairo_surface_t* _tmp14_;
-			cairo_surface_t* _tmp15_;
-			_tmp13_ = entry;
-			_tmp14_ = _tmp13_->label_out_of_box_surface;
-			_tmp15_ = _cairo_surface_reference0 (_tmp14_);
-			result = _tmp15_;
-			return result;
-		}
-	}
-	_tmp16_ = entry;
-	_tmp17_ = _tmp16_->layout;
-	pango_layout_get_pixel_size (_tmp17_, &_tmp18_, &_tmp19_);
-	w = _tmp18_;
-	h = _tmp19_;
-	_tmp21_ = in_box;
-	if (_tmp21_) {
-		_tmp20_ = 1.5;
-	} else {
-		_tmp20_ = 0.5;
-	}
-	_tmp22_ = self->priv->box_width;
-	_tmp23_ = _tmp20_;
-	bw = (_tmp22_ - _tmp23_) * grid_size;
-	_tmp24_ = orig_c;
-	_tmp25_ = cairo_get_target (_tmp24_);
-	_tmp26_ = bw;
-	_tmp27_ = h;
-	_tmp28_ = cairo_surface_create_similar (_tmp25_, CAIRO_CONTENT_COLOR_ALPHA, (gint) (_tmp26_ + 1), _tmp27_);
-	surface = _tmp28_;
-	_tmp29_ = surface;
-	_tmp30_ = cairo_create (_tmp29_);
-	c = _tmp30_;
-	_tmp31_ = w;
-	_tmp32_ = bw;
-	if (((gdouble) _tmp31_) > _tmp32_) {
-		gdouble _tmp33_;
-		cairo_pattern_t* _tmp34_;
-		cairo_pattern_t* mask;
-		gboolean _tmp35_;
-		cairo_pattern_t* _tmp42_;
-		cairo_t* _tmp43_;
-		cairo_pattern_t* _tmp44_;
-		_tmp33_ = bw;
-		_tmp34_ = cairo_pattern_create_linear ((gdouble) 0, (gdouble) 0, _tmp33_, (gdouble) 0);
-		mask = _tmp34_;
-		_tmp35_ = in_box;
-		if (_tmp35_) {
-			cairo_pattern_t* _tmp36_;
-			gdouble _tmp37_;
-			cairo_pattern_t* _tmp38_;
-			gdouble _tmp39_;
-			_tmp36_ = mask;
-			_tmp37_ = bw;
-			cairo_pattern_add_color_stop_rgba (_tmp36_, 1.0 - (27.0 / _tmp37_), 1.0, 1.0, 1.0, 1.0);
-			_tmp38_ = mask;
-			_tmp39_ = bw;
-			cairo_pattern_add_color_stop_rgba (_tmp38_, 1.0 - (21.6 / _tmp39_), 1.0, 1.0, 1.0, 0.5);
-		} else {
-			cairo_pattern_t* _tmp40_;
-			gdouble _tmp41_;
-			_tmp40_ = mask;
-			_tmp41_ = bw;
-			cairo_pattern_add_color_stop_rgba (_tmp40_, 1.0 - (64.0 / _tmp41_), 1.0, 1.0, 1.0, 1.0);
-		}
-		_tmp42_ = mask;
-		cairo_pattern_add_color_stop_rgba (_tmp42_, 1.0, 1.0, 1.0, 1.0, 0.0);
-		_tmp43_ = c;
-		_tmp44_ = mask;
-		cairo_set_source (_tmp43_, _tmp44_);
-		_cairo_pattern_destroy0 (mask);
-	} else {
-		cairo_t* _tmp45_;
-		_tmp45_ = c;
-		cairo_set_source_rgba (_tmp45_, 1.0, 1.0, 1.0, 1.0);
-	}
-	_tmp46_ = c;
-	_tmp47_ = entry;
-	_tmp48_ = _tmp47_->layout;
-	pango_cairo_show_layout (_tmp46_, _tmp48_);
-	_tmp49_ = in_box;
-	if (_tmp49_) {
-		UserEntry* _tmp50_;
-		cairo_surface_t* _tmp51_;
-		cairo_surface_t* _tmp52_;
-		_tmp50_ = entry;
-		_tmp51_ = surface;
-		_tmp52_ = _cairo_surface_reference0 (_tmp51_);
-		_cairo_surface_destroy0 (_tmp50_->label_in_box_surface);
-		_tmp50_->label_in_box_surface = _tmp52_;
-	} else {
-		UserEntry* _tmp53_;
-		cairo_surface_t* _tmp54_;
-		cairo_surface_t* _tmp55_;
-		_tmp53_ = entry;
-		_tmp54_ = surface;
-		_tmp55_ = _cairo_surface_reference0 (_tmp54_);
-		_cairo_surface_destroy0 (_tmp53_->label_out_of_box_surface);
-		_tmp53_->label_out_of_box_surface = _tmp55_;
-	}
-	result = surface;
-	_cairo_destroy0 (c);
-	return result;
-}
-
-
-static void user_list_draw_entry (UserList* self, cairo_t* c, UserEntry* entry, gdouble alpha, gboolean in_box, GdkPixbuf* badge) {
-	cairo_t* _tmp0_;
-	gboolean _tmp1_ = FALSE;
-	MenuBar* _tmp2_;
-	gboolean _tmp3_;
-	gboolean _tmp4_;
-	gboolean _tmp6_;
-	UserEntry* _tmp7_;
-	gboolean _tmp8_;
-	gint w = 0;
-	gint h = 0;
-	UserEntry* _tmp17_;
-	PangoLayout* _tmp18_;
-	gint _tmp19_ = 0;
-	gint _tmp20_ = 0;
-	gint label_x;
-	gint _tmp21_;
-	gint label_y;
-	UserEntry* _tmp22_;
-	cairo_t* _tmp23_;
-	gboolean _tmp24_;
-	cairo_surface_t* _tmp25_ = NULL;
-	cairo_surface_t* label_surface;
-	cairo_t* _tmp26_;
-	cairo_surface_t* _tmp27_;
-	gint _tmp28_;
-	gint _tmp29_;
-	cairo_t* _tmp30_;
-	gdouble _tmp31_;
-	gdouble _tmp32_ = 0.0;
-	gboolean _tmp33_;
-	gint _tmp34_;
-	gdouble _tmp35_;
-	gint bw;
-	gboolean _tmp36_ = FALSE;
-	UserEntry* _tmp37_;
-	gboolean _tmp38_;
-	gboolean _tmp47_;
-	cairo_t* _tmp62_;
-	gboolean _tmp63_ = FALSE;
-	gboolean _tmp64_ = FALSE;
-	gboolean _tmp65_;
-	gboolean _tmp67_;
-	gboolean _tmp69_;
-	g_return_if_fail (self != NULL);
-	g_return_if_fail (c != NULL);
-	g_return_if_fail (entry != NULL);
-	_tmp0_ = c;
-	cairo_save (_tmp0_);
-	_tmp2_ = self->menubar;
-	_tmp3_ = menu_bar_get_high_contrast (_tmp2_);
-	_tmp4_ = _tmp3_;
-	if (_tmp4_) {
-		_tmp1_ = TRUE;
-	} else {
-		gboolean _tmp5_;
-		_tmp5_ = in_box;
-		_tmp1_ = _tmp5_;
-	}
-	_tmp6_ = _tmp1_;
-	if (_tmp6_) {
-		alpha = 1.0;
-	}
-	_tmp7_ = entry;
-	_tmp8_ = _tmp7_->is_active;
-	if (_tmp8_) {
-		cairo_t* _tmp9_;
-		gint _tmp10_;
-		cairo_t* _tmp11_;
-		cairo_t* _tmp12_;
-		cairo_t* _tmp13_;
-		cairo_t* _tmp14_;
-		gdouble _tmp15_;
-		cairo_t* _tmp16_;
-		_tmp9_ = c;
-		_tmp10_ = self->priv->border;
-		cairo_move_to (_tmp9_, (gdouble) 8, (((grid_size / 2) + 0.5) - 4) + _tmp10_);
-		_tmp11_ = c;
-		cairo_rel_line_to (_tmp11_, (gdouble) 5, (gdouble) 4);
-		_tmp12_ = c;
-		cairo_rel_line_to (_tmp12_, (gdouble) (-5), (gdouble) 4);
-		_tmp13_ = c;
-		cairo_close_path (_tmp13_);
-		_tmp14_ = c;
-		_tmp15_ = alpha;
-		cairo_set_source_rgba (_tmp14_, 1.0, 1.0, 1.0, _tmp15_);
-		_tmp16_ = c;
-		cairo_fill (_tmp16_);
-	}
-	_tmp17_ = entry;
-	_tmp18_ = _tmp17_->layout;
-	pango_layout_get_pixel_size (_tmp18_, &_tmp19_, &_tmp20_);
-	w = _tmp19_;
-	h = _tmp20_;
-	label_x = grid_size / 2;
-	_tmp21_ = self->priv->border;
-	label_y = (grid_size / 4) + _tmp21_;
-	_tmp22_ = entry;
-	_tmp23_ = c;
-	_tmp24_ = in_box;
-	_tmp25_ = user_list_entry_ensure_label_surface (self, _tmp22_, _tmp23_, _tmp24_);
-	label_surface = _tmp25_;
-	_tmp26_ = c;
-	_tmp27_ = label_surface;
-	_tmp28_ = label_x;
-	_tmp29_ = label_y;
-	cairo_set_source_surface (_tmp26_, _tmp27_, (gdouble) _tmp28_, (gdouble) _tmp29_);
-	_tmp30_ = c;
-	_tmp31_ = alpha;
-	cairo_paint_with_alpha (_tmp30_, _tmp31_);
-	_tmp33_ = in_box;
-	if (_tmp33_) {
-		_tmp32_ = 1.5;
-	} else {
-		_tmp32_ = 0.5;
-	}
-	_tmp34_ = self->priv->box_width;
-	_tmp35_ = _tmp32_;
-	bw = (gint) ((_tmp34_ - _tmp35_) * grid_size);
-	_tmp37_ = entry;
-	_tmp38_ = _tmp37_->has_messages;
-	if (_tmp38_) {
-		gboolean _tmp39_ = FALSE;
-		gboolean _tmp40_;
-		gboolean _tmp46_;
-		_tmp40_ = in_box;
-		if (!_tmp40_) {
-			_tmp39_ = TRUE;
-		} else {
-			gint _tmp41_;
-			gint _tmp42_;
-			GdkPixbuf* _tmp43_;
-			gint _tmp44_ = 0;
-			gint _tmp45_;
-			_tmp41_ = label_x;
-			_tmp42_ = w;
-			_tmp43_ = self->priv->message_pixbuf;
-			_tmp44_ = gdk_pixbuf_get_width (_tmp43_);
-			_tmp45_ = bw;
-			_tmp39_ = (((_tmp41_ + _tmp42_) + 6) + _tmp44_) < _tmp45_;
-		}
-		_tmp46_ = _tmp39_;
-		_tmp36_ = _tmp46_;
-	} else {
-		_tmp36_ = FALSE;
-	}
-	_tmp47_ = _tmp36_;
-	if (_tmp47_) {
-		cairo_t* _tmp48_;
-		gint _tmp49_;
-		gint _tmp50_;
-		gint _tmp51_;
-		gint _tmp52_;
-		GdkPixbuf* _tmp53_;
-		gint _tmp54_ = 0;
-		cairo_t* _tmp55_;
-		GdkPixbuf* _tmp56_;
-		cairo_surface_t* _tmp57_ = NULL;
-		cairo_surface_t* surface;
-		cairo_t* _tmp58_;
-		cairo_surface_t* _tmp59_;
-		cairo_t* _tmp60_;
-		gdouble _tmp61_;
-		_tmp48_ = c;
-		_tmp49_ = label_x;
-		_tmp50_ = w;
-		_tmp51_ = label_y;
-		_tmp52_ = h;
-		_tmp53_ = self->priv->message_pixbuf;
-		_tmp54_ = gdk_pixbuf_get_height (_tmp53_);
-		cairo_translate (_tmp48_, (gdouble) ((_tmp49_ + _tmp50_) + 6), (gdouble) (_tmp51_ + ((_tmp52_ - _tmp54_) / 2)));
-		_tmp55_ = c;
-		_tmp56_ = self->priv->message_pixbuf;
-		_tmp57_ = cached_image_get_cached_surface (_tmp55_, _tmp56_);
-		surface = _tmp57_;
-		_tmp58_ = c;
-		_tmp59_ = surface;
-		cairo_set_source_surface (_tmp58_, _tmp59_, (gdouble) 0, (gdouble) 0);
-		_tmp60_ = c;
-		_tmp61_ = alpha;
-		cairo_paint_with_alpha (_tmp60_, _tmp61_);
-		_cairo_surface_destroy0 (surface);
-	}
-	_tmp62_ = c;
-	cairo_restore (_tmp62_);
-	_tmp65_ = in_box;
-	if (_tmp65_) {
-		UserListMode _tmp66_;
-		_tmp66_ = self->priv->mode;
-		_tmp64_ = _tmp66_ == USER_LIST_MODE_SCROLLING;
-	} else {
-		_tmp64_ = FALSE;
-	}
-	_tmp67_ = _tmp64_;
-	if (_tmp67_) {
-		GdkPixbuf* _tmp68_;
-		_tmp68_ = badge;
-		_tmp63_ = _tmp68_ != NULL;
-	} else {
-		_tmp63_ = FALSE;
-	}
-	_tmp69_ = _tmp63_;
-	if (_tmp69_) {
-		cairo_t* _tmp70_;
-		GdkPixbuf* _tmp71_;
-		gint _tmp72_;
-		gint _tmp73_;
-		gint xpadding;
-		GdkPixbuf* _tmp74_;
-		gint _tmp75_;
-		gint _tmp76_;
-		gint ypadding;
-		cairo_t* _tmp77_;
-		gint _tmp78_;
-		gint _tmp79_;
-		gint _tmp80_;
-		gint _tmp81_;
-		cairo_t* _tmp82_;
-		GdkPixbuf* _tmp83_;
-		cairo_surface_t* _tmp84_ = NULL;
-		cairo_surface_t* surface;
-		cairo_t* _tmp85_;
-		cairo_surface_t* _tmp86_;
-		cairo_t* _tmp87_;
-		cairo_t* _tmp88_;
-		_tmp70_ = c;
-		cairo_save (_tmp70_);
-		_tmp71_ = badge;
-		_tmp72_ = gdk_pixbuf_get_width (_tmp71_);
-		_tmp73_ = _tmp72_;
-		xpadding = (grid_size - _tmp73_) / 2;
-		_tmp74_ = badge;
-		_tmp75_ = gdk_pixbuf_get_height (_tmp74_);
-		_tmp76_ = _tmp75_;
-		ypadding = ((grid_size - _tmp76_) / 2) - 18;
-		_tmp77_ = c;
-		_tmp78_ = self->priv->box_width;
-		_tmp79_ = xpadding;
-		_tmp80_ = ypadding;
-		_tmp81_ = self->priv->border;
-		cairo_translate (_tmp77_, (gdouble) ((((_tmp78_ * grid_size) - grid_size) - (grid_size / 4)) + _tmp79_), (gdouble) (((grid_size / 4) - _tmp80_) - _tmp81_));
-		_tmp82_ = c;
-		_tmp83_ = badge;
-		_tmp84_ = cached_image_get_cached_surface (_tmp82_, _tmp83_);
-		surface = _tmp84_;
-		_tmp85_ = c;
-		_tmp86_ = surface;
-		cairo_set_source_surface (_tmp85_, _tmp86_, (gdouble) 0, (gdouble) 0);
-		_tmp87_ = c;
-		cairo_paint (_tmp87_);
-		_tmp88_ = c;
-		cairo_restore (_tmp88_);
-		_cairo_surface_destroy0 (surface);
-	}
-	_cairo_surface_destroy0 (label_surface);
-}
-
-
-static void user_list_draw_entry_at_position (UserList* self, cairo_t* c, UserEntry* entry, gdouble position, gboolean in_box, GdkPixbuf* badge) {
-	cairo_t* _tmp0_;
-	cairo_t* _tmp1_;
-	gdouble _tmp2_;
-	gdouble alpha;
-	gdouble _tmp3_;
-	cairo_t* _tmp8_;
-	UserEntry* _tmp9_;
-	gdouble _tmp10_;
-	gboolean _tmp11_;
-	GdkPixbuf* _tmp12_;
-	cairo_t* _tmp13_;
-	g_return_if_fail (self != NULL);
-	g_return_if_fail (c != NULL);
-	g_return_if_fail (entry != NULL);
-	_tmp0_ = c;
-	cairo_save (_tmp0_);
-	_tmp1_ = c;
-	_tmp2_ = position;
-	cairo_translate (_tmp1_, (gdouble) 0, _tmp2_ * grid_size);
-	alpha = 1.0;
-	_tmp3_ = position;
-	if (_tmp3_ < ((gdouble) 0)) {
-		gdouble _tmp4_;
-		guint _tmp5_;
-		_tmp4_ = position;
-		_tmp5_ = self->priv->n_above;
-		alpha = 1.0 + (_tmp4_ / (_tmp5_ + 1));
-	} else {
-		gdouble _tmp6_;
-		guint _tmp7_;
-		_tmp6_ = position;
-		_tmp7_ = self->priv->n_below;
-		alpha = 1.0 - ((_tmp6_ - 2) / (_tmp7_ + 1));
-	}
-	_tmp8_ = c;
-	_tmp9_ = entry;
-	_tmp10_ = alpha;
-	_tmp11_ = in_box;
-	_tmp12_ = badge;
-	user_list_draw_entry (self, _tmp8_, _tmp9_, _tmp10_, _tmp11_, _tmp12_);
-	_tmp13_ = c;
-	cairo_restore (_tmp13_);
 }
 
 
 static gboolean user_list_real_draw (GtkWidget* base, cairo_t* c) {
 	UserList * self;
 	gboolean result = FALSE;
-	gdouble max_alpha;
-	UserListMode _tmp0_;
-	cairo_t* _tmp8_;
-	GtkFixed* _tmp9_;
-	GtkBox* _tmp10_;
-	cairo_t* _tmp11_;
-	cairo_t* _tmp12_;
-	gboolean _tmp13_ = FALSE;
-	gboolean _tmp14_ = FALSE;
-	gboolean _tmp15_ = FALSE;
-	UserListMode _tmp16_;
-	gboolean _tmp18_;
-	gboolean _tmp20_;
-	gboolean _tmp22_;
+	cairo_t* _tmp0_;
+	GtkFixed* _tmp1_;
+	DashBox* _tmp2_;
+	cairo_t* _tmp3_;
+	cairo_t* _tmp4_;
+	DashBox* _tmp5_;
+	gdouble _tmp6_;
+	gdouble _tmp7_;
 	self = (UserList*) base;
 	g_return_val_if_fail (c != NULL, FALSE);
-	max_alpha = 1.0;
-	_tmp0_ = self->priv->mode;
-	if (_tmp0_ == USER_LIST_MODE_TRANSFORM_TO_SESSIONS_HIDE) {
-		AnimateTimer* _tmp1_;
-		gdouble _tmp2_;
-		gdouble _tmp3_;
-		_tmp1_ = self->priv->scroll_timer;
-		_tmp2_ = animate_timer_get_progress (_tmp1_);
-		_tmp3_ = _tmp2_;
-		max_alpha = 1.0 - _tmp3_;
-	} else {
-		UserListMode _tmp4_;
-		_tmp4_ = self->priv->mode;
-		if (_tmp4_ == USER_LIST_MODE_TRANSFORM_TO_LOGIN_SHOW) {
-			AnimateTimer* _tmp5_;
-			gdouble _tmp6_;
-			gdouble _tmp7_;
-			_tmp5_ = self->priv->scroll_timer;
-			_tmp6_ = animate_timer_get_progress (_tmp5_);
-			_tmp7_ = _tmp6_;
-			max_alpha = _tmp7_;
-		}
-	}
-	_tmp8_ = c;
-	cairo_save (_tmp8_);
-	_tmp9_ = self->priv->fixed;
-	_tmp10_ = self->priv->login_box;
-	_tmp11_ = c;
-	gtk_container_propagate_draw ((GtkContainer*) _tmp9_, (GtkWidget*) _tmp10_, _tmp11_);
-	_tmp12_ = c;
-	cairo_restore (_tmp12_);
-	_tmp16_ = self->priv->mode;
-	if (_tmp16_ == USER_LIST_MODE_LOGIN) {
-		_tmp15_ = TRUE;
-	} else {
-		UserListMode _tmp17_;
-		_tmp17_ = self->priv->mode;
-		_tmp15_ = _tmp17_ == USER_LIST_MODE_SCROLLING;
-	}
-	_tmp18_ = _tmp15_;
-	if (_tmp18_) {
-		_tmp14_ = TRUE;
-	} else {
-		UserListMode _tmp19_;
-		_tmp19_ = self->priv->mode;
-		_tmp14_ = _tmp19_ == USER_LIST_MODE_TRANSFORM_TO_SESSIONS_HIDE;
-	}
-	_tmp20_ = _tmp14_;
-	if (_tmp20_) {
-		_tmp13_ = TRUE;
-	} else {
-		UserListMode _tmp21_;
-		_tmp21_ = self->priv->mode;
-		_tmp13_ = _tmp21_ == USER_LIST_MODE_TRANSFORM_TO_LOGIN_SHOW;
-	}
-	_tmp22_ = _tmp13_;
-	if (_tmp22_) {
-		cairo_t* _tmp23_;
-		cairo_t* _tmp24_;
-		cairo_t* _tmp25_;
+	_tmp0_ = c;
+	cairo_save (_tmp0_);
+	_tmp1_ = self->priv->fixed;
+	_tmp2_ = self->priv->login_box;
+	_tmp3_ = c;
+	gtk_container_propagate_draw ((GtkContainer*) _tmp1_, (GtkWidget*) _tmp2_, _tmp3_);
+	_tmp4_ = c;
+	cairo_restore (_tmp4_);
+	_tmp5_ = self->priv->login_box;
+	_tmp6_ = dash_box_get_base_alpha (_tmp5_);
+	_tmp7_ = _tmp6_;
+	if (_tmp7_ != 0.0) {
+		cairo_t* _tmp8_;
+		cairo_t* _tmp9_;
+		cairo_t* _tmp10_;
+		gint _tmp11_;
+		gint _tmp12_;
+		gint _tmp13_;
+		gint _tmp14_;
+		guint _tmp15_;
+		guint _tmp16_;
+		guint _tmp17_;
+		cairo_t* _tmp18_;
+		GtkFixed* _tmp19_;
+		GList* _tmp20_ = NULL;
 		cairo_t* _tmp26_;
 		cairo_t* _tmp27_;
-		cairo_t* _tmp28_;
-		cairo_t* _tmp29_;
+		DashBox* _tmp28_;
+		gdouble _tmp29_;
 		gdouble _tmp30_;
 		cairo_t* _tmp31_;
-		_tmp23_ = c;
-		cairo_save (_tmp23_);
-		_tmp24_ = c;
-		cairo_push_group (_tmp24_);
-		_tmp25_ = c;
-		user_list_draw_names (self, _tmp25_, USER_LIST_NAME_LOCATION_OUTSIDE_BOX);
+		_tmp8_ = c;
+		cairo_save (_tmp8_);
+		_tmp9_ = c;
+		cairo_push_group (_tmp9_);
+		_tmp10_ = c;
+		_tmp11_ = user_list_get_box_x (self);
+		_tmp12_ = _tmp11_;
+		_tmp13_ = user_list_get_box_y (self);
+		_tmp14_ = _tmp13_;
+		_tmp15_ = self->priv->n_above;
+		_tmp16_ = self->priv->n_above;
+		_tmp17_ = self->priv->n_below;
+		cairo_rectangle (_tmp10_, (gdouble) (_tmp12_ + USER_LIST_BORDER), (gdouble) (_tmp14_ - (_tmp15_ * grid_size)), (gdouble) ((grid_size * USER_LIST_BOX_WIDTH) - (USER_LIST_BORDER * 2)), (gdouble) (grid_size * ((_tmp16_ + _tmp17_) + USER_LIST_BOX_HEIGHT)));
+		_tmp18_ = c;
+		cairo_clip (_tmp18_);
+		_tmp19_ = self->priv->fixed;
+		_tmp20_ = gtk_container_get_children ((GtkContainer*) _tmp19_);
+		{
+			GList* child_collection = NULL;
+			GList* child_it = NULL;
+			child_collection = _tmp20_;
+			for (child_it = child_collection; child_it != NULL; child_it = child_it->next) {
+				GtkWidget* child = NULL;
+				child = (GtkWidget*) child_it->data;
+				{
+					GtkWidget* _tmp21_;
+					DashBox* _tmp22_;
+					_tmp21_ = child;
+					_tmp22_ = self->priv->login_box;
+					if (_tmp21_ != GTK_WIDGET (_tmp22_)) {
+						GtkFixed* _tmp23_;
+						GtkWidget* _tmp24_;
+						cairo_t* _tmp25_;
+						_tmp23_ = self->priv->fixed;
+						_tmp24_ = child;
+						_tmp25_ = c;
+						gtk_container_propagate_draw ((GtkContainer*) _tmp23_, _tmp24_, _tmp25_);
+					}
+				}
+			}
+			_g_list_free0 (child_collection);
+		}
 		_tmp26_ = c;
-		user_list_draw_box_contents (self, _tmp26_);
+		cairo_pop_group_to_source (_tmp26_);
 		_tmp27_ = c;
-		user_list_draw_names (self, _tmp27_, USER_LIST_NAME_LOCATION_INSIDE_BOX);
-		_tmp28_ = c;
-		cairo_pop_group_to_source (_tmp28_);
-		_tmp29_ = c;
-		_tmp30_ = max_alpha;
-		cairo_paint_with_alpha (_tmp29_, _tmp30_);
+		_tmp28_ = self->priv->login_box;
+		_tmp29_ = dash_box_get_base_alpha (_tmp28_);
+		_tmp30_ = _tmp29_;
+		cairo_paint_with_alpha (_tmp27_, _tmp30_);
 		_tmp31_ = c;
 		cairo_restore (_tmp31_);
 	}
@@ -3512,592 +2417,74 @@ static gboolean user_list_real_draw (GtkWidget* base, cairo_t* c) {
 }
 
 
-static void user_list_draw_names (UserList* self, cairo_t* c, UserListNameLocation where) {
-	cairo_t* _tmp0_;
-	cairo_t* _tmp1_;
-	gint _tmp2_;
-	gint _tmp3_;
-	gint _tmp4_;
-	gint _tmp5_;
-	gint index;
-	GList* _tmp6_;
-	cairo_t* _tmp87_;
-	g_return_if_fail (self != NULL);
-	g_return_if_fail (c != NULL);
-	_tmp0_ = c;
-	cairo_save (_tmp0_);
-	_tmp1_ = c;
-	_tmp2_ = user_list_get_box_x (self);
-	_tmp3_ = _tmp2_;
-	_tmp4_ = user_list_get_box_y (self);
-	_tmp5_ = _tmp4_;
-	cairo_translate (_tmp1_, (gdouble) _tmp3_, (gdouble) _tmp5_);
-	index = 0;
-	_tmp6_ = self->priv->entries;
-	{
-		GList* entry_collection = NULL;
-		GList* entry_it = NULL;
-		entry_collection = _tmp6_;
-		for (entry_it = entry_collection; entry_it != NULL; entry_it = entry_it->next) {
-			UserEntry* _tmp7_;
-			UserEntry* entry = NULL;
-			_tmp7_ = _user_entry_ref0 ((UserEntry*) entry_it->data);
-			entry = _tmp7_;
-			{
-				gint _tmp8_;
-				gdouble _tmp9_;
-				gdouble position;
-				gboolean _tmp10_ = FALSE;
-				gboolean _tmp11_ = FALSE;
-				UserListNameLocation _tmp12_;
-				gboolean _tmp14_;
-				gboolean _tmp17_;
-				gboolean _tmp29_ = FALSE;
-				gboolean _tmp30_ = FALSE;
-				gboolean _tmp31_ = FALSE;
-				UserListNameLocation _tmp32_;
-				gboolean _tmp34_;
-				gboolean _tmp36_;
-				gboolean _tmp38_;
-				gboolean _tmp66_ = FALSE;
-				gboolean _tmp67_ = FALSE;
-				UserListNameLocation _tmp68_;
-				gboolean _tmp70_;
-				gboolean _tmp73_;
-				gint _tmp86_;
-				_tmp8_ = index;
-				_tmp9_ = self->priv->scroll_location;
-				position = _tmp8_ - _tmp9_;
-				_tmp12_ = where;
-				if (_tmp12_ == USER_LIST_NAME_LOCATION_OUTSIDE_BOX) {
-					gdouble _tmp13_;
-					_tmp13_ = position;
-					_tmp11_ = _tmp13_ < ((gdouble) 0);
-				} else {
-					_tmp11_ = FALSE;
-				}
-				_tmp14_ = _tmp11_;
-				if (_tmp14_) {
-					gdouble _tmp15_;
-					guint _tmp16_;
-					_tmp15_ = position;
-					_tmp16_ = self->priv->n_above;
-					_tmp10_ = _tmp15_ > ((gdouble) ((-1) * ((gint) (_tmp16_ + 1))));
-				} else {
-					_tmp10_ = FALSE;
-				}
-				_tmp17_ = _tmp10_;
-				if (_tmp17_) {
-					guint _tmp18_;
-					gdouble h_above;
-					cairo_t* _tmp19_;
-					cairo_t* _tmp20_;
-					gdouble _tmp21_;
-					gint _tmp22_;
-					gdouble _tmp23_;
-					cairo_t* _tmp24_;
-					cairo_t* _tmp25_;
-					UserEntry* _tmp26_;
-					gdouble _tmp27_;
-					cairo_t* _tmp28_;
-					_tmp18_ = self->priv->n_above;
-					h_above = ((gdouble) (_tmp18_ + 1)) * grid_size;
-					_tmp19_ = c;
-					cairo_save (_tmp19_);
-					_tmp20_ = c;
-					_tmp21_ = h_above;
-					_tmp22_ = self->priv->box_width;
-					_tmp23_ = h_above;
-					cairo_rectangle (_tmp20_, (gdouble) 0, -_tmp21_, (gdouble) (_tmp22_ * grid_size), _tmp23_);
-					_tmp24_ = c;
-					cairo_clip (_tmp24_);
-					_tmp25_ = c;
-					_tmp26_ = entry;
-					_tmp27_ = position;
-					user_list_draw_entry_at_position (self, _tmp25_, _tmp26_, _tmp27_, FALSE, NULL);
-					_tmp28_ = c;
-					cairo_restore (_tmp28_);
-				}
-				_tmp32_ = where;
-				if (_tmp32_ == USER_LIST_NAME_LOCATION_INSIDE_BOX) {
-					gdouble _tmp33_;
-					_tmp33_ = position;
-					_tmp31_ = _tmp33_ > ((gdouble) (-1));
-				} else {
-					_tmp31_ = FALSE;
-				}
-				_tmp34_ = _tmp31_;
-				if (_tmp34_) {
-					gdouble _tmp35_;
-					_tmp35_ = position;
-					_tmp30_ = _tmp35_ < ((gdouble) 1);
-				} else {
-					_tmp30_ = FALSE;
-				}
-				_tmp36_ = _tmp30_;
-				if (_tmp36_) {
-					UserListMode _tmp37_;
-					_tmp37_ = self->priv->mode;
-					_tmp29_ = _tmp37_ == USER_LIST_MODE_SCROLLING;
-				} else {
-					_tmp29_ = FALSE;
-				}
-				_tmp38_ = _tmp29_;
-				if (_tmp38_) {
-					cairo_t* _tmp39_;
-					cairo_t* _tmp40_;
-					gint _tmp41_;
-					cairo_t* _tmp42_;
-					gint _tmp43_;
-					gint _tmp44_;
-					gint _tmp45_;
-					gint _tmp46_;
-					gint _tmp47_;
-					gint _tmp48_;
-					cairo_t* _tmp49_;
-					GdkPixbuf* _tmp50_;
-					GdkPixbuf* _tmp51_;
-					GdkPixbuf* badge;
-					UserEntry* _tmp52_;
-					UserEntry* _tmp53_;
-					gdouble _tmp55_;
-					cairo_t* _tmp65_;
-					_tmp39_ = c;
-					cairo_save (_tmp39_);
-					_tmp40_ = c;
-					_tmp41_ = self->priv->border;
-					cairo_translate (_tmp40_, (gdouble) 0, (gdouble) _tmp41_);
-					_tmp42_ = c;
-					_tmp43_ = self->priv->border;
-					_tmp44_ = self->priv->border;
-					_tmp45_ = self->priv->box_width;
-					_tmp46_ = self->priv->border;
-					_tmp47_ = self->priv->box_height;
-					_tmp48_ = self->priv->border;
-					cairo_rectangle (_tmp42_, (gdouble) _tmp43_, (gdouble) (_tmp44_ * 2), (gdouble) ((_tmp45_ * grid_size) - (_tmp46_ * 2)), (gdouble) ((_tmp47_ * grid_size) - (_tmp48_ * 2)));
-					_tmp49_ = c;
-					cairo_clip (_tmp49_);
-					_tmp50_ = self->priv->last_session_badge;
-					_tmp51_ = _g_object_ref0 (_tmp50_);
-					badge = _tmp51_;
-					_tmp52_ = entry;
-					_tmp53_ = self->priv->_selected_entry;
-					if (_tmp52_ == _tmp53_) {
-						GdkPixbuf* _tmp54_ = NULL;
-						_tmp54_ = user_list_get_badge (self);
-						_g_object_unref0 (badge);
-						badge = _tmp54_;
-					}
-					_tmp55_ = position;
-					if (_tmp55_ <= ((gdouble) 0)) {
-						cairo_t* _tmp56_;
-						UserEntry* _tmp57_;
-						gdouble _tmp58_;
-						GdkPixbuf* _tmp59_;
-						_tmp56_ = c;
-						_tmp57_ = entry;
-						_tmp58_ = position;
-						_tmp59_ = badge;
-						user_list_draw_entry_at_position (self, _tmp56_, _tmp57_, _tmp58_, TRUE, _tmp59_);
-					} else {
-						cairo_t* _tmp60_;
-						UserEntry* _tmp61_;
-						gdouble _tmp62_;
-						gint _tmp63_;
-						GdkPixbuf* _tmp64_;
-						_tmp60_ = c;
-						_tmp61_ = entry;
-						_tmp62_ = position;
-						_tmp63_ = self->priv->box_height;
-						_tmp64_ = badge;
-						user_list_draw_entry_at_position (self, _tmp60_, _tmp61_, (_tmp62_ * _tmp63_) * 2, TRUE, _tmp64_);
-					}
-					_tmp65_ = c;
-					cairo_restore (_tmp65_);
-					_g_object_unref0 (badge);
-				}
-				_tmp68_ = where;
-				if (_tmp68_ == USER_LIST_NAME_LOCATION_OUTSIDE_BOX) {
-					gdouble _tmp69_;
-					_tmp69_ = position;
-					_tmp67_ = _tmp69_ > ((gdouble) 0);
-				} else {
-					_tmp67_ = FALSE;
-				}
-				_tmp70_ = _tmp67_;
-				if (_tmp70_) {
-					gdouble _tmp71_;
-					guint _tmp72_;
-					_tmp71_ = position;
-					_tmp72_ = self->priv->n_below;
-					_tmp66_ = _tmp71_ < ((gdouble) (_tmp72_ + 1));
-				} else {
-					_tmp66_ = FALSE;
-				}
-				_tmp73_ = _tmp66_;
-				if (_tmp73_) {
-					guint _tmp74_;
-					gdouble h_below;
-					cairo_t* _tmp75_;
-					cairo_t* _tmp76_;
-					gint _tmp77_;
-					gint _tmp78_;
-					gdouble _tmp79_;
-					cairo_t* _tmp80_;
-					cairo_t* _tmp81_;
-					UserEntry* _tmp82_;
-					gdouble _tmp83_;
-					gint _tmp84_;
-					cairo_t* _tmp85_;
-					_tmp74_ = self->priv->n_below;
-					h_below = ((gdouble) (_tmp74_ + 1)) * grid_size;
-					_tmp75_ = c;
-					cairo_save (_tmp75_);
-					_tmp76_ = c;
-					_tmp77_ = self->priv->box_height;
-					_tmp78_ = self->priv->box_width;
-					_tmp79_ = h_below;
-					cairo_rectangle (_tmp76_, (gdouble) 0, (gdouble) (_tmp77_ * grid_size), (gdouble) (_tmp78_ * grid_size), _tmp79_);
-					_tmp80_ = c;
-					cairo_clip (_tmp80_);
-					_tmp81_ = c;
-					_tmp82_ = entry;
-					_tmp83_ = position;
-					_tmp84_ = self->priv->box_height;
-					user_list_draw_entry_at_position (self, _tmp81_, _tmp82_, (_tmp83_ + _tmp84_) - 1, FALSE, NULL);
-					_tmp85_ = c;
-					cairo_restore (_tmp85_);
-				}
-				_tmp86_ = index;
-				index = _tmp86_ + 1;
-				_user_entry_unref0 (entry);
-			}
-		}
-	}
-	_tmp87_ = c;
-	cairo_restore (_tmp87_);
-}
-
-
-static gpointer _authentication_message_ref0 (gpointer self) {
-	return self ? authentication_message_ref (self) : NULL;
-}
-
-
-static void user_list_draw_box_contents (UserList* self, cairo_t* c) {
-	GtkFixed* _tmp0_;
-	GList* _tmp1_ = NULL;
-	cairo_t* _tmp7_;
-	cairo_t* _tmp8_;
-	gint _tmp9_;
-	gint _tmp10_;
-	gint _tmp11_;
-	gint _tmp12_;
-	gboolean _tmp13_ = FALSE;
-	UserEntry* _tmp14_;
-	gboolean _tmp16_;
-	UserListMode _tmp31_;
-	cairo_t* _tmp76_;
-	g_return_if_fail (self != NULL);
-	g_return_if_fail (c != NULL);
-	_tmp0_ = self->priv->fixed;
-	_tmp1_ = gtk_container_get_children ((GtkContainer*) _tmp0_);
-	{
-		GList* child_collection = NULL;
-		GList* child_it = NULL;
-		child_collection = _tmp1_;
-		for (child_it = child_collection; child_it != NULL; child_it = child_it->next) {
-			GtkWidget* child = NULL;
-			child = (GtkWidget*) child_it->data;
-			{
-				GtkWidget* _tmp2_;
-				GtkBox* _tmp3_;
-				_tmp2_ = child;
-				_tmp3_ = self->priv->login_box;
-				if (_tmp2_ != GTK_WIDGET (_tmp3_)) {
-					GtkFixed* _tmp4_;
-					GtkWidget* _tmp5_;
-					cairo_t* _tmp6_;
-					_tmp4_ = self->priv->fixed;
-					_tmp5_ = child;
-					_tmp6_ = c;
-					gtk_container_propagate_draw ((GtkContainer*) _tmp4_, _tmp5_, _tmp6_);
-				}
-			}
-		}
-		_g_list_free0 (child_collection);
-	}
-	_tmp7_ = c;
-	cairo_save (_tmp7_);
-	_tmp8_ = c;
-	_tmp9_ = user_list_get_box_x (self);
-	_tmp10_ = _tmp9_;
-	_tmp11_ = user_list_get_box_y (self);
-	_tmp12_ = _tmp11_;
-	cairo_translate (_tmp8_, (gdouble) _tmp10_, (gdouble) _tmp12_);
-	_tmp14_ = self->priv->_selected_entry;
-	if (_tmp14_ != NULL) {
-		UserListMode _tmp15_;
-		_tmp15_ = self->priv->mode;
-		_tmp13_ = _tmp15_ != USER_LIST_MODE_SCROLLING;
-	} else {
-		_tmp13_ = FALSE;
-	}
-	_tmp16_ = _tmp13_;
-	if (_tmp16_) {
-		cairo_t* _tmp17_;
-		cairo_t* _tmp18_;
-		gint _tmp19_;
-		gint _tmp20_;
-		gint _tmp21_;
-		gint _tmp22_;
-		gint _tmp23_;
-		gint _tmp24_;
-		cairo_t* _tmp25_;
-		cairo_t* _tmp26_;
-		gint _tmp27_;
-		cairo_t* _tmp28_;
-		UserEntry* _tmp29_;
-		cairo_t* _tmp30_;
-		_tmp17_ = c;
-		cairo_save (_tmp17_);
-		_tmp18_ = c;
-		_tmp19_ = self->priv->border;
-		_tmp20_ = self->priv->border;
-		_tmp21_ = self->priv->box_width;
-		_tmp22_ = self->priv->border;
-		_tmp23_ = self->priv->box_height;
-		_tmp24_ = self->priv->border;
-		cairo_rectangle (_tmp18_, (gdouble) _tmp19_, (gdouble) _tmp20_, (gdouble) ((_tmp21_ * grid_size) - (_tmp22_ * 2)), (gdouble) ((_tmp23_ * grid_size) - (_tmp24_ * 2)));
-		_tmp25_ = c;
-		cairo_clip (_tmp25_);
-		_tmp26_ = c;
-		_tmp27_ = self->priv->border;
-		cairo_translate (_tmp26_, (gdouble) 0, (gdouble) _tmp27_);
-		_tmp28_ = c;
-		_tmp29_ = self->priv->_selected_entry;
-		user_list_draw_entry (self, _tmp28_, _tmp29_, 1.0, TRUE, NULL);
-		_tmp30_ = c;
-		cairo_restore (_tmp30_);
-	}
-	_tmp31_ = self->priv->mode;
-	if (_tmp31_ != USER_LIST_MODE_SCROLLING) {
-		gdouble vertical_offset;
-		GList* _tmp32_;
-		GList* _tmp40_;
-		vertical_offset = 0.0;
-		_tmp32_ = self->priv->messages;
-		{
-			GList* m_collection = NULL;
-			GList* m_it = NULL;
-			m_collection = _tmp32_;
-			for (m_it = m_collection; m_it != NULL; m_it = m_it->next) {
-				AuthenticationMessage* _tmp33_;
-				AuthenticationMessage* m = NULL;
-				_tmp33_ = _authentication_message_ref0 ((AuthenticationMessage*) m_it->data);
-				m = _tmp33_;
-				{
-					gint w = 0;
-					gint h = 0;
-					AuthenticationMessage* _tmp34_;
-					PangoLayout* _tmp35_;
-					gint _tmp36_ = 0;
-					gint _tmp37_ = 0;
-					gdouble _tmp38_;
-					gint _tmp39_;
-					_tmp34_ = m;
-					_tmp35_ = _tmp34_->layout;
-					pango_layout_get_pixel_size (_tmp35_, &_tmp36_, &_tmp37_);
-					w = _tmp36_;
-					h = _tmp37_;
-					_tmp38_ = vertical_offset;
-					_tmp39_ = h;
-					vertical_offset = _tmp38_ + _tmp39_;
-					_authentication_message_unref0 (m);
-				}
-			}
-		}
-		_tmp40_ = self->priv->messages;
-		{
-			GList* m_collection = NULL;
-			GList* m_it = NULL;
-			m_collection = _tmp40_;
-			for (m_it = m_collection; m_it != NULL; m_it = m_it->next) {
-				AuthenticationMessage* _tmp41_;
-				AuthenticationMessage* m = NULL;
-				_tmp41_ = _authentication_message_ref0 ((AuthenticationMessage*) m_it->data);
-				m = _tmp41_;
-				{
-					gint w = 0;
-					gint h = 0;
-					AuthenticationMessage* _tmp42_;
-					PangoLayout* _tmp43_;
-					gint _tmp44_ = 0;
-					gint _tmp45_ = 0;
-					cairo_t* _tmp46_;
-					gdouble _tmp47_;
-					gint _tmp48_;
-					gdouble _tmp49_;
-					gint _tmp50_;
-					gdouble r;
-					gdouble g;
-					gdouble b;
-					AuthenticationMessage* _tmp51_;
-					gboolean _tmp52_;
-					gint _tmp53_;
-					gdouble bw;
-					gint _tmp54_;
-					gdouble _tmp55_;
-					cairo_t* _tmp73_;
-					AuthenticationMessage* _tmp74_;
-					PangoLayout* _tmp75_;
-					_tmp42_ = m;
-					_tmp43_ = _tmp42_->layout;
-					pango_layout_get_pixel_size (_tmp43_, &_tmp44_, &_tmp45_);
-					w = _tmp44_;
-					h = _tmp45_;
-					_tmp46_ = c;
-					_tmp47_ = vertical_offset;
-					_tmp48_ = self->priv->border;
-					cairo_move_to (_tmp46_, (gdouble) (grid_size / 2), ((grid_size * 1.5) - _tmp47_) + _tmp48_);
-					_tmp49_ = vertical_offset;
-					_tmp50_ = h;
-					vertical_offset = _tmp49_ - _tmp50_;
-					r = 1.0;
-					g = 1.0;
-					b = 1.0;
-					_tmp51_ = m;
-					_tmp52_ = _tmp51_->is_error;
-					if (_tmp52_) {
-						r = 1.0;
-						g = 0.0;
-						b = 0.0;
-					}
-					_tmp53_ = self->priv->box_width;
-					bw = (_tmp53_ - 0.5) * grid_size;
-					_tmp54_ = w;
-					_tmp55_ = bw;
-					if (((gdouble) _tmp54_) > _tmp55_) {
-						gdouble _tmp56_;
-						cairo_pattern_t* _tmp57_;
-						cairo_pattern_t* mask;
-						cairo_pattern_t* _tmp58_;
-						gdouble _tmp59_;
-						gdouble _tmp60_;
-						gdouble _tmp61_;
-						gdouble _tmp62_;
-						cairo_pattern_t* _tmp63_;
-						gdouble _tmp64_;
-						gdouble _tmp65_;
-						gdouble _tmp66_;
-						cairo_t* _tmp67_;
-						cairo_pattern_t* _tmp68_;
-						_tmp56_ = bw;
-						_tmp57_ = cairo_pattern_create_linear ((gdouble) 0, (gdouble) 0, _tmp56_, (gdouble) 0);
-						mask = _tmp57_;
-						_tmp58_ = mask;
-						_tmp59_ = bw;
-						_tmp60_ = r;
-						_tmp61_ = g;
-						_tmp62_ = b;
-						cairo_pattern_add_color_stop_rgba (_tmp58_, 1.0 - ((0.5 * grid_size) / _tmp59_), _tmp60_, _tmp61_, _tmp62_, 1.0);
-						_tmp63_ = mask;
-						_tmp64_ = r;
-						_tmp65_ = g;
-						_tmp66_ = b;
-						cairo_pattern_add_color_stop_rgba (_tmp63_, 1.0, _tmp64_, _tmp65_, _tmp66_, 0.0);
-						_tmp67_ = c;
-						_tmp68_ = mask;
-						cairo_set_source (_tmp67_, _tmp68_);
-						_cairo_pattern_destroy0 (mask);
-					} else {
-						cairo_t* _tmp69_;
-						gdouble _tmp70_;
-						gdouble _tmp71_;
-						gdouble _tmp72_;
-						_tmp69_ = c;
-						_tmp70_ = r;
-						_tmp71_ = g;
-						_tmp72_ = b;
-						cairo_set_source_rgb (_tmp69_, _tmp70_, _tmp71_, _tmp72_);
-					}
-					_tmp73_ = c;
-					_tmp74_ = m;
-					_tmp75_ = _tmp74_->layout;
-					pango_cairo_show_layout (_tmp73_, _tmp75_);
-					_authentication_message_unref0 (m);
-				}
-			}
-		}
-	}
-	_tmp76_ = c;
-	cairo_restore (_tmp76_);
-}
-
-
 static gboolean user_list_inside_entry (UserList* self, gdouble x, gdouble y, gdouble entry_y, UserEntry* entry) {
 	gboolean result = FALSE;
 	gint w = 0;
 	gint h = 0;
 	UserEntry* _tmp0_;
-	PangoLayout* _tmp1_;
+	PromptBox* _tmp1_;
 	gint _tmp2_ = 0;
-	gint _tmp3_ = 0;
-	gint _tmp4_;
-	gint _tmp5_;
-	gboolean _tmp6_ = FALSE;
-	gboolean _tmp7_ = FALSE;
+	UserEntry* _tmp3_;
+	PromptBox* _tmp4_;
+	gint _tmp5_ = 0;
+	gint _tmp6_;
+	gint _tmp7_;
 	gboolean _tmp8_ = FALSE;
-	gdouble _tmp9_;
-	gboolean _tmp12_;
-	gboolean _tmp15_;
-	gboolean _tmp19_;
+	gboolean _tmp9_ = FALSE;
+	gboolean _tmp10_ = FALSE;
+	gdouble _tmp11_;
+	gboolean _tmp14_;
+	gboolean _tmp17_;
+	gboolean _tmp21_;
 	g_return_val_if_fail (self != NULL, FALSE);
 	g_return_val_if_fail (entry != NULL, FALSE);
 	_tmp0_ = entry;
-	_tmp1_ = _tmp0_->layout;
-	pango_layout_get_pixel_size (_tmp1_, &_tmp2_, &_tmp3_);
+	_tmp1_ = _tmp0_->prompt_box;
+	_tmp2_ = gtk_widget_get_allocated_width ((GtkWidget*) _tmp1_);
 	w = _tmp2_;
-	h = _tmp3_;
-	_tmp4_ = w;
-	w = _tmp4_ + (grid_size / 2);
+	_tmp3_ = entry;
+	_tmp4_ = _tmp3_->prompt_box;
+	_tmp5_ = gtk_widget_get_allocated_height ((GtkWidget*) _tmp4_);
+	h = _tmp5_;
+	_tmp6_ = w;
+	w = _tmp6_ + (grid_size / 2);
 	h = grid_size;
-	_tmp5_ = w;
-	w = (((gint) (_tmp5_ + grid_size)) / grid_size) * grid_size;
-	_tmp9_ = x;
-	if (_tmp9_ >= ((gdouble) 0)) {
-		gdouble _tmp10_;
-		gint _tmp11_;
-		_tmp10_ = x;
-		_tmp11_ = w;
-		_tmp8_ = _tmp10_ <= ((gdouble) _tmp11_);
+	_tmp7_ = w;
+	w = (((gint) (_tmp7_ + grid_size)) / grid_size) * grid_size;
+	_tmp11_ = x;
+	if (_tmp11_ >= ((gdouble) 0)) {
+		gdouble _tmp12_;
+		gint _tmp13_;
+		_tmp12_ = x;
+		_tmp13_ = w;
+		_tmp10_ = _tmp12_ <= ((gdouble) _tmp13_);
+	} else {
+		_tmp10_ = FALSE;
+	}
+	_tmp14_ = _tmp10_;
+	if (_tmp14_) {
+		gdouble _tmp15_;
+		gdouble _tmp16_;
+		_tmp15_ = y;
+		_tmp16_ = entry_y;
+		_tmp9_ = _tmp15_ >= _tmp16_;
+	} else {
+		_tmp9_ = FALSE;
+	}
+	_tmp17_ = _tmp9_;
+	if (_tmp17_) {
+		gdouble _tmp18_;
+		gdouble _tmp19_;
+		gint _tmp20_;
+		_tmp18_ = y;
+		_tmp19_ = entry_y;
+		_tmp20_ = h;
+		_tmp8_ = _tmp18_ <= (_tmp19_ + _tmp20_);
 	} else {
 		_tmp8_ = FALSE;
 	}
-	_tmp12_ = _tmp8_;
-	if (_tmp12_) {
-		gdouble _tmp13_;
-		gdouble _tmp14_;
-		_tmp13_ = y;
-		_tmp14_ = entry_y;
-		_tmp7_ = _tmp13_ >= _tmp14_;
-	} else {
-		_tmp7_ = FALSE;
-	}
-	_tmp15_ = _tmp7_;
-	if (_tmp15_) {
-		gdouble _tmp16_;
-		gdouble _tmp17_;
-		gint _tmp18_;
-		_tmp16_ = y;
-		_tmp17_ = entry_y;
-		_tmp18_ = h;
-		_tmp6_ = _tmp16_ <= (_tmp17_ + _tmp18_);
-	} else {
-		_tmp6_ = FALSE;
-	}
-	_tmp19_ = _tmp6_;
-	result = _tmp19_;
+	_tmp21_ = _tmp8_;
+	result = _tmp21_;
 	return result;
 }
 
@@ -4164,16 +2551,15 @@ static gboolean user_list_real_button_release_event (GtkWidget* base, GdkEventBu
 				gboolean _tmp20_;
 				gboolean _tmp23_;
 				gdouble _tmp38_;
-				gint _tmp39_;
 				gdouble below_y;
-				guint _tmp40_;
+				guint _tmp39_;
 				gdouble h_below;
+				gboolean _tmp40_ = FALSE;
 				gboolean _tmp41_ = FALSE;
-				gboolean _tmp42_ = FALSE;
-				gdouble _tmp43_;
-				gboolean _tmp45_;
-				gboolean _tmp48_;
-				gdouble _tmp63_;
+				gdouble _tmp42_;
+				gboolean _tmp44_;
+				gboolean _tmp47_;
+				gdouble _tmp62_;
 				_tmp13_ = self->priv->scroll_location;
 				_tmp14_ = offset;
 				entry_y = ((-_tmp13_) * grid_size) + _tmp14_;
@@ -4239,71 +2625,70 @@ static gboolean user_list_real_button_release_event (GtkWidget* base, GdkEventBu
 					}
 				}
 				_tmp38_ = y;
-				_tmp39_ = self->priv->box_height;
-				below_y = _tmp38_ - (_tmp39_ * grid_size);
-				_tmp40_ = self->priv->n_below;
-				h_below = ((gdouble) _tmp40_) * grid_size;
-				_tmp43_ = entry_y;
-				if (_tmp43_ > ((gdouble) 0)) {
-					gdouble _tmp44_;
-					_tmp44_ = below_y;
-					_tmp42_ = _tmp44_ > ((gdouble) 0);
-				} else {
-					_tmp42_ = FALSE;
-				}
-				_tmp45_ = _tmp42_;
-				if (_tmp45_) {
-					gdouble _tmp46_;
-					gdouble _tmp47_;
-					_tmp46_ = below_y;
-					_tmp47_ = h_below;
-					_tmp41_ = _tmp46_ < _tmp47_;
+				below_y = _tmp38_ - (USER_LIST_BOX_HEIGHT * grid_size);
+				_tmp39_ = self->priv->n_below;
+				h_below = ((gdouble) _tmp39_) * grid_size;
+				_tmp42_ = entry_y;
+				if (_tmp42_ > ((gdouble) 0)) {
+					gdouble _tmp43_;
+					_tmp43_ = below_y;
+					_tmp41_ = _tmp43_ > ((gdouble) 0);
 				} else {
 					_tmp41_ = FALSE;
 				}
-				_tmp48_ = _tmp41_;
-				if (_tmp48_) {
-					gboolean _tmp49_ = FALSE;
+				_tmp44_ = _tmp41_;
+				if (_tmp44_) {
+					gdouble _tmp45_;
+					gdouble _tmp46_;
+					_tmp45_ = below_y;
+					_tmp46_ = h_below;
+					_tmp40_ = _tmp45_ < _tmp46_;
+				} else {
+					_tmp40_ = FALSE;
+				}
+				_tmp47_ = _tmp40_;
+				if (_tmp47_) {
+					gboolean _tmp48_ = FALSE;
+					gdouble _tmp49_;
 					gdouble _tmp50_;
 					gdouble _tmp51_;
-					gdouble _tmp52_;
-					UserEntry* _tmp53_;
-					gboolean _tmp54_ = FALSE;
-					gboolean _tmp61_;
-					_tmp50_ = x;
-					_tmp51_ = below_y;
-					_tmp52_ = entry_y;
-					_tmp53_ = entry;
-					_tmp54_ = user_list_inside_entry (self, _tmp50_, _tmp51_, _tmp52_ - grid_size, _tmp53_);
-					if (_tmp54_) {
-						_tmp49_ = TRUE;
+					UserEntry* _tmp52_;
+					gboolean _tmp53_ = FALSE;
+					gboolean _tmp60_;
+					_tmp49_ = x;
+					_tmp50_ = below_y;
+					_tmp51_ = entry_y;
+					_tmp52_ = entry;
+					_tmp53_ = user_list_inside_entry (self, _tmp49_, _tmp50_, _tmp51_ - grid_size, _tmp52_);
+					if (_tmp53_) {
+						_tmp48_ = TRUE;
 					} else {
+						gdouble _tmp54_;
 						gdouble _tmp55_;
 						gdouble _tmp56_;
 						gdouble _tmp57_;
-						gdouble _tmp58_;
-						UserEntry* _tmp59_;
-						gboolean _tmp60_ = FALSE;
-						_tmp55_ = x;
-						_tmp56_ = below_y;
-						_tmp57_ = entry_y;
-						_tmp58_ = h;
-						_tmp59_ = entry;
-						_tmp60_ = user_list_inside_entry (self, _tmp55_, _tmp56_, (_tmp57_ - grid_size) + _tmp58_, _tmp59_);
-						_tmp49_ = _tmp60_;
+						UserEntry* _tmp58_;
+						gboolean _tmp59_ = FALSE;
+						_tmp54_ = x;
+						_tmp55_ = below_y;
+						_tmp56_ = entry_y;
+						_tmp57_ = h;
+						_tmp58_ = entry;
+						_tmp59_ = user_list_inside_entry (self, _tmp54_, _tmp55_, (_tmp56_ - grid_size) + _tmp57_, _tmp58_);
+						_tmp48_ = _tmp59_;
 					}
-					_tmp61_ = _tmp49_;
-					if (_tmp61_) {
-						UserEntry* _tmp62_;
-						_tmp62_ = entry;
-						user_list_select_entry (self, _tmp62_, 1.0);
+					_tmp60_ = _tmp48_;
+					if (_tmp60_) {
+						UserEntry* _tmp61_;
+						_tmp61_ = entry;
+						user_list_select_entry (self, _tmp61_, 1.0);
 						result = TRUE;
 						_user_entry_unref0 (entry);
 						return result;
 					}
 				}
-				_tmp63_ = offset;
-				offset = _tmp63_ + grid_size;
+				_tmp62_ = offset;
+				offset = _tmp62_ + grid_size;
 				_user_entry_unref0 (entry);
 			}
 		}
@@ -4408,17 +2793,15 @@ static gint user_list_get_box_x (UserList* self) {
 static gint user_list_get_box_y (UserList* self) {
 	gint result;
 	gint _tmp0_ = 0;
-	gint _tmp1_;
 	gint row;
+	gint _tmp1_ = 0;
 	gint _tmp2_ = 0;
-	gint _tmp3_ = 0;
 	g_return_val_if_fail (self != NULL, 0);
 	_tmp0_ = gtk_widget_get_allocated_height ((GtkWidget*) self);
-	_tmp1_ = self->priv->box_height;
-	row = ((gint) ((_tmp0_ / grid_size) - _tmp1_)) / 2;
-	_tmp2_ = gtk_widget_get_allocated_height ((GtkWidget*) self);
-	_tmp3_ = get_grid_offset (_tmp2_);
-	result = _tmp3_ + (row * grid_size);
+	row = ((gint) ((_tmp0_ / grid_size) - USER_LIST_BOX_HEIGHT)) / 2;
+	_tmp1_ = gtk_widget_get_allocated_height ((GtkWidget*) self);
+	_tmp2_ = get_grid_offset (_tmp1_);
+	result = _tmp2_ + (row * grid_size);
 	return result;
 }
 
@@ -4473,6 +2856,42 @@ void user_list_set_manual_username (UserList* self, const gchar* value) {
 }
 
 
+const gchar* user_list_get_default_session (UserList* self) {
+	const gchar* result;
+	const gchar* _tmp0_;
+	g_return_val_if_fail (self != NULL, NULL);
+	_tmp0_ = self->priv->_default_session;
+	result = _tmp0_;
+	return result;
+}
+
+
+void user_list_set_default_session (UserList* self, const gchar* value) {
+	const gchar* _tmp0_;
+	gchar* _tmp1_;
+	UserEntry* _tmp2_;
+	g_return_if_fail (self != NULL);
+	_tmp0_ = value;
+	_tmp1_ = g_strdup (_tmp0_);
+	_g_free0 (self->priv->_default_session);
+	self->priv->_default_session = _tmp1_;
+	_tmp2_ = self->priv->_selected_entry;
+	if (_tmp2_ != NULL) {
+		UserEntry* _tmp3_;
+		PromptBox* _tmp4_;
+		GdkPixbuf* _tmp5_ = NULL;
+		GdkPixbuf* _tmp6_;
+		_tmp3_ = self->priv->_selected_entry;
+		_tmp4_ = _tmp3_->prompt_box;
+		_tmp5_ = user_list_get_badge (self);
+		_tmp6_ = _tmp5_;
+		prompt_box_set_options_image (_tmp4_, _tmp6_);
+		_g_object_unref0 (_tmp6_);
+	}
+	g_object_notify ((GObject *) self, "default-session");
+}
+
+
 const gchar* user_list_get_session (UserList* self) {
 	const gchar* result;
 	const gchar* _tmp0_;
@@ -4486,19 +2905,25 @@ const gchar* user_list_get_session (UserList* self) {
 void user_list_set_session (UserList* self, const gchar* value) {
 	const gchar* _tmp0_;
 	gchar* _tmp1_;
-	CachedImage* _tmp2_;
-	GdkPixbuf* _tmp3_ = NULL;
-	GdkPixbuf* _tmp4_;
+	UserEntry* _tmp2_;
 	g_return_if_fail (self != NULL);
 	_tmp0_ = value;
 	_tmp1_ = g_strdup (_tmp0_);
 	_g_free0 (self->priv->_session);
 	self->priv->_session = _tmp1_;
-	_tmp2_ = self->priv->session_image;
-	_tmp3_ = user_list_get_badge (self);
-	_tmp4_ = _tmp3_;
-	gtk_image_set_from_pixbuf ((GtkImage*) _tmp2_, _tmp4_);
-	_g_object_unref0 (_tmp4_);
+	_tmp2_ = self->priv->_selected_entry;
+	if (_tmp2_ != NULL) {
+		UserEntry* _tmp3_;
+		PromptBox* _tmp4_;
+		GdkPixbuf* _tmp5_ = NULL;
+		GdkPixbuf* _tmp6_;
+		_tmp3_ = self->priv->_selected_entry;
+		_tmp4_ = _tmp3_->prompt_box;
+		_tmp5_ = user_list_get_badge (self);
+		_tmp6_ = _tmp5_;
+		prompt_box_set_options_image (_tmp4_, _tmp6_);
+		_g_object_unref0 (_tmp6_);
+	}
 	g_object_notify ((GObject *) self, "session");
 }
 
@@ -4518,6 +2943,7 @@ static void user_list_class_init (UserListClass * klass) {
 	g_object_class_install_property (G_OBJECT_CLASS (klass), USER_LIST_ALWAYS_SHOW_MANUAL, g_param_spec_boolean ("always-show-manual", "always-show-manual", "always-show-manual", FALSE, G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB | G_PARAM_READABLE | G_PARAM_WRITABLE));
 	g_object_class_install_property (G_OBJECT_CLASS (klass), USER_LIST_SELECTED, g_param_spec_string ("selected", "selected", "selected", NULL, G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB | G_PARAM_READABLE));
 	g_object_class_install_property (G_OBJECT_CLASS (klass), USER_LIST_MANUAL_USERNAME, g_param_spec_string ("manual-username", "manual-username", "manual-username", NULL, G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB | G_PARAM_READABLE | G_PARAM_WRITABLE));
+	g_object_class_install_property (G_OBJECT_CLASS (klass), USER_LIST_DEFAULT_SESSION, g_param_spec_string ("default-session", "default-session", "default-session", NULL, G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB | G_PARAM_READABLE | G_PARAM_WRITABLE));
 	g_object_class_install_property (G_OBJECT_CLASS (klass), USER_LIST_SESSION, g_param_spec_string ("session", "session", "session", NULL, G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB | G_PARAM_READABLE | G_PARAM_WRITABLE));
 	g_signal_new ("user_selected", TYPE_USER_LIST, G_SIGNAL_RUN_LAST, 0, NULL, NULL, g_cclosure_marshal_VOID__STRING, G_TYPE_NONE, 1, G_TYPE_STRING);
 	g_signal_new ("user_displayed_start", TYPE_USER_LIST, G_SIGNAL_RUN_LAST, 0, NULL, NULL, g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
@@ -4534,17 +2960,13 @@ static void user_list_instance_init (UserList * self) {
 	self->priv->_offer_guest = FALSE;
 	self->priv->_always_show_manual = FALSE;
 	self->priv->entries = NULL;
-	self->priv->messages = NULL;
 	self->priv->mode = USER_LIST_MODE_LOGIN;
 	self->priv->complete = FALSE;
-	self->priv->border = 4;
-	self->priv->box_width = 7;
 	self->priv->n_above = (guint) 4;
 	self->priv->n_below = (guint) 4;
-	self->priv->box_height = 3;
 	self->priv->_manual_username = NULL;
 	_tmp0_ = g_strdup ("ubuntu");
-	self->default_session = _tmp0_;
+	self->priv->_default_session = _tmp0_;
 	self->priv->_session = NULL;
 	self->priv->last_session_badge = NULL;
 }
@@ -4559,17 +2981,12 @@ static void user_list_finalize (GObject* obj) {
 	__g_list_free__user_entry_unref0_0 (self->priv->entries);
 	_g_object_unref0 (self->priv->message_pixbuf);
 	_g_object_unref0 (self->priv->scroll_timer);
-	__g_list_free__authentication_message_unref0_0 (self->priv->messages);
 	_g_object_unref0 (self->priv->fixed);
 	_g_object_unref0 (self->priv->login_box);
-	_g_object_unref0 (self->priv->prompt_entry);
-	_g_object_unref0 (self->priv->login_button);
 	_g_object_unref0 (self->priv->prompt_widget_to_show);
-	_g_object_unref0 (self->priv->session_button);
-	_g_object_unref0 (self->priv->session_image);
 	_g_object_unref0 (self->priv->session_chooser);
 	_g_free0 (self->priv->_manual_username);
-	_g_free0 (self->default_session);
+	_g_free0 (self->priv->_default_session);
 	_g_free0 (self->priv->_session);
 	_g_object_unref0 (self->priv->last_session_badge);
 	G_OBJECT_CLASS (user_list_parent_class)->finalize (obj);
@@ -4607,6 +3024,9 @@ static void _vala_user_list_get_property (GObject * object, guint property_id, G
 		case USER_LIST_MANUAL_USERNAME:
 		g_value_set_string (value, user_list_get_manual_username (self));
 		break;
+		case USER_LIST_DEFAULT_SESSION:
+		g_value_set_string (value, user_list_get_default_session (self));
+		break;
 		case USER_LIST_SESSION:
 		g_value_set_string (value, user_list_get_session (self));
 		break;
@@ -4632,6 +3052,9 @@ static void _vala_user_list_set_property (GObject * object, guint property_id, c
 		break;
 		case USER_LIST_MANUAL_USERNAME:
 		user_list_set_manual_username (self, g_value_get_string (value));
+		break;
+		case USER_LIST_DEFAULT_SESSION:
+		user_list_set_default_session (self, g_value_get_string (value));
 		break;
 		case USER_LIST_SESSION:
 		user_list_set_session (self, g_value_get_string (value));

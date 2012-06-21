@@ -1,0 +1,129 @@
+# Silesian translation for unity-greeter
+# Copyright (c) 2012 Rosetta Contributors and Canonical Ltd 2012
+# This file is distributed under the same license as the unity-greeter package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2012.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: unity-greeter\n"
+"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2012-06-19 05:11+0000\n"
+"PO-Revision-Date: 2012-05-06 07:06+0000\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: Silesian <szl@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2012-06-20 05:05+0000\n"
+"X-Generator: Launchpad (build 15435)\n"
+
+#: ../src/main-window.vala:42
+msgid "Login Screen"
+msgstr "Ôbrŏz logowaniŏ"
+
+#: ../src/menubar.vala:211
+msgid "Onscreen keyboard"
+msgstr "Tastatura na ôbrŏzie"
+
+#: ../src/menubar.vala:216
+msgid "High Contrast"
+msgstr "Wysoki kōntrast"
+
+#: ../src/menubar.vala:222
+msgid "Screen Reader"
+msgstr "Czytŏcz ôbrŏzu"
+
+#: ../src/user-list.vala:254
+msgid "Session Options"
+msgstr "Ôpcyje sesyje"
+
+#: ../src/session-chooser.vala:63
+msgid "_Back"
+msgstr "_Nazod"
+
+#. Help string for command line --version flag
+#: ../src/unity-greeter.vala:30
+msgid "Show release version"
+msgstr "Pokazowaniy wersyje"
+
+#. Help string for command line --test-mode flag
+#: ../src/unity-greeter.vala:33
+msgid "Run in test mode"
+msgstr "Włōncz w testowym trybie"
+
+#: ../src/unity-greeter.vala:386 ../src/unity-greeter.vala:527
+#: ../src/unity-greeter.vala:550 ../src/unity-greeter.vala:554
+#: ../src/unity-greeter.vala:558 ../src/unity-greeter.vala:564
+#: ../src/unity-greeter.vala:567 ../src/unity-greeter.vala:594
+msgid "Password:"
+msgstr "Hasło:"
+
+#: ../src/unity-greeter.vala:388 ../src/unity-greeter.vala:530
+msgid "Username:"
+msgstr "Używŏcz:"
+
+#: ../src/unity-greeter.vala:469
+msgid "Invalid password, please try again"
+msgstr "Złe hasło. Sprōbujcie, proszã, jeszcze rŏz"
+
+#: ../src/unity-greeter.vala:478
+msgid "Failed to authenticate"
+msgstr "Uwierzytelniyniy niy zdarziło sie"
+
+#: ../src/unity-greeter.vala:568
+msgid "Favorite Color:"
+msgstr ""
+
+#. Arguments and description for --help text
+#: ../src/unity-greeter.vala:828
+msgid "- Unity Greeter"
+msgstr "- Unity Greeter"
+
+#. Text printed out when an unknown command-line argument provided
+#: ../src/unity-greeter.vala:839
+#, c-format
+msgid "Run '%s --help' to see a full list of available command line options."
+msgstr ""
+"Wkludźcie '%s --help' coby ôbejrzeć cŏlkõ listã ôpcyji linije byfeli."
+
+#: ../src/user-list.vala:80
+msgid "Guest Session"
+msgstr "Sesyjŏ gościa"
+
+#: ../src/user-list.vala:383
+#, c-format
+msgid "Enter password for %s"
+msgstr "Wkludźcie hasło dlŏ %s"
+
+#. 'Log In' here is the button for logging in.
+#: ../src/user-list.vala:409
+msgid "Log In"
+msgstr "Wchōd"
+
+#: ../src/user-list.vala:407
+#, c-format
+msgid "Login as %s"
+msgstr "Logowaniy jako %s"
+
+#: ../src/user-list.vala:413 ../src/user-list.vala:414
+msgid "Retry"
+msgstr "Jeszcze rŏz"
+
+#: ../src/user-list.vala:322
+#, c-format
+msgid "Retry as %s"
+msgstr ""
+
+#: ../src/user-list.vala:430
+msgid "Logging in..."
+msgstr "Logowaniy..."
+
+#: ../src/user-list.vala:515
+msgid "Login"
+msgstr "Login"
+
+#~ msgid "Enter username"
+#~ msgstr "Wkludźcie miano używŏcza"
+
+#~ msgid "Enter password"
+#~ msgstr "Wkludźcie hasło"

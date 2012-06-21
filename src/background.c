@@ -2201,6 +2201,7 @@ static void background_reload (Background* self) {
 			_tmp8_ = _g_object_ref0 (_tmp7_);
 			_g_object_unref0 (self->priv->current);
 			self->priv->current = _tmp8_;
+			background_set_alpha (self, 1.0);
 			_tmp9_ = self->priv->timer;
 			animate_timer_stop (_tmp9_);
 		}

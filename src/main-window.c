@@ -28,7 +28,6 @@
 #include <cairo.h>
 #include <stdlib.h>
 #include <string.h>
-#include <pango/pango.h>
 #include <lightdm.h>
 #include <atk/atk.h>
 #include <glib/gi18n-lib.h>
@@ -98,6 +97,26 @@ typedef struct _MenuBarClass MenuBarClass;
 typedef struct _UserEntry UserEntry;
 typedef struct _UserEntryClass UserEntryClass;
 typedef struct _UserEntryPrivate UserEntryPrivate;
+
+#define TYPE_FADABLE_BOX (fadable_box_get_type ())
+#define FADABLE_BOX(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_FADABLE_BOX, FadableBox))
+#define FADABLE_BOX_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_FADABLE_BOX, FadableBoxClass))
+#define IS_FADABLE_BOX(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_FADABLE_BOX))
+#define IS_FADABLE_BOX_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_FADABLE_BOX))
+#define FADABLE_BOX_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_FADABLE_BOX, FadableBoxClass))
+
+typedef struct _FadableBox FadableBox;
+typedef struct _FadableBoxClass FadableBoxClass;
+
+#define TYPE_PROMPT_BOX (prompt_box_get_type ())
+#define PROMPT_BOX(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_PROMPT_BOX, PromptBox))
+#define PROMPT_BOX_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_PROMPT_BOX, PromptBoxClass))
+#define IS_PROMPT_BOX(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_PROMPT_BOX))
+#define IS_PROMPT_BOX_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_PROMPT_BOX))
+#define PROMPT_BOX_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_PROMPT_BOX, PromptBoxClass))
+
+typedef struct _PromptBox PromptBox;
+typedef struct _PromptBoxClass PromptBoxClass;
 typedef struct _MonitorPrivate MonitorPrivate;
 #define _monitor_unref0(var) ((var == NULL) ? NULL : (var = (monitor_unref (var), NULL)))
 
@@ -127,7 +146,8 @@ struct _UserEntry {
 	volatile int ref_count;
 	UserEntryPrivate * priv;
 	gchar* name;
-	PangoLayout* layout;
+	gchar* label;
+	PromptBox* prompt_box;
 	gchar* background;
 	gboolean is_active;
 	gboolean has_messages;
@@ -203,6 +223,8 @@ void value_take_user_entry (GValue* value, gpointer v_object);
 gpointer value_get_user_entry (const GValue* value);
 GType user_entry_get_type (void) G_GNUC_CONST;
 UserEntry* user_list_get_selected_entry (UserList* self);
+GType fadable_box_get_type (void) G_GNUC_CONST;
+GType prompt_box_get_type (void) G_GNUC_CONST;
 void background_set_current_background (Background* self, const gchar* value);
 static void main_window_change_background (MainWindow* self);
 const gchar* background_get_current_background (Background* self);
@@ -230,15 +252,15 @@ void background_set_logo (Background* self, const gchar* version_logo, const gch
 #define UG_SETTINGS_KEY_BACKGROUND_LOGO "background-logo"
 MenuBar* menu_bar_new (Background* bg, GtkAccelGroup* ag);
 MenuBar* menu_bar_construct (GType object_type, Background* bg, GtkAccelGroup* ag);
-static void _main_window___lambda7_ (MainWindow* self);
-static void __main_window___lambda7__g_object_notify (GObject* _sender, GParamSpec* pspec, gpointer self);
+static void _main_window___lambda13_ (MainWindow* self);
+static void __main_window___lambda13__g_object_notify (GObject* _sender, GParamSpec* pspec, gpointer self);
 UserList* user_list_new (Background* bg, MenuBar* mb);
 UserList* user_list_construct (GType object_type, Background* bg, MenuBar* mb);
-static void _main_window___lambda8_ (MainWindow* self);
-static void __main_window___lambda8__user_list_user_displayed_start (UserList* _sender, gpointer self);
-static void _main_window___lambda9_ (MainWindow* self);
+static void _main_window___lambda14_ (MainWindow* self);
+static void __main_window___lambda14__user_list_user_displayed_start (UserList* _sender, gpointer self);
+static void _main_window___lambda15_ (MainWindow* self);
 void menu_bar_set_layouts (MenuBar* self, GList* layouts);
-static void __main_window___lambda9__user_list_user_displayed_done (UserList* _sender, gpointer self);
+static void __main_window___lambda15__user_list_user_displayed_done (UserList* _sender, gpointer self);
 static void _main_window_monitors_changed_cb_gdk_screen_monitors_changed (GdkScreen* _sender, gpointer self);
 static void main_window_finalize (GObject* obj);
 
@@ -802,27 +824,27 @@ MainWindow* main_window_new (void) {
 }
 
 
-static void _main_window___lambda7_ (MainWindow* self) {
+static void _main_window___lambda13_ (MainWindow* self) {
 	main_window_change_background (self);
 }
 
 
-static void __main_window___lambda7__g_object_notify (GObject* _sender, GParamSpec* pspec, gpointer self) {
-	_main_window___lambda7_ (self);
+static void __main_window___lambda13__g_object_notify (GObject* _sender, GParamSpec* pspec, gpointer self) {
+	_main_window___lambda13_ (self);
 }
 
 
-static void _main_window___lambda8_ (MainWindow* self) {
+static void _main_window___lambda14_ (MainWindow* self) {
 	main_window_change_background (self);
 }
 
 
-static void __main_window___lambda8__user_list_user_displayed_start (UserList* _sender, gpointer self) {
-	_main_window___lambda8_ (self);
+static void __main_window___lambda14__user_list_user_displayed_start (UserList* _sender, gpointer self) {
+	_main_window___lambda14_ (self);
 }
 
 
-static void _main_window___lambda9_ (MainWindow* self) {
+static void _main_window___lambda15_ (MainWindow* self) {
 	MenuBar* _tmp0_;
 	UserList* _tmp1_;
 	UserEntry* _tmp2_;
@@ -838,8 +860,8 @@ static void _main_window___lambda9_ (MainWindow* self) {
 }
 
 
-static void __main_window___lambda9__user_list_user_displayed_done (UserList* _sender, gpointer self) {
-	_main_window___lambda9_ (self);
+static void __main_window___lambda15__user_list_user_displayed_done (UserList* _sender, gpointer self) {
+	_main_window___lambda15_ (self);
 }
 
 
@@ -983,7 +1005,7 @@ static GObject * main_window_constructor (GType type, guint n_construct_properti
 	_g_object_unref0 (self->priv->menubar);
 	self->priv->menubar = _tmp36_;
 	_tmp37_ = self->priv->menubar;
-	g_signal_connect_object ((GObject*) _tmp37_, "notify::high-contrast", (GCallback) __main_window___lambda7__g_object_notify, self, 0);
+	g_signal_connect_object ((GObject*) _tmp37_, "notify::high-contrast", (GCallback) __main_window___lambda13__g_object_notify, self, 0);
 	_tmp38_ = self->priv->menubar;
 	gtk_widget_show ((GtkWidget*) _tmp38_);
 	_tmp39_ = self->priv->login_box;
@@ -1000,9 +1022,9 @@ static GObject * main_window_constructor (GType type, guint n_construct_properti
 	_tmp46_ = self->user_list;
 	g_object_set ((GtkWidget*) _tmp46_, "expand", TRUE, NULL);
 	_tmp47_ = self->user_list;
-	g_signal_connect_object (_tmp47_, "user-displayed-start", (GCallback) __main_window___lambda8__user_list_user_displayed_start, self, 0);
+	g_signal_connect_object (_tmp47_, "user-displayed-start", (GCallback) __main_window___lambda14__user_list_user_displayed_start, self, 0);
 	_tmp48_ = self->user_list;
-	g_signal_connect_object (_tmp48_, "user-displayed-done", (GCallback) __main_window___lambda9__user_list_user_displayed_done, self, 0);
+	g_signal_connect_object (_tmp48_, "user-displayed-done", (GCallback) __main_window___lambda15__user_list_user_displayed_done, self, 0);
 	_tmp49_ = self->user_list;
 	gtk_widget_show ((GtkWidget*) _tmp49_);
 	_tmp50_ = self->priv->login_box;

@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2012-04-17 07:20+0000\n"
+"POT-Creation-Date: 2012-06-19 05:11+0000\n"
 "PO-Revision-Date: 2012-04-15 00:34+0000\n"
 "Last-Translator: Shushi Kurose <md81bird@hitaki.net>\n"
 "Language-Team: Japanese <ja@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2012-04-18 05:09+0000\n"
-"X-Generator: Launchpad (build 15108)\n"
+"X-Launchpad-Export-Date: 2012-06-20 05:05+0000\n"
+"X-Generator: Launchpad (build 15435)\n"
 
 #: ../src/main-window.vala:42
 msgid "Login Screen"
@@ -32,6 +32,10 @@ msgstr "ハイコントラスト"
 #: ../src/menubar.vala:222
 msgid "Screen Reader"
 msgstr "スクリーンリーダー"
+
+#: ../src/user-list.vala:254
+msgid "Session Options"
+msgstr ""
 
 #: ../src/session-chooser.vala:63
 msgid "_Back"
@@ -60,11 +64,15 @@ msgstr "ユーザー名:"
 
 #: ../src/unity-greeter.vala:469
 msgid "Invalid password, please try again"
-msgstr "パスワードが間違っています。もう一度試してください。"
+msgstr "パスワードが違います。もう一度試してください。"
 
 #: ../src/unity-greeter.vala:478
 msgid "Failed to authenticate"
 msgstr "認証に失敗しました"
+
+#: ../src/unity-greeter.vala:568
+msgid "Favorite Color:"
+msgstr ""
 
 #. Arguments and description for --help text
 #: ../src/unity-greeter.vala:828
@@ -81,41 +89,34 @@ msgstr ""
 msgid "Guest Session"
 msgstr ""
 
-#: ../src/user-list.vala:242
-msgid "Session Options"
-msgstr ""
-
-#: ../src/user-list.vala:371
+#: ../src/user-list.vala:383
 #, c-format
 msgid "Enter password for %s"
 msgstr ""
 
-#: ../src/user-list.vala:375
-msgid "Enter username"
+#. 'Log In' here is the button for logging in.
+#: ../src/user-list.vala:409
+msgid "Log In"
 msgstr ""
 
-#: ../src/user-list.vala:377
-msgid "Enter password"
-msgstr ""
-
-#: ../src/user-list.vala:395
+#: ../src/user-list.vala:407
 #, c-format
 msgid "Login as %s"
 msgstr ""
 
-#. 'Log In' here is the button for logging in.
-#: ../src/user-list.vala:397
-msgid "Log In"
-msgstr ""
-
-#: ../src/user-list.vala:401 ../src/user-list.vala:402
+#: ../src/user-list.vala:413 ../src/user-list.vala:414
 msgid "Retry"
 msgstr "再試行"
 
-#: ../src/user-list.vala:418
+#: ../src/user-list.vala:322
+#, c-format
+msgid "Retry as %s"
+msgstr ""
+
+#: ../src/user-list.vala:430
 msgid "Logging in..."
 msgstr ""
 
-#: ../src/user-list.vala:503
+#: ../src/user-list.vala:515
 msgid "Login"
 msgstr ""

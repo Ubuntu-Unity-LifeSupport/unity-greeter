@@ -23,17 +23,18 @@
 #include <glib.h>
 #include <glib-object.h>
 #include <gtk/gtk.h>
-#include <gio/gio.h>
-#include <lightdm.h>
 #include <stdlib.h>
 #include <string.h>
+#include <lightdm.h>
 #include <canberra.h>
 #include <cairo-xlib.h>
+#include <gio/gio.h>
 #include <gdk/gdk.h>
 #include <glib/gi18n-lib.h>
 #include <float.h>
 #include <math.h>
 #include <cairo.h>
+#include <glib/gstdio.h>
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
@@ -88,9 +89,9 @@ typedef struct _SettingsDaemonClass SettingsDaemonClass;
 
 typedef struct _MainWindow MainWindow;
 typedef struct _MainWindowClass MainWindowClass;
-#define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
-#define _g_key_file_free0(var) ((var == NULL) ? NULL : (var = (g_key_file_free (var), NULL)))
 #define _g_free0(var) (var = (g_free (var), NULL))
+#define _g_key_file_free0(var) ((var == NULL) ? NULL : (var = (g_key_file_free (var), NULL)))
+#define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
 #define __g_list_free__g_free0_0(var) ((var == NULL) ? NULL : (var = (_g_list_free__g_free0_ (var), NULL)))
 #define _ca_context_destroy0(var) ((var == NULL) ? NULL : (var = (ca_context_destroy (var), NULL)))
 
@@ -99,6 +100,7 @@ typedef struct _TestEntry TestEntry;
 #define _g_error_free0(var) ((var == NULL) ? NULL : (var = (g_error_free (var), NULL)))
 typedef struct _MainWindowPrivate MainWindowPrivate;
 #define _g_dir_close0(var) ((var == NULL) ? NULL : (var = (g_dir_close (var), NULL)))
+#define __g_list_free__g_object_unref0_0(var) ((var == NULL) ? NULL : (var = (_g_list_free__g_object_unref0_ (var), NULL)))
 typedef struct _UserListPrivate UserListPrivate;
 
 #define TYPE_BACKGROUND (background_get_type ())
@@ -120,7 +122,6 @@ typedef struct _BackgroundClass BackgroundClass;
 
 typedef struct _MenuBar MenuBar;
 typedef struct _MenuBarClass MenuBarClass;
-#define __g_list_free__g_object_unref0_0(var) ((var == NULL) ? NULL : (var = (_g_list_free__g_object_unref0_ (var), NULL)))
 
 #define BACKGROUND_TYPE_DRAW_FLAGS (background_draw_flags_get_type ())
 #define _cairo_destroy0(var) ((var == NULL) ? NULL : (var = (cairo_destroy (var), NULL)))
@@ -143,7 +144,7 @@ struct _UnityGreeterClass {
 };
 
 struct _UnityGreeterPrivate {
-	GFile* state_file;
+	gchar* state_file;
 	GKeyFile* state;
 	SettingsDaemon* settings_daemon;
 	MainWindow* main_window;
@@ -186,7 +187,6 @@ struct _UserList {
 	UserListPrivate * priv;
 	Background* background;
 	MenuBar* menubar;
-	gchar* default_session;
 };
 
 struct _UserListClass {
@@ -254,8 +254,7 @@ void user_list_set_offer_guest (UserList* self, gboolean value);
 static gboolean unity_greeter_key_press_cb (UnityGreeter* self, GdkEventKey* event);
 static gboolean _unity_greeter_key_press_cb_gtk_widget_key_press_event (GtkWidget* _sender, GdkEventKey* event, gpointer self);
 void user_list_set_active_entry (UserList* self, const gchar* name);
-GType background_get_type (void) G_GNUC_CONST;
-GType menu_bar_get_type (void) G_GNUC_CONST;
+void user_list_set_default_session (UserList* self, const gchar* value);
 void user_list_set_always_show_manual (UserList* self, gboolean value);
 static void unity_greeter_user_added_cb (UnityGreeter* self, LightDMUser* user);
 static void _unity_greeter_user_added_cb_lightdm_user_list_user_added (LightDMUserList* _sender, LightDMUser* user, gpointer self);
@@ -289,6 +288,8 @@ const gchar* user_list_get_manual_username (UserList* self);
 void user_list_set_manual_username (UserList* self, const gchar* value);
 void user_list_show_prompt (UserList* self, const gchar* text, gboolean secret);
 static void unity_greeter_background_loaded_cb (UnityGreeter* self, GParamSpec* pspec);
+GType background_get_type (void) G_GNUC_CONST;
+GType menu_bar_get_type (void) G_GNUC_CONST;
 gdouble background_get_alpha (Background* self);
 static void _unity_greeter_background_loaded_cb_g_object_notify (GObject* _sender, GParamSpec* pspec, gpointer self);
 static void unity_greeter_start_session (UnityGreeter* self);
@@ -321,7 +322,7 @@ static void _vala_array_free (gpointer array, gint array_length, GDestroyNotify 
 static gint _vala_array_length (gpointer array);
 
 const GOptionEntry UNITY_GREETER_options[3] = {{"version", 'v', 0, G_OPTION_ARG_NONE, &unity_greeter_show_version, "Show release version", NULL}, {"test-mode", (gchar) 0, 0, G_OPTION_ARG_NONE, &unity_greeter_test_mode, "Run in test mode", NULL}, {NULL}};
-static const TestEntry UNITY_GREETER_test_entries[26] = {{"has-password", "Has Password", "*", "uk;us", FALSE, FALSE, NULL}, {"different-prompt", "Different Prompt", "*", "uk;us", FALSE, FALSE, NULL}, {"no-password", "No Password", "*", "uk;us", FALSE, FALSE, NULL}, {"change-password", "Change Password", "*", "uk;us", FALSE, FALSE, NULL}, {"auth-error", "Auth Error", "*", "uk;us", FALSE, FALSE, NULL}, {"two-factor", "Two Factor", "*", "uk;us", FALSE, FALSE, NULL}, {"info-prompt", "Info Prompt", "*", "uk;us", FALSE, FALSE, NULL}, {"long-info-prompt", "Long Info Prompt", "*", "uk;us", FALSE, FALSE, NULL}, {"wide-info-prompt", "Wide Info Prompt", "*", "uk;us", FALSE, FALSE, NULL}, {"multi-info-prompt", "Multi Info Prompt", "*", "uk;us", FALSE, FALSE, NULL}, {"very-very-long-name", "Long name (far too long to fit)", "*", "uk;us", FALSE, FALSE, NULL}, {"long-name-and-messages", "Long name and messages", "*", "uk;us", FALSE, TRUE, NULL}, {"active", "Active Account", "*", "uk;us", TRUE, FALSE, NULL}, {"has-messages", "Has Messages", "*", "uk;us", FALSE, TRUE, NULL}, {"gnome", "GNOME", "*", "uk;us", FALSE, FALSE, "gnome-shell"}, {"locked", "Locked Account", "*", "uk;us", FALSE, FALSE, NULL}, {"color-background", "Color Background", "#dd4814", "uk;us", FALSE, FALSE, NULL}, {"white-background", "White Background", "#ffffff", "uk;us", FALSE, FALSE, NULL}, {"black-background", "Black Background", "#000000", "uk;us", FALSE, FALSE, NULL}, {"no-background", "No Background", NULL, "uk;us", FALSE, FALSE, NULL}, {"unicode", "가나다라마", "*", "uk;us", FALSE, FALSE, NULL}, {"system-layout", "System Layout", "*", NULL, FALSE, FALSE, NULL}, {"four-layouts", "Four Layouts", "*", "de\tdvorak;ca;gb;fr\toss", FALSE, FALSE, NULL}, {"hy-layout", "Layout Is 'hy'", "*", "am\teastern-alt", FALSE, FALSE, NULL}, {"no-response", "No Response", "*", NULL, FALSE, FALSE, NULL}, {"", "", NULL, NULL, FALSE, FALSE, NULL}};
+static const TestEntry UNITY_GREETER_test_entries[27] = {{"has-password", "Has Password", "*", "uk;us", FALSE, FALSE, NULL}, {"different-prompt", "Different Prompt", "*", "uk;us", FALSE, FALSE, NULL}, {"no-password", "No Password", "*", "uk;us", FALSE, FALSE, NULL}, {"change-password", "Change Password", "*", "uk;us", FALSE, FALSE, NULL}, {"auth-error", "Auth Error", "*", "uk;us", FALSE, FALSE, NULL}, {"two-factor", "Two Factor", "*", "uk;us", FALSE, FALSE, NULL}, {"two-prompts", "Two Prompts", "*", "gb;us", FALSE, FALSE, NULL}, {"info-prompt", "Info Prompt", "*", "uk;us", FALSE, FALSE, NULL}, {"long-info-prompt", "Long Info Prompt", "*", "uk;us", FALSE, FALSE, NULL}, {"wide-info-prompt", "Wide Info Prompt", "*", "uk;us", FALSE, FALSE, NULL}, {"multi-info-prompt", "Multi Info Prompt", "*", "uk;us", FALSE, FALSE, NULL}, {"very-very-long-name", "Long name (far too long to fit)", "*", "uk;us", FALSE, FALSE, NULL}, {"long-name-and-messages", "Long name and messages", "*", "uk;us", FALSE, TRUE, NULL}, {"active", "Active Account", "*", "uk;us", TRUE, FALSE, NULL}, {"has-messages", "Has Messages", "*", "uk;us", FALSE, TRUE, NULL}, {"gnome", "GNOME", "*", "uk;us", FALSE, FALSE, "gnome-shell"}, {"locked", "Locked Account", "*", "uk;us", FALSE, FALSE, NULL}, {"color-background", "Color Background", "#dd4814", "uk;us", FALSE, FALSE, NULL}, {"white-background", "White Background", "#ffffff", "uk;us", FALSE, FALSE, NULL}, {"black-background", "Black Background", "#000000", "uk;us", FALSE, FALSE, NULL}, {"no-background", "No Background", NULL, "uk;us", FALSE, FALSE, NULL}, {"unicode", "가나다라마", "*", "uk;us", FALSE, FALSE, NULL}, {"system-layout", "System Layout", "*", NULL, FALSE, FALSE, NULL}, {"four-layouts", "Four Layouts", "*", "de\tdvorak;ca;gb;fr\toss", FALSE, FALSE, NULL}, {"hy-layout", "Layout Is 'hy'", "*", "am\teastern-alt", FALSE, FALSE, NULL}, {"no-response", "No Response", "*", NULL, FALSE, FALSE, NULL}, {"", "", NULL, NULL, FALSE, FALSE, NULL}};
 
 static void _g_free0_ (gpointer var) {
 	var = (g_free (var), NULL);
@@ -415,23 +416,21 @@ UnityGreeter* unity_greeter_construct (GType object_type) {
 	const gchar* _tmp16_;
 	const gchar* _tmp17_;
 	gchar* _tmp18_ = NULL;
-	gchar* _tmp19_;
-	GFile* _tmp20_ = NULL;
-	GKeyFile* _tmp21_;
-	gchar* _tmp32_;
+	GKeyFile* _tmp19_;
+	gchar* _tmp26_;
 	gchar* last_user;
-	MainWindow* _tmp36_;
-	MainWindow* _tmp37_;
-	MainWindow* _tmp38_;
-	UserList* _tmp39_;
-	UserList* _tmp40_;
-	gboolean _tmp41_;
-	UserList* _tmp90_;
-	UserList* _tmp91_;
-	UserList* _tmp92_;
-	UserList* _tmp93_;
-	const gchar* _tmp94_;
-	const gchar* _tmp95_;
+	MainWindow* _tmp30_;
+	MainWindow* _tmp31_;
+	MainWindow* _tmp32_;
+	UserList* _tmp33_;
+	UserList* _tmp34_;
+	gboolean _tmp35_;
+	UserList* _tmp83_;
+	UserList* _tmp84_;
+	UserList* _tmp85_;
+	UserList* _tmp86_;
+	const gchar* _tmp87_;
+	const gchar* _tmp88_;
 	GError * _inner_error_ = NULL;
 	self = (UnityGreeter*) g_type_create_instance (object_type);
 	_tmp0_ = lightdm_greeter_new ();
@@ -452,20 +451,20 @@ UnityGreeter* unity_greeter_construct (GType object_type) {
 		_tmp5_ = lightdm_greeter_connect_sync (_tmp4_, &_inner_error_);
 		_tmp6_ = _tmp5_;
 		if (_inner_error_ != NULL) {
-			goto __catch12_g_error;
+			goto __catch13_g_error;
 		}
 		connected = _tmp6_;
 	}
-	goto __finally12;
-	__catch12_g_error:
+	goto __finally13;
+	__catch13_g_error:
 	{
 		GError* e = NULL;
 		e = _inner_error_;
 		_inner_error_ = NULL;
-		g_warning ("unity-greeter.vala:107: Failed to connect to LightDM daemon");
+		g_warning ("unity-greeter.vala:108: Failed to connect to LightDM daemon");
 		_g_error_free0 (e);
 	}
-	__finally12:
+	__finally13:
 	if (_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
@@ -500,84 +499,71 @@ UnityGreeter* unity_greeter_construct (GType object_type) {
 	g_mkdir_with_parents (_tmp16_, 0775);
 	_tmp17_ = state_dir;
 	_tmp18_ = g_build_filename (_tmp17_, "state", NULL);
-	_tmp19_ = _tmp18_;
-	_tmp20_ = g_file_new_for_path (_tmp19_);
-	_g_object_unref0 (self->priv->state_file);
-	self->priv->state_file = _tmp20_;
-	_g_free0 (_tmp19_);
-	_tmp21_ = g_key_file_new ();
+	_g_free0 (self->priv->state_file);
+	self->priv->state_file = _tmp18_;
+	_tmp19_ = g_key_file_new ();
 	_g_key_file_free0 (self->priv->state);
-	self->priv->state = _tmp21_;
+	self->priv->state = _tmp19_;
 	{
-		GKeyFile* _tmp22_;
-		GFile* _tmp23_;
-		gchar* _tmp24_ = NULL;
-		gchar* _tmp25_;
-		_tmp22_ = self->priv->state;
-		_tmp23_ = self->priv->state_file;
-		_tmp24_ = g_file_get_path (_tmp23_);
-		_tmp25_ = _tmp24_;
-		g_key_file_load_from_file (_tmp22_, _tmp25_, G_KEY_FILE_NONE, &_inner_error_);
-		_g_free0 (_tmp25_);
-		if (_inner_error_ != NULL) {
-			goto __catch13_g_error;
-		}
-	}
-	goto __finally13;
-	__catch13_g_error:
-	{
-		GError* e = NULL;
-		GError* _tmp26_;
-		e = _inner_error_;
-		_inner_error_ = NULL;
-		_tmp26_ = e;
-		if (!g_error_matches (_tmp26_, G_FILE_ERROR, G_FILE_ERROR_NOENT)) {
-			GFile* _tmp27_;
-			gchar* _tmp28_ = NULL;
-			gchar* _tmp29_;
-			GError* _tmp30_;
-			const gchar* _tmp31_;
-			_tmp27_ = self->priv->state_file;
-			_tmp28_ = g_file_get_path (_tmp27_);
-			_tmp29_ = _tmp28_;
-			_tmp30_ = e;
-			_tmp31_ = _tmp30_->message;
-			g_warning ("unity-greeter.vala:130: Failed to load state from %s: %s\n", _tmp29_, _tmp31_);
-			_g_free0 (_tmp29_);
-		}
-		_g_error_free0 (e);
-	}
-	__finally13:
-	if (_inner_error_ != NULL) {
-		_g_free0 (state_dir);
-		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
-		g_clear_error (&_inner_error_);
-		return NULL;
-	}
-	_tmp32_ = g_strdup ("");
-	last_user = _tmp32_;
-	{
-		GKeyFile* _tmp33_;
-		gchar* _tmp34_ = NULL;
-		gchar* _tmp35_;
-		_tmp33_ = self->priv->state;
-		_tmp34_ = g_key_file_get_value (_tmp33_, "greeter", "last-user", &_inner_error_);
-		_tmp35_ = _tmp34_;
+		GKeyFile* _tmp20_;
+		const gchar* _tmp21_;
+		_tmp20_ = self->priv->state;
+		_tmp21_ = self->priv->state_file;
+		g_key_file_load_from_file (_tmp20_, _tmp21_, G_KEY_FILE_NONE, &_inner_error_);
 		if (_inner_error_ != NULL) {
 			goto __catch14_g_error;
 		}
-		_g_free0 (last_user);
-		last_user = _tmp35_;
 	}
 	goto __finally14;
 	__catch14_g_error:
 	{
 		GError* e = NULL;
+		GError* _tmp22_;
+		e = _inner_error_;
+		_inner_error_ = NULL;
+		_tmp22_ = e;
+		if (!g_error_matches (_tmp22_, G_FILE_ERROR, G_FILE_ERROR_NOENT)) {
+			const gchar* _tmp23_;
+			GError* _tmp24_;
+			const gchar* _tmp25_;
+			_tmp23_ = self->priv->state_file;
+			_tmp24_ = e;
+			_tmp25_ = _tmp24_->message;
+			g_warning ("unity-greeter.vala:131: Failed to load state from %s: %s\n", _tmp23_, _tmp25_);
+		}
+		_g_error_free0 (e);
+	}
+	__finally14:
+	if (_inner_error_ != NULL) {
+		_g_free0 (state_dir);
+		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
+		g_clear_error (&_inner_error_);
+		return NULL;
+	}
+	_tmp26_ = g_strdup ("");
+	last_user = _tmp26_;
+	{
+		GKeyFile* _tmp27_;
+		gchar* _tmp28_ = NULL;
+		gchar* _tmp29_;
+		_tmp27_ = self->priv->state;
+		_tmp28_ = g_key_file_get_value (_tmp27_, "greeter", "last-user", &_inner_error_);
+		_tmp29_ = _tmp28_;
+		if (_inner_error_ != NULL) {
+			goto __catch15_g_error;
+		}
+		_g_free0 (last_user);
+		last_user = _tmp29_;
+	}
+	goto __finally15;
+	__catch15_g_error:
+	{
+		GError* e = NULL;
 		e = _inner_error_;
 		_inner_error_ = NULL;
 		_g_error_free0 (e);
 	}
-	__finally14:
+	__finally15:
 	if (_inner_error_ != NULL) {
 		_g_free0 (last_user);
 		_g_free0 (state_dir);
@@ -585,30 +571,30 @@ UnityGreeter* unity_greeter_construct (GType object_type) {
 		g_clear_error (&_inner_error_);
 		return NULL;
 	}
-	_tmp36_ = main_window_new ();
-	_tmp37_ = g_object_ref_sink (_tmp36_);
+	_tmp30_ = main_window_new ();
+	_tmp31_ = g_object_ref_sink (_tmp30_);
 	_g_object_unref0 (self->priv->main_window);
-	self->priv->main_window = _tmp37_;
-	_tmp38_ = self->priv->main_window;
-	_tmp39_ = _tmp38_->user_list;
-	_tmp40_ = _g_object_ref0 (_tmp39_);
+	self->priv->main_window = _tmp31_;
+	_tmp32_ = self->priv->main_window;
+	_tmp33_ = _tmp32_->user_list;
+	_tmp34_ = _g_object_ref0 (_tmp33_);
 	_g_object_unref0 (self->user_list);
-	self->user_list = _tmp40_;
-	_tmp41_ = unity_greeter_test_mode;
-	if (_tmp41_) {
-		UserList* _tmp50_;
-		MainWindow* _tmp51_;
-		const gchar* _tmp52_;
+	self->user_list = _tmp34_;
+	_tmp35_ = unity_greeter_test_mode;
+	if (_tmp35_) {
+		UserList* _tmp44_;
+		MainWindow* _tmp45_;
+		const gchar* _tmp46_;
 		__g_list_free__g_free0_0 (self->priv->test_backgrounds);
 		self->priv->test_backgrounds = NULL;
 		{
-			GDir* _tmp42_ = NULL;
+			GDir* _tmp36_ = NULL;
 			GDir* dir;
-			_tmp42_ = g_dir_open ("/usr/share/backgrounds/", (guint) 0, &_inner_error_);
-			dir = _tmp42_;
+			_tmp36_ = g_dir_open ("/usr/share/backgrounds/", (guint) 0, &_inner_error_);
+			dir = _tmp36_;
 			if (_inner_error_ != NULL) {
 				if (_inner_error_->domain == G_FILE_ERROR) {
-					goto __catch15_g_file_error;
+					goto __catch16_g_file_error;
 				}
 				_g_free0 (last_user);
 				_g_free0 (state_dir);
@@ -617,38 +603,38 @@ UnityGreeter* unity_greeter_construct (GType object_type) {
 				return NULL;
 			}
 			while (TRUE) {
-				GDir* _tmp43_;
-				const gchar* _tmp44_ = NULL;
-				gchar* _tmp45_;
+				GDir* _tmp37_;
+				const gchar* _tmp38_ = NULL;
+				gchar* _tmp39_;
 				gchar* bg;
-				const gchar* _tmp46_;
-				const gchar* _tmp47_;
-				gchar* _tmp48_;
-				_tmp43_ = dir;
-				_tmp44_ = g_dir_read_name (_tmp43_);
-				_tmp45_ = g_strdup (_tmp44_);
-				bg = _tmp45_;
-				_tmp46_ = bg;
-				if (_tmp46_ == NULL) {
+				const gchar* _tmp40_;
+				const gchar* _tmp41_;
+				gchar* _tmp42_;
+				_tmp37_ = dir;
+				_tmp38_ = g_dir_read_name (_tmp37_);
+				_tmp39_ = g_strdup (_tmp38_);
+				bg = _tmp39_;
+				_tmp40_ = bg;
+				if (_tmp40_ == NULL) {
 					_g_free0 (bg);
 					break;
 				}
-				_tmp47_ = bg;
-				_tmp48_ = g_strconcat ("/usr/share/backgrounds/", _tmp47_, NULL);
-				self->priv->test_backgrounds = g_list_append (self->priv->test_backgrounds, _tmp48_);
+				_tmp41_ = bg;
+				_tmp42_ = g_strconcat ("/usr/share/backgrounds/", _tmp41_, NULL);
+				self->priv->test_backgrounds = g_list_append (self->priv->test_backgrounds, _tmp42_);
 				_g_free0 (bg);
 			}
 			_g_dir_close0 (dir);
 		}
-		goto __finally15;
-		__catch15_g_file_error:
+		goto __finally16;
+		__catch16_g_file_error:
 		{
 			GError* e = NULL;
 			e = _inner_error_;
 			_inner_error_ = NULL;
 			_g_error_free0 (e);
 		}
-		__finally15:
+		__finally16:
 		if (_inner_error_ != NULL) {
 			_g_free0 (last_user);
 			_g_free0 (state_dir);
@@ -657,140 +643,137 @@ UnityGreeter* unity_greeter_construct (GType object_type) {
 			return NULL;
 		}
 		while (TRUE) {
-			gboolean _tmp49_ = FALSE;
-			_tmp49_ = unity_greeter_add_test_entry (self);
-			if (!_tmp49_) {
+			gboolean _tmp43_ = FALSE;
+			_tmp43_ = unity_greeter_add_test_entry (self);
+			if (!_tmp43_) {
 				break;
 			}
 		}
-		_tmp50_ = self->user_list;
-		user_list_set_offer_guest (_tmp50_, TRUE);
-		_tmp51_ = self->priv->main_window;
-		g_signal_connect ((GtkWidget*) _tmp51_, "key-press-event", (GCallback) _unity_greeter_key_press_cb_gtk_widget_key_press_event, self);
-		_tmp52_ = last_user;
-		if (_tmp52_ != NULL) {
-			UserList* _tmp53_;
-			const gchar* _tmp54_;
-			_tmp53_ = self->user_list;
-			_tmp54_ = last_user;
-			user_list_set_active_entry (_tmp53_, _tmp54_);
+		_tmp44_ = self->user_list;
+		user_list_set_offer_guest (_tmp44_, TRUE);
+		_tmp45_ = self->priv->main_window;
+		g_signal_connect ((GtkWidget*) _tmp45_, "key-press-event", (GCallback) _unity_greeter_key_press_cb_gtk_widget_key_press_event, self);
+		_tmp46_ = last_user;
+		if (_tmp46_ != NULL) {
+			UserList* _tmp47_;
+			const gchar* _tmp48_;
+			_tmp47_ = self->user_list;
+			_tmp48_ = last_user;
+			user_list_set_active_entry (_tmp47_, _tmp48_);
 		}
 	} else {
-		UserList* _tmp55_;
-		LightDMGreeter* _tmp56_;
-		const gchar* _tmp57_;
-		const gchar* _tmp58_;
-		gchar* _tmp59_;
-		UserList* _tmp60_;
-		LightDMGreeter* _tmp61_;
-		gboolean _tmp62_;
-		gboolean _tmp63_;
-		LightDMGreeter* _tmp64_;
-		gboolean _tmp65_;
-		gboolean _tmp66_;
-		LightDMGreeter* _tmp76_;
-		gboolean _tmp77_;
-		gboolean _tmp78_;
-		LightDMGreeter* _tmp80_;
-		const gchar* _tmp81_;
-		const gchar* _tmp82_;
-		_tmp55_ = self->user_list;
-		_tmp56_ = self->priv->greeter;
-		_tmp57_ = lightdm_greeter_get_default_session_hint (_tmp56_);
-		_tmp58_ = _tmp57_;
-		_tmp59_ = g_strdup (_tmp58_);
-		_g_free0 (_tmp55_->default_session);
-		_tmp55_->default_session = _tmp59_;
-		_tmp60_ = self->user_list;
-		_tmp61_ = self->priv->greeter;
-		_tmp62_ = lightdm_greeter_get_show_manual_login_hint (_tmp61_);
-		_tmp63_ = _tmp62_;
-		user_list_set_always_show_manual (_tmp60_, _tmp63_);
-		_tmp64_ = self->priv->greeter;
-		_tmp65_ = lightdm_greeter_get_hide_users_hint (_tmp64_);
-		_tmp66_ = _tmp65_;
-		if (!_tmp66_) {
-			LightDMUserList* _tmp67_ = NULL;
-			LightDMUserList* _tmp68_;
+		UserList* _tmp49_;
+		LightDMGreeter* _tmp50_;
+		const gchar* _tmp51_;
+		const gchar* _tmp52_;
+		UserList* _tmp53_;
+		LightDMGreeter* _tmp54_;
+		gboolean _tmp55_;
+		gboolean _tmp56_;
+		LightDMGreeter* _tmp57_;
+		gboolean _tmp58_;
+		gboolean _tmp59_;
+		LightDMGreeter* _tmp69_;
+		gboolean _tmp70_;
+		gboolean _tmp71_;
+		LightDMGreeter* _tmp73_;
+		const gchar* _tmp74_;
+		const gchar* _tmp75_;
+		_tmp49_ = self->user_list;
+		_tmp50_ = self->priv->greeter;
+		_tmp51_ = lightdm_greeter_get_default_session_hint (_tmp50_);
+		_tmp52_ = _tmp51_;
+		user_list_set_default_session (_tmp49_, _tmp52_);
+		_tmp53_ = self->user_list;
+		_tmp54_ = self->priv->greeter;
+		_tmp55_ = lightdm_greeter_get_show_manual_login_hint (_tmp54_);
+		_tmp56_ = _tmp55_;
+		user_list_set_always_show_manual (_tmp53_, _tmp56_);
+		_tmp57_ = self->priv->greeter;
+		_tmp58_ = lightdm_greeter_get_hide_users_hint (_tmp57_);
+		_tmp59_ = _tmp58_;
+		if (!_tmp59_) {
+			LightDMUserList* _tmp60_ = NULL;
+			LightDMUserList* _tmp61_;
 			LightDMUserList* users;
-			LightDMUserList* _tmp69_;
-			LightDMUserList* _tmp70_;
-			LightDMUserList* _tmp71_;
-			LightDMUserList* _tmp72_;
-			GList* _tmp73_;
-			GList* _tmp74_;
-			_tmp67_ = lightdm_user_list_get_instance ();
-			_tmp68_ = _g_object_ref0 (_tmp67_);
-			users = _tmp68_;
-			_tmp69_ = users;
-			g_signal_connect (_tmp69_, "user-added", (GCallback) _unity_greeter_user_added_cb_lightdm_user_list_user_added, self);
-			_tmp70_ = users;
-			g_signal_connect (_tmp70_, "user-changed", (GCallback) _unity_greeter_user_added_cb_lightdm_user_list_user_changed, self);
-			_tmp71_ = users;
-			g_signal_connect (_tmp71_, "user-removed", (GCallback) _unity_greeter_user_removed_cb_lightdm_user_list_user_removed, self);
-			_tmp72_ = users;
-			_tmp73_ = lightdm_user_list_get_users (_tmp72_);
-			_tmp74_ = _tmp73_;
+			LightDMUserList* _tmp62_;
+			LightDMUserList* _tmp63_;
+			LightDMUserList* _tmp64_;
+			LightDMUserList* _tmp65_;
+			GList* _tmp66_;
+			GList* _tmp67_;
+			_tmp60_ = lightdm_user_list_get_instance ();
+			_tmp61_ = _g_object_ref0 (_tmp60_);
+			users = _tmp61_;
+			_tmp62_ = users;
+			g_signal_connect (_tmp62_, "user-added", (GCallback) _unity_greeter_user_added_cb_lightdm_user_list_user_added, self);
+			_tmp63_ = users;
+			g_signal_connect (_tmp63_, "user-changed", (GCallback) _unity_greeter_user_added_cb_lightdm_user_list_user_changed, self);
+			_tmp64_ = users;
+			g_signal_connect (_tmp64_, "user-removed", (GCallback) _unity_greeter_user_removed_cb_lightdm_user_list_user_removed, self);
+			_tmp65_ = users;
+			_tmp66_ = lightdm_user_list_get_users (_tmp65_);
+			_tmp67_ = _tmp66_;
 			{
 				GList* user_collection = NULL;
 				GList* user_it = NULL;
-				user_collection = _tmp74_;
+				user_collection = _tmp67_;
 				for (user_it = user_collection; user_it != NULL; user_it = user_it->next) {
 					LightDMUser* user = NULL;
 					user = (LightDMUser*) user_it->data;
 					{
-						LightDMUser* _tmp75_;
-						_tmp75_ = user;
-						unity_greeter_user_added_cb (self, _tmp75_);
+						LightDMUser* _tmp68_;
+						_tmp68_ = user;
+						unity_greeter_user_added_cb (self, _tmp68_);
 					}
 				}
 			}
 			_g_object_unref0 (users);
 		}
-		_tmp76_ = self->priv->greeter;
-		_tmp77_ = lightdm_greeter_get_has_guest_account_hint (_tmp76_);
-		_tmp78_ = _tmp77_;
-		if (_tmp78_) {
-			UserList* _tmp79_;
-			g_debug ("unity-greeter.vala:184: Adding guest account entry");
-			_tmp79_ = self->user_list;
-			user_list_set_offer_guest (_tmp79_, TRUE);
+		_tmp69_ = self->priv->greeter;
+		_tmp70_ = lightdm_greeter_get_has_guest_account_hint (_tmp69_);
+		_tmp71_ = _tmp70_;
+		if (_tmp71_) {
+			UserList* _tmp72_;
+			g_debug ("unity-greeter.vala:185: Adding guest account entry");
+			_tmp72_ = self->user_list;
+			user_list_set_offer_guest (_tmp72_, TRUE);
 		}
-		_tmp80_ = self->priv->greeter;
-		_tmp81_ = lightdm_greeter_get_select_user_hint (_tmp80_);
-		_tmp82_ = _tmp81_;
-		if (_tmp82_ != NULL) {
-			UserList* _tmp83_;
-			LightDMGreeter* _tmp84_;
-			const gchar* _tmp85_;
-			const gchar* _tmp86_;
-			_tmp83_ = self->user_list;
-			_tmp84_ = self->priv->greeter;
-			_tmp85_ = lightdm_greeter_get_select_user_hint (_tmp84_);
-			_tmp86_ = _tmp85_;
-			user_list_set_active_entry (_tmp83_, _tmp86_);
+		_tmp73_ = self->priv->greeter;
+		_tmp74_ = lightdm_greeter_get_select_user_hint (_tmp73_);
+		_tmp75_ = _tmp74_;
+		if (_tmp75_ != NULL) {
+			UserList* _tmp76_;
+			LightDMGreeter* _tmp77_;
+			const gchar* _tmp78_;
+			const gchar* _tmp79_;
+			_tmp76_ = self->user_list;
+			_tmp77_ = self->priv->greeter;
+			_tmp78_ = lightdm_greeter_get_select_user_hint (_tmp77_);
+			_tmp79_ = _tmp78_;
+			user_list_set_active_entry (_tmp76_, _tmp79_);
 		} else {
-			const gchar* _tmp87_;
-			_tmp87_ = last_user;
-			if (_tmp87_ != NULL) {
-				UserList* _tmp88_;
-				const gchar* _tmp89_;
-				_tmp88_ = self->user_list;
-				_tmp89_ = last_user;
-				user_list_set_active_entry (_tmp88_, _tmp89_);
+			const gchar* _tmp80_;
+			_tmp80_ = last_user;
+			if (_tmp80_ != NULL) {
+				UserList* _tmp81_;
+				const gchar* _tmp82_;
+				_tmp81_ = self->user_list;
+				_tmp82_ = last_user;
+				user_list_set_active_entry (_tmp81_, _tmp82_);
 			}
 		}
 	}
-	_tmp90_ = self->user_list;
-	g_signal_connect (_tmp90_, "user-selected", (GCallback) _unity_greeter_user_selected_cb_user_list_user_selected, self);
-	_tmp91_ = self->user_list;
-	g_signal_connect (_tmp91_, "respond-to-prompt", (GCallback) _unity_greeter_respond_to_prompt_cb_user_list_respond_to_prompt, self);
-	_tmp92_ = self->user_list;
-	g_signal_connect (_tmp92_, "start-session", (GCallback) _unity_greeter_start_session_cb_user_list_start_session, self);
-	_tmp93_ = self->user_list;
-	_tmp94_ = user_list_get_selected (_tmp93_);
-	_tmp95_ = _tmp94_;
-	unity_greeter_user_selected_cb (self, _tmp95_);
+	_tmp83_ = self->user_list;
+	g_signal_connect (_tmp83_, "user-selected", (GCallback) _unity_greeter_user_selected_cb_user_list_user_selected, self);
+	_tmp84_ = self->user_list;
+	g_signal_connect (_tmp84_, "respond-to-prompt", (GCallback) _unity_greeter_respond_to_prompt_cb_user_list_respond_to_prompt, self);
+	_tmp85_ = self->user_list;
+	g_signal_connect (_tmp85_, "start-session", (GCallback) _unity_greeter_start_session_cb_user_list_start_session, self);
+	_tmp86_ = self->user_list;
+	_tmp87_ = user_list_get_selected (_tmp86_);
+	_tmp88_ = _tmp87_;
+	unity_greeter_user_selected_cb (self, _tmp88_);
 	unity_greeter_start_fake_wm (self);
 	gdk_threads_add_idle (_unity_greeter_ready_cb_gsource_func, self);
 	_g_free0 (last_user);
@@ -1183,7 +1166,7 @@ static gboolean unity_greeter_ready_cb (UnityGreeter* self) {
 	ca_context* _tmp0_ = NULL;
 	gboolean _tmp1_ = FALSE;
 	g_return_val_if_fail (self != NULL, FALSE);
-	g_debug ("unity-greeter.vala:310: starting system-ready sound");
+	g_debug ("unity-greeter.vala:311: starting system-ready sound");
 	ca_context_create (&_tmp0_);
 	_ca_context_destroy0 (self->priv->canberra_context);
 	self->priv->canberra_context = _tmp0_;
@@ -1243,7 +1226,7 @@ static void unity_greeter_user_added_cb (UnityGreeter* self, LightDMUser* user) 
 	_tmp3_ = user;
 	_tmp4_ = lightdm_user_get_real_name (_tmp3_);
 	_tmp5_ = _tmp4_;
-	g_debug ("unity-greeter.vala:327: Adding/updating user %s (%s)", _tmp2_, _tmp5_);
+	g_debug ("unity-greeter.vala:328: Adding/updating user %s (%s)", _tmp2_, _tmp5_);
 	_tmp6_ = user;
 	_tmp7_ = lightdm_user_get_real_name (_tmp6_);
 	_tmp8_ = _tmp7_;
@@ -1337,7 +1320,7 @@ static void unity_greeter_user_removed_cb (UnityGreeter* self, LightDMUser* user
 	_tmp0_ = user;
 	_tmp1_ = lightdm_user_get_name (_tmp0_);
 	_tmp2_ = _tmp1_;
-	g_debug ("unity-greeter.vala:346: Removing user %s", _tmp2_);
+	g_debug ("unity-greeter.vala:347: Removing user %s", _tmp2_);
 	_tmp3_ = self->user_list;
 	_tmp4_ = user;
 	_tmp5_ = lightdm_user_get_name (_tmp4_);
@@ -1351,7 +1334,7 @@ void unity_greeter_show (UnityGreeter* self) {
 	MainWindow* _tmp1_;
 	GdkWindow* _tmp2_ = NULL;
 	g_return_if_fail (self != NULL);
-	g_debug ("unity-greeter.vala:352: Showing main window");
+	g_debug ("unity-greeter.vala:353: Showing main window");
 	_tmp0_ = self->priv->main_window;
 	gtk_widget_show ((GtkWidget*) _tmp0_);
 	_tmp1_ = self->priv->main_window;
@@ -1523,11 +1506,11 @@ static void unity_greeter_start_session (UnityGreeter* self) {
 		_tmp10_ = _tmp9_;
 		lightdm_greeter_start_session_sync (_tmp7_, _tmp10_, &_inner_error_);
 		if (_inner_error_ != NULL) {
-			goto __catch16_g_error;
+			goto __catch17_g_error;
 		}
 	}
-	goto __finally16;
-	__catch16_g_error:
+	goto __finally17;
+	__catch17_g_error:
 	{
 		GError* e = NULL;
 		GError* _tmp11_;
@@ -1536,10 +1519,10 @@ static void unity_greeter_start_session (UnityGreeter* self) {
 		_inner_error_ = NULL;
 		_tmp11_ = e;
 		_tmp12_ = _tmp11_->message;
-		g_warning ("unity-greeter.vala:418: Failed to start session: %s", _tmp12_);
+		g_warning ("unity-greeter.vala:419: Failed to start session: %s", _tmp12_);
 		_g_error_free0 (e);
 	}
-	__finally16:
+	__finally17:
 	if (_inner_error_ != NULL) {
 		_cairo_destroy0 (c);
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
@@ -1618,7 +1601,7 @@ static void unity_greeter_authentication_complete_cb (UnityGreeter* self) {
 				_tmp20_ = gdk_screen_get_default ();
 				_tmp21_ = unity_greeter_background_surface;
 				unity_greeter_refresh_background (self, _tmp20_, _tmp21_);
-				g_debug ("unity-greeter.vala:451: Successfully logged in!  Quitting...");
+				g_debug ("unity-greeter.vala:452: Successfully logged in!  Quitting...");
 				gtk_main_quit ();
 				_cairo_destroy0 (c);
 			}
@@ -1687,15 +1670,15 @@ static void unity_greeter_user_selected_cb (UnityGreeter* self, const gchar* use
 	_tmp3_ = g_key_file_to_data (_tmp2_, NULL, NULL);
 	data = _tmp3_;
 	{
-		GFile* _tmp4_;
+		const gchar* _tmp4_;
 		_tmp4_ = self->priv->state_file;
-		g_file_replace_contents (_tmp4_, (guint8*) data, (gsize) -1, NULL, FALSE, G_FILE_CREATE_NONE, NULL, NULL, &_inner_error_);
+		g_file_set_contents (_tmp4_, data, (gssize) (-1), &_inner_error_);
 		if (_inner_error_ != NULL) {
-			goto __catch17_g_error;
+			goto __catch18_g_error;
 		}
 	}
-	goto __finally17;
-	__catch17_g_error:
+	goto __finally18;
+	__catch18_g_error:
 	{
 		GError* e = NULL;
 		GError* _tmp5_;
@@ -1704,10 +1687,10 @@ static void unity_greeter_user_selected_cb (UnityGreeter* self, const gchar* use
 		_inner_error_ = NULL;
 		_tmp5_ = e;
 		_tmp6_ = _tmp5_->message;
-		g_debug ("unity-greeter.vala:496: Failed to write state: %s", _tmp6_);
+		g_debug ("unity-greeter.vala:497: Failed to write state: %s", _tmp6_);
 		_g_error_free0 (e);
 	}
-	__finally17:
+	__finally18:
 	if (_inner_error_ != NULL) {
 		_g_free0 (data);
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
@@ -1745,6 +1728,7 @@ static void unity_greeter_start_authentication (UnityGreeter* self) {
 		static GQuark _tmp6_label6 = 0;
 		static GQuark _tmp6_label7 = 0;
 		static GQuark _tmp6_label8 = 0;
+		static GQuark _tmp6_label9 = 0;
 		_g_free0 (self->priv->test_username);
 		self->priv->test_username = NULL;
 		self->priv->test_is_authenticated = FALSE;
@@ -1871,49 +1855,62 @@ static void unity_greeter_start_authentication (UnityGreeter* self) {
 					break;
 				}
 			}
-		} else {
+		} else if (_tmp7_ == ((0 != _tmp6_label9) ? _tmp6_label9 : (_tmp6_label9 = g_quark_from_static_string ("two-prompts")))) {
 			switch (0) {
 				default:
 				{
 					const gchar* _tmp17_ = NULL;
-					_tmp17_ = _ ("Password:");
-					unity_greeter_show_prompt_cb (self, _tmp17_, LIGHTDM_PROMPT_TYPE_SECRET);
+					const gchar* _tmp18_ = NULL;
+					_tmp17_ = _ ("Favorite Color:");
+					unity_greeter_show_prompt_cb (self, _tmp17_, LIGHTDM_PROMPT_TYPE_QUESTION);
+					_tmp18_ = _ ("Password:");
+					unity_greeter_show_prompt_cb (self, _tmp18_, LIGHTDM_PROMPT_TYPE_SECRET);
+					break;
+				}
+			}
+		} else {
+			switch (0) {
+				default:
+				{
+					const gchar* _tmp19_ = NULL;
+					_tmp19_ = _ ("Password:");
+					unity_greeter_show_prompt_cb (self, _tmp19_, LIGHTDM_PROMPT_TYPE_SECRET);
 					break;
 				}
 			}
 		}
 	} else {
-		UserList* _tmp18_;
-		const gchar* _tmp19_;
-		const gchar* _tmp20_;
-		_tmp18_ = self->user_list;
-		_tmp19_ = user_list_get_selected (_tmp18_);
-		_tmp20_ = _tmp19_;
-		if (g_strcmp0 (_tmp20_, "*other") == 0) {
-			LightDMGreeter* _tmp21_;
-			_tmp21_ = self->priv->greeter;
-			lightdm_greeter_authenticate (_tmp21_, NULL);
+		UserList* _tmp20_;
+		const gchar* _tmp21_;
+		const gchar* _tmp22_;
+		_tmp20_ = self->user_list;
+		_tmp21_ = user_list_get_selected (_tmp20_);
+		_tmp22_ = _tmp21_;
+		if (g_strcmp0 (_tmp22_, "*other") == 0) {
+			LightDMGreeter* _tmp23_;
+			_tmp23_ = self->priv->greeter;
+			lightdm_greeter_authenticate (_tmp23_, NULL);
 		} else {
-			UserList* _tmp22_;
-			const gchar* _tmp23_;
-			const gchar* _tmp24_;
-			_tmp22_ = self->user_list;
-			_tmp23_ = user_list_get_selected (_tmp22_);
-			_tmp24_ = _tmp23_;
-			if (g_strcmp0 (_tmp24_, "*guest") == 0) {
-				LightDMGreeter* _tmp25_;
-				_tmp25_ = self->priv->greeter;
-				lightdm_greeter_authenticate_as_guest (_tmp25_);
+			UserList* _tmp24_;
+			const gchar* _tmp25_;
+			const gchar* _tmp26_;
+			_tmp24_ = self->user_list;
+			_tmp25_ = user_list_get_selected (_tmp24_);
+			_tmp26_ = _tmp25_;
+			if (g_strcmp0 (_tmp26_, "*guest") == 0) {
+				LightDMGreeter* _tmp27_;
+				_tmp27_ = self->priv->greeter;
+				lightdm_greeter_authenticate_as_guest (_tmp27_);
 			} else {
-				LightDMGreeter* _tmp26_;
-				UserList* _tmp27_;
-				const gchar* _tmp28_;
-				const gchar* _tmp29_;
-				_tmp26_ = self->priv->greeter;
-				_tmp27_ = self->user_list;
-				_tmp28_ = user_list_get_selected (_tmp27_);
-				_tmp29_ = _tmp28_;
-				lightdm_greeter_authenticate (_tmp26_, _tmp29_);
+				LightDMGreeter* _tmp28_;
+				UserList* _tmp29_;
+				const gchar* _tmp30_;
+				const gchar* _tmp31_;
+				_tmp28_ = self->priv->greeter;
+				_tmp29_ = self->user_list;
+				_tmp30_ = user_list_get_selected (_tmp29_);
+				_tmp31_ = _tmp30_;
+				lightdm_greeter_authenticate (_tmp28_, _tmp31_);
 			}
 		}
 	}
@@ -1938,7 +1935,7 @@ static void unity_greeter_respond_to_prompt_cb (UnityGreeter* self, const gchar*
 		static GQuark _tmp6_label3 = 0;
 		static GQuark _tmp6_label4 = 0;
 		_tmp1_ = text;
-		g_debug ("unity-greeter.vala:586: response %s", _tmp1_);
+		g_debug ("unity-greeter.vala:591: response %s", _tmp1_);
 		_tmp2_ = self->user_list;
 		_tmp3_ = user_list_get_selected (_tmp2_);
 		_tmp4_ = _tmp3_;
@@ -1956,7 +1953,7 @@ static void unity_greeter_respond_to_prompt_cb (UnityGreeter* self, const gchar*
 						gchar* _tmp11_;
 						const gchar* _tmp12_ = NULL;
 						_tmp9_ = text;
-						g_debug ("unity-greeter.vala:592: username=%s", _tmp9_);
+						g_debug ("unity-greeter.vala:597: username=%s", _tmp9_);
 						_tmp10_ = text;
 						_tmp11_ = g_strdup (_tmp10_);
 						_g_free0 (self->priv->test_username);
@@ -1982,7 +1979,7 @@ static void unity_greeter_respond_to_prompt_cb (UnityGreeter* self, const gchar*
 						const gchar* _tmp15_;
 						_tmp15_ = text;
 						if (g_strcmp0 (_tmp15_, "password") == 0) {
-							g_debug ("unity-greeter.vala:607: prompt otp");
+							g_debug ("unity-greeter.vala:612: prompt otp");
 							self->priv->test_prompted_sso = TRUE;
 							unity_greeter_show_prompt_cb (self, "OTP:", LIGHTDM_PROMPT_TYPE_QUESTION);
 						} else {
@@ -2423,7 +2420,7 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 		_argv_size_ = argv_length1;
 		if (_inner_error_ != NULL) {
 			argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
-			goto __catch18_g_error;
+			goto __catch19_g_error;
 		}
 		_tmp2_ = argv;
 		_tmp2__length1 = argv_length1;
@@ -2431,12 +2428,12 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 		atspi_pid = _tmp3_;
 		if (_inner_error_ != NULL) {
 			argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
-			goto __catch18_g_error;
+			goto __catch19_g_error;
 		}
 		argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
 	}
-	goto __finally18;
-	__catch18_g_error:
+	goto __finally19;
+	__catch19_g_error:
 	{
 		GError* e = NULL;
 		GError* _tmp4_;
@@ -2445,10 +2442,10 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 		_inner_error_ = NULL;
 		_tmp4_ = e;
 		_tmp5_ = _tmp4_->message;
-		g_warning ("unity-greeter.vala:808: Error starting the at-spi registry: %s", _tmp5_);
+		g_warning ("unity-greeter.vala:813: Error starting the at-spi registry: %s", _tmp5_);
 		_g_error_free0 (e);
 	}
-	__finally18:
+	__finally19:
 	if (_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
@@ -2461,19 +2458,19 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 	g_log_set_default_handler (_unity_greeter_log_cb_glog_func, NULL);
 	_tmp7_ = getuid ();
 	_tmp8_ = g_getenv ("LANG");
-	g_debug ("unity-greeter.vala:816: Starting unity-greeter %s UID=%d LANG=%s", VERSION, (gint) _tmp7_, _tmp8_);
-	g_debug ("unity-greeter.vala:819: Setting cursor");
+	g_debug ("unity-greeter.vala:821: Starting unity-greeter %s UID=%d LANG=%s", VERSION, (gint) _tmp7_, _tmp8_);
+	g_debug ("unity-greeter.vala:824: Setting cursor");
 	_tmp9_ = gdk_get_default_root_window ();
 	_tmp10_ = gdk_cursor_new (GDK_LEFT_PTR);
 	_tmp11_ = _tmp10_;
 	gdk_window_set_cursor (_tmp9_, _tmp11_);
 	_g_object_unref0 (_tmp11_);
-	g_debug ("unity-greeter.vala:823: Creating background surface");
+	g_debug ("unity-greeter.vala:828: Creating background surface");
 	_tmp12_ = gdk_screen_get_default ();
 	_tmp13_ = unity_greeter_create_root_surface (_tmp12_);
 	_cairo_surface_destroy0 (unity_greeter_background_surface);
 	unity_greeter_background_surface = _tmp13_;
-	g_debug ("unity-greeter.vala:826: Loading command line options");
+	g_debug ("unity-greeter.vala:831: Loading command line options");
 	_tmp14_ = _ ("- Unity Greeter");
 	_tmp15_ = g_option_context_new (_tmp14_);
 	c = _tmp15_;
@@ -2487,11 +2484,11 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 		_tmp19_ = c;
 		g_option_context_parse (_tmp19_, &args_length1, &args, &_inner_error_);
 		if (_inner_error_ != NULL) {
-			goto __catch19_g_error;
+			goto __catch20_g_error;
 		}
 	}
-	goto __finally19;
-	__catch19_g_error:
+	goto __finally20;
+	__catch20_g_error:
 	{
 		GError* e = NULL;
 		FILE* _tmp20_;
@@ -2522,7 +2519,7 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 		_g_option_context_free0 (c);
 		return result;
 	}
-	__finally19:
+	__finally20:
 	if (_inner_error_ != NULL) {
 		_g_option_context_free0 (c);
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
@@ -2540,9 +2537,9 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 	}
 	_tmp30_ = unity_greeter_test_mode;
 	if (_tmp30_) {
-		g_debug ("unity-greeter.vala:851: Running in test mode");
+		g_debug ("unity-greeter.vala:856: Running in test mode");
 	}
-	g_debug ("unity-greeter.vala:854: Setting GTK+ settings");
+	g_debug ("unity-greeter.vala:859: Setting GTK+ settings");
 	_tmp31_ = gtk_settings_get_default ();
 	_tmp32_ = _g_object_ref0 (_tmp31_);
 	settings = _tmp32_;
@@ -2615,13 +2612,13 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 		_tmp59_ = value;
 		g_object_set ((GObject*) _tmp58_, "gtk-xft-rgba", _tmp59_, NULL, NULL);
 	}
-	g_debug ("unity-greeter.vala:877: Creating Unity Greeter");
+	g_debug ("unity-greeter.vala:882: Creating Unity Greeter");
 	_tmp60_ = unity_greeter_new ();
 	greeter = _tmp60_;
-	g_debug ("unity-greeter.vala:880: Showing greeter");
+	g_debug ("unity-greeter.vala:885: Showing greeter");
 	_tmp61_ = greeter;
 	unity_greeter_show (_tmp61_);
-	g_debug ("unity-greeter.vala:883: Starting main loop");
+	g_debug ("unity-greeter.vala:888: Starting main loop");
 	gtk_main ();
 	_tmp62_ = atspi_pid;
 	if (_tmp62_ != ((GPid) 0)) {
@@ -2786,7 +2783,7 @@ static void unity_greeter_instance_init (UnityGreeter * self) {
 static void unity_greeter_finalize (UnityGreeter* obj) {
 	UnityGreeter * self;
 	self = UNITY_GREETER (obj);
-	_g_object_unref0 (self->priv->state_file);
+	_g_free0 (self->priv->state_file);
 	_g_key_file_free0 (self->priv->state);
 	_g_object_unref0 (self->priv->settings_daemon);
 	_g_object_unref0 (self->priv->main_window);

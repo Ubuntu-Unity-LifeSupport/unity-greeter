@@ -36,7 +36,7 @@ public class UnityGreeter
 
     private static Timer log_timer;
 
-    private File state_file;
+    private string state_file;
     private KeyFile state;
 
     private static Cairo.XlibSurface background_surface;
@@ -61,6 +61,7 @@ public class UnityGreeter
         { "change-password",    "Change Password",   "*",              "uk;us", false, false, null },
         { "auth-error",         "Auth Error",        "*",              "uk;us", false, false, null },
         { "two-factor",         "Two Factor",        "*",              "uk;us", false, false, null },
+        { "two-prompts",        "Two Prompts",       "*",              "gb;us", false, false, null },
         { "info-prompt",        "Info Prompt",       "*",              "uk;us", false, false, null },
         { "long-info-prompt",   "Long Info Prompt",  "*",              "uk;us", false, false, null },
         { "wide-info-prompt",   "Wide Info Prompt",  "*",              "uk;us", false, false, null },
@@ -118,16 +119,16 @@ public class UnityGreeter
         var state_dir = Path.build_filename (Environment.get_user_cache_dir (), "unity-greeter");
         DirUtils.create_with_parents (state_dir, 0775);
 
-        state_file = File.new_for_path (Path.build_filename (state_dir, "state"));
+        state_file = Path.build_filename (state_dir, "state");
         state = new KeyFile ();
         try
         {
-            state.load_from_file (state_file.get_path (), KeyFileFlags.NONE);
+            state.load_from_file (state_file, KeyFileFlags.NONE);
         }
         catch (Error e)
         {
             if (!(e is FileError.NOENT))
-                warning ("Failed to load state from %s: %s\n", state_file.get_path (), e.message);
+                warning ("Failed to load state from %s: %s\n", state_file, e.message);
         }
         var last_user = "";
         try
@@ -489,7 +490,7 @@ public class UnityGreeter
         var data = state.to_data ();
         try
         {
-            state_file.replace_contents ((uint8[])data, null, false, FileCreateFlags.NONE, null);
+            FileUtils.set_contents (state_file, data);
         }
         catch (Error e)
         {
@@ -561,6 +562,10 @@ public class UnityGreeter
                 show_message_cb ("Welcome to Unity Greeter", LightDM.MessageType.INFO);
                 show_message_cb ("This is an error", LightDM.MessageType.ERROR);
                 show_message_cb ("You should have seen three messages", LightDM.MessageType.INFO);
+                show_prompt_cb (_("Password:"), LightDM.PromptType.SECRET);
+                break;
+            case "two-prompts":
+                show_prompt_cb (_("Favorite Color:"), LightDM.PromptType.QUESTION);
                 show_prompt_cb (_("Password:"), LightDM.PromptType.SECRET);
                 break;
             default:

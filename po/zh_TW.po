@@ -7,31 +7,35 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2012-04-17 07:20+0000\n"
-"PO-Revision-Date: 2012-01-24 16:14+0000\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2012-06-19 05:11+0000\n"
+"PO-Revision-Date: 2012-05-08 13:34+0000\n"
+"Last-Translator: taijuin lee <Unknown>\n"
 "Language-Team: Chinese (Traditional) <zh_TW@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2012-04-18 05:09+0000\n"
-"X-Generator: Launchpad (build 15108)\n"
+"X-Launchpad-Export-Date: 2012-06-20 05:05+0000\n"
+"X-Generator: Launchpad (build 15435)\n"
 
 #: ../src/main-window.vala:42
 msgid "Login Screen"
-msgstr ""
+msgstr "登入畫面"
 
 #: ../src/menubar.vala:211
 msgid "Onscreen keyboard"
-msgstr ""
+msgstr "螢幕鍵盤"
 
 #: ../src/menubar.vala:216
 msgid "High Contrast"
-msgstr ""
+msgstr "高反差"
 
 #: ../src/menubar.vala:222
 msgid "Screen Reader"
-msgstr ""
+msgstr "螢幕閱讀器"
+
+#: ../src/user-list.vala:254
+msgid "Session Options"
+msgstr "作業階段選項"
 
 #: ../src/session-chooser.vala:63
 msgid "_Back"
@@ -40,82 +44,85 @@ msgstr "返回(_B)"
 #. Help string for command line --version flag
 #: ../src/unity-greeter.vala:30
 msgid "Show release version"
-msgstr ""
+msgstr "顯示發行版本"
 
 #. Help string for command line --test-mode flag
 #: ../src/unity-greeter.vala:33
 msgid "Run in test mode"
-msgstr ""
+msgstr "以測試模式執行"
 
 #: ../src/unity-greeter.vala:386 ../src/unity-greeter.vala:527
 #: ../src/unity-greeter.vala:550 ../src/unity-greeter.vala:554
 #: ../src/unity-greeter.vala:558 ../src/unity-greeter.vala:564
 #: ../src/unity-greeter.vala:567 ../src/unity-greeter.vala:594
 msgid "Password:"
-msgstr ""
+msgstr "密碼："
 
 #: ../src/unity-greeter.vala:388 ../src/unity-greeter.vala:530
 msgid "Username:"
-msgstr ""
+msgstr "使用者名稱："
 
 #: ../src/unity-greeter.vala:469
 msgid "Invalid password, please try again"
-msgstr ""
+msgstr "無效的密碼，請重試"
 
 #: ../src/unity-greeter.vala:478
 msgid "Failed to authenticate"
-msgstr ""
+msgstr "認證失敗"
+
+#: ../src/unity-greeter.vala:568
+msgid "Favorite Color:"
+msgstr "最喜歡的顏色："
 
 #. Arguments and description for --help text
 #: ../src/unity-greeter.vala:828
 msgid "- Unity Greeter"
-msgstr ""
+msgstr "- Unity 歡迎程式"
 
 #. Text printed out when an unknown command-line argument provided
 #: ../src/unity-greeter.vala:839
 #, c-format
 msgid "Run '%s --help' to see a full list of available command line options."
-msgstr ""
+msgstr "執行「%s --help」來查看所有命令列可用選項的完整清單。"
 
 #: ../src/user-list.vala:80
 msgid "Guest Session"
-msgstr ""
+msgstr "訪客作業階段"
 
-#: ../src/user-list.vala:242
-msgid "Session Options"
-msgstr ""
-
-#: ../src/user-list.vala:371
+#: ../src/user-list.vala:383
 #, c-format
 msgid "Enter password for %s"
-msgstr ""
-
-#: ../src/user-list.vala:375
-msgid "Enter username"
-msgstr ""
-
-#: ../src/user-list.vala:377
-msgid "Enter password"
-msgstr ""
-
-#: ../src/user-list.vala:395
-#, c-format
-msgid "Login as %s"
-msgstr ""
+msgstr "輸入 %s 的密碼"
 
 #. 'Log In' here is the button for logging in.
-#: ../src/user-list.vala:397
+#: ../src/user-list.vala:409
 msgid "Log In"
 msgstr "登入"
 
-#: ../src/user-list.vala:401 ../src/user-list.vala:402
+#: ../src/user-list.vala:407
+#, c-format
+msgid "Login as %s"
+msgstr "以 %s 身份登入"
+
+#: ../src/user-list.vala:413 ../src/user-list.vala:414
 msgid "Retry"
 msgstr "重試"
 
-#: ../src/user-list.vala:418
-msgid "Logging in..."
-msgstr ""
+#: ../src/user-list.vala:322
+#, c-format
+msgid "Retry as %s"
+msgstr "重試由於 %s"
 
-#: ../src/user-list.vala:503
+#: ../src/user-list.vala:430
+msgid "Logging in..."
+msgstr "正在登入..."
+
+#: ../src/user-list.vala:515
 msgid "Login"
-msgstr ""
+msgstr "登入"
+
+#~ msgid "Enter username"
+#~ msgstr "輸入使用者名稱"
+
+#~ msgid "Enter password"
+#~ msgstr "輸入密碼"

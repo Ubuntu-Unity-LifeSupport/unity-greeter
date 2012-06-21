@@ -72,7 +72,7 @@ typedef struct _SessionChooserClass SessionChooserClass;
 typedef struct _SessionChooserPrivate SessionChooserPrivate;
 #define _g_free0(var) (var = (g_free (var), NULL))
 #define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
-typedef struct _Block1Data Block1Data;
+typedef struct _Block2Data Block2Data;
 
 #define TYPE_CACHED_IMAGE (cached_image_get_type ())
 #define CACHED_IMAGE(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_CACHED_IMAGE, CachedImage))
@@ -110,7 +110,7 @@ struct _SessionChooserClass {
 	FadableBoxClass parent_class;
 };
 
-struct _Block1Data {
+struct _Block2Data {
 	int _ref_count_;
 	SessionChooser * self;
 	gchar* key;
@@ -131,13 +131,13 @@ enum  {
 };
 static GtkWidget* session_chooser_build_back_button (SessionChooser* self);
 void unity_greeter_add_style_class (GtkWidget* widget);
-static void __lambda5_ (SessionChooser* self);
-static void ___lambda5__gtk_button_clicked (GtkButton* _sender, gpointer self);
+static void __lambda11_ (SessionChooser* self);
+static void ___lambda11__gtk_button_clicked (GtkButton* _sender, gpointer self);
 static void session_chooser_add_session (SessionChooser* self, const gchar* key, const gchar* name);
-static Block1Data* block1_data_ref (Block1Data* _data1_);
-static void block1_data_unref (void * _userdata_);
-static void __lambda6_ (Block1Data* _data1_);
-static void ___lambda6__gtk_button_clicked (GtkButton* _sender, gpointer self);
+static Block2Data* block2_data_ref (Block2Data* _data2_);
+static void block2_data_unref (void * _userdata_);
+static void __lambda12_ (Block2Data* _data2_);
+static void ___lambda12__gtk_button_clicked (GtkButton* _sender, gpointer self);
 GdkPixbuf* session_chooser_get_badge (const gchar* session);
 CachedImage* cached_image_new (GdkPixbuf* pixbuf);
 CachedImage* cached_image_construct (GType object_type, GdkPixbuf* pixbuf);
@@ -153,13 +153,13 @@ static GObject * session_chooser_constructor (GType type, guint n_construct_prop
 static void session_chooser_finalize (GObject* obj);
 
 
-static void __lambda5_ (SessionChooser* self) {
+static void __lambda11_ (SessionChooser* self) {
 	g_signal_emit_by_name (self, "session-clicked", NULL);
 }
 
 
-static void ___lambda5__gtk_button_clicked (GtkButton* _sender, gpointer self) {
-	__lambda5_ (self);
+static void ___lambda11__gtk_button_clicked (GtkButton* _sender, gpointer self) {
+	__lambda11_ (self);
 }
 
 
@@ -192,7 +192,7 @@ static GtkWidget* session_chooser_build_back_button (SessionChooser* self) {
 	_tmp3_ = g_object_ref_sink (_tmp2_);
 	back = _tmp3_;
 	unity_greeter_add_style_class ((GtkWidget*) back);
-	g_signal_connect_object (back, "clicked", (GCallback) ___lambda5__gtk_button_clicked, self, 0);
+	g_signal_connect_object (back, "clicked", (GCallback) ___lambda11__gtk_button_clicked, self, 0);
 	gtk_container_add ((GtkContainer*) align, (GtkWidget*) back);
 	_tmp4_ = (GtkBox*) gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
 	_tmp5_ = g_object_ref_sink (_tmp4_);
@@ -223,41 +223,41 @@ static GtkWidget* session_chooser_build_back_button (SessionChooser* self) {
 }
 
 
-static Block1Data* block1_data_ref (Block1Data* _data1_) {
-	g_atomic_int_inc (&_data1_->_ref_count_);
-	return _data1_;
+static Block2Data* block2_data_ref (Block2Data* _data2_) {
+	g_atomic_int_inc (&_data2_->_ref_count_);
+	return _data2_;
 }
 
 
-static void block1_data_unref (void * _userdata_) {
-	Block1Data* _data1_;
-	_data1_ = (Block1Data*) _userdata_;
-	if (g_atomic_int_dec_and_test (&_data1_->_ref_count_)) {
+static void block2_data_unref (void * _userdata_) {
+	Block2Data* _data2_;
+	_data2_ = (Block2Data*) _userdata_;
+	if (g_atomic_int_dec_and_test (&_data2_->_ref_count_)) {
 		SessionChooser * self;
-		self = _data1_->self;
-		_g_free0 (_data1_->key);
+		self = _data2_->self;
+		_g_free0 (_data2_->key);
 		_g_object_unref0 (self);
-		g_slice_free (Block1Data, _data1_);
+		g_slice_free (Block2Data, _data2_);
 	}
 }
 
 
-static void __lambda6_ (Block1Data* _data1_) {
+static void __lambda12_ (Block2Data* _data2_) {
 	SessionChooser * self;
 	const gchar* _tmp0_;
-	self = _data1_->self;
-	_tmp0_ = _data1_->key;
+	self = _data2_->self;
+	_tmp0_ = _data2_->key;
 	g_signal_emit_by_name (self, "session-clicked", _tmp0_);
 }
 
 
-static void ___lambda6__gtk_button_clicked (GtkButton* _sender, gpointer self) {
-	__lambda6_ (self);
+static void ___lambda12__gtk_button_clicked (GtkButton* _sender, gpointer self) {
+	__lambda12_ (self);
 }
 
 
 static void session_chooser_add_session (SessionChooser* self, const gchar* key, const gchar* name) {
-	Block1Data* _data1_;
+	Block2Data* _data2_;
 	const gchar* _tmp0_;
 	gchar* _tmp1_;
 	GtkButton* _tmp2_;
@@ -286,23 +286,23 @@ static void session_chooser_add_session (SessionChooser* self, const gchar* key,
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (key != NULL);
 	g_return_if_fail (name != NULL);
-	_data1_ = g_slice_new0 (Block1Data);
-	_data1_->_ref_count_ = 1;
-	_data1_->self = g_object_ref (self);
+	_data2_ = g_slice_new0 (Block2Data);
+	_data2_->_ref_count_ = 1;
+	_data2_->self = g_object_ref (self);
 	_tmp0_ = key;
 	_tmp1_ = g_strdup (_tmp0_);
-	_data1_->key = _tmp1_;
+	_data2_->key = _tmp1_;
 	_tmp2_ = (GtkButton*) gtk_button_new ();
 	_tmp3_ = g_object_ref_sink (_tmp2_);
 	item = _tmp3_;
 	_tmp4_ = item;
-	g_signal_connect_data (_tmp4_, "clicked", (GCallback) ___lambda6__gtk_button_clicked, block1_data_ref (_data1_), (GClosureNotify) block1_data_unref, 0);
+	g_signal_connect_data (_tmp4_, "clicked", (GCallback) ___lambda12__gtk_button_clicked, block2_data_ref (_data2_), (GClosureNotify) block2_data_unref, 0);
 	_tmp5_ = item;
 	unity_greeter_add_style_class ((GtkWidget*) _tmp5_);
 	_tmp6_ = (GtkBox*) gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
 	_tmp7_ = g_object_ref_sink (_tmp6_);
 	hbox = _tmp7_;
-	_tmp8_ = _data1_->key;
+	_tmp8_ = _data2_->key;
 	_tmp9_ = session_chooser_get_badge (_tmp8_);
 	pixbuf = _tmp9_;
 	_tmp10_ = pixbuf;
@@ -346,15 +346,15 @@ static void session_chooser_add_session (SessionChooser* self, const gchar* key,
 		gtk_css_provider_load_from_data (style, "* {padding: 3px;}", (gssize) (-1), &_inner_error_);
 		if (_inner_error_ != NULL) {
 			_g_object_unref0 (style);
-			goto __catch9_g_error;
+			goto __catch10_g_error;
 		}
 		_tmp25_ = item;
 		_tmp26_ = gtk_widget_get_style_context ((GtkWidget*) _tmp25_);
 		gtk_style_context_add_provider (_tmp26_, (GtkStyleProvider*) style, (guint) GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 		_g_object_unref0 (style);
 	}
-	goto __finally9;
-	__catch9_g_error:
+	goto __finally10;
+	__catch10_g_error:
 	{
 		GError* e = NULL;
 		GError* _tmp27_;
@@ -367,14 +367,14 @@ static void session_chooser_add_session (SessionChooser* self, const gchar* key,
 ": %s", _tmp28_);
 		_g_error_free0 (e);
 	}
-	__finally9:
+	__finally10:
 	if (_inner_error_ != NULL) {
 		_g_object_unref0 (label);
 		_g_object_unref0 (pixbuf);
 		_g_object_unref0 (hbox);
 		_g_object_unref0 (item);
-		block1_data_unref (_data1_);
-		_data1_ = NULL;
+		block2_data_unref (_data2_);
+		_data2_ = NULL;
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
 		return;
@@ -385,8 +385,8 @@ static void session_chooser_add_session (SessionChooser* self, const gchar* key,
 	_g_object_unref0 (pixbuf);
 	_g_object_unref0 (hbox);
 	_g_object_unref0 (item);
-	block1_data_unref (_data1_);
-	_data1_ = NULL;
+	block2_data_unref (_data2_);
+	_data2_ = NULL;
 }
 
 
@@ -403,11 +403,12 @@ static gchar* session_chooser_get_badge_name (const gchar* session) {
 	static GQuark _tmp2_label5 = 0;
 	static GQuark _tmp2_label6 = 0;
 	static GQuark _tmp2_label7 = 0;
+	static GQuark _tmp2_label8 = 0;
 	g_return_val_if_fail (session != NULL, NULL);
 	_tmp0_ = session;
 	_tmp1_ = _tmp0_;
 	_tmp3_ = (NULL == _tmp1_) ? 0 : g_quark_from_string (_tmp1_);
-	if (((_tmp3_ == ((0 != _tmp2_label0) ? _tmp2_label0 : (_tmp2_label0 = g_quark_from_static_string ("ubuntu")))) || (_tmp3_ == ((0 != _tmp2_label1) ? _tmp2_label1 : (_tmp2_label1 = g_quark_from_static_string ("ubuntu-2d"))))) || (_tmp3_ == ((0 != _tmp2_label2) ? _tmp2_label2 : (_tmp2_label2 = g_quark_from_static_string ("gnome"))))) {
+	if ((_tmp3_ == ((0 != _tmp2_label0) ? _tmp2_label0 : (_tmp2_label0 = g_quark_from_static_string ("ubuntu")))) || (_tmp3_ == ((0 != _tmp2_label1) ? _tmp2_label1 : (_tmp2_label1 = g_quark_from_static_string ("ubuntu-2d"))))) {
 		switch (0) {
 			default:
 			{
@@ -417,7 +418,7 @@ static gchar* session_chooser_get_badge_name (const gchar* session) {
 				return result;
 			}
 		}
-	} else if (((_tmp3_ == ((0 != _tmp2_label3) ? _tmp2_label3 : (_tmp2_label3 = g_quark_from_static_string ("gnome-classic")))) || (_tmp3_ == ((0 != _tmp2_label4) ? _tmp2_label4 : (_tmp2_label4 = g_quark_from_static_string ("gnome-fallback"))))) || (_tmp3_ == ((0 != _tmp2_label5) ? _tmp2_label5 : (_tmp2_label5 = g_quark_from_static_string ("gnome-shell"))))) {
+	} else if ((((_tmp3_ == ((0 != _tmp2_label2) ? _tmp2_label2 : (_tmp2_label2 = g_quark_from_static_string ("gnome-classic")))) || (_tmp3_ == ((0 != _tmp2_label3) ? _tmp2_label3 : (_tmp2_label3 = g_quark_from_static_string ("gnome-fallback"))))) || (_tmp3_ == ((0 != _tmp2_label4) ? _tmp2_label4 : (_tmp2_label4 = g_quark_from_static_string ("gnome-shell"))))) || (_tmp3_ == ((0 != _tmp2_label5) ? _tmp2_label5 : (_tmp2_label5 = g_quark_from_static_string ("gnome"))))) {
 		switch (0) {
 			default:
 			{
@@ -427,7 +428,7 @@ static gchar* session_chooser_get_badge_name (const gchar* session) {
 				return result;
 			}
 		}
-	} else if (_tmp3_ == ((0 != _tmp2_label6) ? _tmp2_label6 : (_tmp2_label6 = g_quark_from_static_string ("kde")))) {
+	} else if ((_tmp3_ == ((0 != _tmp2_label6) ? _tmp2_label6 : (_tmp2_label6 = g_quark_from_static_string ("kde")))) || (_tmp3_ == ((0 != _tmp2_label7) ? _tmp2_label7 : (_tmp2_label7 = g_quark_from_static_string ("kde-plasma"))))) {
 		switch (0) {
 			default:
 			{
@@ -437,7 +438,7 @@ static gchar* session_chooser_get_badge_name (const gchar* session) {
 				return result;
 			}
 		}
-	} else if (_tmp3_ == ((0 != _tmp2_label7) ? _tmp2_label7 : (_tmp2_label7 = g_quark_from_static_string ("xterm")))) {
+	} else if (_tmp3_ == ((0 != _tmp2_label8) ? _tmp2_label8 : (_tmp2_label8 = g_quark_from_static_string ("xterm")))) {
 		switch (0) {
 			default:
 			{
@@ -564,7 +565,7 @@ GdkPixbuf* session_chooser_get_badge (const gchar* session) {
 			_g_free0 (_tmp23_);
 			_tmp26_ = _tmp25_;
 			if (_inner_error_ != NULL) {
-				goto __catch10_g_error;
+				goto __catch11_g_error;
 			}
 			_g_object_unref0 (pixbuf);
 			pixbuf = _tmp26_;
@@ -575,8 +576,8 @@ GdkPixbuf* session_chooser_get_badge (const gchar* session) {
 			_tmp31_ = _g_object_ref0 (_tmp30_);
 			g_hash_table_insert (_tmp27_, _tmp29_, _tmp31_);
 		}
-		goto __finally10;
-		__catch10_g_error:
+		goto __finally11;
+		__catch11_g_error:
 		{
 			GError* e = NULL;
 			const gchar* _tmp32_;
@@ -590,7 +591,7 @@ GdkPixbuf* session_chooser_get_badge (const gchar* session) {
 			g_debug ("session-chooser.vala:162: Error loading badge %s: %s", _tmp32_, _tmp34_);
 			_g_error_free0 (e);
 		}
-		__finally10:
+		__finally11:
 		if (_inner_error_ != NULL) {
 			_g_object_unref0 (pixbuf);
 			_g_free0 (name);
@@ -636,8 +637,8 @@ static GObject * session_chooser_constructor (GType type, guint n_construct_prop
 	gtk_box_pack_start ((GtkBox*) self, _tmp1_, FALSE, FALSE, (guint) 0);
 	_tmp2_ = unity_greeter_test_mode;
 	if (_tmp2_) {
-		session_chooser_add_session (self, "gnome", "Ubuntu");
-		session_chooser_add_session (self, "gnome-shell", "GNOME");
+		session_chooser_add_session (self, "ubuntu", "Ubuntu");
+		session_chooser_add_session (self, "gnome", "GNOME");
 		session_chooser_add_session (self, "kde", "KDE");
 	} else {
 		GList* _tmp3_ = NULL;

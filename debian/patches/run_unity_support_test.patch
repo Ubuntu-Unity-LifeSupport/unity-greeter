@@ -2,11 +2,11 @@
 #              result in /tmp for further call while the user is typing his
 #              password.
 
-Index: ubuntu-unity-greeter/src/unity-greeter.vala
+Index: unity-greeter-12.10.0/src/unity-greeter.vala
 ===================================================================
---- ubuntu-unity-greeter.orig/src/unity-greeter.vala	2011-09-06 16:30:06.209204307 +0200
-+++ ubuntu-unity-greeter/src/unity-greeter.vala	2011-09-06 16:36:59.483253629 +0200
-@@ -420,6 +420,16 @@
+--- unity-greeter-12.10.0.orig/src/unity-greeter.vala	2012-06-06 13:00:15.000000000 +1200
++++ unity-greeter-12.10.0/src/unity-greeter.vala	2012-06-21 16:40:54.823059848 +1200
+@@ -885,6 +885,16 @@
          debug ("Showing greeter");
          greeter.show ();
  

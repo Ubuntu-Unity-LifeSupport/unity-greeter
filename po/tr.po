@@ -7,31 +7,35 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2012-04-17 07:20+0000\n"
-"PO-Revision-Date: 2012-01-24 16:14+0000\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2012-06-19 05:11+0000\n"
+"PO-Revision-Date: 2012-05-23 09:54+0000\n"
+"Last-Translator: Hasan Yılmaz <iletisim@hasanyilmaz.net>\n"
 "Language-Team: Turkish <tr@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2012-04-18 05:09+0000\n"
-"X-Generator: Launchpad (build 15108)\n"
+"X-Launchpad-Export-Date: 2012-06-20 05:05+0000\n"
+"X-Generator: Launchpad (build 15435)\n"
 
 #: ../src/main-window.vala:42
 msgid "Login Screen"
-msgstr ""
+msgstr "Giriş Ekranı"
 
 #: ../src/menubar.vala:211
 msgid "Onscreen keyboard"
-msgstr ""
+msgstr "Ekran klavyesi"
 
 #: ../src/menubar.vala:216
 msgid "High Contrast"
-msgstr ""
+msgstr "Yüksek Karşıtlık"
 
 #: ../src/menubar.vala:222
 msgid "Screen Reader"
-msgstr ""
+msgstr "Ekran Okuyucu"
+
+#: ../src/user-list.vala:254
+msgid "Session Options"
+msgstr "Oturum Seçenekleri"
 
 #: ../src/session-chooser.vala:63
 msgid "_Back"
@@ -40,82 +44,84 @@ msgstr "_Geri"
 #. Help string for command line --version flag
 #: ../src/unity-greeter.vala:30
 msgid "Show release version"
-msgstr ""
+msgstr "Yayım sürümünü göster"
 
 #. Help string for command line --test-mode flag
 #: ../src/unity-greeter.vala:33
 msgid "Run in test mode"
-msgstr ""
+msgstr "Sınama kipinde çalıştır"
 
 #: ../src/unity-greeter.vala:386 ../src/unity-greeter.vala:527
 #: ../src/unity-greeter.vala:550 ../src/unity-greeter.vala:554
 #: ../src/unity-greeter.vala:558 ../src/unity-greeter.vala:564
 #: ../src/unity-greeter.vala:567 ../src/unity-greeter.vala:594
 msgid "Password:"
-msgstr ""
+msgstr "Parola:"
 
 #: ../src/unity-greeter.vala:388 ../src/unity-greeter.vala:530
 msgid "Username:"
-msgstr ""
+msgstr "Kullanıcı Adı:"
 
 #: ../src/unity-greeter.vala:469
 msgid "Invalid password, please try again"
-msgstr ""
+msgstr "Geçersiz parola, lütfen yeniden deneyin"
 
 #: ../src/unity-greeter.vala:478
 msgid "Failed to authenticate"
+msgstr "Kimlik doğrulama başarısız"
+
+#: ../src/unity-greeter.vala:568
+msgid "Favorite Color:"
 msgstr ""
 
 #. Arguments and description for --help text
 #: ../src/unity-greeter.vala:828
 msgid "- Unity Greeter"
-msgstr ""
+msgstr "- Unity Karşılayıcısı"
 
 #. Text printed out when an unknown command-line argument provided
 #: ../src/unity-greeter.vala:839
 #, c-format
 msgid "Run '%s --help' to see a full list of available command line options."
 msgstr ""
+"Kullanılabilir komut satırı seçeneklerinin tam listesini görmek için '%s --"
+"help' komutunu yürütün."
 
 #: ../src/user-list.vala:80
 msgid "Guest Session"
-msgstr ""
+msgstr "Konuk Oturumu"
 
-#: ../src/user-list.vala:242
-msgid "Session Options"
-msgstr ""
-
-#: ../src/user-list.vala:371
+#: ../src/user-list.vala:383
 #, c-format
 msgid "Enter password for %s"
-msgstr ""
-
-#: ../src/user-list.vala:375
-msgid "Enter username"
-msgstr ""
-
-#: ../src/user-list.vala:377
-msgid "Enter password"
-msgstr ""
-
-#: ../src/user-list.vala:395
-#, c-format
-msgid "Login as %s"
-msgstr ""
+msgstr "Parola girin: %s"
 
 #. 'Log In' here is the button for logging in.
-#: ../src/user-list.vala:397
+#: ../src/user-list.vala:409
 msgid "Log In"
-msgstr ""
+msgstr "Oturum aç"
 
-#: ../src/user-list.vala:401 ../src/user-list.vala:402
+#: ../src/user-list.vala:407
+#, c-format
+msgid "Login as %s"
+msgstr "Oturum aç: %s"
+
+#: ../src/user-list.vala:413 ../src/user-list.vala:414
 msgid "Retry"
-msgstr "Yeniden Dene"
+msgstr "Yeniden dene"
 
-#: ../src/user-list.vala:418
+#: ../src/user-list.vala:322
+#, c-format
+msgid "Retry as %s"
+msgstr ""
+
+#: ../src/user-list.vala:430
 msgid "Logging in..."
-msgstr ""
+msgstr "Oturum açılıyor..."
 
-#: ../src/user-list.vala:503
+#: ../src/user-list.vala:515
 msgid "Login"
-msgstr ""
+msgstr "Oturum aç"
+
+#~ msgid "Enter password"
+#~ msgstr "Parola girin"
