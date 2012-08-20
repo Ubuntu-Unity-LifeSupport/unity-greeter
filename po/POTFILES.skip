@@ -7,12 +7,16 @@ src/dash-entry.c
 src/fadable-box.c
 src/fadable.c
 src/fading-label.c
+src/greeter-list.c
+src/list-stack.c
 src/main-window.c
 src/menubar.c
 src/menu.c
 src/prompt-box.c
-src/session-chooser.c
+src/session-list.c
 src/settings-daemon.c
 src/settings.c
 src/unity-greeter.c
 src/user-list.c
+src/user-prompt-box.c
+

@@ -20,7 +20,7 @@
 
 public class Menu : Gtk.Menu
 {
-    public Background? background {get; construct; default = null;}
+    public Background? background { get; construct; default = null; }
 
     public Menu (Background bg)
     {

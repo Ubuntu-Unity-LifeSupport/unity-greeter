@@ -29,13 +29,13 @@ public class FadingLabel : Gtk.Label
     public override void get_preferred_width (out int minimum, out int natural)
     {
         base.get_preferred_width (out minimum, out natural);
-        minimum = 1;
+        minimum = 0;
     }
 
     public override void get_preferred_width_for_height (int height, out int minimum, out int natural)
     {
         base.get_preferred_width_for_height (height, out minimum, out natural);
-        minimum = 1;
+        minimum = 0;
     }
 
     public override void size_allocate (Gtk.Allocation allocation)

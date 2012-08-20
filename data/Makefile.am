@@ -19,6 +19,8 @@ dist_pkgdata_DATA = \
 @GSETTINGS_RULES@
 gsettings_SCHEMAS = com.canonical.unity-greeter.gschema.xml
 
+dist_man1_MANS = unity-greeter.1
+
 EXTRA_DIST = \
 	$(gsettings_SCHEMAS)
 

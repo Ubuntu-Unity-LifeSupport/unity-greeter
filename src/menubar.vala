@@ -21,12 +21,12 @@
 private class IndicatorMenuItem : Gtk.MenuItem
 {
     public unowned Indicator.ObjectEntry entry;
-    private Gtk.HBox hbox;
+    private Gtk.Box hbox;
 
     public IndicatorMenuItem (Indicator.ObjectEntry entry)
     {
         this.entry = entry;
-        this.hbox = new Gtk.HBox (false, 3);
+        this.hbox = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 3);
         this.add (this.hbox);
         this.hbox.show ();
 
@@ -45,7 +45,7 @@ private class IndicatorMenuItem : Gtk.MenuItem
         if (entry.accessible_desc != null)
             get_accessible ().set_name (entry.accessible_desc);
         if (entry.menu != null)
-            submenu = entry.menu;
+            set_submenu (entry.menu as Gtk.Widget);
 
         if (has_visible_child ())
             show ();
@@ -65,10 +65,12 @@ private class IndicatorMenuItem : Gtk.MenuItem
 
 public class MenuBar : Gtk.MenuBar
 {
-    public Background? background {get; construct; default = null;}
-    public bool high_contrast {get; private set; default = false;}
+    public static const int HEIGHT = 32;
+    public Background? background { get; construct; default = null; }
+    public bool high_contrast { get; private set; default = false; }
+    public Gtk.Window? keyboard_window { get; private set; default = null; }
 
-    public Gtk.AccelGroup? accel_group {get; construct;}
+    public Gtk.AccelGroup? accel_group { get; construct; }
 
     public MenuBar (Background bg, Gtk.AccelGroup ag)
     {
@@ -115,13 +117,22 @@ public class MenuBar : Gtk.MenuBar
         return false;
     }
 
+    /* Due to LP #973922 the keyboard has to be loaded after the main window
+     * is shown and given focus. Therefore we don't enable the active state
+     * until now.
+     */
+    public void set_keyboard_state ()
+    {
+        onscreen_keyboard_item.set_active (UGSettings.get_boolean (UGSettings.KEY_ONSCREEN_KEYBOARD));
+    }
+
     private string default_theme_name;
     private List<Indicator.Object> indicator_objects;
     private Gtk.MenuItem keyboard_item;
     private Gtk.CheckMenuItem high_contrast_item;
     private Gtk.Label keyboard_label = null;
     private Pid keyboard_pid = 0;
-    private Gtk.Window? keyboard_window = null;
+    private Gtk.CheckMenuItem onscreen_keyboard_item;
 
     construct
     {
@@ -156,7 +167,7 @@ public class MenuBar : Gtk.MenuBar
 
         setup_indicators ();
 
-        set_size_request (-1, 32);
+        set_size_request (-1, HEIGHT);
     }
 
     ~MenuBar ()
@@ -200,30 +211,30 @@ public class MenuBar : Gtk.MenuBar
     private Gtk.Widget make_a11y_indicator ()
     {
         var a11y_item = new Gtk.MenuItem ();
-        var hbox = new Gtk.HBox (false, 3);
+        var hbox = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 3);
         hbox.show ();
         a11y_item.add (hbox);
         var image = new Gtk.Image.from_file (Path.build_filename (Config.PKGDATADIR, "a11y.svg"));
         image.show ();
         hbox.add (image);
         a11y_item.show ();
-        a11y_item.submenu = new Gtk.Menu ();
-        var item = new Gtk.CheckMenuItem.with_label (_("Onscreen keyboard"));
-        item.toggled.connect (keyboard_toggled_cb);
-        item.show ();
-        a11y_item.submenu.append (item);
-        item.set_active (UGSettings.get_boolean (UGSettings.KEY_ONSCREEN_KEYBOARD));
+        a11y_item.set_submenu (new Gtk.Menu () as Gtk.Widget);
+        onscreen_keyboard_item = new Gtk.CheckMenuItem.with_label (_("Onscreen keyboard"));
+        onscreen_keyboard_item.toggled.connect (keyboard_toggled_cb);
+        onscreen_keyboard_item.show ();
+        unowned Gtk.Menu submenu = a11y_item.submenu;
+        submenu.append (onscreen_keyboard_item);
         high_contrast_item = new Gtk.CheckMenuItem.with_label (_("High Contrast"));
         high_contrast_item.toggled.connect (high_contrast_toggled_cb);
         high_contrast_item.add_accelerator ("activate", accel_group, Gdk.KEY_h, Gdk.ModifierType.CONTROL_MASK, Gtk.AccelFlags.VISIBLE);
         high_contrast_item.show ();
-        a11y_item.submenu.append (high_contrast_item);
+        submenu.append (high_contrast_item);
         high_contrast_item.set_active (UGSettings.get_boolean (UGSettings.KEY_HIGH_CONTRAST));
-        item = new Gtk.CheckMenuItem.with_label (_("Screen Reader"));
+        var item = new Gtk.CheckMenuItem.with_label (_("Screen Reader"));
         item.toggled.connect (screen_reader_toggled_cb);
         item.add_accelerator ("activate", accel_group, Gdk.KEY_s, Gdk.ModifierType.CONTROL_MASK, Gtk.AccelFlags.VISIBLE);
         item.show ();
-        a11y_item.submenu.append (item);
+        submenu.append (item);
         item.set_active (UGSettings.get_boolean (UGSettings.KEY_SCREEN_READER));
         return a11y_item;
     }
@@ -245,7 +256,7 @@ public class MenuBar : Gtk.MenuBar
                 desc = layout.name;
             else
             {
-                // Lookup parent layout, get its short_description
+                /* Lookup parent layout, get its short_description */
                 var parent_layout = UnityGreeter.get_layout_by_name (parts[0]);
                 if (parent_layout.short_description == null ||
                     parent_layout.short_description == "")
@@ -316,10 +327,11 @@ public class MenuBar : Gtk.MenuBar
         insert (a11y_item, (int) get_children ().length () - 1);
 
         debug ("LANG=%s LANGUAGE=%s", Environment.get_variable ("LANG"), Environment.get_variable ("LANGUAGE"));
-        string[] filenames = {Path.build_filename (Config.INDICATORDIR, "libsession.so"),
-                              Path.build_filename (Config.INDICATORDIR, "libdatetime.so"),
-                              Path.build_filename (Config.INDICATORDIR, "libpower.so"),
-                              Path.build_filename (Config.INDICATORDIR, "libsoundmenu.so")};
+        string[] filenames = { Path.build_filename (Config.INDICATORDIR, "libsession.so"),
+                               Path.build_filename (Config.INDICATORDIR, "libdatetime.so"),
+                               Path.build_filename (Config.INDICATORDIR, "libpower.so"),
+                               Path.build_filename (Config.INDICATORDIR, "libsoundmenu.so"),
+                               Path.build_filename (Config.INDICATORDIR, "libapplication.so") };
         foreach (var filename in filenames)
         {
             var io = new Indicator.Object.from_file (filename);
@@ -347,7 +359,7 @@ public class MenuBar : Gtk.MenuBar
 
         if (keyboard_window == null)
         {
-            int id;
+            int id = 0;
 
             try
             {
@@ -366,8 +378,8 @@ public class MenuBar : Gtk.MenuBar
                                                 null);
                 var f = FileStream.fdopen (onboard_stdout_fd, "r");
                 var stdout_text = new char[1024];
-                f.gets (stdout_text);
-                id = int.parse ((string) stdout_text);
+                if (f.gets (stdout_text) != null)
+                    id = int.parse ((string) stdout_text);
 
             }
             catch (Error e)
@@ -400,7 +412,7 @@ public class MenuBar : Gtk.MenuBar
     private Gtk.RadioMenuItem recreate_menu (List <LightDM.Layout> layouts_in)
     {
         var submenu = new Gtk.Menu ();
-        keyboard_item.set_submenu (submenu);
+        keyboard_item.set_submenu (submenu as Gtk.Widget);
 
         var layouts = layouts_in.copy ();
         layouts.sort (cmp_layout);

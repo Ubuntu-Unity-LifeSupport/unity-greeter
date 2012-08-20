@@ -19,7 +19,7 @@
 
 public class DashButton : Gtk.Button, Fadable
 {
-    protected FadeTracker fade_tracker {get; protected set;}
+    protected FadeTracker fade_tracker { get; protected set; }
     private Gtk.Label text_label;
 
     private string _text = "";
@@ -29,7 +29,7 @@ public class DashButton : Gtk.Button, Fadable
         set
         {
             _text = value;
-            text_label.set_markup ("<span font=\"Ubuntu 16\">%s</span>".printf (value));
+            text_label.set_markup ("<span font=\"Ubuntu 13\">%s</span>".printf (value));
         }
     }
 
@@ -38,29 +38,22 @@ public class DashButton : Gtk.Button, Fadable
         fade_tracker = new FadeTracker (this);
 
         var hbox = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
-        var sizes = new Gtk.SizeGroup (Gtk.SizeGroupMode.HORIZONTAL);
 
-        // add blank label to match chevron
-        var label = new Gtk.Label ("");
-        sizes.add_widget (label);
-        hbox.add (label);
-
-        // add text
+        /* Add text */
         text_label = new Gtk.Label ("");
         text_label.use_markup = true;
         text_label.hexpand = true;
-        text_label.halign = Gtk.Align.CENTER;
+        text_label.halign = Gtk.Align.START;
         hbox.add (text_label);
         this.text = text;
 
-        // add chevron
+        /* Add chevron */
         var path = Path.build_filename (Config.PKGDATADIR, "arrow_right.png", null);
         try
         {
             var pixbuf = new Gdk.Pixbuf.from_file (path);
             var image = new CachedImage (pixbuf);
             image.valign = Gtk.Align.CENTER;
-            sizes.add_widget (image);
             hbox.add (image);
         }
         catch (Error e)
@@ -74,7 +67,7 @@ public class DashButton : Gtk.Button, Fadable
         try
         {
             var style = new Gtk.CssProvider ();
-            style.load_from_data ("* {padding: 3px;}", -1);
+            style.load_from_data ("* {padding: 8px;}", -1);
             this.get_style_context ().add_provider (style, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
         }
         catch (Error e)

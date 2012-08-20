@@ -20,62 +20,90 @@
 
 public class PromptBox : FadableBox
 {
-    public signal void respond (string response);
+    public signal void respond (string[] response);
     public signal void login ();
     public signal void show_options ();
+    public signal void name_clicked ();
 
-    public bool has_messages {get; private set; default = false;}
+    public bool has_errors { get; set; default = false; }
+    public string id { get; construct; }
+
+    public string label
+    {
+        get { return name_label.label; }
+        set
+        {
+            name_label.label = value;
+            small_name_label.label = value;
+        }
+    }
+
+    public double position { get; set; default = 0; }
 
     private Gtk.Fixed fixed;
     private Gtk.Widget zone; /* when overlapping zone we are fully expanded */
 
     /* Expanded widgets */
-    private Gtk.Grid box_grid;
+    protected Gtk.Grid box_grid;
+    protected Gtk.Grid name_grid;
     private ActiveIndicator active_indicator;
-    private FadingLabel name_label;
-    private Gtk.Button option_button;
+    protected FadingLabel name_label;
+    protected Gtk.Button option_button;
     private CachedImage option_image;
     private CachedImage message_image;
 
     /* Condensed widgets */
-    private Gtk.Grid small_box_grid;
+    protected Gtk.Widget small_box_widget;
     private ActiveIndicator small_active_indicator;
-    private FadingLabel small_name_label;
+    protected FadingLabel small_name_label;
     private CachedImage small_message_image;
 
-    private static const int COL_ACTIVE        = 0;
-    private static const int COL_CONTENT       = 1;
-    private static const int COL_SPACER        = 2;
+    protected static const int COL_ACTIVE        = 0;
+    protected static const int COL_CONTENT       = 1;
+    protected static const int COL_SPACER        = 2;
 
-    private static const int ROW_NAME          = 0;
-    private static const int COL_NAME_LABEL    = 0;
-    private static const int COL_NAME_MESSAGE  = 1;
-    private static const int COL_NAME_OPTIONS  = 2;
+    protected static const int ROW_NAME          = 0;
+    protected static const int COL_NAME_LABEL    = 0;
+    protected static const int COL_NAME_MESSAGE  = 1;
+    protected static const int COL_NAME_OPTIONS  = 2;
 
-    private static const int COL_ENTRIES_START = 1;
-    private static const int COL_ENTRIES_END   = 1;
-    private static const int COL_ENTRIES_WIDTH = 1;
-    private static const int ROW_ENTRIES_START = 1;
+    protected static const int COL_ENTRIES_START = 1;
+    protected static const int COL_ENTRIES_END   = 1;
+    protected static const int COL_ENTRIES_WIDTH = 1;
 
-    private int last_row;
+    protected int start_row;
+    protected int last_row;
+
+    private enum PromptVisibility
+    {
+        HIDDEN,
+        FADING,
+        SHOWN,
+    }
+    private PromptVisibility prompt_visibility = PromptVisibility.HIDDEN;
+
+    public PromptBox (string id)
+    {
+        Object (id: id);
+    }
 
     construct
     {
+        set_start_row ();
+        reset_last_row ();
         expand = true;
-        orientation = Gtk.Orientation.VERTICAL;
 
         fixed = new Gtk.Fixed ();
         fixed.show ();
         add (fixed);
 
         /* Create fully expanded version of ourselves */
-        var name_grid = new Gtk.Grid ();
-        name_grid.column_spacing = 4;
-        name_grid.hexpand = true;
+        name_grid = create_name_grid ();
 
         box_grid = new Gtk.Grid ();
         box_grid.column_spacing = 4;
         box_grid.row_spacing = 3;
+        box_grid.margin_bottom = 10;
         box_grid.expand = true;
 
         /** Grid layout:
@@ -86,19 +114,68 @@ public class PromptBox : FadableBox
          */
 
         active_indicator = new ActiveIndicator ();
-        active_indicator.valign = Gtk.Align.CENTER;
+        active_indicator.valign = Gtk.Align.START;
+        active_indicator.margin_top = 18;
         active_indicator.show ();
-        box_grid.attach (active_indicator, COL_ACTIVE, ROW_NAME, 1, 1);
+        box_grid.attach (active_indicator, COL_ACTIVE, last_row, 1, 1);
 
-        // Add a second one on right just for equal-spacing purposes
+        /* Add a second one on right just for equal-spacing purposes */
         var dummy_indicator = new ActiveIndicator ();
         dummy_indicator.show ();
-        box_grid.attach (dummy_indicator, COL_SPACER, ROW_NAME, 1, 1);
+        box_grid.attach (dummy_indicator, COL_SPACER, last_row, 1, 1);
+
+        box_grid.show ();
+        box_grid.attach (name_grid, COL_CONTENT, last_row, 1, 1);
+
+        /* Now prep small versions of the above normal widgets.  These are
+         * used when scrolling outside of the main dash box. */
+        var small_box_grid = new Gtk.Grid ();
+        small_box_grid.column_spacing = 4;
+        small_box_grid.row_spacing = 6;
+        small_box_grid.hexpand = true;
+        small_box_grid.show ();
+
+        small_active_indicator = new ActiveIndicator ();
+        small_active_indicator.valign = Gtk.Align.CENTER;
+        small_active_indicator.show ();
+        small_box_grid.attach (small_active_indicator, 0, 0, 1, 1);
+
+        var small_name_grid = create_small_name_grid ();
+        small_box_grid.attach (small_name_grid, 1, 0, 1, 1);
+
+        /* Add a second indicator on right just for equal-spacing purposes */
+        var small_dummy_indicator = new ActiveIndicator ();
+        small_dummy_indicator.show ();
+        small_box_grid.attach (small_dummy_indicator, 3, 0, 1, 1);
+
+        var small_box_eventbox = new Gtk.EventBox ();
+        small_box_eventbox.visible_window = false;
+        small_box_eventbox.button_release_event.connect (() =>
+        {
+            name_clicked ();
+            return true;
+        });
+        small_box_eventbox.add (small_box_grid);
+        small_box_eventbox.show ();
+        small_box_widget = small_box_eventbox;
+
+        fixed.add (small_box_widget);
+        fixed.add (box_grid);
+    }
+
+    protected virtual Gtk.Grid create_name_grid ()
+    {
+        var name_grid = new Gtk.Grid ();
+        name_grid.column_spacing = 4;
+        name_grid.hexpand = true;
 
         name_label = new FadingLabel ("");
-        name_label.override_font (Pango.FontDescription.from_string ("Ubuntu 16"));
-        name_label.override_color (Gtk.StateFlags.NORMAL, {1.0f, 1.0f, 1.0f, 1.0f});
+        name_label.override_font (Pango.FontDescription.from_string ("Ubuntu 13"));
+        name_label.override_color (Gtk.StateFlags.NORMAL, { 1.0f, 1.0f, 1.0f, 1.0f });
+        name_label.valign = Gtk.Align.START;
+        name_label.vexpand = true;
         name_label.xalign = 0.0f;
+        name_label.set_size_request (-1, grid_size);
         name_label.show ();
         name_grid.attach (name_label, COL_NAME_LABEL, ROW_NAME, 1, 1);
 
@@ -111,12 +188,18 @@ public class PromptBox : FadableBox
         {
             debug ("Error loading message image: %s", e.message);
         }
-        message_image.valign = Gtk.Align.CENTER;
-        name_grid.attach (message_image, COL_NAME_MESSAGE, ROW_NAME, 1, 1);
+
+        var align = new Gtk.Alignment (0.5f, 0.5f, 0.0f, 0.0f);
+        align.valign = Gtk.Align.START;
+        align.set_size_request (-1, grid_size);
+        align.add (message_image);
+        align.show ();
+        name_grid.attach (align, COL_NAME_MESSAGE, ROW_NAME, 1, 1);
 
         option_button = new Gtk.Button ();
-        option_button.expand = true;
+        option_button.hexpand = true;
         option_button.halign = Gtk.Align.END;
+        option_button.valign = Gtk.Align.START;
         option_button.focus_on_click = false;
         option_button.relief = Gtk.ReliefStyle.NONE;
         option_button.get_accessible ().set_name (_("Session Options"));
@@ -128,43 +211,61 @@ public class PromptBox : FadableBox
         name_grid.attach (option_button, COL_NAME_OPTIONS, ROW_NAME, 1, 1);
 
         name_grid.show ();
-        box_grid.show ();
-        box_grid.attach (name_grid, COL_CONTENT, ROW_NAME, 1, 1);
-        fixed.add (box_grid);
 
-        /* Now prep small versions of the above normal widgets.  These are
-           used when scrolling outside of the main dash box. */
-        small_box_grid = new Gtk.Grid ();
-        small_box_grid.column_spacing = 4;
-        small_box_grid.row_spacing = 6;
-        small_box_grid.hexpand = true;
+        return name_grid;
+    }
 
-        small_active_indicator = new ActiveIndicator ();
-        small_active_indicator.valign = Gtk.Align.CENTER;
-        small_active_indicator.show ();
-        small_box_grid.attach (small_active_indicator, 0, 0, 1, 1);
+    protected virtual Gtk.Grid create_small_name_grid ()
+    {
+        var small_name_grid = new Gtk.Grid ();
+        small_name_grid.column_spacing = 4;
 
         small_name_label = new FadingLabel ("");
-        small_name_label.override_font (Pango.FontDescription.from_string ("Ubuntu 16"));
-        small_name_label.override_color (Gtk.StateFlags.NORMAL, {1.0f, 1.0f, 1.0f, 1.0f});
+        small_name_label.override_font (Pango.FontDescription.from_string ("Ubuntu 13"));
+        small_name_label.override_color (Gtk.StateFlags.NORMAL, { 1.0f, 1.0f, 1.0f, 1.0f });
         small_name_label.xalign = 0.0f;
+        small_name_label.set_size_request (-1, grid_size);
         small_name_label.show ();
-        small_box_grid.attach (small_name_label, 1, 0, 1, 1);
+        small_name_grid.attach (small_name_label, 1, 0, 1, 1);
 
         small_message_image = new CachedImage (null);
         small_message_image.pixbuf = message_image.pixbuf;
-        small_message_image.valign = Gtk.Align.CENTER;
-        small_box_grid.attach (small_message_image, 2, 0, 1, 1);
 
-        // Add a second indicator on right just for equal-spacing purposes
-        var small_dummy_indicator = new ActiveIndicator ();
-        small_dummy_indicator.show ();
-        small_box_grid.attach (small_dummy_indicator, 3, 0, 1, 1);
+        var align = new Gtk.Alignment (0.5f, 0.5f, 0.0f, 0.0f);
+        align.set_size_request (-1, grid_size);
+        align.add (small_message_image);
+        align.show ();
+        small_name_grid.attach (align, 2, 0, 1, 1);
 
-        small_box_grid.show ();
-        fixed.add (small_box_grid);
+        small_name_grid.show ();
+        return small_name_grid;
+    }
 
-        last_row = 0;
+    protected virtual void set_start_row ()
+    {
+        start_row = 0;
+    }
+
+    protected virtual void reset_last_row ()
+    {
+        last_row = start_row;
+    }
+
+    private int round_to_grid (int size)
+    {
+        var num_grids = size / grid_size;
+        var remainder = size % grid_size;
+        if (remainder > 0)
+            num_grids += 1;
+        num_grids = int.max (num_grids, 3);
+        return num_grids * grid_size;
+    }
+
+    public override void get_preferred_height (out int min, out int nat)
+    {
+        base.get_preferred_height (out min, out nat);
+        min = round_to_grid (min + GreeterList.BORDER * 2) - GreeterList.BORDER * 2;
+        nat = round_to_grid (nat + GreeterList.BORDER * 2) - GreeterList.BORDER * 2;
     }
 
     public void set_zone (Gtk.Widget zone)
@@ -173,14 +274,11 @@ public class PromptBox : FadableBox
         queue_draw ();
     }
 
-    public void set_name (string name)
-    {
-        name_label.label = name;
-        small_name_label.label = name;
-    }
-
     public void set_options_image (Gdk.Pixbuf? image)
     {
+        if (option_button == null)
+            return;
+
         option_image.pixbuf = image;
 
         if (image == null)
@@ -206,42 +304,115 @@ public class PromptBox : FadableBox
         small_active_indicator.active = active;
     }
 
-    private void foreach_prompt_widget (Gtk.Callback cb)
+    protected void foreach_prompt_widget (Gtk.Callback cb)
     {
-        foreach (var w in box_grid.get_children ())
+        var prompt_widgets = new List<Gtk.Widget> ();
+
+        var i = start_row + 1;
+        while (i <= last_row)
         {
-            if (w.get_data<Gtk.Widget> ("prompt-box-widget") != null)
-                cb (w);
+            var c = box_grid.get_child_at (COL_ENTRIES_START, i);
+            if (c != null) /* c might have been deleted from selective clear */
+                prompt_widgets.append (c);
+            i++;
         }
+
+        foreach (var w in prompt_widgets)
+            cb (w);
     }
 
     public void clear ()
     {
-        foreach_prompt_widget ((w) => {w.destroy ();});
-        last_row = 0;
-        has_messages = false;
+        prompt_visibility = PromptVisibility.HIDDEN;
+        foreach_prompt_widget ((w) => { w.destroy (); });
+        reset_last_row ();
+        has_errors = false;
     }
 
-    public void fade_in_prompts ()
+    /* Clears error messages */
+    public void reset_messages ()
     {
-        show ();
+        has_errors = false;
         foreach_prompt_widget ((w) =>
         {
+            var is_error = w.get_data<bool> ("prompt-box-is-error");
+            if (is_error)
+                w.destroy ();
+        });
+    }
+
+    /* Stops spinners */
+    public void reset_spinners ()
+    {
+        foreach_prompt_widget ((w) =>
+        {
+            if (w is DashEntry)
+            {
+                var e = w as DashEntry;
+                e.did_respond = false;
+            }
+        });
+    }
+
+    /* Clears error messages and stops spinners.  Basically gets the box back to a filled-by-user-but-no-status state. */
+    public void reset_state ()
+    {
+        reset_messages ();
+        reset_spinners ();
+    }
+
+    public virtual void add_static_prompts ()
+    {
+        /* Subclasses may want to add prompts that are always present here */
+    }
+
+    private void update_prompt_visibility (Gtk.Widget w)
+    {
+        switch (prompt_visibility)
+        {
+        case PromptVisibility.HIDDEN:
+            w.hide ();
+            break;
+        case PromptVisibility.FADING:
             var f = w as Fadable;
+            w.sensitive = true;
             if (f != null)
                 f.fade_in ();
             else
                 w.show ();
-        });
+            break;
+        case PromptVisibility.SHOWN:
+            w.show ();
+            w.sensitive = true;
+            break;
+        }
+    }
+
+    public void fade_in_prompts ()
+    {
+        prompt_visibility = PromptVisibility.FADING;
+        show ();
+        foreach_prompt_widget ((w) => { update_prompt_visibility (w); });
     }
 
     public void show_prompts ()
     {
+        prompt_visibility = PromptVisibility.SHOWN;
         show ();
-        foreach_prompt_widget ((w) =>
-        {
-            w.show ();
-        });
+        foreach_prompt_widget ((w) => { update_prompt_visibility (w); });
+    }
+
+    protected void attach_item (Gtk.Widget w, bool add_style_class = true)
+    {
+        w.set_data ("prompt-box-widget", this);
+        if (add_style_class)
+            UnityGreeter.add_style_class (w);
+
+        last_row += 1;
+        box_grid.attach (w, COL_ENTRIES_START, last_row, COL_ENTRIES_WIDTH, 1);
+
+        update_prompt_visibility (w);
+        queue_resize ();
     }
 
     public void add_message (string text, bool is_error)
@@ -252,25 +423,35 @@ public class PromptBox : FadableBox
 
         Gdk.RGBA color;
         if (is_error)
-            color = {1.0f, 0.0f, 0.0f, 1.0f};
+            color = { 1.0f, 0.0f, 0.0f, 1.0f };
         else
-            color = {1.0f, 1.0f, 1.0f, 1.0f};
+            color = { 1.0f, 1.0f, 1.0f, 1.0f };
         label.override_color (Gtk.StateFlags.NORMAL, color);
 
         label.xalign = 0.0f;
+        label.set_data<bool> ("prompt-box-is-error", is_error);
 
-        label.set_data ("prompt-box-widget", this);
-        UnityGreeter.add_style_class (label);
+        attach_item (label);
 
-        last_row += 1;
-        box_grid.attach (label, COL_ENTRIES_START, last_row, COL_ENTRIES_WIDTH, 1);
-
-        has_messages = true;
+        if (is_error)
+            has_errors = true;
     }
 
-    public void add_prompt (string text, string? accessible_text, bool is_secret)
+    public DashEntry add_prompt (string text, string? accessible_text, bool is_secret)
     {
+        /* Stop other entry's arrows/spinners from showing */
+        foreach_prompt_widget ((w) =>
+        {
+            if (w is DashEntry)
+            {
+                var e = w as DashEntry;
+                if (e != null)
+                    e.can_respond = false;
+            }
+        });
+
         var entry = new DashEntry ();
+        entry.sensitive = false;
 
         if (text.contains ("\n"))
         {
@@ -301,21 +482,49 @@ public class PromptBox : FadableBox
             entry.caps_lock_warning = true;
         }
 
-        entry.activate.connect (entry_activate_cb);
+        entry.respond.connect (entry_activate_cb);
 
-        entry.set_data ("prompt-box-widget", this);
-        UnityGreeter.add_style_class (entry);
+        attach_item (entry);
 
-        last_row += 1;
-        box_grid.attach (entry, COL_ENTRIES_START, last_row, COL_ENTRIES_WIDTH, 1);
-
-        if (last_row == 1)
-            entry.margin_top = 19;
+        return entry;
     }
 
-    private void entry_activate_cb (Gtk.Entry entry)
+    public Gtk.ComboBox add_combo (GenericArray<string> texts, bool read_only)
     {
-        respond (entry.text);
+        Gtk.ComboBoxText combo;
+        if (read_only)
+            combo = new Gtk.ComboBoxText ();
+        else
+            combo = new Gtk.ComboBoxText.with_entry ();
+
+        combo.get_style_context ().add_class ("lightdm-combo");
+        combo.get_child ().get_style_context ().add_class ("lightdm-combo");
+        combo.get_child ().override_font (Pango.FontDescription.from_string (DashEntry.font));
+
+        attach_item (combo, false);
+
+        texts.foreach ((text) => { combo.append_text (text); });
+
+        if (texts.length > 0)
+            combo.active = 0;
+
+        return combo;
+    }
+
+    protected void entry_activate_cb ()
+    {
+        var response = new string[0];
+
+        foreach_prompt_widget ((w) =>
+        {
+            if (w is Gtk.Entry)
+            {
+                var e = w as Gtk.Entry;
+                if (e != null)
+                    response += e.text;
+            }
+        });
+        respond (response);
     }
 
     public void add_button (string text, string? accessible_text)
@@ -327,14 +536,7 @@ public class PromptBox : FadableBox
 
         button.clicked.connect (button_clicked_cb);
 
-        button.set_data ("prompt-box-widget", this);
-        UnityGreeter.add_style_class (button);
-
-        last_row += 1;
-        box_grid.attach (button, COL_ENTRIES_START, last_row, COL_ENTRIES_WIDTH, 1);
-
-        if (last_row == 1)
-            button.margin_top = 22;
+        attach_item (button);
     }
 
     private void button_clicked_cb (Gtk.Button button)
@@ -344,25 +546,37 @@ public class PromptBox : FadableBox
 
     public override void grab_focus ()
     {
-        bool done = false;
+        var done = false;
+        Gtk.Widget best = null;
         foreach_prompt_widget ((w) =>
         {
-            if (!done && (w is Gtk.Entry || w is Gtk.Button))
-            {
-                w.grab_focus ();
+            if (done)
+                return;
+            best = w; /* last entry wins, all else considered */
+            var e = w as Gtk.Entry;
+            var b = w as Gtk.Button;
+            var c = w as Gtk.ComboBox;
+
+            /* We've found ideal entry (first empty one), so stop looking */
+            if ((e != null && e.text == "") || b != null || c != null)
                 done = true;
-            }
         });
+        if (best != null)
+            best.grab_focus ();
     }
 
     public override void size_allocate (Gtk.Allocation allocation)
     {
         base.size_allocate (allocation);
         box_grid.size_allocate (allocation);
-        small_box_grid.size_allocate (allocation);
+
+        int small_height;
+        small_box_widget.get_preferred_height (null, out small_height);
+        allocation.height = small_height;
+        small_box_widget.size_allocate (allocation);
     }
 
-    public override bool draw (Cairo.Context c)
+    public override void draw_full_alpha (Cairo.Context c)
     {
         /* Draw either small or normal version of ourselves, depending on where
            our allocation put us relative to our zone */
@@ -373,48 +587,46 @@ public class PromptBox : FadableBox
         this.get_allocation (out alloc);
         zone.get_allocation (out zone_alloc);
 
-        // Draw main grid only in that area
+        /* Draw main grid only in that area */
         c.save ();
         c.rectangle (x, y, zone_alloc.width, zone_alloc.height);
         c.clip ();
         fixed.propagate_draw (box_grid, c);
         c.restore ();
 
-        // Do actual drawing
+        /* Do actual drawing */
         c.save ();
         if (y > 0)
             c.rectangle (x, 0, zone_alloc.width, y);
         else
             c.rectangle (x, y + zone_alloc.height, zone_alloc.width, -y);
         c.clip ();
-        fixed.propagate_draw (small_box_grid, c);
-        small_box_grid.draw (c);
+        fixed.propagate_draw (small_box_widget, c);
         c.restore ();
-
-        return false;
     }
 }
 
 private class ActiveIndicator : Gtk.Label
 {
-    public static const int SIZE = grid_size / 4;
+    public static const int WIDTH = 4;
+    public static const int HEIGHT = 5;
 
-    public bool active {get; set;}
+    public bool active { get; set; }
 
     construct
     {
-        notify["active"].connect (() => {queue_draw ();});
+        notify["active"].connect (() => { queue_draw (); });
     }
 
     public override void get_preferred_width (out int min, out int nat)
     {
-        min = SIZE;
+        min = WIDTH;
         nat = min;
     }
 
     public override void get_preferred_height (out int min, out int nat)
     {
-        min = SIZE;
+        min = HEIGHT;
         nat = min;
     }
 
@@ -424,10 +636,11 @@ private class ActiveIndicator : Gtk.Label
             return false;
 
         c.move_to (0, 0);
-        c.rel_line_to (5, 4);
-        c.rel_line_to (-5, 4);
+        c.rel_line_to (WIDTH, HEIGHT/2.0);
+        c.rel_line_to (-WIDTH, HEIGHT/2.0);
         c.close_path ();
         c.set_source_rgb (1.0, 1.0, 1.0);
+        c.stroke_preserve ();
         c.fill ();
         return false;
     }

@@ -1,3 +1,28 @@
+unity-greeter (12.10.2-0ubuntu1) quantal; urgency=low
+
+  [ Robert Ancell ]
+  * New upstream release:
+    - Show network indicator (bug 1042757, but currently disabled)
+    - Add support for remote logins (bug 1040221, but currently disabled)
+    - Show onboard keyboard on startup if enabled already (LP: #973922)
+    - Support multiple simultaneous prompts from PAM (LP: #1043593)
+    - Fix tabbing through widgets sometimes taking too many tabs
+    - Set average background colour atom based on background (LP: #1043572)
+    - Add a man page
+    - Finess UI (LP: #932162)
+
+  [ Michael Terry ]
+  * debian/unity-greeter.pkla, debian/install:
+    - Install a policykit authentication file to disallow any mucking
+      with NetworkManager in anticipation of adding NM to the greeter.
+  * debian/control:
+    - Require lightdm 1.3.3
+  * debian/patches/01_disable_remote_login.patch,
+  * debian/patches/02_disable_nm_applet.patch:
+    - Disable a couple features until their FFes are approved.
+
+ -- Michael Terry <mterry@ubuntu.com>  Mon, 20 Aug 2012 14:14:17 -0400
+
 unity-greeter (12.10.0-0ubuntu2) quantal; urgency=low
 
   * debian/patches/run_unity_support_test.patch:

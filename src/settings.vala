@@ -37,11 +37,25 @@ public class UGSettings
     public static const string KEY_HIGH_CONTRAST = "high-contrast";
     public static const string KEY_SCREEN_READER = "screen-reader";
     public static const string KEY_PLAY_READY_SOUND = "play-ready-sound";
+    public static const string KEY_ENABLE_REMOTE_LOGIN = "enable-remote-login";
 
     public static bool get_boolean (string key)
     {
         var gsettings = new Settings (SCHEMA);
         return gsettings.get_boolean (key);
+    }
+
+    /* LP: 1006497 - utility function to make sure we have the key before trying to read it (which will segfault if the key isn't there) */
+    public static bool safe_get_boolean (string key, bool default)
+    {
+        var gsettings = new Settings (SCHEMA);
+        string[] keys = gsettings.list_keys ();
+        foreach (var k in keys)
+            if (k == key)
+                return gsettings.get_boolean (key);
+
+        /* key not in child list */
+        return default;
     }
 
     public static double get_double (string key)

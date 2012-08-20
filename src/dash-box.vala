@@ -19,10 +19,10 @@
 
 public class DashBox : Gtk.Box
 {
-    public Background? background {get; construct; default = null;}
+    public Background? background { get; construct; default = null; }
 
-    public bool has_content {get; private set; default = false;}
-    public double base_alpha {get; private set; default = 1.0;}
+    public bool has_base { get; private set; default = false; }
+    public double base_alpha { get; private set; default = 1.0; }
 
     private enum Mode
     {
@@ -33,12 +33,11 @@ public class DashBox : Gtk.Box
         POP_FADE_IN,
     }
 
-    private Gtk.Widget pushed;
-    private Gtk.Widget orig;
+    private GreeterList pushed;
+    private Gtk.Widget orig = null;
     private FadeTracker orig_tracker;
-    private int orig_height;
+    private int orig_height = -1;
     private Mode mode;
-    private FadableBox fader;
 
     public DashBox (Background bg)
     {
@@ -47,24 +46,22 @@ public class DashBox : Gtk.Box
 
     construct
     {
-        fader = new FadableBox ();
-        fader.show ();
-        fader.fade_done.connect (fade_done_cb);
-        add (fader);
         mode = Mode.NORMAL;
     }
 
-    // Does not actually add w to this widget, as doing so would potentially
-    // mess with w's placement.
+    /* Does not actually add w to this widget, as doing so would potentially mess with w's placement. */
     public void set_base (Gtk.Widget? w)
     {
         return_if_fail (pushed == null);
         return_if_fail (mode == Mode.NORMAL);
 
+        if (orig != null)
+            orig.size_allocate.disconnect (base_size_allocate_cb);
         orig = w;
 
         if (orig != null)
         {
+            orig.size_allocate.connect (base_size_allocate_cb);
             orig_tracker = new FadeTracker (orig);
             orig_tracker.notify["alpha"].connect (() =>
             {
@@ -73,17 +70,22 @@ public class DashBox : Gtk.Box
             });
             orig_tracker.done.connect (fade_done_cb);
             base_alpha = orig_tracker.alpha;
+            has_base = true;
         }
         else
         {
+            orig_height = -1;
+            get_preferred_height (null, out orig_height); /* save height */
+
             orig_tracker = null;
             base_alpha = 1.0;
+            has_base = false;
         }
 
         queue_resize ();
     }
 
-    public void push (Gtk.Widget w)
+    public void push (GreeterList l)
     {
         /* This isn't designed to push more than one widget at a time yet */
         return_if_fail (pushed == null);
@@ -91,9 +93,9 @@ public class DashBox : Gtk.Box
         return_if_fail (mode == Mode.NORMAL);
 
         get_preferred_height (null, out orig_height);
-        pushed = w;
+        pushed = l;
+        pushed.fade_done.connect (fade_done_cb);
         mode = Mode.PUSH_FADE_OUT;
-        has_content = true;
         orig_tracker.reset (FadeTracker.Mode.FADE_OUT);
         queue_resize ();
     }
@@ -105,7 +107,7 @@ public class DashBox : Gtk.Box
         return_if_fail (mode == Mode.NORMAL);
 
         mode = Mode.POP_FADE_OUT;
-        fader.fade_out ();
+        pushed.fade_out ();
     }
 
     private void fade_done_cb ()
@@ -114,9 +116,8 @@ public class DashBox : Gtk.Box
         {
         case Mode.PUSH_FADE_OUT:
             mode = Mode.PUSH_FADE_IN;
-            pushed.show ();
-            fader.add (pushed);
-            fader.fade_in ();
+            orig.hide ();
+            pushed.fade_in ();
             break;
         case Mode.PUSH_FADE_IN:
             mode = Mode.NORMAL;
@@ -124,51 +125,58 @@ public class DashBox : Gtk.Box
             break;
         case Mode.POP_FADE_OUT:
             mode = Mode.POP_FADE_IN;
-            fader.remove (pushed);
             orig_tracker.reset (FadeTracker.Mode.FADE_IN);
+            orig.show ();
             break;
         case Mode.POP_FADE_IN:
             mode = Mode.NORMAL;
+            pushed.fade_done.disconnect (fade_done_cb);
+            pushed.destroy ();
             pushed = null;
-            has_content = false;
             queue_resize ();
+            orig.grab_focus ();
             break;
         }
     }
 
-    private int round_to_grid (int size)
+    private void base_size_allocate_cb ()
     {
-        var num_grids = size / grid_size;
-        var remainder = size % grid_size;
-        if (remainder > 0)
-            num_grids += 1;
-        if (num_grids % 2 == 0) /* always return odd number of grids */
-            num_grids += 1;
-        return num_grids * grid_size;
+        queue_resize ();
     }
 
     public override void get_preferred_height (out int min, out int nat)
     {
         if (orig == null)
         {
-            min = grid_size * UserList.BOX_HEIGHT - UserList.BORDER * 2;
-            nat = grid_size * UserList.BOX_HEIGHT - UserList.BORDER * 2;
+            /* Return cached height if we have it. This makes transitions between two base widgets smoother. */
+            if (orig_height >= 0)
+            {
+                min = orig_height;
+                nat = orig_height;
+            }
+            else
+            {
+                min = grid_size * GreeterList.DEFAULT_BOX_HEIGHT - GreeterList.BORDER * 2;
+                nat = grid_size * GreeterList.DEFAULT_BOX_HEIGHT - GreeterList.BORDER * 2;
+            }
         }
         else
         {
             if (pushed == null)
                 orig.get_preferred_height (out min, out nat);
             else
-                pushed.get_preferred_height (out min, out nat);
-            min = round_to_grid (min) - UserList.BORDER * 2;
-            nat = round_to_grid (nat) - UserList.BORDER * 2;
+            {
+                pushed.selected_entry.get_preferred_height (out min, out nat);
+                min = int.max (orig_height, min);
+                nat = int.max (orig_height, nat);
+            }
         }
     }
 
     public override void get_preferred_width (out int min, out int nat)
     {
-        min = grid_size * UserList.BOX_WIDTH - UserList.BORDER * 2;
-        nat = grid_size * UserList.BOX_WIDTH - UserList.BORDER * 2;
+        min = grid_size * GreeterList.BOX_WIDTH - GreeterList.BORDER * 2;
+        nat = grid_size * GreeterList.BOX_WIDTH - GreeterList.BORDER * 2;
     }
 
     public override bool draw (Cairo.Context c)
@@ -184,7 +192,7 @@ public class DashBox : Gtk.Box
         }
 
         /* Draw darker background with a rounded border */
-        var box_r = 0.2 * grid_size;
+        var box_r = 0.3 * grid_size;
         int box_y = 0;
         int box_w;
         int box_h;
@@ -195,14 +203,12 @@ public class DashBox : Gtk.Box
         {
             /* Grow dark bg to fit new pushed object */
             var new_box_h = box_h - (int) ((box_h - orig_height) * base_alpha);
-            box_y = (box_h - new_box_h) / 2;
             box_h = new_box_h;
         }
         else if (mode == Mode.POP_FADE_IN)
         {
             /* Shrink dark bg to fit orig */
             var new_box_h = box_h - (int) ((box_h - orig_height) * base_alpha);
-            box_y = (box_h - new_box_h) / 2;
             box_h = new_box_h;
         }
 
@@ -218,7 +224,7 @@ public class DashBox : Gtk.Box
         c.stroke ();
 
         c.restore ();
-        
+
         return base.draw (c);
     }
 

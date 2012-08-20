@@ -2,7 +2,7 @@
 
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT(unity-greeter, 12.10.0)
+AC_INIT(unity-greeter, 12.10.2)
 AC_CONFIG_MACRO_DIR(m4)
 AM_INIT_AUTOMAKE
 AM_PROG_CC_C_O
@@ -12,7 +12,6 @@ AM_MAINTAINER_MODE
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES(yes)])
 
 GLIB_GSETTINGS
-GNOME_COMPILE_WARNINGS(maximum)
 
 dnl ###########################################################################
 dnl Dependencies
@@ -22,7 +21,7 @@ PKG_CHECK_MODULES(UNITY_GREETER, [
     gtk+-3.0
     gdk-x11-3.0
     indicator3-0.4
-    liblightdm-gobject-1 >= 1.1.7
+    liblightdm-gobject-1 >= 1.3.3
     freetype2
     cairo-ft
     libcanberra

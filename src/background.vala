@@ -20,16 +20,17 @@
 
 class BackgroundLoader : Object
 {
-    public string filename {get; private set;}
-    public Cairo.Surface logo {get; set;}
+    public string filename { get; private set; }
+    public Cairo.Surface logo { get; set; }
 
     public int[] widths;
     public int[] heights;
     public Cairo.Pattern[] patterns;
+    public Gdk.RGBA average_color;
 
     private Cairo.Surface target_surface;
     private bool draw_grid;
-    private unowned Thread<void*> thread;
+    private Thread<void*> thread;
     private Gdk.Pixbuf[] images;
     private bool finished;
     private uint ready_id;
@@ -80,12 +81,12 @@ class BackgroundLoader : Object
         {
             try
             {
-                this.ref();
-                thread = Thread<void*>.create<void*> (load_and_scale, true);
+                this.ref ();
+                thread = new Thread<void*>.try ("background-loader", load_and_scale);
             }
-            catch (ThreadError e)
+            catch (Error e)
             {
-                this.unref();
+                this.unref ();
                 finished = true;
                 return true;
             }
@@ -93,7 +94,7 @@ class BackgroundLoader : Object
 
         return false;
     }
-    
+
     public Cairo.Pattern? get_pattern (int width, int height)
     {
         for (var i = 0; i < widths.length; i++)
@@ -122,12 +123,14 @@ class BackgroundLoader : Object
         for (var i = 0; i < widths.length; i++)
         {
             patterns[i] = create_pattern (images[i]);
+            if (i == 0)
+                pixbuf_average_value (images[i], out average_color);
             images[i] = null;
         }
 
         loaded ();
 
-        this.unref();
+        this.unref ();
         return false;
     }
 
@@ -148,7 +151,7 @@ class BackgroundLoader : Object
 
         return null;
     }
-    
+
     private Gdk.Pixbuf? scale (Gdk.Pixbuf? image, int width, int height)
     {
         var target_aspect = (double) width / height;
@@ -198,8 +201,152 @@ class BackgroundLoader : Object
 
         var pattern = new Cairo.Pattern.for_surface (surface);
         pattern.set_extend (Cairo.Extend.REPEAT);
-       
+
         return pattern;
+    }
+
+    /* The following color averaging algorithm was originally written for
+       Unity in C++, then patched into gnome-desktop3 in C.  I've taken it
+       and put it here in Vala.  It would be nice if we could get
+       gnome-desktop3 to expose this for our use instead of copying the
+       code... */
+
+    static const int QUAD_MAX_LEVEL_OF_RECURSION = 16;
+    static const int QUAD_MIN_LEVEL_OF_RECURSION = 2;
+    static const int QUAD_CORNER_WEIGHT_NW       = 3;
+    static const int QUAD_CORNER_WEIGHT_NE       = 1;
+    static const int QUAD_CORNER_WEIGHT_SE       = 1;
+    static const int QUAD_CORNER_WEIGHT_SW       = 3;
+    static const int QUAD_CORNER_WEIGHT_CENTER   = 2;
+    static const int QUAD_CORNER_WEIGHT_TOTAL    = (QUAD_CORNER_WEIGHT_NW + QUAD_CORNER_WEIGHT_NE + QUAD_CORNER_WEIGHT_SE + QUAD_CORNER_WEIGHT_SW + QUAD_CORNER_WEIGHT_CENTER);
+
+    /* Pixbuf utilities */
+    private Gdk.RGBA get_pixbuf_sample (uint8[]   pixels,
+                                        int       rowstride,
+                                        int       channels,
+                                        int       x,
+                                        int       y)
+    {
+	    var sample = Gdk.RGBA ();
+	    double dd = 0xFF;
+	    int offset = ((y * rowstride) + (x * channels));
+
+	    sample.red = pixels[offset++] / dd;
+	    sample.green = pixels[offset++] / dd;
+	    sample.blue = pixels[offset++] / dd;
+	    sample.alpha = 1.0f;
+
+	    return sample;
+    }
+
+    private bool is_color_different (Gdk.RGBA color_a,
+                                     Gdk.RGBA color_b)
+    {
+	    var diff = Gdk.RGBA ();
+
+	    diff.red   = color_a.red   - color_b.red;
+	    diff.green = color_a.green - color_b.green;
+	    diff.blue  = color_a.blue  - color_b.blue;
+	    diff.alpha = 1.0f;
+
+	    if (GLib.Math.fabs (diff.red) > 0.15 ||
+	        GLib.Math.fabs (diff.green) > 0.15 ||
+	        GLib.Math.fabs (diff.blue) > 0.15)
+		    return true;
+
+	    return false;
+    }
+
+    private Gdk.RGBA get_quad_average (int       x,
+                                       int       y,
+                                       int       width,
+                                       int       height,
+                                       int       level_of_recursion,
+                                       uint8[]   pixels,
+                                       int       rowstride,
+                                       int       channels)
+    {
+	    // samples four corners
+	    // c1-----c2
+	    // |       |
+	    // c3-----c4
+
+	    var average = Gdk.RGBA ();
+	    var corner1 = get_pixbuf_sample (pixels, rowstride, channels, x        , y         );
+	    var corner2 = get_pixbuf_sample (pixels, rowstride, channels, x + width, y         );
+	    var corner3 = get_pixbuf_sample (pixels, rowstride, channels, x        , y + height);
+	    var corner4 = get_pixbuf_sample (pixels, rowstride, channels, x + width, y + height);
+	    var centre  = get_pixbuf_sample (pixels, rowstride, channels, x + (width / 2), y + (height / 2));
+
+	    /* If we're over the max we want to just take the average and be happy
+	       with that value */
+	    if (level_of_recursion < QUAD_MAX_LEVEL_OF_RECURSION) {
+		    /* Otherwise we want to look at each value and check it's distance
+		       from the center color and take the average if they're far apart. */
+
+		    /* corner 1 */
+		    if (level_of_recursion < QUAD_MIN_LEVEL_OF_RECURSION ||
+				    is_color_different(corner1, centre)) {
+			    corner1 = get_quad_average (x, y, width/2, height/2, level_of_recursion + 1, pixels, rowstride, channels);
+		    }
+
+		    /* corner 2 */
+		    if (level_of_recursion < QUAD_MIN_LEVEL_OF_RECURSION ||
+				    is_color_different(corner2, centre)) {
+			    corner2 = get_quad_average (x + width/2, y, width/2, height/2, level_of_recursion + 1, pixels, rowstride, channels);
+		    }
+
+		    /* corner 3 */
+		    if (level_of_recursion < QUAD_MIN_LEVEL_OF_RECURSION ||
+				    is_color_different(corner3, centre)) {
+			    corner3 = get_quad_average (x, y + height/2, width/2, height/2, level_of_recursion + 1, pixels, rowstride, channels);
+		    }
+
+		    /* corner 4 */
+		    if (level_of_recursion < QUAD_MIN_LEVEL_OF_RECURSION ||
+				    is_color_different(corner4, centre)) {
+			    corner4 = get_quad_average (x + width/2, y + height/2, width/2, height/2, level_of_recursion + 1, pixels, rowstride, channels);
+		    }
+	    }
+
+	    average.red   = ((corner1.red * QUAD_CORNER_WEIGHT_NW)     +
+	                     (corner3.red * QUAD_CORNER_WEIGHT_SW)     +
+	                     (centre.red  * QUAD_CORNER_WEIGHT_CENTER) +
+	                     (corner2.red * QUAD_CORNER_WEIGHT_NE)     +
+	                     (corner4.red * QUAD_CORNER_WEIGHT_SE))
+	                    / QUAD_CORNER_WEIGHT_TOTAL;
+	    average.green = ((corner1.green * QUAD_CORNER_WEIGHT_NW)     +
+	                     (corner3.green * QUAD_CORNER_WEIGHT_SW)     +
+	                     (centre.green  * QUAD_CORNER_WEIGHT_CENTER) +
+	                     (corner2.green * QUAD_CORNER_WEIGHT_NE)     +
+	                     (corner4.green * QUAD_CORNER_WEIGHT_SE))
+	                    / QUAD_CORNER_WEIGHT_TOTAL;
+	    average.blue  = ((corner1.blue * QUAD_CORNER_WEIGHT_NW)     +
+	                     (corner3.blue * QUAD_CORNER_WEIGHT_SW)     +
+	                     (centre.blue  * QUAD_CORNER_WEIGHT_CENTER) +
+	                     (corner2.blue * QUAD_CORNER_WEIGHT_NE)     +
+	                     (corner4.blue * QUAD_CORNER_WEIGHT_SE))
+	                    / QUAD_CORNER_WEIGHT_TOTAL;
+	    average.alpha = 1.0f;
+
+	    return average;
+    }
+
+    private void pixbuf_average_value (Gdk.Pixbuf pixbuf,
+                                       out Gdk.RGBA result)
+    {
+	    var average = get_quad_average (0, 0,
+	                                    pixbuf.get_width () - 1, pixbuf.get_height () - 1,
+	                                    1,
+	                                    pixbuf.get_pixels (),
+	                                    pixbuf.get_rowstride (),
+	                                    pixbuf.get_n_channels ());
+
+	    result = Gdk.RGBA ();
+	    result.red = average.red;
+	    result.green = average.green;
+	    result.blue = average.blue;
+	    result.alpha = average.alpha;
     }
 }
 
@@ -227,10 +374,10 @@ public class Background : Gtk.Fixed
         GRID,
     }
 
-    public string default_background {get; set; default = UGSettings.get_string (UGSettings.KEY_BACKGROUND_COLOR);}
-    public string? current_background {get; set; default = null;}
-    public bool draw_grid {get; set; default = true;}
-    public double alpha {get; private set; default = 1.0;}
+    public string default_background { get; set; default = UGSettings.get_string (UGSettings.KEY_BACKGROUND_COLOR); }
+    public string? current_background { get; set; default = null; }
+    public bool draw_grid { get; set; default = true; }
+    public double alpha { get; private set; default = 1.0; }
 
     private Cairo.Surface target_surface;
 
@@ -259,7 +406,7 @@ public class Background : Gtk.Fixed
 
         loaders = new HashTable<string?, BackgroundLoader> (str_hash, str_equal);
 
-        notify["current-background"].connect (() => {reload ();});
+        notify["current-background"].connect (() => { reload (); });
     }
 
     public void set_logo (string version_logo, string background_logo)
@@ -297,7 +444,7 @@ public class Background : Gtk.Fixed
             this.monitors.append (m);
         queue_draw ();
     }
-    
+
     public void set_active_monitor (Monitor? monitor)
     {
         active_monitor = monitor;
@@ -343,6 +490,7 @@ public class Background : Gtk.Fixed
             if (old == current)
                 old = new_background;
             current = new_background;
+            publish_average_color ();
         }
 
         /* Fade to this background when loaded */
@@ -438,6 +586,7 @@ public class Background : Gtk.Fixed
             }
 
             queue_draw ();
+            publish_average_color ();
         }
     }
 
@@ -467,7 +616,7 @@ public class Background : Gtk.Fixed
 
             b = new BackgroundLoader (target_surface, filename, widths, heights, draw_grid);
             b.logo = version_logo_surface;
-            b.loaded.connect (() => {reload();});
+            b.loaded.connect (() => { reload (); });
             b.load ();
             loaders.insert (filename, b);
         }
@@ -517,5 +666,18 @@ public class Background : Gtk.Fixed
         c.rectangle (0, 0, width, height);
         c.fill ();
         c.restore ();
+    }
+
+    void publish_average_color ()
+    {
+        var rgba = current.average_color.to_string ();
+        var root = get_screen ().get_root_window ();
+
+        Gdk.property_change (root,
+                             Gdk.Atom.intern_static_string ("_GNOME_BACKGROUND_REPRESENTATIVE_COLORS"),
+                             Gdk.Atom.intern_static_string ("STRING"),
+                             8,
+                             Gdk.PropMode.REPLACE,
+                             rgba.data);
     }
 }

@@ -55,10 +55,12 @@ sbin_PROGRAMS = unity-greeter$(EXEEXT)
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	animate-timer.c background.c cached-image.c dash-box.c \
-	dash-button.c dash-entry.c fadable-box.c fadable.c \
-	fading-label.c main-window.c menu.c menubar.c prompt-box.c \
-	session-chooser.c settings-daemon.c settings.c unity-greeter.c \
-	unity_greeter_vala.stamp user-list.c
+	dash-button.c dash-entry.c email-autocompleter.c fadable-box.c \
+	fadable.c fading-label.c greeter-list.c list-stack.c \
+	main-window.c menu.c menubar.c prompt-box.c \
+	remote-login-service.c session-list.c settings-daemon.c \
+	settings.c unity-greeter.c unity_greeter_vala.stamp \
+	user-list.c user-prompt-box.c
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/configure.ac
@@ -73,20 +75,25 @@ PROGRAMS = $(sbin_PROGRAMS)
 am_unity_greeter_OBJECTS = unity_greeter-animate-timer.$(OBJEXT) \
 	unity_greeter-background.$(OBJEXT) \
 	unity_greeter-cached-image.$(OBJEXT) \
+	unity_greeter-email-autocompleter.$(OBJEXT) \
 	unity_greeter-dash-box.$(OBJEXT) \
 	unity_greeter-dash-button.$(OBJEXT) \
 	unity_greeter-dash-entry.$(OBJEXT) \
 	unity_greeter-fadable.$(OBJEXT) \
 	unity_greeter-fadable-box.$(OBJEXT) \
 	unity_greeter-fading-label.$(OBJEXT) \
+	unity_greeter-greeter-list.$(OBJEXT) \
+	unity_greeter-list-stack.$(OBJEXT) \
 	unity_greeter-main-window.$(OBJEXT) \
 	unity_greeter-menu.$(OBJEXT) unity_greeter-menubar.$(OBJEXT) \
 	unity_greeter-prompt-box.$(OBJEXT) \
-	unity_greeter-session-chooser.$(OBJEXT) \
+	unity_greeter-session-list.$(OBJEXT) \
+	unity_greeter-remote-login-service.$(OBJEXT) \
 	unity_greeter-settings.$(OBJEXT) \
 	unity_greeter-settings-daemon.$(OBJEXT) \
 	unity_greeter-unity-greeter.$(OBJEXT) \
-	unity_greeter-user-list.$(OBJEXT)
+	unity_greeter-user-list.$(OBJEXT) \
+	unity_greeter-user-prompt-box.$(OBJEXT)
 unity_greeter_OBJECTS = $(am_unity_greeter_OBJECTS)
 am__DEPENDENCIES_1 =
 unity_greeter_DEPENDENCIES = $(am__DEPENDENCIES_1)
@@ -196,7 +203,6 @@ UNITY_GREETER_LIBS = @UNITY_GREETER_LIBS@
 USE_NLS = @USE_NLS@
 VALAC = @VALAC@
 VERSION = @VERSION@
-WARN_CFLAGS = @WARN_CFLAGS@
 XGETTEXT = @XGETTEXT@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
@@ -250,21 +256,26 @@ unity_greeter_SOURCES = \
 	animate-timer.vala \
 	background.vala \
 	cached-image.vala \
+	email-autocompleter.vala \
 	dash-box.vala \
 	dash-button.vala \
 	dash-entry.vala \
 	fadable.vala \
 	fadable-box.vala \
 	fading-label.vala \
+	greeter-list.vala \
+	list-stack.vala \
 	main-window.vala \
 	menu.vala \
 	menubar.vala \
 	prompt-box.vala \
-	session-chooser.vala \
+	session-list.vala \
+	remote-login-service.vala \
 	settings.vala \
 	settings-daemon.vala \
 	unity-greeter.vala \
-	user-list.vala
+	user-list.vala \
+	user-prompt-box.vala
 
 unity_greeter_CFLAGS = \
 	$(UNITY_GREETER_CFLAGS) \
@@ -280,9 +291,12 @@ unity_greeter_VALAFLAGS = \
 	--pkg posix \
 	--pkg gtk+-3.0 \
 	--pkg gdk-x11-3.0 \
+	--pkg gio-unix-2.0 \
 	--pkg x11 \
 	--pkg liblightdm-gobject-1 \
-	--pkg libcanberra
+	--pkg libcanberra \
+	--pkg gio-2.0 \
+	--target-glib 2.32
 
 unity_greeter_LDADD = \
 	$(UNITY_GREETER_LIBS)
@@ -380,18 +394,23 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-dash-box.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-dash-button.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-dash-entry.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-email-autocompleter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-fadable-box.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-fadable.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-fading-label.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-greeter-list.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-list-stack.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-main-window.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-menu.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-menubar.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-prompt-box.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-session-chooser.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-remote-login-service.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-session-list.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-settings-daemon.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-settings.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-unity-greeter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-user-list.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-user-prompt-box.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -448,6 +467,20 @@ unity_greeter-cached-image.obj: cached-image.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='cached-image.c' object='unity_greeter-cached-image.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-cached-image.obj `if test -f 'cached-image.c'; then $(CYGPATH_W) 'cached-image.c'; else $(CYGPATH_W) '$(srcdir)/cached-image.c'; fi`
+
+unity_greeter-email-autocompleter.o: email-autocompleter.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-email-autocompleter.o -MD -MP -MF $(DEPDIR)/unity_greeter-email-autocompleter.Tpo -c -o unity_greeter-email-autocompleter.o `test -f 'email-autocompleter.c' || echo '$(srcdir)/'`email-autocompleter.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-email-autocompleter.Tpo $(DEPDIR)/unity_greeter-email-autocompleter.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='email-autocompleter.c' object='unity_greeter-email-autocompleter.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-email-autocompleter.o `test -f 'email-autocompleter.c' || echo '$(srcdir)/'`email-autocompleter.c
+
+unity_greeter-email-autocompleter.obj: email-autocompleter.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-email-autocompleter.obj -MD -MP -MF $(DEPDIR)/unity_greeter-email-autocompleter.Tpo -c -o unity_greeter-email-autocompleter.obj `if test -f 'email-autocompleter.c'; then $(CYGPATH_W) 'email-autocompleter.c'; else $(CYGPATH_W) '$(srcdir)/email-autocompleter.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-email-autocompleter.Tpo $(DEPDIR)/unity_greeter-email-autocompleter.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='email-autocompleter.c' object='unity_greeter-email-autocompleter.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-email-autocompleter.obj `if test -f 'email-autocompleter.c'; then $(CYGPATH_W) 'email-autocompleter.c'; else $(CYGPATH_W) '$(srcdir)/email-autocompleter.c'; fi`
 
 unity_greeter-dash-box.o: dash-box.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-dash-box.o -MD -MP -MF $(DEPDIR)/unity_greeter-dash-box.Tpo -c -o unity_greeter-dash-box.o `test -f 'dash-box.c' || echo '$(srcdir)/'`dash-box.c
@@ -533,6 +566,34 @@ unity_greeter-fading-label.obj: fading-label.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-fading-label.obj `if test -f 'fading-label.c'; then $(CYGPATH_W) 'fading-label.c'; else $(CYGPATH_W) '$(srcdir)/fading-label.c'; fi`
 
+unity_greeter-greeter-list.o: greeter-list.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-greeter-list.o -MD -MP -MF $(DEPDIR)/unity_greeter-greeter-list.Tpo -c -o unity_greeter-greeter-list.o `test -f 'greeter-list.c' || echo '$(srcdir)/'`greeter-list.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-greeter-list.Tpo $(DEPDIR)/unity_greeter-greeter-list.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='greeter-list.c' object='unity_greeter-greeter-list.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-greeter-list.o `test -f 'greeter-list.c' || echo '$(srcdir)/'`greeter-list.c
+
+unity_greeter-greeter-list.obj: greeter-list.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-greeter-list.obj -MD -MP -MF $(DEPDIR)/unity_greeter-greeter-list.Tpo -c -o unity_greeter-greeter-list.obj `if test -f 'greeter-list.c'; then $(CYGPATH_W) 'greeter-list.c'; else $(CYGPATH_W) '$(srcdir)/greeter-list.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-greeter-list.Tpo $(DEPDIR)/unity_greeter-greeter-list.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='greeter-list.c' object='unity_greeter-greeter-list.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-greeter-list.obj `if test -f 'greeter-list.c'; then $(CYGPATH_W) 'greeter-list.c'; else $(CYGPATH_W) '$(srcdir)/greeter-list.c'; fi`
+
+unity_greeter-list-stack.o: list-stack.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-list-stack.o -MD -MP -MF $(DEPDIR)/unity_greeter-list-stack.Tpo -c -o unity_greeter-list-stack.o `test -f 'list-stack.c' || echo '$(srcdir)/'`list-stack.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-list-stack.Tpo $(DEPDIR)/unity_greeter-list-stack.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='list-stack.c' object='unity_greeter-list-stack.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-list-stack.o `test -f 'list-stack.c' || echo '$(srcdir)/'`list-stack.c
+
+unity_greeter-list-stack.obj: list-stack.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-list-stack.obj -MD -MP -MF $(DEPDIR)/unity_greeter-list-stack.Tpo -c -o unity_greeter-list-stack.obj `if test -f 'list-stack.c'; then $(CYGPATH_W) 'list-stack.c'; else $(CYGPATH_W) '$(srcdir)/list-stack.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-list-stack.Tpo $(DEPDIR)/unity_greeter-list-stack.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='list-stack.c' object='unity_greeter-list-stack.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-list-stack.obj `if test -f 'list-stack.c'; then $(CYGPATH_W) 'list-stack.c'; else $(CYGPATH_W) '$(srcdir)/list-stack.c'; fi`
+
 unity_greeter-main-window.o: main-window.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-main-window.o -MD -MP -MF $(DEPDIR)/unity_greeter-main-window.Tpo -c -o unity_greeter-main-window.o `test -f 'main-window.c' || echo '$(srcdir)/'`main-window.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-main-window.Tpo $(DEPDIR)/unity_greeter-main-window.Po
@@ -589,19 +650,33 @@ unity_greeter-prompt-box.obj: prompt-box.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-prompt-box.obj `if test -f 'prompt-box.c'; then $(CYGPATH_W) 'prompt-box.c'; else $(CYGPATH_W) '$(srcdir)/prompt-box.c'; fi`
 
-unity_greeter-session-chooser.o: session-chooser.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-session-chooser.o -MD -MP -MF $(DEPDIR)/unity_greeter-session-chooser.Tpo -c -o unity_greeter-session-chooser.o `test -f 'session-chooser.c' || echo '$(srcdir)/'`session-chooser.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-session-chooser.Tpo $(DEPDIR)/unity_greeter-session-chooser.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='session-chooser.c' object='unity_greeter-session-chooser.o' libtool=no @AMDEPBACKSLASH@
+unity_greeter-session-list.o: session-list.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-session-list.o -MD -MP -MF $(DEPDIR)/unity_greeter-session-list.Tpo -c -o unity_greeter-session-list.o `test -f 'session-list.c' || echo '$(srcdir)/'`session-list.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-session-list.Tpo $(DEPDIR)/unity_greeter-session-list.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='session-list.c' object='unity_greeter-session-list.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-session-chooser.o `test -f 'session-chooser.c' || echo '$(srcdir)/'`session-chooser.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-session-list.o `test -f 'session-list.c' || echo '$(srcdir)/'`session-list.c
 
-unity_greeter-session-chooser.obj: session-chooser.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-session-chooser.obj -MD -MP -MF $(DEPDIR)/unity_greeter-session-chooser.Tpo -c -o unity_greeter-session-chooser.obj `if test -f 'session-chooser.c'; then $(CYGPATH_W) 'session-chooser.c'; else $(CYGPATH_W) '$(srcdir)/session-chooser.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-session-chooser.Tpo $(DEPDIR)/unity_greeter-session-chooser.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='session-chooser.c' object='unity_greeter-session-chooser.obj' libtool=no @AMDEPBACKSLASH@
+unity_greeter-session-list.obj: session-list.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-session-list.obj -MD -MP -MF $(DEPDIR)/unity_greeter-session-list.Tpo -c -o unity_greeter-session-list.obj `if test -f 'session-list.c'; then $(CYGPATH_W) 'session-list.c'; else $(CYGPATH_W) '$(srcdir)/session-list.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-session-list.Tpo $(DEPDIR)/unity_greeter-session-list.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='session-list.c' object='unity_greeter-session-list.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-session-chooser.obj `if test -f 'session-chooser.c'; then $(CYGPATH_W) 'session-chooser.c'; else $(CYGPATH_W) '$(srcdir)/session-chooser.c'; fi`
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-session-list.obj `if test -f 'session-list.c'; then $(CYGPATH_W) 'session-list.c'; else $(CYGPATH_W) '$(srcdir)/session-list.c'; fi`
+
+unity_greeter-remote-login-service.o: remote-login-service.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-remote-login-service.o -MD -MP -MF $(DEPDIR)/unity_greeter-remote-login-service.Tpo -c -o unity_greeter-remote-login-service.o `test -f 'remote-login-service.c' || echo '$(srcdir)/'`remote-login-service.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-remote-login-service.Tpo $(DEPDIR)/unity_greeter-remote-login-service.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='remote-login-service.c' object='unity_greeter-remote-login-service.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-remote-login-service.o `test -f 'remote-login-service.c' || echo '$(srcdir)/'`remote-login-service.c
+
+unity_greeter-remote-login-service.obj: remote-login-service.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-remote-login-service.obj -MD -MP -MF $(DEPDIR)/unity_greeter-remote-login-service.Tpo -c -o unity_greeter-remote-login-service.obj `if test -f 'remote-login-service.c'; then $(CYGPATH_W) 'remote-login-service.c'; else $(CYGPATH_W) '$(srcdir)/remote-login-service.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-remote-login-service.Tpo $(DEPDIR)/unity_greeter-remote-login-service.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='remote-login-service.c' object='unity_greeter-remote-login-service.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-remote-login-service.obj `if test -f 'remote-login-service.c'; then $(CYGPATH_W) 'remote-login-service.c'; else $(CYGPATH_W) '$(srcdir)/remote-login-service.c'; fi`
 
 unity_greeter-settings.o: settings.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-settings.o -MD -MP -MF $(DEPDIR)/unity_greeter-settings.Tpo -c -o unity_greeter-settings.o `test -f 'settings.c' || echo '$(srcdir)/'`settings.c
@@ -658,6 +733,20 @@ unity_greeter-user-list.obj: user-list.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='user-list.c' object='unity_greeter-user-list.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-user-list.obj `if test -f 'user-list.c'; then $(CYGPATH_W) 'user-list.c'; else $(CYGPATH_W) '$(srcdir)/user-list.c'; fi`
+
+unity_greeter-user-prompt-box.o: user-prompt-box.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-user-prompt-box.o -MD -MP -MF $(DEPDIR)/unity_greeter-user-prompt-box.Tpo -c -o unity_greeter-user-prompt-box.o `test -f 'user-prompt-box.c' || echo '$(srcdir)/'`user-prompt-box.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-user-prompt-box.Tpo $(DEPDIR)/unity_greeter-user-prompt-box.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='user-prompt-box.c' object='unity_greeter-user-prompt-box.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-user-prompt-box.o `test -f 'user-prompt-box.c' || echo '$(srcdir)/'`user-prompt-box.c
+
+unity_greeter-user-prompt-box.obj: user-prompt-box.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-user-prompt-box.obj -MD -MP -MF $(DEPDIR)/unity_greeter-user-prompt-box.Tpo -c -o unity_greeter-user-prompt-box.obj `if test -f 'user-prompt-box.c'; then $(CYGPATH_W) 'user-prompt-box.c'; else $(CYGPATH_W) '$(srcdir)/user-prompt-box.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-user-prompt-box.Tpo $(DEPDIR)/unity_greeter-user-prompt-box.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='user-prompt-box.c' object='unity_greeter-user-prompt-box.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-user-prompt-box.obj `if test -f 'user-prompt-box.c'; then $(CYGPATH_W) 'user-prompt-box.c'; else $(CYGPATH_W) '$(srcdir)/user-prompt-box.c'; fi`
 $(srcdir)/animate-timer.c: $(srcdir)/unity_greeter_vala.stamp
 	@if test -f $@; then :; else rm -f $(srcdir)/unity_greeter_vala.stamp; fi
 	@if test -f $@; then :; else \
@@ -669,6 +758,11 @@ $(srcdir)/background.c: $(srcdir)/unity_greeter_vala.stamp
 	  $(MAKE) $(AM_MAKEFLAGS) $(srcdir)/unity_greeter_vala.stamp; \
 	fi
 $(srcdir)/cached-image.c: $(srcdir)/unity_greeter_vala.stamp
+	@if test -f $@; then :; else rm -f $(srcdir)/unity_greeter_vala.stamp; fi
+	@if test -f $@; then :; else \
+	  $(MAKE) $(AM_MAKEFLAGS) $(srcdir)/unity_greeter_vala.stamp; \
+	fi
+$(srcdir)/email-autocompleter.c: $(srcdir)/unity_greeter_vala.stamp
 	@if test -f $@; then :; else rm -f $(srcdir)/unity_greeter_vala.stamp; fi
 	@if test -f $@; then :; else \
 	  $(MAKE) $(AM_MAKEFLAGS) $(srcdir)/unity_greeter_vala.stamp; \
@@ -703,6 +797,16 @@ $(srcdir)/fading-label.c: $(srcdir)/unity_greeter_vala.stamp
 	@if test -f $@; then :; else \
 	  $(MAKE) $(AM_MAKEFLAGS) $(srcdir)/unity_greeter_vala.stamp; \
 	fi
+$(srcdir)/greeter-list.c: $(srcdir)/unity_greeter_vala.stamp
+	@if test -f $@; then :; else rm -f $(srcdir)/unity_greeter_vala.stamp; fi
+	@if test -f $@; then :; else \
+	  $(MAKE) $(AM_MAKEFLAGS) $(srcdir)/unity_greeter_vala.stamp; \
+	fi
+$(srcdir)/list-stack.c: $(srcdir)/unity_greeter_vala.stamp
+	@if test -f $@; then :; else rm -f $(srcdir)/unity_greeter_vala.stamp; fi
+	@if test -f $@; then :; else \
+	  $(MAKE) $(AM_MAKEFLAGS) $(srcdir)/unity_greeter_vala.stamp; \
+	fi
 $(srcdir)/main-window.c: $(srcdir)/unity_greeter_vala.stamp
 	@if test -f $@; then :; else rm -f $(srcdir)/unity_greeter_vala.stamp; fi
 	@if test -f $@; then :; else \
@@ -723,7 +827,12 @@ $(srcdir)/prompt-box.c: $(srcdir)/unity_greeter_vala.stamp
 	@if test -f $@; then :; else \
 	  $(MAKE) $(AM_MAKEFLAGS) $(srcdir)/unity_greeter_vala.stamp; \
 	fi
-$(srcdir)/session-chooser.c: $(srcdir)/unity_greeter_vala.stamp
+$(srcdir)/session-list.c: $(srcdir)/unity_greeter_vala.stamp
+	@if test -f $@; then :; else rm -f $(srcdir)/unity_greeter_vala.stamp; fi
+	@if test -f $@; then :; else \
+	  $(MAKE) $(AM_MAKEFLAGS) $(srcdir)/unity_greeter_vala.stamp; \
+	fi
+$(srcdir)/remote-login-service.c: $(srcdir)/unity_greeter_vala.stamp
 	@if test -f $@; then :; else rm -f $(srcdir)/unity_greeter_vala.stamp; fi
 	@if test -f $@; then :; else \
 	  $(MAKE) $(AM_MAKEFLAGS) $(srcdir)/unity_greeter_vala.stamp; \
@@ -748,9 +857,14 @@ $(srcdir)/user-list.c: $(srcdir)/unity_greeter_vala.stamp
 	@if test -f $@; then :; else \
 	  $(MAKE) $(AM_MAKEFLAGS) $(srcdir)/unity_greeter_vala.stamp; \
 	fi
-$(srcdir)/unity_greeter_vala.stamp: config.vapi fixes.vapi indicator.vapi animate-timer.vala background.vala cached-image.vala dash-box.vala dash-button.vala dash-entry.vala fadable.vala fadable-box.vala fading-label.vala main-window.vala menu.vala menubar.vala prompt-box.vala session-chooser.vala settings.vala settings-daemon.vala unity-greeter.vala user-list.vala
+$(srcdir)/user-prompt-box.c: $(srcdir)/unity_greeter_vala.stamp
+	@if test -f $@; then :; else rm -f $(srcdir)/unity_greeter_vala.stamp; fi
+	@if test -f $@; then :; else \
+	  $(MAKE) $(AM_MAKEFLAGS) $(srcdir)/unity_greeter_vala.stamp; \
+	fi
+$(srcdir)/unity_greeter_vala.stamp: config.vapi fixes.vapi indicator.vapi animate-timer.vala background.vala cached-image.vala email-autocompleter.vala dash-box.vala dash-button.vala dash-entry.vala fadable.vala fadable-box.vala fading-label.vala greeter-list.vala list-stack.vala main-window.vala menu.vala menubar.vala prompt-box.vala session-list.vala remote-login-service.vala settings.vala settings-daemon.vala unity-greeter.vala user-list.vala user-prompt-box.vala
 	$(AM_V_at)rm -f $@ && echo stamp > $@-t
-	$(AM_V_VALAC)$(am__cd) $(srcdir) && $(VALAC) $(unity_greeter_VALAFLAGS) $(VALAFLAGS) -C config.vapi fixes.vapi indicator.vapi animate-timer.vala background.vala cached-image.vala dash-box.vala dash-button.vala dash-entry.vala fadable.vala fadable-box.vala fading-label.vala main-window.vala menu.vala menubar.vala prompt-box.vala session-chooser.vala settings.vala settings-daemon.vala unity-greeter.vala user-list.vala
+	$(AM_V_VALAC)$(am__cd) $(srcdir) && $(VALAC) $(unity_greeter_VALAFLAGS) $(VALAFLAGS) -C config.vapi fixes.vapi indicator.vapi animate-timer.vala background.vala cached-image.vala email-autocompleter.vala dash-box.vala dash-button.vala dash-entry.vala fadable.vala fadable-box.vala fading-label.vala greeter-list.vala list-stack.vala main-window.vala menu.vala menubar.vala prompt-box.vala session-list.vala remote-login-service.vala settings.vala settings-daemon.vala unity-greeter.vala user-list.vala user-prompt-box.vala
 	$(AM_V_at)mv -f $@-t $@
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
@@ -879,19 +993,24 @@ maintainer-clean-generic:
 	-rm -f dash-box.c
 	-rm -f dash-button.c
 	-rm -f dash-entry.c
+	-rm -f email-autocompleter.c
 	-rm -f fadable-box.c
 	-rm -f fadable.c
 	-rm -f fading-label.c
+	-rm -f greeter-list.c
+	-rm -f list-stack.c
 	-rm -f main-window.c
 	-rm -f menu.c
 	-rm -f menubar.c
 	-rm -f prompt-box.c
-	-rm -f session-chooser.c
+	-rm -f remote-login-service.c
+	-rm -f session-list.c
 	-rm -f settings-daemon.c
 	-rm -f settings.c
 	-rm -f unity-greeter.c
 	-rm -f unity_greeter_vala.stamp
 	-rm -f user-list.c
+	-rm -f user-prompt-box.c
 clean: clean-am
 
 clean-am: clean-generic clean-sbinPROGRAMS mostlyclean-am
@@ -976,6 +1095,8 @@ uninstall-am: uninstall-sbinPROGRAMS
 	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
 	uninstall-am uninstall-sbinPROGRAMS
 
+
+unity_greeter_vala.stamp: $(top_srcdir)/config.h
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

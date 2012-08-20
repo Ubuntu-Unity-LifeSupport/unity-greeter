@@ -27,28 +27,28 @@ public class SettingsDaemon : Object
 
     private void configure ()
     {
-        string[] disabled = {"org.gnome.settings-daemon.plugins.background",
-                             "org.gnome.settings-daemon.plugins.clipboard",
-                             "org.gnome.settings-daemon.plugins.font",
-                             "org.gnome.settings-daemon.plugins.gconf",
-                             "org.gnome.settings-daemon.plugins.gsdwacom",
-                             "org.gnome.settings-daemon.plugins.housekeeping",
-                             "org.gnome.settings-daemon.plugins.keybindings",
-                             "org.gnome.settings-daemon.plugins.keyboard",
-                             "org.gnome.settings-daemon.plugins.media-keys",
-                             "org.gnome.settings-daemon.plugins.mouse",
-                             "org.gnome.settings-daemon.plugins.print-notifications",
-                             "org.gnome.settings-daemon.plugins.smartcard",
-                             "org.gnome.settings-daemon.plugins.sound",
-                             "org.gnome.settings-daemon.plugins.wacom",
-                             "org.gnome.settings-daemon.plugins.xsettings"};
+        string[] disabled = { "org.gnome.settings-daemon.plugins.background",
+                              "org.gnome.settings-daemon.plugins.clipboard",
+                              "org.gnome.settings-daemon.plugins.font",
+                              "org.gnome.settings-daemon.plugins.gconf",
+                              "org.gnome.settings-daemon.plugins.gsdwacom",
+                              "org.gnome.settings-daemon.plugins.housekeeping",
+                              "org.gnome.settings-daemon.plugins.keybindings",
+                              "org.gnome.settings-daemon.plugins.keyboard",
+                              "org.gnome.settings-daemon.plugins.media-keys",
+                              "org.gnome.settings-daemon.plugins.mouse",
+                              "org.gnome.settings-daemon.plugins.print-notifications",
+                              "org.gnome.settings-daemon.plugins.smartcard",
+                              "org.gnome.settings-daemon.plugins.sound",
+                              "org.gnome.settings-daemon.plugins.wacom",
+                              "org.gnome.settings-daemon.plugins.xsettings" };
 
-        string[] enabled =  {"org.gnome.settings-daemon.plugins.a11y-keyboard",
-                             "org.gnome.settings-daemon.plugins.a11y-settings",
-                             "org.gnome.settings-daemon.plugins.color",
-                             "org.gnome.settings-daemon.plugins.cursor",
-                             "org.gnome.settings-daemon.plugins.power",
-                             "org.gnome.settings-daemon.plugins.xrandr"};
+        string[] enabled =  { "org.gnome.settings-daemon.plugins.a11y-keyboard",
+                              "org.gnome.settings-daemon.plugins.a11y-settings",
+                              "org.gnome.settings-daemon.plugins.color",
+                              "org.gnome.settings-daemon.plugins.cursor",
+                              "org.gnome.settings-daemon.plugins.power",
+                              "org.gnome.settings-daemon.plugins.xrandr" };
 
         foreach (var schema in disabled)
             set_plugin_enabled (schema, false);
@@ -83,7 +83,7 @@ public class SettingsDaemon : Object
         try
         {
             var proxy = new GLib.DBusProxy.for_bus_sync (GLib.BusType.SESSION,
-                                                         GLib.DBusProxyFlags.NONE, null, 
+                                                         GLib.DBusProxyFlags.NONE, null,
                                                          "org.gnome.SettingsDaemon",
                                                          "/org/gnome/SettingsDaemon",
                                                          "org.gnome.SettingsDaemon",

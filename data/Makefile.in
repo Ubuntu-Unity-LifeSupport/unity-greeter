@@ -52,8 +52,9 @@ NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
 subdir = data
-DIST_COMMON = $(dist_pkgdata_DATA) $(dist_xgreeter_DATA) \
-	$(srcdir)/Makefile.am $(srcdir)/Makefile.in
+DIST_COMMON = $(dist_man1_MANS) $(dist_pkgdata_DATA) \
+	$(dist_xgreeter_DATA) $(srcdir)/Makefile.am \
+	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/configure.ac
@@ -103,7 +104,11 @@ am__uninstall_files_from_dir = { \
     || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
-am__installdirs = "$(DESTDIR)$(pkgdatadir)" "$(DESTDIR)$(xgreeterdir)"
+man1dir = $(mandir)/man1
+am__installdirs = "$(DESTDIR)$(man1dir)" "$(DESTDIR)$(pkgdatadir)" \
+	"$(DESTDIR)$(xgreeterdir)"
+NROFF = nroff
+MANS = $(dist_man1_MANS)
 DATA = $(dist_pkgdata_DATA) $(dist_xgreeter_DATA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
@@ -173,7 +178,6 @@ UNITY_GREETER_LIBS = @UNITY_GREETER_LIBS@
 USE_NLS = @USE_NLS@
 VALAC = @VALAC@
 VERSION = @VERSION@
-WARN_CFLAGS = @WARN_CFLAGS@
 XGETTEXT = @XGETTEXT@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
@@ -236,6 +240,7 @@ dist_pkgdata_DATA = \
 	unknown_badge.png
 
 gsettings_SCHEMAS = com.canonical.unity-greeter.gschema.xml
+dist_man1_MANS = unity-greeter.1
 EXTRA_DIST = \
 	$(gsettings_SCHEMAS)
 
@@ -275,6 +280,47 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
+install-man1: $(dist_man1_MANS)
+	@$(NORMAL_INSTALL)
+	@list1='$(dist_man1_MANS)'; \
+	list2=''; \
+	test -n "$(man1dir)" \
+	  && test -n "`echo $$list1$$list2`" \
+	  || exit 0; \
+	echo " $(MKDIR_P) '$(DESTDIR)$(man1dir)'"; \
+	$(MKDIR_P) "$(DESTDIR)$(man1dir)" || exit 1; \
+	{ for i in $$list1; do echo "$$i"; done;  \
+	if test -n "$$list2"; then \
+	  for i in $$list2; do echo "$$i"; done \
+	    | sed -n '/\.1[a-z]*$$/p'; \
+	fi; \
+	} | while read p; do \
+	  if test -f $$p; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; echo "$$p"; \
+	done | \
+	sed -e 'n;s,.*/,,;p;h;s,.*\.,,;s,^[^1][0-9a-z]*$$,1,;x' \
+	      -e 's,\.[0-9a-z]*$$,,;$(transform);G;s,\n,.,' | \
+	sed 'N;N;s,\n, ,g' | { \
+	list=; while read file base inst; do \
+	  if test "$$base" = "$$inst"; then list="$$list $$file"; else \
+	    echo " $(INSTALL_DATA) '$$file' '$(DESTDIR)$(man1dir)/$$inst'"; \
+	    $(INSTALL_DATA) "$$file" "$(DESTDIR)$(man1dir)/$$inst" || exit $$?; \
+	  fi; \
+	done; \
+	for i in $$list; do echo "$$i"; done | $(am__base_list) | \
+	while read files; do \
+	  test -z "$$files" || { \
+	    echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(man1dir)'"; \
+	    $(INSTALL_DATA) $$files "$(DESTDIR)$(man1dir)" || exit $$?; }; \
+	done; }
+
+uninstall-man1:
+	@$(NORMAL_UNINSTALL)
+	@list='$(dist_man1_MANS)'; test -n "$(man1dir)" || exit 0; \
+	files=`{ for i in $$list; do echo "$$i"; done; \
+	} | sed -e 's,.*/,,;h;s,.*\.,,;s,^[^1][0-9a-z]*$$,1,;x' \
+	      -e 's,\.[0-9a-z]*$$,,;$(transform);G;s,\n,.,'`; \
+	dir='$(DESTDIR)$(man1dir)'; $(am__uninstall_files_from_dir)
 install-dist_pkgdataDATA: $(dist_pkgdata_DATA)
 	@$(NORMAL_INSTALL)
 	@list='$(dist_pkgdata_DATA)'; test -n "$(pkgdatadir)" || list=; \
@@ -325,6 +371,19 @@ CTAGS:
 
 
 distdir: $(DISTFILES)
+	@list='$(MANS)'; if test -n "$$list"; then \
+	  list=`for p in $$list; do \
+	    if test -f $$p; then d=; else d="$(srcdir)/"; fi; \
+	    if test -f "$$d$$p"; then echo "$$d$$p"; else :; fi; done`; \
+	  if test -n "$$list" && \
+	    grep 'ab help2man is required to generate this page' $$list >/dev/null; then \
+	    echo "error: found man pages containing the \`missing help2man' replacement text:" >&2; \
+	    grep -l 'ab help2man is required to generate this page' $$list | sed 's/^/         /' >&2; \
+	    echo "       to fix them, install help2man, remove and regenerate the man pages;" >&2; \
+	    echo "       typically \`make maintainer-clean' will remove them" >&2; \
+	    exit 1; \
+	  else :; fi; \
+	else :; fi
 	@srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \
 	list='$(DISTFILES)'; \
@@ -356,9 +415,9 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(DATA)
+all-am: Makefile $(MANS) $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(pkgdatadir)" "$(DESTDIR)$(xgreeterdir)"; do \
+	for dir in "$(DESTDIR)$(man1dir)" "$(DESTDIR)$(pkgdatadir)" "$(DESTDIR)$(xgreeterdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -412,7 +471,8 @@ info: info-am
 
 info-am:
 
-install-data-am: install-dist_pkgdataDATA install-dist_xgreeterDATA
+install-data-am: install-dist_pkgdataDATA install-dist_xgreeterDATA \
+	install-man
 
 install-dvi: install-dvi-am
 
@@ -428,7 +488,7 @@ install-info: install-info-am
 
 install-info-am:
 
-install-man:
+install-man: install-man1
 
 install-pdf: install-pdf-am
 
@@ -456,7 +516,10 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-dist_pkgdataDATA uninstall-dist_xgreeterDATA
+uninstall-am: uninstall-dist_pkgdataDATA uninstall-dist_xgreeterDATA \
+	uninstall-man
+
+uninstall-man: uninstall-man1
 
 .MAKE: install-am install-strip
 
@@ -466,11 +529,12 @@ uninstall-am: uninstall-dist_pkgdataDATA uninstall-dist_xgreeterDATA
 	install-dist_pkgdataDATA install-dist_xgreeterDATA install-dvi \
 	install-dvi-am install-exec install-exec-am install-html \
 	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-generic pdf pdf-am ps ps-am uninstall uninstall-am \
-	uninstall-dist_pkgdataDATA uninstall-dist_xgreeterDATA
+	install-man1 install-pdf install-pdf-am install-ps \
+	install-ps-am install-strip installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-generic pdf pdf-am ps ps-am uninstall \
+	uninstall-am uninstall-dist_pkgdataDATA \
+	uninstall-dist_xgreeterDATA uninstall-man uninstall-man1
 
 
 @GSETTINGS_RULES@

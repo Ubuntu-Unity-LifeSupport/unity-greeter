@@ -1,3 +1,15 @@
+namespace Posix
+{
+    [CCode (cheader_filename = "sys/mman.h")]
+    public const int MCL_CURRENT;
+    [CCode (cheader_filename = "sys/mman.h")]
+    public const int MCL_FUTURE;
+    [CCode (cheader_filename = "sys/mman.h")]
+    public int mlockall (int flags);
+    [CCode (cheader_filename = "sys/mman.h")]
+    public int munlockall ();
+}
+
 [CCode (cprefix = "", lower_case_cprefix = "", cheader_filename = "X11/Xlib.h")]
 namespace X
 {

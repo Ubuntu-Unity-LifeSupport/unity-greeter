@@ -17,23 +17,27 @@
  * Authors: Michael Terry <michael.terry@canonical.com>
  */
 
-public class SessionChooser : FadableBox
+public class SessionPrompt : PromptBox
 {
-    public signal void session_clicked (string? session);
+    public string session { get; construct; }
+    public string default_session { get; construct; }
+
+    private Gtk.Widget active;
+
+    public SessionPrompt (string id, string? session, string? default_session)
+    {
+        Object (id: id, session: session, default_session: default_session);
+    }
 
     construct
     {
-        orientation = Gtk.Orientation.VERTICAL;
-        border_width = 6;
-
-        var back = build_back_button ();
-        pack_start (back, false, false, 0);
+        label = _("Select desktop environment");
 
         if (UnityGreeter.test_mode)
         {
-            add_session ("ubuntu", "Ubuntu");
             add_session ("gnome", "GNOME");
             add_session ("kde", "KDE");
+            add_session ("ubuntu", "Ubuntu");
         }
         else
         {
@@ -43,60 +47,59 @@ public class SessionChooser : FadableBox
                 add_session (session.key, session.name);
             }
         }
+
+        var ok = new DashButton (_("OK"));
+        ok.clicked.connect (() =>
+        {
+            if (active != null)
+                respond ({ active.get_data<string> ("session-list-key") });
+            else
+                respond ({ null });
+        });
+        attach_item (ok);
+
+        /* Only have the OK button be end-aligned.  The rest of them are near the top. */
+        name_label.vexpand = false;
+        ok.valign = Gtk.Align.END;
+        ok.vexpand = true;
     }
 
-    private Gtk.Widget build_back_button ()
-    {
-        var align = new Gtk.Alignment (0.0f, 0.5f, 0.0f, 1.0f);
-
-        var back = new Gtk.Button ();
-        UnityGreeter.add_style_class (back);
-        back.clicked.connect (() => {session_clicked (null);});
-        align.add (back);
-
-        var hbox = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 6);
-        back.add (hbox);
-
-        var image = new Gtk.Image.from_file (Path.build_filename (Config.PKGDATADIR, "arrow_left.png", null));
-        hbox.pack_start (image, false, false, 0);
-
-        var label = new Gtk.Label.with_mnemonic (_("_Back"));
-        label.mnemonic_widget = back;
-        label.halign = Gtk.Align.START;
-        hbox.pack_start (label, false, false, 0);
-
-        align.show_all ();
-        return align;
-    }
-
-    private void add_session (string key, string name)
+    private void add_session (string key, string name_in)
     {
         var item = new Gtk.Button ();
-        item.clicked.connect (() => {session_clicked (key);});
+        item.clicked.connect (button_clicked_cb);
         UnityGreeter.add_style_class (item);
 
         var hbox = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 6);
 
-        var pixbuf = get_badge (key);
+        var pixbuf = SessionList.get_badge (key);
         if (pixbuf != null)
         {
             var image = new CachedImage (pixbuf);
             hbox.pack_start (image, false, false, 0);
         }
 
-        var label = new Gtk.Label (name);
+        var name = name_in;
+        if (key == default_session)
+        {
+            /* Translators: %s is a session name like KDE or Ubuntu */
+            name = _("%s (Default)").printf (name);
+        }
+
+        var label = new Gtk.Label (null);
+        label.set_markup ("<span font=\"Ubuntu 13\">%s</span>".printf (name));
         label.halign = Gtk.Align.START;
         hbox.pack_start (label, true, true, 0);
 
-        item.relief = Gtk.ReliefStyle.NONE;
+        item.hexpand = true;
         item.add (hbox);
-        item.show_all ();
+        hbox.show_all ();
 
         try
         {
             /* Tighten padding on buttons to not be so large */
             var style = new Gtk.CssProvider ();
-            style.load_from_data ("* {padding: 3px;}", -1);
+            style.load_from_data ("* {padding: 8px;}", -1);
             item.get_style_context ().add_provider (style, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
         }
         catch (Error e)
@@ -104,8 +107,76 @@ public class SessionChooser : FadableBox
             debug ("Internal error loading session chooser style: %s", e.message);
         }
 
-        add (item);
+        item.set_data<string> ("session-list-key", key);
+        attach_item (item);
     }
+
+    private void button_clicked_cb (Gtk.Widget button)
+    {
+        foreach_prompt_widget ((w) =>
+        {
+            if (w == button)
+                w.override_background_color (Gtk.StateFlags.NORMAL, { 0.5f, 0.5f, 0.5f, 0.4f });
+            else
+                w.override_background_color (Gtk.StateFlags.NORMAL, null);
+        });
+        active = button;
+    }
+
+    public override void grab_focus ()
+    {
+        var done = false;
+        Gtk.Widget best = null;
+        foreach_prompt_widget ((w) =>
+        {
+            if (done)
+                return;
+            if (best == null)
+                best = w; /* first button wins, all else considered */
+            var key = w.get_data<string> ("session-list-key");
+            if (session == key || (session == null && default_session == key))
+            {
+                best = w;
+                done = true;
+            }
+        });
+
+        if (best != null)
+        {
+            best.grab_focus ();
+            button_clicked_cb (best);
+        }
+    }
+}
+
+public class SessionList : GreeterList
+{
+    public signal void session_clicked (string session);
+    public string session { get; construct; }
+    public string default_session { get; construct; }
+
+    private SessionPrompt prompt;
+
+    public SessionList (Background bg, MenuBar mb, string? session, string? default_session)
+    {
+        Object (background: bg, menubar: mb, session: session, default_session: default_session);
+    }
+
+    construct
+    {
+        prompt = add_session_prompt ("session");
+    }
+
+    private SessionPrompt add_session_prompt (string id)
+    {
+        var e = new SessionPrompt (id, session, default_session);
+        e.respond.connect ((responses) => { session_clicked (responses[0]); });
+        add_entry (e);
+        return e;
+    }
+
+    protected override void add_manual_entry () {}
+    public override void show_authenticated (bool successful = true) {}
 
     private static string? get_badge_name (string session)
     {
@@ -124,6 +195,8 @@ public class SessionChooser : FadableBox
             return "kde_badge.png";
         case "xterm":
             return "recovery_console_badge.png";
+        case "remote-login":
+            return "unknown_badge.png"; //"remote_login_help.png";
         default:
             return null;
         }

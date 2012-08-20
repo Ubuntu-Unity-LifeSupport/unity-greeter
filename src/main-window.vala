@@ -21,13 +21,15 @@
 public class MainWindow : Gtk.Window
 {
     public UserList user_list;
+    public MenuBar menubar;
 
     private List<Monitor> monitors;
     private Background background;
-    private MenuBar menubar;
     private Gtk.Box login_box;
+    private Gtk.Box hbox;
+    private Gtk.Button back_button;
 
-    private uint change_background_timeout = 0;
+    public ListStack stack;
 
     construct
     {
@@ -57,23 +59,39 @@ public class MainWindow : Gtk.Window
         background.add (login_box);
 
         menubar = new MenuBar (background, accel_group);
-        menubar.notify["high-contrast"].connect (() => {change_background ();});
         menubar.show ();
         login_box.add (menubar);
         UnityGreeter.add_style_class (menubar);
 
-        user_list = new UserList (background, menubar);
-        user_list.expand = true;
-        user_list.user_displayed_start.connect (() => {
-            change_background ();
-        });
-        user_list.user_displayed_done.connect (() => {
-            menubar.set_layouts (user_list.selected_entry.keyboard_layouts);
-            change_background ();
-        });
-        user_list.show ();
-        login_box.add (user_list);
-        UnityGreeter.add_style_class (user_list);
+        hbox = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
+        hbox.expand = true;
+        hbox.show ();
+        login_box.add (hbox);
+
+        var align = new Gtk.Alignment (0.5f, 0.5f, 0.0f, 0.0f);
+        align.set_size_request (grid_size, -1);
+        align.margin_bottom = MenuBar.HEIGHT; /* offset for menubar at top */
+        align.show ();
+        hbox.add (align);
+
+        back_button = new Gtk.Button ();
+        var image = new Gtk.Image.from_file (Path.build_filename (Config.PKGDATADIR, "arrow_left.png", null));
+        image.show ();
+        back_button.set_size_request (grid_size - GreeterList.BORDER * 2, grid_size - GreeterList.BORDER * 2);
+        back_button.add (image);
+        UnityGreeter.add_style_class (back_button);
+        back_button.clicked.connect (pop_list);
+        align.add (back_button);
+
+        align = new Gtk.Alignment (0.0f, 0.5f, 0.0f, 1.0f);
+        align.show ();
+        hbox.add (align);
+
+        stack = new ListStack ();
+        stack.show ();
+        align.add (stack);
+
+        add_user_list ();
 
         if (UnityGreeter.test_mode)
         {
@@ -90,6 +108,35 @@ public class MainWindow : Gtk.Window
             var screen = get_screen ();
             screen.monitors_changed.connect (monitors_changed_cb);
             monitors_changed_cb (screen);
+        }
+    }
+
+    public void push_list (GreeterList widget)
+    {
+        stack.push (widget);
+
+        if (stack.num_children > 1)
+            back_button.show ();
+    }
+
+    public void pop_list ()
+    {
+        if (stack.num_children <= 2)
+            back_button.hide ();
+
+        stack.pop ();
+    }
+
+    public override void size_allocate (Gtk.Allocation allocation)
+    {
+        base.size_allocate (allocation);
+
+        if (hbox != null)
+        {
+            hbox.margin_left = get_grid_offset (get_allocated_width ()) + grid_size;
+            hbox.margin_right = get_grid_offset (get_allocated_width ());
+            hbox.margin_top = get_grid_offset (get_allocated_height ());
+            hbox.margin_bottom = get_grid_offset (get_allocated_height ());
         }
     }
 
@@ -112,7 +159,7 @@ public class MainWindow : Gtk.Window
         move (0, 0);
         move_to_monitor (monitors.nth_data (0));
     }
-    
+
     /* Check if a monitor has a unique position */
     private bool monitor_is_unique_position (Gdk.Screen screen, int n)
     {
@@ -129,32 +176,6 @@ public class MainWindow : Gtk.Window
         }
 
         return true;
-    }
-
-    private bool change_background_timeout_cb ()
-    {
-        string new_background_file;
-        if (menubar.high_contrast ||
-            !UGSettings.get_boolean (UGSettings.KEY_DRAW_USER_BACKGROUNDS))
-            new_background_file = null;
-        else
-            new_background_file = user_list.selected_entry.background;
-
-        background.current_background = new_background_file;
-
-        change_background_timeout = 0;
-        return false;
-    }
-
-    private void change_background ()
-    {
-        if (background.current_background != null)
-        {
-            if (change_background_timeout == 0)
-                change_background_timeout = Idle.add (change_background_timeout_cb);
-        }
-        else
-            change_background_timeout_cb ();
     }
 
     public override bool motion_notify_event (Gdk.EventMotion event)
@@ -193,28 +214,39 @@ public class MainWindow : Gtk.Window
         background.move (login_box, monitor.x, monitor.y);
     }
 
+    private void add_user_list ()
+    {
+        GreeterList greeter_list;
+        greeter_list = new UserList (background, menubar);
+        greeter_list.show ();
+        UnityGreeter.add_style_class (greeter_list);
+        push_list (greeter_list);
+    }
+
     public override bool key_press_event (Gdk.EventKey event)
     {
+        var top = stack.top ();
+
         switch (event.keyval)
         {
         case Gdk.KEY_Escape:
-            user_list.cancel_authentication ();
+            top.cancel_authentication ();
             break;
         case Gdk.KEY_Page_Up:
         case Gdk.KEY_KP_Page_Up:
-            user_list.scroll (UserList.ScrollTarget.START);
+            top.scroll (GreeterList.ScrollTarget.START);
             break;
         case Gdk.KEY_Page_Down:
         case Gdk.KEY_KP_Page_Down:
-            user_list.scroll (UserList.ScrollTarget.END);
+            top.scroll (GreeterList.ScrollTarget.END);
             break;
         case Gdk.KEY_Up:
         case Gdk.KEY_KP_Up:
-            user_list.scroll (UserList.ScrollTarget.UP);
+            top.scroll (GreeterList.ScrollTarget.UP);
             break;
         case Gdk.KEY_Down:
         case Gdk.KEY_KP_Down:
-            user_list.scroll (UserList.ScrollTarget.DOWN);
+            top.scroll (GreeterList.ScrollTarget.DOWN);
             break;
         case Gdk.KEY_F10:
             menubar.select_first (false);
@@ -224,5 +256,10 @@ public class MainWindow : Gtk.Window
         }
 
         return true;
+    }
+
+    public void set_keyboard_state ()
+    {
+        menubar.set_keyboard_state ();
     }
 }

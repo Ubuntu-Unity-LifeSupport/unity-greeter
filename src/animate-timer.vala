@@ -30,10 +30,10 @@ private class AnimateTimer : Object
     public static const int SLOW =   1000; /* Good for animations that convey information that is only presented in the animation */
 
     /* speed is in milliseconds */
-    public unowned EasingFunc easing_func {get; private set;}
-    public int speed {get; set;}
+    public unowned EasingFunc easing_func { get; private set; }
+    public int speed { get; set; }
     public bool is_running { get { return timeout != 0; } }
-    public double progress {get; private set;}
+    public double progress { get; private set; }
 
     /* progress is from 0.0 to 1.0 */
     public signal void animate (double progress);
@@ -59,7 +59,7 @@ private class AnimateTimer : Object
     }
 
     /* temp_speed is in milliseconds */
-    public void reset (int temp_speed = 0)
+    public void reset (int temp_speed = -1)
     {
         stop ();
 
@@ -69,7 +69,7 @@ private class AnimateTimer : Object
         extra_time = 0;
         extra_progress = 0;
 
-        if (temp_speed == 0)
+        if (temp_speed == -1)
             temp_speed = speed;
 
         length = temp_speed * TimeSpan.MILLISECOND;

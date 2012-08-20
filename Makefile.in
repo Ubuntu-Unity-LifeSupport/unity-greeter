@@ -201,7 +201,6 @@ UNITY_GREETER_LIBS = @UNITY_GREETER_LIBS@
 USE_NLS = @USE_NLS@
 VALAC = @VALAC@
 VERSION = @VERSION@
-WARN_CFLAGS = @WARN_CFLAGS@
 XGETTEXT = @XGETTEXT@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@

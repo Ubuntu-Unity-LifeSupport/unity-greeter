@@ -53,4 +53,4 @@ public class CachedImage : Gtk.Image
         }
         return false;
     }
-}	
+}

@@ -17,22 +17,28 @@
  * Authored by: Michael Terry <michael.terry@canonical.com>
  */
 
-public class FadableBox : Gtk.Box, Fadable
+public class FadableBox : Gtk.EventBox, Fadable
 {
     public signal void fade_done ();
 
-    protected FadeTracker fade_tracker {get; protected set;}
+    protected FadeTracker fade_tracker { get; protected set; }
 
     construct
     {
+        visible_window = false;
         fade_tracker = new FadeTracker (this);
-        fade_tracker.done.connect (() => {fade_done ();});
+        fade_tracker.done.connect (() => { fade_done (); });
+    }
+
+    protected virtual void draw_full_alpha (Cairo.Context c)
+    {
+        base.draw (c);
     }
 
     public override bool draw (Cairo.Context c)
     {
         c.push_group ();
-        base.draw (c);
+        draw_full_alpha (c);
         c.pop_group_to_source ();
         c.paint_with_alpha (fade_tracker.alpha);
         return false;

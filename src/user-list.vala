@@ -18,48 +18,22 @@
  *          Michael Terry <michael.terry@canonical.com>
  */
 
-private int get_grid_offset (int size)
+int remote_server_field_sort_function (RemoteServerField? item1, RemoteServerField? item2)
 {
-    return (int) (size % grid_size) / 2;
+    string[] sorted_fields = { "domain", "username", "email", "password" };
+    foreach (var field in sorted_fields)
+    {
+        if (item1.type == field)
+            return -1;
+        if (item2.type == field)
+            return 1;
+    }
+
+    return (item1.type < item2.type) ? -1 : 0;
 }
 
-public class UserEntry
+public class UserList : GreeterList
 {
-    /* Unique name for this entry */
-    public string name;
-
-    /* Label text */
-    public string label;
-
-    /* Name widget */
-    public PromptBox prompt_box;
-
-    /* Background for this user */
-    public string background;
-
-    /* True if should be marked as active */
-    public bool is_active;
-
-    /* True if have messages */
-    public bool has_messages;
-
-    /* Keyboard layouts to use for this user by default */
-    public List <LightDM.Layout> keyboard_layouts;
-
-    /* Default session for this user */
-    public string session;
-
-    /* Cached cairo surfaces */
-    public Cairo.Surface label_in_box_surface;
-    public Cairo.Surface label_out_of_box_surface;
-}
-
-public class UserList : Gtk.EventBox
-{
-    public Background background;
-    public MenuBar menubar;
-    public UserEntry? selected_entry {get; private set; default = null;}
-
     private bool _offer_guest = false;
     public bool offer_guest
     {
@@ -68,96 +42,27 @@ public class UserList : Gtk.EventBox
         {
             _offer_guest = value;
             if (value)
-                add_entry ("*guest", _("Guest Session"));
+                add_user ("*guest", _("Guest Session"));
             else
                 remove_entry ("*guest");
         }
     }
 
-    private bool _always_show_manual = false;
-    public bool always_show_manual
-    {
-        get { return _always_show_manual; }
-        set
-        {
-            _always_show_manual = value;
-            if (value)
-                add_manual_entry ();
-            else if (have_users ())
-                remove_entry ("*other");
-        }
-    }
-
-    private List<UserEntry> entries = null;
-
     private Gdk.Pixbuf message_pixbuf;
-    
-    private double scroll_target_location;
-    private double scroll_start_location;
-    private double scroll_location;
-    private double scroll_direction;
 
-    private AnimateTimer scroll_timer;
+    private uint change_background_timeout = 0;
 
-    private Gtk.Fixed fixed;
-    private DashBox login_box;
-    private PromptBox prompt_widget_to_show;
-    private SessionChooser session_chooser;
- 
-    private enum Mode
-    {
-        LOGIN,
-        SCROLLING,
-    }
-    private Mode mode = Mode.LOGIN;
+    private uint remote_login_service_watch;
+    private RemoteLoginService remote_login_service;
+    private List<RemoteServer?> remote_directory_server_list = new List<RemoteServer?> ();
+    private List<RemoteServer?> remote_login_server_list = new List<RemoteServer?> ();
+    private HashTable<string, Gtk.Widget> current_remote_fields;
+    private string currently_browsing_server_url;
+    private string currently_browsing_server_email;
+    private EmailAutocompleter remote_server_email_field_autocompleter;
 
-    private bool complete = false;
-
-    public static const int BORDER = 6;
-    public static const int BOX_WIDTH = 7;
-
-    private uint n_above = 4;
-    private uint n_below = 4;
-
-    /* Box in the middle taking up three rows */
-    public static const int BOX_HEIGHT = 3;
-
-    private int box_x
-    {
-        get { return get_grid_offset (get_allocated_width ()) + grid_size; }
-    }
-    
-    private int box_y
-    {
-        get
-        {
-            var row = (int) (get_allocated_height () / grid_size - BOX_HEIGHT) / 2;
-            return get_grid_offset (get_allocated_height ()) + row * grid_size;
-        }
-    }
-
-    public signal void user_selected (string? username);
-    public signal void user_displayed_start ();
-    public signal void user_displayed_done ();
-    public signal void respond_to_prompt (string text);
-    public signal void start_session ();
-
-    public string? selected
-    {
-        get { if (selected_entry == null) return null; return selected_entry.name; }
-    }
-    
-    private string? _manual_username = null;
-    public string? manual_username
-    { 
-        get { return _manual_username; }
-        set
-        {
-            _manual_username = value;
-            if (find_entry ("*other") != null)
-                add_manual_entry ();
-        }
-    }
+    /* User to authenticate against */
+    private string ?authenticate_user = null;
 
     private string _default_session = "ubuntu";
     public string default_session
@@ -170,7 +75,7 @@ public class UserList : Gtk.EventBox
         {
             _default_session = value;
             if (selected_entry != null)
-                selected_entry.prompt_box.set_options_image (get_badge ());
+                selected_entry.set_options_image (get_badge ());
         }
     }
 
@@ -185,32 +90,28 @@ public class UserList : Gtk.EventBox
         {
             _session = value;
             if (selected_entry != null)
-                selected_entry.prompt_box.set_options_image (get_badge ());
+                selected_entry.set_options_image (get_badge ());
         }
     }
 
-    private Gdk.Pixbuf? last_session_badge = null;
-
     public UserList (Background bg, MenuBar mb)
     {
-        background = bg;
-        menubar = mb;
-        can_focus = false;
-        visible_window = false;
+        Object (background: bg, menubar: mb);
+    }
 
-        fixed = new Gtk.Fixed ();
-        fixed.show ();
-        add (fixed);
-
-        login_box = new DashBox (background);
-        login_box.notify["base-alpha"].connect (() => {queue_draw ();});
-        login_box.show ();
-        add_with_class (login_box);
-
-        session_chooser = new SessionChooser ();
-        session_chooser.session_clicked.connect (session_clicked_cb);
-        session_chooser.show ();
-        UnityGreeter.add_style_class (session_chooser);
+    construct
+    {
+        menubar.notify["high-contrast"].connect (() => { change_background (); });
+        entry_displayed_start.connect (() => { change_background (); });
+        entry_displayed_done.connect (() =>
+        {
+            var userbox = (selected_entry as UserPromptBox);
+            if (userbox != null)
+                menubar.set_layouts (userbox.keyboard_layouts);
+            else
+                menubar.set_layouts (new List <LightDM.Layout> ());
+            change_background ();
+        });
 
         try
         {
@@ -221,621 +122,1338 @@ public class UserList : Gtk.EventBox
             debug ("Error loading message image: %s", e.message);
         }
 
-        scroll_timer = new AnimateTimer (AnimateTimer.ease_out_quint, AnimateTimer.FAST);
-        scroll_timer.animate.connect (animate_scrolling);
+        fill_list ();
 
-        // Start with manual entry, because no users have been added yet.
-        // It will be auto-removed when those are added (unless we're told to
-        // always show a manual entry).
-        add_manual_entry ();
+        entry_selected.connect (entry_selected_cb);
+        entry_selected_cb (selected_entry.id);
+
+        connect_to_lightdm ();
+
+        if (!UnityGreeter.test_mode && UGSettings.get_boolean (UGSettings.KEY_ENABLE_REMOTE_LOGIN))
+            remote_login_service_watch = Bus.watch_name (BusType.SESSION,
+                                            "com.canonical.RemoteLogin",
+                                            BusNameWatcherFlags.AUTO_START,
+                                            on_remote_login_service_appeared,
+                                            on_remote_login_service_vanished);
+
     }
 
-    public enum ScrollTarget
+    private void remove_remote_servers ()
     {
-        START,
-        END,
-        UP,
-        DOWN,
+        remote_directory_server_list = new List<RemoteServer?> ();
+        remote_login_server_list = new List<RemoteServer?> ();
+        remove_entries_with_prefix ("*remote");
     }
 
-    public void cancel_authentication ()
+    private void remove_remote_login_servers ()
     {
-        user_selected (selected_entry.name);
+        remote_login_server_list = new List<RemoteServer?> ();
+        remove_entries_with_prefix ("*remote_login");
     }
 
-    public void scroll (ScrollTarget target)
+    private async void query_directory_servers ()
     {
-        if (login_box.has_content)
-            return;
-
-        switch (target)
+        try
         {
-        case ScrollTarget.START:
-            select_entry (entries.nth_data (0), -1.0);
-            break;
-        case ScrollTarget.END:
-            select_entry (entries.nth_data (entries.length () - 1), 1.0);
-            break;
-        case ScrollTarget.UP:
-            var index = entries.index (selected_entry) - 1;
-            if (index < 0)
-                index = 0;
-            select_entry (entries.nth_data (index), -1.0);
-            break;
-        case ScrollTarget.DOWN:
-            var index = entries.index (selected_entry) + 1;
-            if (index >= (int) entries.length ())
-                index = (int) entries.length () - 1;
-            select_entry (entries.nth_data (index), 1.0);
-            break;
+            RemoteServer[] server_list;
+            yield remote_login_service.get_servers (out server_list);
+            set_remote_directory_servers (server_list);
+        }
+        catch (IOError e)
+        {
+            debug ("Calling GetServers on com.canonical.RemoteLogin dbus service failed. Error: %s", e.message);
+            remove_remote_servers ();
         }
     }
 
-    private void add_with_class (Gtk.Widget widget)
+    private string user_list_name_for_remote_directory_server (RemoteServer remote_server)
     {
-        fixed.add (widget);
-        UnityGreeter.add_style_class (widget);
+        return "*remote_directory*" + remote_server.url;
     }
 
-    private void redraw_login_box ()
+    private string user_list_name_for_remote_login_server (RemoteServer remote_server)
     {
-        Gtk.Allocation allocation;
-        login_box.get_allocation (out allocation);
-        queue_draw_area (allocation.x, allocation.y, allocation.width, allocation.height);
+        return "*remote_login*" + remote_server.url;
     }
 
-    public void show_message (string text, bool is_error = false)
+    private string url_from_remote_loding_server_list_name (string remote_server_list_name)
     {
-        selected_entry.prompt_box.add_message (text, is_error);
+        return remote_server_list_name.split ("*")[2];
     }
 
-    public bool have_messages ()
+    private void set_remote_directory_servers (RemoteServer[] server_list)
     {
-        return selected_entry.prompt_box.has_messages;
+        /* Add new servers */
+        foreach (var remote_server in server_list)
+        {
+            var list_name = user_list_name_for_remote_directory_server (remote_server);
+            if (find_entry (list_name) == null)
+            {
+                var e = new PromptBox (list_name);
+                e.label = remote_server.name;
+                e.respond.connect (remote_directory_respond_cb);
+                e.show_options.connect (show_remote_account_dialog);
+                add_entry (e);
+
+                remote_directory_server_list.append (remote_server);
+            }
+        }
+
+        /* Remove gone servers */
+        unowned List<RemoteServer?> it = remote_directory_server_list;
+        while (it != null)
+        {
+            var remote_server = it.data;
+            var found = false;
+            for (int i = 0; !found && i < server_list.length; i++)
+            {
+                found = remote_server.url == server_list[i].url;
+            }
+            if (!found)
+            {
+                if (remote_server.url == currently_browsing_server_url)
+                {
+                    /* The server we where "browsing" disappeared, so kill its children */
+                    remove_remote_login_servers ();
+                    currently_browsing_server_url = "";
+                    currently_browsing_server_email = "";
+                }
+                remove_entry (user_list_name_for_remote_directory_server (remote_server));
+                unowned List<RemoteServer?> newIt = it.next;
+                remote_directory_server_list.delete_link (it);
+                it = newIt;
+            }
+            else
+            {
+                it = it.next;
+            }
+        }
     }
 
-    public void clear_messages ()
+    private PromptBox create_prompt_for_login_server (RemoteServer remote_server)
     {
-        selected_entry.prompt_box.clear ();
+        var e = new PromptBox (user_list_name_for_remote_login_server (remote_server));
+        e.label = remote_server.name;
+        e.respond.connect (remote_login_respond_cb);
+        add_entry (e);
+        remote_login_server_list.append (remote_server);
+
+        return e;
     }
 
-    public void show_prompt (string text, bool secret = false)
+    private void remote_login_servers_updated (string url, string email_address, string data_type, RemoteServer[] server_list)
     {
-        string accessible_text = null;
-        if (selected_entry != null && selected_entry.name != null)
-            accessible_text = _("Enter password for %s").printf (selected_entry.label);
-        selected_entry.prompt_box.add_prompt (text, accessible_text, secret);
+        if (currently_browsing_server_url == url && currently_browsing_server_email == email_address)
+        {
+            /* Add new servers */
+            foreach (var remote_server in server_list)
+            {
+                var list_name = user_list_name_for_remote_login_server (remote_server);
+                if (find_entry (list_name) == null)
+                    create_prompt_for_login_server (remote_server);
+            }
 
-        if (mode == Mode.SCROLLING)
-            prompt_widget_to_show = selected_entry.prompt_box;
+            /* Remove gone servers */
+            unowned List<RemoteServer?> it = remote_login_server_list;
+            while (it != null)
+            {
+                RemoteServer remote_server = it.data;
+                var found = false;
+                for (var i = 0; !found && i < server_list.length; i++)
+                    found = remote_server.url == server_list[i].url;
+                if (!found)
+                {
+                    remove_entry (user_list_name_for_remote_login_server (remote_server));
+                    unowned List<RemoteServer?> newIt = it.next;
+                    remote_login_server_list.delete_link (it);
+                    it = newIt;
+                }
+                else
+                {
+                    it = it.next;
+                }
+            }
+        }
+    }
+
+    private void remote_login_changed (string url, string email_address)
+    {
+        if (currently_browsing_server_url == url && currently_browsing_server_email == email_address)
+        {
+            /* Something happened and we are being asked for re-authentication by the remote-login-service */
+            remove_remote_login_servers ();
+            currently_browsing_server_url = "";
+            currently_browsing_server_email = "";
+
+            var directory_list_name = "*remote_directory*" + url;
+            set_active_entry (directory_list_name);
+        }
+    }
+
+    private void on_remote_login_service_appeared (DBusConnection conn, string name)
+    {
+        Bus.get_proxy.begin<RemoteLoginService> (BusType.SESSION,
+            "com.canonical.RemoteLogin",
+            "/com/canonical/RemoteLogin",
+            0,
+            null,
+            (obj, res) => {
+                try
+                {
+                    remote_login_service = Bus.get_proxy.end<RemoteLoginService> (res);
+                    remote_login_service.servers_updated.connect (set_remote_directory_servers);
+                    remote_login_service.login_servers_updated.connect (remote_login_servers_updated);
+                    remote_login_service.login_changed.connect (remote_login_changed);
+                    query_directory_servers ();
+                }
+                catch (IOError e)
+                {
+                    debug ("Getting the com.canonical.RemoteLogin dbus service failed. Error: %s", e.message);
+                    remove_remote_servers ();
+                    remote_login_service = null;
+                }
+            }
+        );
+    }
+
+    private void on_remote_login_service_vanished (DBusConnection conn, string name)
+    {
+        remove_remote_servers ();
+        remote_login_service = null;
+    }
+
+    private async void remote_directory_respond_cb ()
+    {
+        remove_remote_login_servers ();
+        currently_browsing_server_url = "";
+        currently_browsing_server_email = "";
+
+        var password_field = current_remote_fields.get ("password") as DashEntry;
+        var email_field = current_remote_fields.get ("email") as Gtk.Entry;
+        if (password_field == null)
+        {
+            debug ("Something wrong happened in remote_directory_respond_cb. There was no password field");
+            return;
+        }
+        if (email_field == null)
+        {
+            debug ("Something wrong happened in remote_directory_respond_cb. There was no email field");
+            return;
+        }
+
+        RemoteServer[] server_list = {};
+        var email = email_field.text;
+        var email_valid = false;
+        try
+        {
+            /* Check email address is valid
+             * Using the html5 definition of a valid e-mail address
+             * http://www.w3.org/TR/html5/states-of-the-type-attribute.html#valid-e-mail-address */
+            var re = new Regex ("[a-zA-Z0-9.!#$%&'\\*\\+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*");
+            MatchInfo info;
+            email_valid = re.match_all (email, 0, out info);
+            email_valid = email_valid && info.get_match_count () > 0 && info.fetch (0) == email;
+        }
+        catch (RegexError e)
+        {
+            debug ("Calling email regex match failed. Error: %s", e.message);
+        }
+
+        selected_entry.reset_messages ();
+        if (!email_valid)
+        {
+            will_clear = true;
+            show_message (_("Please enter a complete e-mail address"), true);
+            create_remote_fields_for_current_item (remote_directory_server_list);
+        }
         else
-            selected_entry.prompt_box.show_prompts ();
+        {
+            var login_success = false;
+            try
+            {
+                var url = url_from_remote_loding_server_list_name (selected_entry.id);
+                if (UnityGreeter.test_mode)
+                {
+                    if (password_field.text == "password")
+                    {
+                        test_fill_remote_login_servers (out server_list);
+                        login_success = true;
+                    }
+                    else if (password_field.text == "delay1")
+                    {
+                        test_fill_remote_login_servers (out server_list);
+                        login_success = true;
+                        Timeout.add (5000, () => { test_call_set_remote_directory_servers (); return false; });
+                    }
+                    else if (password_field.text == "delay2")
+                    {
+                        test_fill_remote_login_servers (out server_list);
+                        login_success = true;
+                        Timeout.add (5000, () => { test_call_remote_login_servers_updated (); return false; });
+                    }
+                    else if (password_field.text == "delay3")
+                    {
+                        test_fill_remote_login_servers (out server_list);
+                        login_success = true;
+                        Timeout.add (5000, () => { remote_login_changed (currently_browsing_server_url, currently_browsing_server_email); return false; });
+                    }
+                }
+                else
+                {
+                    string data_type;
+                    yield remote_login_service.get_servers_for_login (url, email, password_field.text, true, out login_success, out data_type, out server_list);
+                }
+                currently_browsing_server_url = url;
+                currently_browsing_server_email = email;
+            }
+            catch (IOError e)
+            {
+                debug ("Calling get_servers in com.canonical.RemoteLogin dbus service failed. Error: %s", e.message);
+            }
 
-        focus_prompt ();
-        redraw_login_box ();
+            if (login_success)
+            {
+                password_field.did_respond = false;
+                if (server_list.length == 0)
+                    show_remote_account_dialog ();
+                else
+                {
+                    var last_used_server_list_name = "";
+                    foreach (var remote_server in server_list)
+                    {
+                        var e = create_prompt_for_login_server (remote_server);
+                        if (remote_server.last_used_server)
+                            last_used_server_list_name = e.id;
+                    }
+                    if (last_used_server_list_name != "")
+                        set_active_entry (last_used_server_list_name);
+                    else
+                        set_active_first_entry_with_prefix ("*remote_login");
+                }
+            }
+            else
+            {
+                will_clear = true;
+                show_message (_("Incorrect e-mail address or password"), true);
+                create_remote_fields_for_current_item (remote_directory_server_list);
+            }
+        }
     }
 
-    public void focus_prompt ()
+    private void remote_login_respond_cb ()
     {
-        selected_entry.prompt_box.sensitive = true;
-        selected_entry.prompt_box.grab_focus ();
+        sensitive = false;
+        will_clear = true;
+        greeter_authenticating_user = selected_entry.id;
+        if (UnityGreeter.test_mode)
+        {
+            Gtk.Entry field = current_remote_fields.get ("password") as Gtk.Entry;
+            test_is_authenticated = field.text == "password";
+            if (field.text == "delay")
+                Timeout.add (5000, () => { authentication_complete_cb (); return false; });
+            else
+                authentication_complete_cb ();
+        }
+        else
+        {
+            UnityGreeter.greeter.authenticate_remote (get_lightdm_session (), null);
+            remote_login_service.set_last_used_server (currently_browsing_server_url, url_from_remote_loding_server_list_name (selected_entry.id));
+        }
     }
 
-    public void show_authenticated (bool successful = true)
+    private void show_remote_account_dialog ()
+    {
+        var dialog = new Gtk.MessageDialog (null, 0, Gtk.MessageType.OTHER, Gtk.ButtonsType.NONE, "");
+        dialog.secondary_text = _("If you have an account on an RDP or Citrix server, Remote Login lets you run applications from that server.");
+        if (offer_guest)
+        {
+            dialog.add_button (_("Cancel"), 0);
+            var b = dialog.add_button (_("Set Up…"), 1);
+            b.grab_focus ();
+            dialog.text = _("You need an Ubuntu Remote Login account to use this service. Would you like to set up an account now?");
+        }
+        else
+        {
+            dialog.add_button (_("OK"), 0);
+            dialog.text = _("You need an Ubuntu Remote Login account to use this service. Visit uccs.canonical.com to set up an account.");
+        }
+
+        dialog.show_all ();
+        dialog.response.connect ((id) =>
+        {
+            if (id == 1)
+            {
+                var config_session = "uccsconfigure";
+                if (is_supported_remote_session (config_session))
+                {
+                    greeter_authenticating_user = selected_entry.id;
+                    UnityGreeter.greeter.authenticate_remote (config_session, null);
+                }
+            }
+            dialog.destroy ();
+        });
+        dialog.run ();
+    }
+
+    private bool change_background_timeout_cb ()
+    {
+        string? new_background_file = null;
+        if (menubar.high_contrast || !UGSettings.get_boolean (UGSettings.KEY_DRAW_USER_BACKGROUNDS))
+            new_background_file = null;
+        else if (selected_entry is UserPromptBox)
+            new_background_file = (selected_entry as UserPromptBox).background;
+
+        background.current_background = new_background_file;
+
+        change_background_timeout = 0;
+        return false;
+    }
+
+    private void change_background ()
+    {
+        if (background.current_background != null)
+        {
+            if (change_background_timeout == 0)
+                change_background_timeout = Idle.add (change_background_timeout_cb);
+        }
+        else
+            change_background_timeout_cb ();
+    }
+
+    protected static int user_list_compare_entry (PromptBox a, PromptBox b)
+    {
+        if (a.id.has_prefix ("*remote_directory") && !b.id.has_prefix ("*remote_directory"))
+            return 1;
+        if (a.id.has_prefix ("*remote_login") && !b.id.has_prefix ("*remote_login"))
+            return 1;
+
+        /* Fall back to default behaviour of the GreeterList sorter */
+        return GreeterList.compare_entry (a, b);
+    }
+
+    protected override void insert_entry (PromptBox entry)
+    {
+        entries.insert_sorted (entry, user_list_compare_entry);
+    }
+
+    protected override void setup_prompt_box (bool fade = true)
+    {
+        base.setup_prompt_box (fade);
+        var userbox = selected_entry as UserPromptBox;
+        if (userbox != null)
+            selected_entry.set_is_active (userbox.is_active);
+    }
+
+    private void entry_selected_cb (string? username)
+    {
+        UnityGreeter.set_state ("last-user", username);
+        if (selected_entry is UserPromptBox)
+            session = (selected_entry as UserPromptBox).session;
+        else
+            session = null;
+        selected_entry.clear ();
+
+        /* Reset this variable so it can be freed */
+        remote_server_email_field_autocompleter = null;
+
+        start_authentication ();
+    }
+
+    protected override void start_authentication ()
+    {
+        sensitive = true;
+        greeter_authenticating_user = "";
+        if (selected_entry.id.has_prefix ("*remote_directory"))
+        {
+            prompted = true;
+            create_remote_fields_for_current_item (remote_directory_server_list);
+        }
+        else if (selected_entry.id.has_prefix ("*remote_login"))
+        {
+            prompted = true;
+            create_remote_fields_for_current_item (remote_login_server_list);
+        }
+        else
+            base.start_authentication ();
+    }
+
+    private async void create_remote_fields_for_current_item (List<RemoteServer?> server_list)
+    {
+        current_remote_fields = new HashTable<string, Gtk.Widget> (str_hash, str_equal);
+        var url = url_from_remote_loding_server_list_name (selected_entry.id);
+        foreach (var remote_server in server_list)
+        {
+            if (remote_server.url == url)
+            {
+                if (selected_entry.id.has_prefix ("*remote_login"))
+                {
+                    if (!is_supported_remote_session (remote_server.type))
+                    {
+                        show_message (_("Server type not supported."), true);
+                    }
+                }
+
+                var fields = new List<RemoteServerField?> ();
+                foreach (var field in remote_server.fields)
+                    fields.append (field);
+                fields.sort (remote_server_field_sort_function);
+                foreach (var field in fields)
+                {
+                    Gtk.Widget? widget = null;
+                    var default_value = "";
+                    if (field.default_value != null && field.default_value.is_of_type (VariantType.STRING))
+                        default_value = field.default_value.get_string ();
+                    if (field.type == "username")
+                    {
+                        var entry = add_prompt (_("Username:"));
+                        entry.text = default_value;
+                        widget = entry;
+                    }
+                    else if (field.type == "password")
+                    {
+                        var entry = add_prompt (_("Password:"), true);
+                        entry.text = default_value;
+                        widget = entry;
+                    }
+                    else if (field.type == "domain")
+                    {
+                        string[] domainsArray = {};
+                        if (field.properties != null && field.properties.contains ("domains") && field.properties.get ("domains").is_of_type (VariantType.ARRAY))
+                            domainsArray = field.properties.get ("domains").dup_strv ();
+                        var domains = new GenericArray<string> ();
+                        for (var i = 0; i < domainsArray.length; i++)
+                            domains.add (domainsArray[i]);
+
+                        var read_only = field.properties != null &&
+                                        field.properties.contains ("read-only") &&
+                                        field.properties.get ("read-only").is_of_type (VariantType.BOOLEAN) &&
+                                        field.properties.get ("read-only").get_boolean ();
+                        if (domains.length == 0 || (domains.length == 1 && (domains[0] == default_value || default_value.length == 0)))
+                        {
+                            var prompt = add_prompt (_("Domain:"));
+                            prompt.text = domains.length == 1 ? domains[0] : default_value;
+                            prompt.sensitive = !read_only;
+                            widget = prompt;
+                        }
+                        else
+                        {
+                            if (default_value.length > 0)
+                            {
+                                /* Make sure the domain list contains the default value */
+                                var found = false;
+                                for (var i = 0; !found && i < domains.length; i++)
+                                    found = default_value == domains[i];
+
+                                if (!found)
+                                    domains.add (default_value);
+                            }
+
+                            /* Sort domains alphabetically */
+                            domains.sort (strcmp);
+                            var combo = add_combo (domains, read_only);
+
+                            if (default_value.length > 0)
+                            {
+                                if (read_only)
+                                {
+                                    for (var i = 0; i < domains.length; i++)
+                                    {
+                                        if (default_value == domains[i])
+                                        {
+                                            combo.active = i;
+                                            break;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    var entry = combo.get_child () as Gtk.Entry;
+                                    entry.text = default_value;
+                                }
+                            }
+
+                            widget = combo;
+                        }
+                    }
+                    else if (field.type == "email")
+                    {
+                        string[] email_domains;
+                        try
+                        {
+                            if (UnityGreeter.test_mode)
+                                email_domains = { "canonical.com", "ubuntu.org", "candy.com", "urban.net" };
+                            else
+                                yield remote_login_service.get_cached_domains_for_server (url, out email_domains);
+                        }
+                        catch (IOError e)
+                        {
+                            email_domains.resize (0);
+                            debug ("Calling get_cached_domains_for_server in com.canonical.RemoteLogin dbus service failed. Error: %s", e.message);
+                        }
+
+                        var entry = add_prompt (_("Email address:"));
+                        entry.text = default_value;
+                        widget = entry;
+                        if (email_domains.length > 0)
+                            remote_server_email_field_autocompleter = new EmailAutocompleter (entry, email_domains);
+                    }
+                    else
+                    {
+                        debug ("Found field of type %s, don't know what to do with it", field.type);
+                        continue;
+                    }
+                    current_remote_fields.insert (field.type, widget);
+                }
+                break;
+            }
+        }
+    }
+
+    public override void focus_prompt ()
+    {
+        if (selected_entry.id.has_prefix ("*remote_login"))
+        {
+            var url = url_from_remote_loding_server_list_name(selected_entry.id);
+            foreach (var remote_server in remote_login_server_list)
+            {
+                if (remote_server.url == url)
+                {
+                    if (!is_supported_remote_session (remote_server.type))
+                    {
+                        selected_entry.sensitive = false;
+                        return;
+                    }
+                }
+            }
+        }
+
+        base.focus_prompt ();
+    }
+
+    public override void show_authenticated (bool successful = true)
     {
         if (successful)
         {
             /* 'Log In' here is the button for logging in. */
-            selected_entry.prompt_box.add_button (_("Log In"),
-                                                  _("Login as %s").printf (selected_entry.label));
+            selected_entry.add_button (_("Log In"),
+                                       _("Login as %s").printf (selected_entry.label));
         }
         else
         {
-            selected_entry.prompt_box.add_button (_("Retry"),
-                                                  _("Retry as %s").printf (selected_entry.label));
+            selected_entry.add_button (_("Retry"),
+                                       _("Retry as %s").printf (selected_entry.label));
         }
 
-        if (mode == Mode.SCROLLING)
-            prompt_widget_to_show = selected_entry.prompt_box;
-        else
-            selected_entry.prompt_box.show_prompts ();
+        if (mode != Mode.SCROLLING)
+            selected_entry.show_prompts ();
 
         focus_prompt ();
-        redraw_login_box ();
+        redraw_greeter_box ();
     }
 
-    public void login_complete ()
+    public void add_user (string name, string label, string? background = null, List <LightDM.Layout>? keyboard_layouts = null, bool is_active = false, bool has_messages = false, string? session = null)
     {
-        complete = true;
-        sensitive = false;
-
-        selected_entry.prompt_box.clear ();
-        selected_entry.prompt_box.add_message (_("Logging in..."), false);
-
-        redraw_login_box ();
-    }
-
-    private UserEntry? find_entry (string name)
-    {
-        foreach (var entry in entries)
-        {
-            if (entry.name == name)
-                return entry;
-        }
-
-        return null;
-    }
-
-    public void add_entry (string name, string label, string? background = null, List <LightDM.Layout>? keyboard_layouts = null, bool is_active = false, bool has_messages = false, string? session = null)
-    {
-        var e = find_entry (name);
+        var e = find_entry (name) as UserPromptBox;
         if (e == null)
         {
-            e = new UserEntry ();
-            e.name = name;
+            e = new UserPromptBox (name);
+            e.respond.connect (prompt_box_respond_cb);
+            e.login.connect (prompt_box_login_cb);
+            e.show_options.connect (prompt_box_show_options_cb);
+            e.label = label; /* Do this before adding for sorting purposes */
+            add_entry (e);
         }
-        else
-            entries.remove (e);
-        e.label = label;
         e.background = background;
         e.keyboard_layouts = keyboard_layouts.copy ();
         e.is_active = is_active;
-        e.has_messages = has_messages;
         e.session = session;
-
-        e.prompt_box = new PromptBox ();
-        e.prompt_box.expand = true;
-        e.prompt_box.set_name (label);
-        e.prompt_box.set_show_message_icon (has_messages);
-        e.prompt_box.set_is_active (is_active);
-        e.prompt_box.respond.connect (prompt_box_respond_cb);
-        e.prompt_box.login.connect (prompt_box_login_cb);
-        e.prompt_box.show_options.connect (prompt_box_show_options_cb);
-        e.prompt_box.set_size_request (grid_size * BOX_WIDTH - BORDER * 2, -1);
-        add_with_class (e.prompt_box);
-
-        entries.insert_sorted (e, compare_entry);
-
-        if (selected_entry == null)
-            select_entry (e, 1.0);
-        else
-            select_entry (selected_entry, 1.0);
+        e.label = label;
+        e.set_show_message_icon (has_messages);
+        e.set_is_active (is_active);
 
         /* Remove manual option when have users */
-        if (have_users () && !always_show_manual)
+        if (have_entries () && !always_show_manual)
             remove_entry ("*other");
-
-        queue_draw ();
     }
 
-    private static int compare_entry (UserEntry a, UserEntry b)
+    protected override void add_manual_entry ()
     {
-        if (a.name.has_prefix ("*") || b.name.has_prefix ("*"))
-        {
-           /* Special entries go after normal ones */
-           if (!a.name.has_prefix ("*"))
-               return -1;
-           if (!b.name.has_prefix ("*"))
-               return 1;
-
-           /* Manual comes before guest */
-           if (a.name == "*other")
-               return -1;
-           if (a.name == "*guest")
-               return 1;
-        }
-
-        /* Alphabetical by label */
-        return a.label.ascii_casecmp (b.label);
-    }
-    
-    private bool have_users ()
-    {
-        foreach (var e in entries)
-        {
-            if (!e.name.has_prefix ("*"))
-                return true;
-        }
-        return false;
-    }
-
-    private void add_manual_entry ()
-    {
-        var text = manual_username;
+        var text = manual_name;
         if (text == null)
             text = _("Login");
-        add_entry ("*other", text);
+        add_user ("*other", text);
     }
 
-    public void set_active_entry (string ?name)
+    protected void prompt_box_respond_cb (string[] responses)
     {
-        var e = find_entry (name);
-        if (e != null)
-            select_entry (e, 1.0);
-    }
+        selected_entry.sensitive = false;
+        will_clear = true;
 
-    public void remove_entry (string? name)
-    {
-        var entry = find_entry (name);
-        if (entry == null)
-            return;
-
-        var index = entries.index (entry);
-        entry.prompt_box.destroy ();
-        entries.remove (entry);
-
-        /* Show a manual login if no users */
-        if (!have_users ())
-            add_manual_entry ();
-
-        /* Select previous entry if the selected one was removed */
-        if (entry == selected_entry)
+        foreach (var response in responses)
         {
-            if (index >= entries.length ())
-                index--;
-            select_entry (entries.nth_data (index), -1.0);
+            if (UnityGreeter.test_mode)
+                test_respond (response);
+            else
+                UnityGreeter.greeter.respond (response);
         }
-
-        queue_draw ();
-    }
-
-    private void prompt_box_respond_cb (string response)
-    {
-        selected_entry.prompt_box.sensitive = false;
-        respond_to_prompt (response);
     }
 
     private void prompt_box_login_cb ()
     {
-        debug ("Start session for %s", selected_entry.name);
-        start_session ();
+        debug ("Start session for %s", selected_entry.id);
+
+        var is_authenticated = false;
+        if (UnityGreeter.test_mode)
+            is_authenticated = test_is_authenticated;
+        else
+            is_authenticated = UnityGreeter.greeter.is_authenticated;
+
+        /* Finish authentication (again) or restart it */
+        if (is_authenticated)
+            authentication_complete_cb ();
+        else
+        {
+            selected_entry.clear ();
+            start_authentication ();
+        }
     }
 
     private void prompt_box_show_options_cb ()
     {
-        login_box.push (session_chooser);
+        var session_chooser = new SessionList (background, menubar, session, default_session);
+        session_chooser.session_clicked.connect (session_clicked_cb);
+        UnityGreeter.push_list (session_chooser);
     }
 
-    private void session_clicked_cb (string? session)
+    private void session_clicked_cb (string session)
     {
-        login_box.pop ();
-
-        if (session != null)
-            this.session = session;
-    }
-
-    private int get_login_box_height ()
-    {
-        int height;
-        login_box.get_preferred_height (null, out height);
-        return height;
-    }
-
-    /* guaranteed to return an odd number */
-    private int get_login_box_height_grids ()
-    {
-        int height = get_login_box_height ();
-        return height / grid_size + 1; /* +1 because we'll be slightly under due to BORDER */
-    }
-
-    private int get_login_box_x ()
-    {
-        return box_x + BORDER;
-    }
-
-    private int get_login_box_y ()
-    {
-        //int height = get_login_box_height_grids ();
-
-        /* Normal box_y is based on BOX_HEIGHT boxes.  Modify as we need */
-        //return box_y + BORDER - (height - BOX_HEIGHT) / 2 * grid_size;
-        return box_y + BORDER;
-    }
-
-    private int get_position_y (double position)
-    {
-        double grid_number = position;
-
-        if (position >= 0.0 && position < 1.0)
-        {
-            var grids = get_login_box_height_grids ();
-            grid_number = position * grids; /* scaled to height of login box */
-        }
-        else if (position >= 1.0)
-        {
-            var grids = get_login_box_height_grids ();
-            grid_number = position + grids - 1.0;
-        }
-
-        return get_login_box_y () + (int)(grid_number * grid_size);
-    }
-
-    private void move_entry (UserEntry entry, double position)
-    {
-        var alpha = 1.0;
-        if (position < 0)
-            alpha = 1.0 + position / (n_above + 1);
-        else
-            alpha = 1.0 - position / (n_below + 1);
-        entry.prompt_box.set_alpha (alpha);
-
-        var child_allocation = Gtk.Allocation ();
-        child_allocation.width = grid_size * BOX_WIDTH - BORDER * 2;
-        entry.prompt_box.get_preferred_height_for_width (child_allocation.width, null, out child_allocation.height);
-        child_allocation.x = get_login_box_x ();
-        child_allocation.y = get_position_y (position);
-        fixed.move (entry.prompt_box, child_allocation.x, child_allocation.y);
-        entry.prompt_box.size_allocate (child_allocation);
-
-        entry.prompt_box.show ();
-    }
-
-    private void move_names ()
-    {
-        var index = 0;
-        foreach (var entry in entries)
-        {
-            var position = index - scroll_location;
-
-            entry.prompt_box.hide (); // hide by default
-
-            /* Draw entries above the box */
-            if (position <= -1 && position > -1 * (int)(n_above + 1))
-                move_entry (entry, position);
-
-            /* Draw entries in the box */
-            if (position > -1 && position < 1 && mode == Mode.SCROLLING)
-                move_entry (entry, position);
-
-            /* Draw entries below the box */
-            if (position >= 1 && position < n_below + 1)
-                move_entry (entry, position);
-
-            index++;
-        }
-    }
-
-    private void animate_scrolling (double progress)
-    {
-        /* Total height of list */
-        var h = entries.length ();
-
-        /* How far we have to go in total, either up or down with wrapping */
-        var distance = scroll_target_location - scroll_start_location;
-        if (scroll_direction * distance < 0)
-            distance += scroll_direction * h;
-
-        /* How far we've gone so far */
-        distance *= progress;
-
-        /* Go that far and wrap around */
-        scroll_location = scroll_start_location + distance;
-        if (scroll_location > h)
-            scroll_location -= h;
-        if (scroll_location < 0)
-            scroll_location += h;
-
-        move_names ();
-
-        /* And finally, redraw */
-        queue_draw ();
-
-        if (progress >= 0.975 && prompt_widget_to_show != null)
-        {
-            setup_prompt_box ();
-            prompt_widget_to_show.fade_in_prompts ();
-            prompt_widget_to_show = null;
-            user_displayed_start ();
-        }
-
-        /* Stop when we get there */
-        if (progress >= 1.0)
-            finished_scrolling ();
-    }
-
-    private void finished_scrolling ()
-    {
-        user_displayed_done ();
-        mode = Mode.LOGIN;
-        login_box.set_base (selected_entry.prompt_box);
-    }
-
-    private void select_entry (UserEntry entry, double direction)
-    {
-        last_session_badge = get_badge ();
-
-        if (!get_realized ())
-        {
-            /* Just note it for the future if we haven't been realized yet */
-            selected_entry = entry;
-            session = entry.session;
-            return;
-        }
-
-        if (scroll_target_location != entries.index (entry))
-        {
-            var new_target = entries.index (entry);
-            var new_direction = direction;
-            var new_start = scroll_location;
-
-            if (scroll_location != new_target)
-            {
-                var new_distance = new_direction * (new_target - new_start);
-                // Base rate is 350 (250 + 100).  If we find ourselves going further, slow down animation
-                scroll_timer.reset (250 + int.min((int)(100 * (new_distance)), 500));
-
-                mode = Mode.SCROLLING;
-            }
-
-            scroll_target_location = new_target;
-            scroll_direction = new_direction;
-            scroll_start_location = new_start;
-
-            login_box.set_base (null);
-        }
-
-        if (selected_entry != entry)
-        {
-            if (selected_entry != null)
-            {
-                selected_entry.prompt_box.clear ();
-            }
-
-            selected_entry = entry;
-            session = entry.session;
-            setup_prompt_box ();
-            user_selected (selected_entry.name);
-
-            if (mode == Mode.LOGIN)
-            {
-                /* don't need to move, but make sure we trigger the same side effects */
-                scroll_timer.reset (0);
-                mode = Mode.SCROLLING;
-            }
-        }
-    }
-
-    private void setup_prompt_box ()
-    {
-        selected_entry.prompt_box.set_name (selected_entry.label);
-        selected_entry.prompt_box.set_show_message_icon (selected_entry.has_messages);
-        selected_entry.prompt_box.set_is_active (selected_entry.is_active);
+        this.session = session;
+        UnityGreeter.pop_list ();
     }
 
     private Gdk.Pixbuf? get_badge ()
     {
-        if (session == null)
-            return SessionChooser.get_badge (default_session);
-        else
-            return SessionChooser.get_badge (session);    
-    }
-
-    public override void realize ()
-    {
-        base.realize ();
-
-        var saved_entry = selected_entry;
-        selected_entry = null;
-        select_entry (saved_entry, 1);
-    }
-
-    private void allocate_login_box ()
-    {
-        Gtk.Allocation allocation;
-        get_allocation (out allocation);
-
-        var child_allocation = Gtk.Allocation ();
-        login_box.get_preferred_width (null, out child_allocation.width);
-        login_box.get_preferred_height (null, out child_allocation.height);
-        child_allocation.x = allocation.x + get_login_box_x ();
-        child_allocation.y = allocation.y + get_login_box_y ();
-        fixed.move (login_box, child_allocation.x, child_allocation.y);
-        login_box.size_allocate (child_allocation);
-
-        foreach (var entry in entries)
+        if (selected_entry is UserPromptBox)
         {
-            entry.prompt_box.set_zone (login_box);
+            if (session == null)
+                return SessionList.get_badge (default_session);
+            else
+                return SessionList.get_badge (session);
+        }
+        else
+        {
+            if (selected_entry.id.has_prefix ("*remote_directory"))
+                return SessionList.get_badge ("remote-login");
+            else
+                return null;
         }
     }
 
-    public override void size_allocate (Gtk.Allocation allocation)
+    private bool is_supported_remote_session (string session_internal_name)
     {
-        base.size_allocate (allocation);
+        if (UnityGreeter.test_mode)
+            return session_internal_name == "rdp";
 
-        if (!get_realized ())
-            return;
-
-        allocate_login_box ();
+        var found = false;
+        foreach (var session in LightDM.get_remote_sessions ())
+        {
+            if (session.key == session_internal_name)
+            {
+                found = true;
+                break;
+            }
+        }
+        return found;
     }
 
-    public override bool draw (Cairo.Context c)
+    protected override string get_lightdm_session ()
     {
-        c.save ();
-        fixed.propagate_draw (login_box, c); /* Always full alpha */
-        c.restore ();
-
-        if (login_box.base_alpha != 0.0)
+        if (selected_entry.id.has_prefix ("*remote_login"))
         {
-            c.save ();
-            c.push_group ();
+            var url = url_from_remote_loding_server_list_name (selected_entry.id);
+            unowned List<RemoteServer?> it = remote_login_server_list;
 
-            c.rectangle (box_x + BORDER, box_y - n_above * grid_size, grid_size * BOX_WIDTH - BORDER * 2, grid_size * (n_above + n_below + BOX_HEIGHT));
-            c.clip ();
-
-            foreach (var child in fixed.get_children ())
+            var answer = "";
+            while (answer == "" && it != null)
             {
-                if (child != login_box)
-                    fixed.propagate_draw (child, c);
+                RemoteServer remote_server = it.data;
+                if (remote_server.url == url)
+                    answer = remote_server.type;
+                it = it.next;
             }
 
-            c.pop_group_to_source ();
-            c.paint_with_alpha (login_box.base_alpha);
-            c.restore ();
+            if (is_supported_remote_session (answer))
+                return answer;
+            else
+                return "";
+        }
+        else
+            return session;
+    }
+
+    private void fill_list ()
+    {
+        if (UnityGreeter.test_mode)
+            test_fill_list ();
+        else
+        {
+            default_session = UnityGreeter.greeter.default_session_hint;
+            always_show_manual = UnityGreeter.greeter.show_manual_login_hint;
+            if (!UnityGreeter.greeter.hide_users_hint)
+            {
+                var users = LightDM.UserList.get_instance ();
+                users.user_added.connect (user_added_cb);
+                users.user_changed.connect (user_added_cb);
+                users.user_removed.connect (user_removed_cb);
+                foreach (var user in users.users)
+                    user_added_cb (user);
+            }
+
+            if (UnityGreeter.greeter.has_guest_account_hint)
+            {
+                debug ("Adding guest account entry");
+                offer_guest = true;
+            }
+
+            var last_user = UnityGreeter.get_state ("last-user");
+            if (UnityGreeter.greeter.select_user_hint != null)
+                set_active_entry (UnityGreeter.greeter.select_user_hint);
+            else if (last_user != null)
+                set_active_entry (last_user);
+        }
+    }
+
+    private void user_added_cb (LightDM.User user)
+    {
+        debug ("Adding/updating user %s (%s)", user.name, user.real_name);
+
+        var label = user.real_name;
+        if (user.real_name == "")
+            label = user.name;
+
+        var layouts = new List <LightDM.Layout> ();
+        foreach (var name in user.get_layouts ())
+        {
+            var layout = UnityGreeter.get_layout_by_name (name);
+            if (layout != null)
+                layouts.append (layout);
         }
 
-        return false;
+        add_user (user.name, label, user.background, layouts, user.logged_in, user.has_messages, user.session);
     }
 
-    private bool inside_entry (double x, double y, double entry_y, UserEntry entry)
+    private void user_removed_cb (LightDM.User user)
     {
-        int w, h;
-        w = entry.prompt_box.get_allocated_width ();
-        h = entry.prompt_box.get_allocated_height ();
-
-        /* Allow space to the left of the entry */
-        w += grid_size / 2;
-
-        /* Round up to whole grid sizes */
-        h = grid_size;
-        w = ((int) (w + grid_size) / grid_size) * grid_size;
-
-        return x >= 0 && x <= w && y >= entry_y && y <= entry_y + h;
+        debug ("Removing user %s", user.name);
+        remove_entry (user.name);
     }
 
-    public override bool button_release_event (Gdk.EventButton event)
+    protected override void show_prompt_cb (string text, LightDM.PromptType type)
     {
-        if (mode != Mode.LOGIN)
+        if (selected_entry.id.has_prefix ("*remote_login"))
+        {
+            if (text == "remote login:")
+            {
+                Gtk.Entry field = current_remote_fields.get ("username") as Gtk.Entry;
+                var answer = field != null ? field.text : "";
+                UnityGreeter.greeter.respond (answer);
+            }
+            else if (text == "password:")
+            {
+                Gtk.Entry field = current_remote_fields.get ("password") as Gtk.Entry;
+                var answer = field != null ? field.text : "";
+                UnityGreeter.greeter.respond (answer);
+            }
+            else if (text == "remote host:")
+            {
+                var answer = url_from_remote_loding_server_list_name (selected_entry.id);
+                UnityGreeter.greeter.respond (answer);
+            }
+            else if (text == "domain:")
+            {
+                Gtk.Entry field = current_remote_fields.get ("domain") as Gtk.Entry;
+                var answer = field != null ? field.text : "";
+                UnityGreeter.greeter.respond (answer);
+            }
+        }
+        else
+            base.show_prompt_cb (text, type);
+    }
+
+    /* A lot of test code below here */
+
+    private struct TestEntry
+    {
+        string username;
+        string real_name;
+        string? background;
+        string? layouts;
+        bool is_active;
+        bool has_messages;
+        string? session;
+    }
+
+    private const TestEntry[] test_entries =
+    {
+        { "has-password",       "Has Password",      "*",              "gb;us", false, false, null },
+        { "different-prompt",   "Different Prompt",  "*",              "gb;us", false, false, null },
+        { "no-password",        "No Password",       "*",              "gb;us", false, false, null },
+        { "change-password",    "Change Password",   "*",              "gb;us", false, false, null },
+        { "auth-error",         "Auth Error",        "*",              "gb;us", false, false, null },
+        { "two-factor",         "Two Factor",        "*",              "gb;us", false, false, null },
+        { "two-prompts",        "Two Prompts",       "*",              "gb;us", false, false, null },
+        { "info-prompt",        "Info Prompt",       "*",              "gb;us", false, false, null },
+        { "long-info-prompt",   "Long Info Prompt",  "*",              "gb;us", false, false, null },
+        { "wide-info-prompt",   "Wide Info Prompt",  "*",              "gb;us", false, false, null },
+        { "multi-info-prompt",  "Multi Info Prompt", "*",              "gb;us", false, false, null },
+        { "very-very-long-name",    "Long name (far far too long to fit)", "*", "gb;us", false, false, null },
+        { "long-name-and-messages", "Long name and messages (too long to fit)",          "*", "gb;us", false, true,  null },
+        { "active",             "Active Account",    "*",              "gb;us", true,  false, null },
+        { "has-messages",       "Has Messages",      "*",              "gb;us", false, true,  null },
+        { "gnome",              "GNOME",             "*",              "gb;us", false, false, "gnome" },
+        { "locked",             "Locked Account",    "*",              "gb;us", false, false, null },
+        { "color-background",   "Color Background",  "#dd4814",        "gb;us", false, false, null },
+        { "white-background",   "White Background",  "#ffffff",        "gb;us", false, false, null },
+        { "black-background",   "Black Background",  "#000000",        "gb;us", false, false, null },
+        { "no-background",      "No Background",     null,             "gb;us", false, false, null },
+        { "unicode",            "가나다라마",         "*",              "gb;us", false, false, null },
+        { "system-layout",      "System Layout",     "*",              null,    false, false, null },
+        { "four-layouts",       "Four Layouts",      "*",              "de\tdvorak;ca;gb;fr\toss", false, false, null },
+        { "hy-layout",          "Layout Is 'hy'",    "*",              "am\teastern-alt", false, false, null }, /* inherits parent layout's short_desc */
+        { "no-response",        "No Response",       "*",              null,    false, false, null },
+        { "",                   "",                  null,             null,    false, false, null }
+    };
+    private List<string> test_backgrounds;
+    private int n_test_entries = 0;
+    private bool test_prompted_sso = false;
+    private string test_two_prompts_first = null;
+    private bool test_request_new_password = false;
+    private string? test_new_password = null;
+
+    private void test_fill_list ()
+    {
+        test_backgrounds = new List<string> ();
+        try
+        {
+            var dir = Dir.open ("/usr/share/backgrounds/");
+            while (true)
+            {
+                var bg = dir.read_name ();
+                if (bg == null)
+                    break;
+                test_backgrounds.append ("/usr/share/backgrounds/" + bg);
+            }
+        }
+        catch (FileError e)
+        {
+        }
+
+        while (add_test_entry ());
+        offer_guest = true;
+        always_show_manual = true;
+
+        key_press_event.connect (test_key_press_cb);
+
+        Timeout.add (1000, () =>
+        {
+            RemoteServer[] test_server_list = {};
+            RemoteServer remote_server = RemoteServer ();
+            remote_server.type = "uccs";
+            remote_server.name = "Remote Login";
+            remote_server.url = "http://crazyurl.com";
+            remote_server.last_used_server = false;
+            remote_server.fields = {};
+            RemoteServerField field1 = RemoteServerField ();
+            field1.type = "email";
+            RemoteServerField field2 = RemoteServerField ();
+            field2.type = "password";
+            remote_server.fields = {field1, field2};
+
+            test_server_list += remote_server;
+            set_remote_directory_servers (test_server_list);
+            return false;
+        });
+
+        var last_user = UnityGreeter.get_state ("last-user");
+        if (last_user != null)
+            set_active_entry (last_user);
+
+    }
+
+    private void test_call_set_remote_directory_servers ()
+    {
+        RemoteServer[] test_server_list = {};
+        RemoteServer remote_server = RemoteServer ();
+        remote_server.type = "uccs";
+        remote_server.name = "Corporate Remote Login";
+        remote_server.url = "http://internalcompayserver.com";
+        remote_server.last_used_server = false;
+        remote_server.fields = {};
+        RemoteServerField field1 = RemoteServerField ();
+        field1.type = "email";
+        RemoteServerField field2 = RemoteServerField ();
+        field2.type = "password";
+        remote_server.fields = {field1, field2};
+
+        test_server_list += remote_server;
+        set_remote_directory_servers (test_server_list);
+    }
+
+    private void test_call_remote_login_servers_updated ()
+    {
+        RemoteServer[] server_list = {};
+        RemoteServer remote_server1 = RemoteServer ();
+        remote_server1.type = "rdp";
+        remote_server1.name = "Cool RDP server";
+        remote_server1.url = "http://coolrdpserver.com";
+        remote_server1.last_used_server = false;
+        remote_server1.fields = {};
+        RemoteServerField field1 = RemoteServerField ();
+        field1.type = "username";
+        RemoteServerField field2 = RemoteServerField ();
+        field2.type = "password";
+        RemoteServerField field3 = RemoteServerField ();
+        field3.type = "domain";
+        remote_server1.fields = {field1, field2, field3};
+
+        RemoteServer remote_server2 = RemoteServer ();
+        remote_server2.type = "rdp";
+        remote_server2.name = "MegaCool RDP server";
+        remote_server2.url = "http://megacoolrdpserver.com";
+        remote_server2.last_used_server = false;
+        remote_server2.fields = {};
+        RemoteServerField field21 = RemoteServerField ();
+        field21.type = "username";
+        RemoteServerField field22 = RemoteServerField ();
+        field22.type = "password";
+        remote_server2.fields = {field21, field22};
+
+        server_list.resize (2);
+        server_list[0] = remote_server1;
+        server_list[1] = remote_server2;
+
+        remote_login_servers_updated (currently_browsing_server_url, currently_browsing_server_email, "", server_list);
+    }
+
+    private void test_fill_remote_login_servers (out RemoteServer[] server_list)
+    {
+        string[] domains = { "SCANNERS", "PRINTERS", "ROUTERS" };
+
+        server_list = {};
+        RemoteServer remote_server1 = RemoteServer ();
+        remote_server1.type = "rdp";
+        remote_server1.name = "Cool RDP server";
+        remote_server1.url = "http://coolrdpserver.com";
+        remote_server1.last_used_server = false;
+        remote_server1.fields = {};
+        RemoteServerField field1 = RemoteServerField ();
+        field1.type = "username";
+        RemoteServerField field2 = RemoteServerField ();
+        field2.type = "password";
+        RemoteServerField field3 = RemoteServerField ();
+        field3.type = "domain";
+        remote_server1.fields = {field1, field2, field3};
+
+        RemoteServer remote_server2 = RemoteServer ();
+        remote_server2.type = "rdp";
+        remote_server2.name = "RDP server with default username, and editable domain";
+        remote_server2.url = "http://rdpdefaultusername.com";
+        remote_server2.last_used_server = false;
+        remote_server2.fields = {};
+        RemoteServerField field21 = RemoteServerField ();
+        field21.type = "username";
+        field21.default_value = new Variant.string ("alowl");
+        RemoteServerField field22 = RemoteServerField ();
+        field22.type = "password";
+        RemoteServerField field23 = RemoteServerField ();
+        field23.type = "domain";
+        field23.default_value = new Variant.string ("PRINTERS");
+        field23.properties = new HashTable<string, Variant> (str_hash, str_equal);
+        field23.properties["domains"] = domains;
+        remote_server2.fields = {field21, field22, field23};
+
+        RemoteServer remote_server3 = RemoteServer ();
+        remote_server3.type = "rdp";
+        remote_server3.name = "RDP server with default username, and non editable domain";
+        remote_server3.url = "http://rdpdefaultusername2.com";
+        remote_server3.last_used_server = true;
+        remote_server3.fields = {};
+        RemoteServerField field31 = RemoteServerField ();
+        field31.type = "username";
+        field31.default_value = new Variant.string ("lwola");
+        RemoteServerField field32 = RemoteServerField ();
+        field32.type = "password";
+        RemoteServerField field33 = RemoteServerField ();
+        field33.type = "domain";
+        field33.default_value = new Variant.string ("PRINTERS");
+        field33.properties = new HashTable<string, Variant> (str_hash, str_equal);
+        field33.properties["domains"] = domains;
+        field33.properties["read-only"] = true;
+
+        remote_server3.fields = {field31, field32, field33};
+
+        RemoteServer remote_server4 = RemoteServer ();
+        remote_server4.type = "notsupported";
+        remote_server4.name = "Not supported server";
+        remote_server4.url = "http://notsupportedserver.com";
+        remote_server4.fields = {};
+        RemoteServerField field41 = RemoteServerField ();
+        field41.type = "username";
+        RemoteServerField field42 = RemoteServerField ();
+        field42.type = "password";
+        RemoteServerField field43 = RemoteServerField ();
+        field43.type = "domain";
+
+        remote_server4.fields = {field41, field42, field43};
+
+        server_list.resize (4);
+        server_list[0] = remote_server1;
+        server_list[1] = remote_server2;
+        server_list[2] = remote_server3;
+        server_list[3] = remote_server4;
+    }
+
+    private bool test_key_press_cb (Gdk.EventKey event)
+    {
+        if ((event.state & Gdk.CONTROL_MASK) == 0)
             return false;
 
-        var x = event.x - box_x;
-        var y = event.y - box_y;
-
-        /* Total height of list */
-        var h = (double) entries.length () * grid_size;
-
-        var offset = 0.0;
-        foreach (var entry in entries)
+        switch (event.keyval)
         {
-            var entry_y = -scroll_location * grid_size + offset;
-
-            /* Check entry above the box */
-            var h_above = (double) n_above * grid_size;
-            if (entry_y < 0 && y < 0 && y > -h_above)
-            {
-                if (inside_entry (x, y, entry_y, entry) ||
-                    inside_entry (x, y, entry_y - h, entry))
-                {
-                    select_entry (entry, -1.0);
-                    return true;
-                }
-            }
-
-            /* Check entry below the box */
-            var below_y = y - BOX_HEIGHT * grid_size;
-            var h_below = (double) n_below * grid_size;
-            if (entry_y > 0 && below_y > 0 && below_y < h_below)
-            {
-                if (inside_entry (x, below_y, entry_y - grid_size, entry) ||
-                    inside_entry (x, below_y, entry_y - grid_size + h, entry))
-                {
-                    select_entry (entry, 1.0);
-                    return true;
-                }
-            }
-
-            offset += grid_size;
+        case Gdk.KEY_plus:
+            add_test_entry ();
+            break;
+        case Gdk.KEY_minus:
+            remove_test_entry ();
+            break;
+        case Gdk.KEY_0:
+            while (remove_test_entry ());
+            offer_guest = false;
+            break;
+        case Gdk.KEY_equal:
+            while (add_test_entry ());
+            offer_guest = true;
+            break;
+        case Gdk.KEY_g:
+            offer_guest = false;
+            break;
+        case Gdk.KEY_G:
+            offer_guest = true;
+            break;
+        case Gdk.KEY_m:
+            always_show_manual = false;
+            break;
+        case Gdk.KEY_M:
+            always_show_manual = true;
+            break;
         }
 
         return false;
+    }
+
+    private bool add_test_entry ()
+    {
+        var e = test_entries[n_test_entries];
+        if (e.username == "")
+            return false;
+
+        var background = e.background;
+        if (background == "*")
+        {
+            var background_index = 0;
+            for (var i = 0; i < n_test_entries; i++)
+            {
+                if (test_entries[i].background == "*")
+                    background_index++;
+            }
+            if (test_backgrounds.length () > 0)
+                background = test_backgrounds.nth_data (background_index % test_backgrounds.length ());
+        }
+        add_user (e.username, e.real_name, background, test_make_layout_list (e.layouts), e.is_active, e.has_messages, e.session);
+        n_test_entries++;
+
+        return true;
+    }
+
+    private bool remove_test_entry ()
+    {
+        if (n_test_entries == 0)
+            return false;
+
+        remove_entry (test_entries[n_test_entries - 1].username);
+        n_test_entries--;
+
+        return true;
+    }
+
+    private List <LightDM.Layout> test_make_layout_list (string? names)
+    {
+        var layouts = new List <LightDM.Layout> ();
+
+        if (names != null)
+        {
+            var names_split = names.split (";");
+            foreach (var name in names_split)
+            {
+                var layout = UnityGreeter.get_layout_by_name (name);
+                if (layout != null)
+                    layouts.append (layout);
+            }
+        }
+
+        return layouts;
+    }
+
+    private void test_respond (string text)
+    {
+        debug ("response %s", text);
+        switch (get_selected_id ())
+        {
+        case "*other":
+            if (test_username == null)
+            {
+                debug ("username=%s", text);
+                test_username = text;
+                show_prompt_cb (_("Password:"), LightDM.PromptType.SECRET);
+            }
+            else
+            {
+                test_is_authenticated = text == "password";
+                authentication_complete_cb ();
+            }
+            break;
+        case "two-factor":
+            if (!test_prompted_sso)
+            {
+                if (text == "password")
+                {
+                    debug ("prompt otp");
+                    test_prompted_sso = true;
+                    show_prompt_cb ("OTP:", LightDM.PromptType.QUESTION);
+                }
+                else
+                {
+                    test_is_authenticated = false;
+                    authentication_complete_cb ();
+                }
+            }
+            else
+            {
+                test_is_authenticated = text == "otp";
+                authentication_complete_cb ();
+            }
+            break;
+        case "two-prompts":
+            if (test_two_prompts_first == null)
+                test_two_prompts_first = text;
+            else
+            {
+                test_is_authenticated = test_two_prompts_first == "blue" && text == "password";
+                authentication_complete_cb ();
+            }
+            break;
+        case "change-password":
+            if (test_new_password != null)
+            {
+                test_is_authenticated = text == test_new_password;
+                authentication_complete_cb ();
+            }
+            else if (test_request_new_password)
+            {
+                test_new_password = text;
+                show_prompt_cb ("Retype new UNIX password: ", LightDM.PromptType.SECRET);
+            }
+            else
+            {
+                if (text != "password")
+                {
+                    test_is_authenticated = false;
+                    authentication_complete_cb ();
+                }
+                else
+                {
+                    test_request_new_password = true;
+                    show_message_cb ("You are required to change your password immediately (root enforced)", LightDM.MessageType.ERROR);
+                    show_prompt_cb ("Enter new UNIX password: ", LightDM.PromptType.SECRET);
+                }
+            }
+            break;
+        case "no-response":
+            break;
+        case "locked":
+            test_is_authenticated = false;
+            show_message_cb ("Account is locked", LightDM.MessageType.ERROR);
+            authentication_complete_cb ();
+            break;
+        default:
+            test_is_authenticated = text == "password";
+            authentication_complete_cb ();
+            break;
+        }
+    }
+
+    protected override void test_start_authentication ()
+    {
+        test_username = null;
+        test_is_authenticated = false;
+        test_prompted_sso = false;
+        test_two_prompts_first = null;
+        test_request_new_password = false;
+        test_new_password = null;
+
+        switch (get_selected_id ())
+        {
+        case "*other":
+            if (authenticate_user != null)
+            {
+                test_username = authenticate_user;
+                authenticate_user = null;
+                show_prompt_cb (_("Password:"), LightDM.PromptType.SECRET);
+            }
+            else
+                show_prompt_cb (_("Username:"), LightDM.PromptType.QUESTION);
+            break;
+        case "*guest":
+            test_is_authenticated = true;
+            authentication_complete_cb ();
+            break;
+        case "different-prompt":
+            show_prompt_cb ("Secret word", LightDM.PromptType.SECRET);
+            break;
+        case "no-password":
+            test_is_authenticated = true;
+            authentication_complete_cb ();
+            break;
+        case "auth-error":
+            show_message_cb ("Authentication Error", LightDM.MessageType.ERROR);
+            test_is_authenticated = false;
+            authentication_complete_cb ();
+            break;
+        case "info-prompt":
+            show_message_cb ("Welcome to Unity Greeter", LightDM.MessageType.INFO);
+            show_prompt_cb (_("Password:"), LightDM.PromptType.SECRET);
+            break;
+        case "long-info-prompt":
+            show_message_cb ("Welcome to Unity Greeter\n\nWe like to annoy you with long messages.\nLike this one\n\nThis is the last line of a multiple line message.", LightDM.MessageType.INFO);
+            show_prompt_cb (_("Password:"), LightDM.PromptType.SECRET);
+            break;
+        case "wide-info-prompt":
+            show_message_cb ("Welcome to Unity Greeter, the greeteriest greeter that ever did appear in these fine lands", LightDM.MessageType.INFO);
+            show_prompt_cb (_("Password:"), LightDM.PromptType.SECRET);
+            break;
+        case "multi-info-prompt":
+            show_message_cb ("Welcome to Unity Greeter", LightDM.MessageType.INFO);
+            show_message_cb ("This is an error", LightDM.MessageType.ERROR);
+            show_message_cb ("You should have seen three messages", LightDM.MessageType.INFO);
+            show_prompt_cb (_("Password:"), LightDM.PromptType.SECRET);
+            break;
+        case "two-prompts":
+            show_prompt_cb (_("Favorite Color (blue):"), LightDM.PromptType.QUESTION);
+            show_prompt_cb (_("Password:"), LightDM.PromptType.SECRET);
+            break;
+        default:
+            show_prompt_cb (_("Password:"), LightDM.PromptType.SECRET);
+            break;
+        }
     }
 }

@@ -7,116 +7,180 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2012-06-19 05:11+0000\n"
+"POT-Creation-Date: 2012-08-30 03:14+0000\n"
 "PO-Revision-Date: 2012-01-24 16:14+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: Shan <shn@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2012-06-20 05:05+0000\n"
-"X-Generator: Launchpad (build 15435)\n"
+"X-Launchpad-Export-Date: 2012-08-30 05:23+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 
-#: ../src/main-window.vala:42
+#: ../src/greeter-list.vala:245
+#, c-format
+msgid "Enter password for %s"
+msgstr "ပေႃ့သႂ်ႇ မၢႆလပ့် တွၼ်ႈတႃႇ %s"
+
+#: ../src/greeter-list.vala:725 ../src/user-list.vala:610
+#: ../src/user-list.vala:1273 ../src/user-list.vala:1367
+#: ../src/user-list.vala:1390 ../src/user-list.vala:1394
+#: ../src/user-list.vala:1398 ../src/user-list.vala:1404
+#: ../src/user-list.vala:1408 ../src/user-list.vala:1411
+msgid "Password:"
+msgstr "မၢႆလပ့်:"
+
+#: ../src/greeter-list.vala:727 ../src/user-list.vala:604
+#: ../src/user-list.vala:1370
+msgid "Username:"
+msgstr "ၸိုဝ်ႈၽူႈၸႂ့်တိုဝ်း:"
+
+#: ../src/greeter-list.vala:779
+msgid "Invalid password, please try again"
+msgstr "မၢႆလပ့်ဢမ်ႇမႅၼ်ႈ၊ ၶတ်းၸႂ်တူၺ်းထႅင်ႈ"
+
+#: ../src/greeter-list.vala:790
+msgid "Failed to authenticate"
+msgstr "ၵၢၼ်ထတ်းသၢင်ႈတႃႇၵပ်းသိုပ်ႇ ဢမ်ႇၶႅမ့်လႅပ်ႈ"
+
+#: ../src/greeter-list.vala:845
+msgid "Logging in..."
+msgstr "တိုၵ့်ၽွမ့်ၶဝ်ႈယူႇ"
+
+#: ../src/main-window.vala:44
 msgid "Login Screen"
-msgstr ""
-
-#: ../src/menubar.vala:211
-msgid "Onscreen keyboard"
-msgstr ""
-
-#: ../src/menubar.vala:216
-msgid "High Contrast"
-msgstr ""
+msgstr "ၽိဝ်ၼႃႈ ၽွမ့်ၶဝ်ႈ"
 
 #: ../src/menubar.vala:222
+msgid "Onscreen keyboard"
+msgstr "လွၵ်းမိုဝ်းၽိဝ်ၼႃႈ"
+
+#: ../src/menubar.vala:227
+msgid "High Contrast"
+msgstr "ႁႂ်ႈႁၼ်ၸႅင်ႈလႅင်းလီ"
+
+#: ../src/menubar.vala:233
 msgid "Screen Reader"
-msgstr ""
+msgstr "တႃႇလူ ၽိဝ်ၼႃႈ"
 
-#: ../src/user-list.vala:254
+#: ../src/prompt-box.vala:205
 msgid "Session Options"
+msgstr "ၵၼ်လိူၵ်ႈသၢင်ႈ"
+
+#: ../src/session-list.vala:34
+msgid "Select desktop environment"
 msgstr ""
 
-#: ../src/session-chooser.vala:63
-msgid "_Back"
+#: ../src/session-list.vala:51 ../src/user-list.vala:479
+msgid "OK"
+msgstr ""
+
+#. Translators: %s is a session name like KDE or Ubuntu
+#: ../src/session-list.vala:86
+#, c-format
+msgid "%s (Default)"
 msgstr ""
 
 #. Help string for command line --version flag
 #: ../src/unity-greeter.vala:30
 msgid "Show release version"
-msgstr ""
+msgstr "ၼႄမၢႆသွႆ့ဢၼ်ပိုၼ်ဢွၵ်ႇဝႆ့"
 
 #. Help string for command line --test-mode flag
 #: ../src/unity-greeter.vala:33
 msgid "Run in test mode"
-msgstr ""
-
-#: ../src/unity-greeter.vala:386 ../src/unity-greeter.vala:527
-#: ../src/unity-greeter.vala:550 ../src/unity-greeter.vala:554
-#: ../src/unity-greeter.vala:558 ../src/unity-greeter.vala:564
-#: ../src/unity-greeter.vala:567 ../src/unity-greeter.vala:594
-msgid "Password:"
-msgstr ""
-
-#: ../src/unity-greeter.vala:388 ../src/unity-greeter.vala:530
-msgid "Username:"
-msgstr ""
-
-#: ../src/unity-greeter.vala:469
-msgid "Invalid password, please try again"
-msgstr ""
-
-#: ../src/unity-greeter.vala:478
-msgid "Failed to authenticate"
-msgstr ""
-
-#: ../src/unity-greeter.vala:568
-msgid "Favorite Color:"
-msgstr ""
+msgstr "ပိုတ်ႇၸၢမ်းတူၺ်း"
 
 #. Arguments and description for --help text
-#: ../src/unity-greeter.vala:828
+#: ../src/unity-greeter.vala:353
 msgid "- Unity Greeter"
-msgstr ""
+msgstr "- Unity Greeter"
 
 #. Text printed out when an unknown command-line argument provided
-#: ../src/unity-greeter.vala:839
+#: ../src/unity-greeter.vala:364
 #, c-format
 msgid "Run '%s --help' to see a full list of available command line options."
 msgstr ""
+"ပေႃ့ '%s--help' တွၼ်ႈတႃႇ တေလႆႈႁၼ် ၵၼ်လိူၵ်ႈသၢင်ႈ သဵၼ်ႈမၢႆ ၶေႃႈပူင်ဢၼ်ၸႂ့်လႆႈ"
 
-#: ../src/user-list.vala:80
+#: ../src/user-list.vala:45
 msgid "Guest Session"
+msgstr "ၵၼ်တွၼ်ႈၶႅၵ်ႇ"
+
+#: ../src/user-list.vala:366
+msgid "Please enter a complete e-mail address"
 msgstr ""
 
-#: ../src/user-list.vala:383
-#, c-format
-msgid "Enter password for %s"
+#: ../src/user-list.vala:437
+msgid "Incorrect e-mail address or password"
+msgstr ""
+
+#: ../src/user-list.vala:469
+msgid ""
+"If you have an account on an RDP or Citrix server, Remote Login lets you run "
+"applications from that server."
+msgstr ""
+
+#: ../src/user-list.vala:472
+msgid "Cancel"
+msgstr ""
+
+#: ../src/user-list.vala:473
+msgid "Set Up…"
+msgstr ""
+
+#: ../src/user-list.vala:475
+msgid ""
+"You need an Ubuntu Remote Login account to use this service. Would you like "
+"to set up an account now?"
+msgstr ""
+
+#: ../src/user-list.vala:480
+msgid ""
+"You need an Ubuntu Remote Login account to use this service. Visit "
+"uccs.canonical.com to set up an account."
+msgstr ""
+
+#: ../src/user-list.vala:629
+msgid "Domain:"
+msgstr ""
+
+#: ../src/user-list.vala:690
+msgid "Email address:"
 msgstr ""
 
 #. 'Log In' here is the button for logging in.
-#: ../src/user-list.vala:409
+#: ../src/user-list.vala:713
 msgid "Log In"
 msgstr ""
 
-#: ../src/user-list.vala:407
+#: ../src/user-list.vala:714
 #, c-format
 msgid "Login as %s"
-msgstr ""
+msgstr "ၽွမ့်ၶဝ်ႈ ၼင်ႇ %s"
 
-#: ../src/user-list.vala:413 ../src/user-list.vala:414
+#: ../src/user-list.vala:718
 msgid "Retry"
 msgstr ""
 
-#: ../src/user-list.vala:322
+#: ../src/user-list.vala:719
 #, c-format
 msgid "Retry as %s"
 msgstr ""
 
-#: ../src/user-list.vala:430
-msgid "Logging in..."
+#: ../src/user-list.vala:758
+msgid "Login"
+msgstr "ၽွမ့်ၶဝ်ႈ"
+
+#: ../src/user-list.vala:1407
+msgid "Favorite Color (blue):"
 msgstr ""
 
-#: ../src/user-list.vala:515
-msgid "Login"
-msgstr ""
+#~ msgid "Other..."
+#~ msgstr "ၵၼ်တၢင်ႇၸိူဝ်း..."
+
+#~ msgid "Enter username"
+#~ msgstr "ပေႃ့သႂ်ႇ ၸိုဝ်ႈၽူႈၸႂ့်တိုဝ်း"
+
+#~ msgid "Enter password"
+#~ msgstr "ပေႃ့သႂ်ႇ မၢႆလပ့်"
