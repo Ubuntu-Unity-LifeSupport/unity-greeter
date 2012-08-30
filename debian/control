@@ -25,6 +25,7 @@ Recommends: indicator-datetime,
             indicator-session,
             indicator-sound,
             lightdm,
+            network-manager-gnome,
 Provides: lightdm-greeter
 Breaks: edubuntu-artwork (<< 12.01.1~)
 Description: Unity Greeter

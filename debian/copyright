@@ -1,8 +1,8 @@
-Format: http://svn.debian.org/wsvn/dep/web/deps/dep5.mdwn?op=file&rev=174
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Source: https://launchpad.net/unity-greeter
 
 Files: *
-Copyright: 2011 Canonical Ltd
+Copyright: 2011-2012 Canonical Ltd
 License: GPL-3
 
 License: GPL-3
@@ -14,6 +14,6 @@ License: GPL-3
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
-
-Comment: On Debian systems, the complete text of the GNU General
+ .
+ On Debian systems, the complete text of the GNU General
  Public License can be found in `/usr/share/common-licenses/GPL-3’.

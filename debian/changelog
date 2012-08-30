@@ -1,3 +1,10 @@
+unity-greeter (12.10.2-0ubuntu2) quantal; urgency=low
+
+  * Enable Network Manager support (LP: #1042757)
+  * debian/copyright: update Format and syntax
+
+ -- Michael Terry <mterry@ubuntu.com>  Thu, 30 Aug 2012 16:10:27 -0400
+
 unity-greeter (12.10.2-0ubuntu1) quantal; urgency=low
 
   [ Robert Ancell ]
