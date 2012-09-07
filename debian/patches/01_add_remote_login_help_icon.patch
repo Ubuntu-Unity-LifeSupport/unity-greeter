@@ -1,0 +1,13 @@
+Index: unity-greeter-12.10.2/src/session-list.vala
+===================================================================
+--- unity-greeter-12.10.2.orig/src/session-list.vala	2012-08-27 20:53:06.000000000 -0400
++++ unity-greeter-12.10.2/src/session-list.vala	2012-09-07 11:25:32.053937073 -0400
+@@ -196,7 +196,7 @@
+         case "xterm":
+             return "recovery_console_badge.png";
+         case "remote-login":
+-            return "unknown_badge.png"; //"remote_login_help.png";
++            return "remote_login_help.png";
+         default:
+             return null;
+         }

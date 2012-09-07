@@ -1,3 +1,10 @@
+unity-greeter (12.10.2-0ubuntu3) quantal; urgency=low
+
+  * Enable Remote Login support (LP: #1040221)
+  * Add proper remote login help icon from trunk
+
+ -- Michael Terry <mterry@ubuntu.com>  Fri, 07 Sep 2012 11:26:21 -0400
+
 unity-greeter (12.10.2-0ubuntu2) quantal; urgency=low
 
   * Enable Network Manager support (LP: #1042757)
