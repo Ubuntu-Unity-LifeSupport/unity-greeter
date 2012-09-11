@@ -1,3 +1,13 @@
+unity-greeter (12.10.2-0ubuntu5) quantal; urgency=low
+
+  * debian/patches/02_use_remote_login_hint.patch:
+    - Use new greeter hint to control whether remote login is enabled,
+      rather than a gsettings key for the lightdm user.
+  * debian/control:
+    - Bump lightdm version to latest for above greeter hint
+
+ -- Michael Terry <mterry@ubuntu.com>  Tue, 11 Sep 2012 14:27:08 -0400
+
 unity-greeter (12.10.2-0ubuntu4) quantal; urgency=low
 
   * Whoops, and Recommend remote-login-service and friends to pull

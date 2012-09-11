@@ -1,0 +1,41 @@
+=== modified file 'data/com.canonical.unity-greeter.gschema.xml'
+Index: unity-greeter-12.10.2/data/com.canonical.unity-greeter.gschema.xml
+===================================================================
+--- unity-greeter-12.10.2.orig/data/com.canonical.unity-greeter.gschema.xml	2012-08-23 17:16:11.000000000 -0400
++++ unity-greeter-12.10.2/data/com.canonical.unity-greeter.gschema.xml	2012-09-11 11:49:59.562924014 -0400
+@@ -82,9 +82,5 @@
+       <default>true</default>
+       <summary>Whether to play sound when greeter is ready</summary>
+     </key>
+-    <key name="enable-remote-login" type="b">
+-      <default>false</default>
+-      <summary>Whether to enable Remote Login or not</summary>
+-    </key>
+   </schema>
+ </schemalist>
+Index: unity-greeter-12.10.2/src/settings.vala
+===================================================================
+--- unity-greeter-12.10.2.orig/src/settings.vala	2012-08-27 20:53:06.000000000 -0400
++++ unity-greeter-12.10.2/src/settings.vala	2012-09-11 11:49:59.562924014 -0400
+@@ -37,7 +37,6 @@
+     public static const string KEY_HIGH_CONTRAST = "high-contrast";
+     public static const string KEY_SCREEN_READER = "screen-reader";
+     public static const string KEY_PLAY_READY_SOUND = "play-ready-sound";
+-    public static const string KEY_ENABLE_REMOTE_LOGIN = "enable-remote-login";
+ 
+     public static bool get_boolean (string key)
+     {
+Index: unity-greeter-12.10.2/src/user-list.vala
+===================================================================
+--- unity-greeter-12.10.2.orig/src/user-list.vala	2012-08-30 12:07:14.000000000 -0400
++++ unity-greeter-12.10.2/src/user-list.vala	2012-09-11 11:49:59.566924014 -0400
+@@ -129,7 +129,8 @@
+ 
+         connect_to_lightdm ();
+ 
+-        if (!UnityGreeter.test_mode && UGSettings.get_boolean (UGSettings.KEY_ENABLE_REMOTE_LOGIN))
++        if (!UnityGreeter.test_mode &&
++            UnityGreeter.greeter.show_remote_login_hint)
+             remote_login_service_watch = Bus.watch_name (BusType.SESSION,
+                                             "com.canonical.RemoteLogin",
+                                             BusNameWatcherFlags.AUTO_START,
