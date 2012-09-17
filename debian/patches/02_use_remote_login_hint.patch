@@ -1,8 +1,8 @@
 === modified file 'data/com.canonical.unity-greeter.gschema.xml'
-Index: unity-greeter-12.10.2/data/com.canonical.unity-greeter.gschema.xml
+Index: unity-greeter-12.10.3/data/com.canonical.unity-greeter.gschema.xml
 ===================================================================
---- unity-greeter-12.10.2.orig/data/com.canonical.unity-greeter.gschema.xml	2012-08-23 17:16:11.000000000 -0400
-+++ unity-greeter-12.10.2/data/com.canonical.unity-greeter.gschema.xml	2012-09-11 11:49:59.562924014 -0400
+--- unity-greeter-12.10.3.orig/data/com.canonical.unity-greeter.gschema.xml	2012-09-17 13:59:26.538789687 -0400
++++ unity-greeter-12.10.3/data/com.canonical.unity-greeter.gschema.xml	2012-09-17 13:59:46.298789896 -0400
 @@ -82,9 +82,5 @@
        <default>true</default>
        <summary>Whether to play sound when greeter is ready</summary>
@@ -13,10 +13,10 @@ Index: unity-greeter-12.10.2/data/com.canonical.unity-greeter.gschema.xml
 -    </key>
    </schema>
  </schemalist>
-Index: unity-greeter-12.10.2/src/settings.vala
+Index: unity-greeter-12.10.3/src/settings.vala
 ===================================================================
---- unity-greeter-12.10.2.orig/src/settings.vala	2012-08-27 20:53:06.000000000 -0400
-+++ unity-greeter-12.10.2/src/settings.vala	2012-09-11 11:49:59.562924014 -0400
+--- unity-greeter-12.10.3.orig/src/settings.vala	2012-09-17 13:59:26.538789687 -0400
++++ unity-greeter-12.10.3/src/settings.vala	2012-09-17 13:59:46.302789896 -0400
 @@ -37,7 +37,6 @@
      public static const string KEY_HIGH_CONTRAST = "high-contrast";
      public static const string KEY_SCREEN_READER = "screen-reader";
@@ -25,17 +25,49 @@ Index: unity-greeter-12.10.2/src/settings.vala
  
      public static bool get_boolean (string key)
      {
-Index: unity-greeter-12.10.2/src/user-list.vala
+Index: unity-greeter-12.10.3/src/unity-greeter.vala
 ===================================================================
---- unity-greeter-12.10.2.orig/src/user-list.vala	2012-08-30 12:07:14.000000000 -0400
-+++ unity-greeter-12.10.2/src/user-list.vala	2012-09-11 11:49:59.566924014 -0400
+--- unity-greeter-12.10.3.orig/src/unity-greeter.vala	2012-09-17 10:59:30.000000000 -0400
++++ unity-greeter-12.10.3/src/unity-greeter.vala	2012-09-17 13:59:46.302789896 -0400
+@@ -247,6 +247,11 @@
+         return greeter.show_manual_login_hint;
+     }
+ 
++    public bool show_remote_login_hint ()
++    {
++        return greeter.show_remote_login_hint;
++    }
++
+     public bool hide_users_hint ()
+     {
+         return greeter.hide_users_hint;
+Index: unity-greeter-12.10.3/src/user-list.vala
+===================================================================
+--- unity-greeter-12.10.3.orig/src/user-list.vala	2012-09-17 13:59:26.538789687 -0400
++++ unity-greeter-12.10.3/src/user-list.vala	2012-09-17 13:59:46.306789896 -0400
 @@ -129,7 +129,8 @@
  
          connect_to_lightdm ();
  
--        if (!UnityGreeter.test_mode && UGSettings.get_boolean (UGSettings.KEY_ENABLE_REMOTE_LOGIN))
-+        if (!UnityGreeter.test_mode &&
-+            UnityGreeter.greeter.show_remote_login_hint)
+-        if (!UnityGreeter.singleton.test_mode && UGSettings.get_boolean (UGSettings.KEY_ENABLE_REMOTE_LOGIN))
++        if (!UnityGreeter.singleton.test_mode &&
++            UnityGreeter.singleton.show_remote_login_hint ())
              remote_login_service_watch = Bus.watch_name (BusType.SESSION,
                                              "com.canonical.RemoteLogin",
                                              BusNameWatcherFlags.AUTO_START,
+Index: unity-greeter-12.10.3/tests/unity-greeter.vala
+===================================================================
+--- unity-greeter-12.10.3.orig/tests/unity-greeter.vala	2012-09-12 10:09:49.000000000 -0400
++++ unity-greeter-12.10.3/tests/unity-greeter.vala	2012-09-17 13:59:46.310789896 -0400
+@@ -77,6 +77,11 @@
+         return false;
+     }
+ 
++    public bool show_remote_login_hint ()
++    {
++        return true;
++    }
++
+     public bool hide_users_hint ()
+     {
+         return false;

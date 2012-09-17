@@ -706,20 +706,10 @@ static gboolean background_loader_ready_cb (BackgroundLoader* self) {
 				gint _tmp5_;
 				gint* _tmp6_;
 				gint _tmp6__length1;
-				cairo_pattern_t** _tmp7_;
+				GdkPixbuf** _tmp7_;
 				gint _tmp7__length1;
 				gint _tmp8_;
-				GdkPixbuf** _tmp9_;
-				gint _tmp9__length1;
-				gint _tmp10_;
-				GdkPixbuf* _tmp11_;
-				cairo_pattern_t* _tmp12_ = NULL;
-				cairo_pattern_t* _tmp13_;
-				gint _tmp14_;
-				GdkPixbuf** _tmp19_;
-				gint _tmp19__length1;
-				gint _tmp20_;
-				GdkPixbuf* _tmp21_;
+				GdkPixbuf* _tmp9_;
 				_tmp3_ = _tmp2_;
 				if (!_tmp3_) {
 					gint _tmp4_;
@@ -733,37 +723,73 @@ static gboolean background_loader_ready_cb (BackgroundLoader* self) {
 				if (!(_tmp5_ < _tmp6__length1)) {
 					break;
 				}
-				_tmp7_ = self->patterns;
-				_tmp7__length1 = self->patterns_length1;
+				_tmp7_ = self->priv->images;
+				_tmp7__length1 = self->priv->images_length1;
 				_tmp8_ = i;
-				_tmp9_ = self->priv->images;
-				_tmp9__length1 = self->priv->images_length1;
-				_tmp10_ = i;
-				_tmp11_ = _tmp9_[_tmp10_];
-				_tmp12_ = background_loader_create_pattern (self, _tmp11_);
-				_cairo_pattern_destroy0 (_tmp7_[_tmp8_]);
-				_tmp7_[_tmp8_] = _tmp12_;
-				_tmp13_ = _tmp7_[_tmp8_];
-				_tmp14_ = i;
-				if (_tmp14_ == 0) {
-					GdkPixbuf** _tmp15_;
-					gint _tmp15__length1;
-					gint _tmp16_;
-					GdkPixbuf* _tmp17_;
-					GdkRGBA _tmp18_ = {0};
-					_tmp15_ = self->priv->images;
-					_tmp15__length1 = self->priv->images_length1;
-					_tmp16_ = i;
-					_tmp17_ = _tmp15_[_tmp16_];
-					background_loader_pixbuf_average_value (self, _tmp17_, &_tmp18_);
-					self->average_color = _tmp18_;
+				_tmp9_ = _tmp7_[_tmp8_];
+				if (_tmp9_ != NULL) {
+					cairo_pattern_t** _tmp10_;
+					gint _tmp10__length1;
+					gint _tmp11_;
+					GdkPixbuf** _tmp12_;
+					gint _tmp12__length1;
+					gint _tmp13_;
+					GdkPixbuf* _tmp14_;
+					cairo_pattern_t* _tmp15_ = NULL;
+					cairo_pattern_t* _tmp16_;
+					gint _tmp17_;
+					GdkPixbuf** _tmp22_;
+					gint _tmp22__length1;
+					gint _tmp23_;
+					GdkPixbuf* _tmp24_;
+					_tmp10_ = self->patterns;
+					_tmp10__length1 = self->patterns_length1;
+					_tmp11_ = i;
+					_tmp12_ = self->priv->images;
+					_tmp12__length1 = self->priv->images_length1;
+					_tmp13_ = i;
+					_tmp14_ = _tmp12_[_tmp13_];
+					_tmp15_ = background_loader_create_pattern (self, _tmp14_);
+					_cairo_pattern_destroy0 (_tmp10_[_tmp11_]);
+					_tmp10_[_tmp11_] = _tmp15_;
+					_tmp16_ = _tmp10_[_tmp11_];
+					_tmp17_ = i;
+					if (_tmp17_ == 0) {
+						GdkPixbuf** _tmp18_;
+						gint _tmp18__length1;
+						gint _tmp19_;
+						GdkPixbuf* _tmp20_;
+						GdkRGBA _tmp21_ = {0};
+						_tmp18_ = self->priv->images;
+						_tmp18__length1 = self->priv->images_length1;
+						_tmp19_ = i;
+						_tmp20_ = _tmp18_[_tmp19_];
+						background_loader_pixbuf_average_value (self, _tmp20_, &_tmp21_);
+						self->average_color = _tmp21_;
+					}
+					_tmp22_ = self->priv->images;
+					_tmp22__length1 = self->priv->images_length1;
+					_tmp23_ = i;
+					_g_object_unref0 (_tmp22_[_tmp23_]);
+					_tmp22_[_tmp23_] = NULL;
+					_tmp24_ = _tmp22_[_tmp23_];
+				} else {
+					gint _tmp25_;
+					const gchar* _tmp26_;
+					cairo_pattern_t** _tmp27_;
+					gint _tmp27__length1;
+					gint _tmp28_;
+					cairo_pattern_t* _tmp29_;
+					_tmp25_ = i;
+					_tmp26_ = self->priv->_filename;
+					g_debug ("background.vala:134: images[%d] was null for %s", _tmp25_, _tmp26_);
+					_tmp27_ = self->patterns;
+					_tmp27__length1 = self->patterns_length1;
+					_tmp28_ = i;
+					_cairo_pattern_destroy0 (_tmp27_[_tmp28_]);
+					_tmp27_[_tmp28_] = NULL;
+					_tmp29_ = _tmp27_[_tmp28_];
 				}
-				_tmp19_ = self->priv->images;
-				_tmp19__length1 = self->priv->images_length1;
-				_tmp20_ = i;
-				_g_object_unref0 (_tmp19_[_tmp20_]);
-				_tmp19_[_tmp20_] = NULL;
-				_tmp21_ = _tmp19_[_tmp20_];
 			}
 		}
 	}
@@ -865,7 +891,7 @@ static void* background_loader_load_and_scale (BackgroundLoader* self) {
 		_inner_error_ = NULL;
 		_tmp18_ = e;
 		_tmp19_ = _tmp18_->message;
-		g_debug ("background.vala:147: Error loading background: %s", _tmp19_);
+		g_debug ("background.vala:155: Error loading background: %s", _tmp19_);
 		_g_error_free0 (e);
 	}
 	__finally1:
@@ -2135,7 +2161,7 @@ static cairo_surface_t* background_load_image (Background* self, const gchar* fi
 		_tmp17_ = filename;
 		_tmp18_ = e;
 		_tmp19_ = _tmp18_->message;
-		g_debug ("background.vala:434: Failed to load background component %s: %s", _tmp17_, _tmp19_);
+		g_debug ("background.vala:442: Failed to load background component %s: %s", _tmp17_, _tmp19_);
 		_g_error_free0 (e);
 	}
 	__finally2:
@@ -2235,7 +2261,7 @@ static void background_real_size_allocate (GtkWidget* base, GtkAllocation* alloc
 		GHashTable* _tmp10_;
 		BackgroundLoader* _tmp11_ = NULL;
 		BackgroundLoader* _tmp12_;
-		g_debug ("background.vala:462: Regenerating backgrounds");
+		g_debug ("background.vala:470: Regenerating backgrounds");
 		_tmp10_ = self->priv->loaders;
 		g_hash_table_remove_all (_tmp10_);
 		_tmp11_ = background_load_background (self, NULL);

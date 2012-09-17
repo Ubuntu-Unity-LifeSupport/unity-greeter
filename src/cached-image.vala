@@ -45,11 +45,14 @@ public class CachedImage : Gtk.Image
 
     public override bool draw (Cairo.Context c)
     {
-        var cached_surface = get_cached_surface (c, pixbuf);
-        if (cached_surface != null)
+        if (pixbuf != null)
         {
-            c.set_source_surface (cached_surface, 0, 0);
-            c.paint ();
+            var cached_surface = get_cached_surface (c, pixbuf);
+            if (cached_surface != null)
+            {
+                c.set_source_surface (cached_surface, 0, 0);
+                c.paint ();
+            }
         }
         return false;
     }

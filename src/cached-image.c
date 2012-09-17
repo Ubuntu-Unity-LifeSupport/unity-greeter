@@ -190,37 +190,48 @@ CachedImage* cached_image_new (GdkPixbuf* pixbuf) {
 static gboolean cached_image_real_draw (GtkWidget* base, cairo_t* c) {
 	CachedImage * self;
 	gboolean result = FALSE;
-	cairo_t* _tmp0_;
-	GdkPixbuf* _tmp1_ = NULL;
+	GdkPixbuf* _tmp0_ = NULL;
+	GdkPixbuf* _tmp1_;
 	GdkPixbuf* _tmp2_;
-	GdkPixbuf* _tmp3_;
-	cairo_surface_t* _tmp4_ = NULL;
-	cairo_surface_t* _tmp5_;
-	cairo_surface_t* cached_surface;
-	cairo_surface_t* _tmp6_;
+	gboolean _tmp3_;
 	self = (CachedImage*) base;
 	g_return_val_if_fail (c != NULL, FALSE);
-	_tmp0_ = c;
-	g_object_get ((GtkImage*) self, "pixbuf", &_tmp1_, NULL);
+	g_object_get ((GtkImage*) self, "pixbuf", &_tmp0_, NULL);
+	_tmp1_ = _tmp0_;
 	_tmp2_ = _tmp1_;
-	_tmp3_ = _tmp2_;
-	_tmp4_ = cached_image_get_cached_surface (_tmp0_, _tmp3_);
-	_tmp5_ = _tmp4_;
-	_g_object_unref0 (_tmp3_);
-	cached_surface = _tmp5_;
-	_tmp6_ = cached_surface;
-	if (_tmp6_ != NULL) {
-		cairo_t* _tmp7_;
-		cairo_surface_t* _tmp8_;
-		cairo_t* _tmp9_;
-		_tmp7_ = c;
-		_tmp8_ = cached_surface;
-		cairo_set_source_surface (_tmp7_, _tmp8_, (gdouble) 0, (gdouble) 0);
-		_tmp9_ = c;
-		cairo_paint (_tmp9_);
+	_tmp3_ = _tmp2_ != NULL;
+	_g_object_unref0 (_tmp2_);
+	if (_tmp3_) {
+		cairo_t* _tmp4_;
+		GdkPixbuf* _tmp5_ = NULL;
+		GdkPixbuf* _tmp6_;
+		GdkPixbuf* _tmp7_;
+		cairo_surface_t* _tmp8_ = NULL;
+		cairo_surface_t* _tmp9_;
+		cairo_surface_t* cached_surface;
+		cairo_surface_t* _tmp10_;
+		_tmp4_ = c;
+		g_object_get ((GtkImage*) self, "pixbuf", &_tmp5_, NULL);
+		_tmp6_ = _tmp5_;
+		_tmp7_ = _tmp6_;
+		_tmp8_ = cached_image_get_cached_surface (_tmp4_, _tmp7_);
+		_tmp9_ = _tmp8_;
+		_g_object_unref0 (_tmp7_);
+		cached_surface = _tmp9_;
+		_tmp10_ = cached_surface;
+		if (_tmp10_ != NULL) {
+			cairo_t* _tmp11_;
+			cairo_surface_t* _tmp12_;
+			cairo_t* _tmp13_;
+			_tmp11_ = c;
+			_tmp12_ = cached_surface;
+			cairo_set_source_surface (_tmp11_, _tmp12_, (gdouble) 0, (gdouble) 0);
+			_tmp13_ = c;
+			cairo_paint (_tmp13_);
+		}
+		_cairo_surface_destroy0 (cached_surface);
 	}
 	result = FALSE;
-	_cairo_surface_destroy0 (cached_surface);
 	return result;
 }
 

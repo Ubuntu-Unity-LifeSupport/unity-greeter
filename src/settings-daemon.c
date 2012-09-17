@@ -189,11 +189,11 @@ static void settings_daemon_configure (SettingsDaemon* self) {
 	gchar* _tmp11_;
 	gchar* _tmp12_;
 	gchar* _tmp13_;
-	gchar* _tmp14_;
-	gchar** _tmp15_ = NULL;
+	gchar** _tmp14_ = NULL;
 	gchar** disabled;
 	gint disabled_length1;
 	gint _disabled_size_;
+	gchar* _tmp15_;
 	gchar* _tmp16_;
 	gchar* _tmp17_;
 	gchar* _tmp18_;
@@ -223,41 +223,41 @@ static void settings_daemon_configure (SettingsDaemon* self) {
 	_tmp11_ = g_strdup ("org.gnome.settings-daemon.plugins.smartcard");
 	_tmp12_ = g_strdup ("org.gnome.settings-daemon.plugins.sound");
 	_tmp13_ = g_strdup ("org.gnome.settings-daemon.plugins.wacom");
-	_tmp14_ = g_strdup ("org.gnome.settings-daemon.plugins.xsettings");
-	_tmp15_ = g_new0 (gchar*, 15 + 1);
-	_tmp15_[0] = _tmp0_;
-	_tmp15_[1] = _tmp1_;
-	_tmp15_[2] = _tmp2_;
-	_tmp15_[3] = _tmp3_;
-	_tmp15_[4] = _tmp4_;
-	_tmp15_[5] = _tmp5_;
-	_tmp15_[6] = _tmp6_;
-	_tmp15_[7] = _tmp7_;
-	_tmp15_[8] = _tmp8_;
-	_tmp15_[9] = _tmp9_;
-	_tmp15_[10] = _tmp10_;
-	_tmp15_[11] = _tmp11_;
-	_tmp15_[12] = _tmp12_;
-	_tmp15_[13] = _tmp13_;
-	_tmp15_[14] = _tmp14_;
-	disabled = _tmp15_;
-	disabled_length1 = 15;
+	_tmp14_ = g_new0 (gchar*, 14 + 1);
+	_tmp14_[0] = _tmp0_;
+	_tmp14_[1] = _tmp1_;
+	_tmp14_[2] = _tmp2_;
+	_tmp14_[3] = _tmp3_;
+	_tmp14_[4] = _tmp4_;
+	_tmp14_[5] = _tmp5_;
+	_tmp14_[6] = _tmp6_;
+	_tmp14_[7] = _tmp7_;
+	_tmp14_[8] = _tmp8_;
+	_tmp14_[9] = _tmp9_;
+	_tmp14_[10] = _tmp10_;
+	_tmp14_[11] = _tmp11_;
+	_tmp14_[12] = _tmp12_;
+	_tmp14_[13] = _tmp13_;
+	disabled = _tmp14_;
+	disabled_length1 = 14;
 	_disabled_size_ = disabled_length1;
-	_tmp16_ = g_strdup ("org.gnome.settings-daemon.plugins.a11y-keyboard");
-	_tmp17_ = g_strdup ("org.gnome.settings-daemon.plugins.a11y-settings");
-	_tmp18_ = g_strdup ("org.gnome.settings-daemon.plugins.color");
-	_tmp19_ = g_strdup ("org.gnome.settings-daemon.plugins.cursor");
-	_tmp20_ = g_strdup ("org.gnome.settings-daemon.plugins.power");
-	_tmp21_ = g_strdup ("org.gnome.settings-daemon.plugins.xrandr");
-	_tmp22_ = g_new0 (gchar*, 6 + 1);
-	_tmp22_[0] = _tmp16_;
-	_tmp22_[1] = _tmp17_;
-	_tmp22_[2] = _tmp18_;
-	_tmp22_[3] = _tmp19_;
-	_tmp22_[4] = _tmp20_;
-	_tmp22_[5] = _tmp21_;
+	_tmp15_ = g_strdup ("org.gnome.settings-daemon.plugins.a11y-keyboard");
+	_tmp16_ = g_strdup ("org.gnome.settings-daemon.plugins.a11y-settings");
+	_tmp17_ = g_strdup ("org.gnome.settings-daemon.plugins.color");
+	_tmp18_ = g_strdup ("org.gnome.settings-daemon.plugins.cursor");
+	_tmp19_ = g_strdup ("org.gnome.settings-daemon.plugins.power");
+	_tmp20_ = g_strdup ("org.gnome.settings-daemon.plugins.xrandr");
+	_tmp21_ = g_strdup ("org.gnome.settings-daemon.plugins.xsettings");
+	_tmp22_ = g_new0 (gchar*, 7 + 1);
+	_tmp22_[0] = _tmp15_;
+	_tmp22_[1] = _tmp16_;
+	_tmp22_[2] = _tmp17_;
+	_tmp22_[3] = _tmp18_;
+	_tmp22_[4] = _tmp19_;
+	_tmp22_[5] = _tmp20_;
+	_tmp22_[6] = _tmp21_;
 	enabled = _tmp22_;
-	enabled_length1 = 6;
+	enabled_length1 = 7;
 	_enabled_size_ = enabled_length1;
 	_tmp23_ = disabled;
 	_tmp23__length1 = disabled_length1;
@@ -416,7 +416,7 @@ static gboolean settings_daemon_run_co (SettingsDaemonRunData* _data_) {
 		_data_->_tmp0_ = g_dbus_proxy_new_for_bus_sync (G_BUS_TYPE_SESSION, G_DBUS_PROXY_FLAGS_NONE, NULL, "org.gnome.SettingsDaemon", "/org/gnome/SettingsDaemon", "org.gnome.SettingsDaemon", NULL, &_data_->_inner_error_);
 		_data_->proxy = _data_->_tmp0_;
 		if (_data_->_inner_error_ != NULL) {
-			goto __catch12_g_error;
+			goto __catch14_g_error;
 		}
 		_data_->_tmp1_ = _data_->proxy;
 		_data_->_state_ = 1;
@@ -429,12 +429,12 @@ static gboolean settings_daemon_run_co (SettingsDaemonRunData* _data_) {
 		_g_variant_unref0 (_data_->_tmp3_);
 		if (_data_->_inner_error_ != NULL) {
 			_g_object_unref0 (_data_->proxy);
-			goto __catch12_g_error;
+			goto __catch14_g_error;
 		}
 		_g_object_unref0 (_data_->proxy);
 	}
-	goto __finally12;
-	__catch12_g_error:
+	goto __finally14;
+	__catch14_g_error:
 	{
 		_data_->e = _data_->_inner_error_;
 		_data_->_inner_error_ = NULL;
@@ -444,7 +444,7 @@ static gboolean settings_daemon_run_co (SettingsDaemonRunData* _data_) {
 "us: %s", _data_->_tmp5_);
 		_g_error_free0 (_data_->e);
 	}
-	__finally12:
+	__finally14:
 	if (_data_->_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _data_->_inner_error_->message, g_quark_to_string (_data_->_inner_error_->domain), _data_->_inner_error_->code);
 		g_clear_error (&_data_->_inner_error_);

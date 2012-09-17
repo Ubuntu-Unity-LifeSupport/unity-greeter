@@ -122,10 +122,18 @@ class BackgroundLoader : Object
 
         for (var i = 0; i < widths.length; i++)
         {
-            patterns[i] = create_pattern (images[i]);
-            if (i == 0)
-                pixbuf_average_value (images[i], out average_color);
-            images[i] = null;
+            if (images[i] != null)
+            {
+                patterns[i] = create_pattern (images[i]);
+                if (i == 0)
+                    pixbuf_average_value (images[i], out average_color);
+                images[i] = null;
+            }
+            else
+            {
+                debug ("images[%d] was null for %s", i, filename);
+                patterns[i] = null;
+            }
         }
 
         loaded ();

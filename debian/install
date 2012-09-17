@@ -1,2 +1,1 @@
 debian/unity-greeter.pkla /var/lib/polkit-1/localauthority/10-vendor.d/
-debian/remote_login_help.png /usr/share/unity-greeter/

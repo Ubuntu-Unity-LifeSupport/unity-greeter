@@ -21,37 +21,42 @@ public const int grid_size = 40;
 
 public class UnityGreeter
 {
-    static bool show_version = false;
-    public static bool test_mode = false;
-    public static const OptionEntry[] options =
-    {
-        { "version", 'v', 0, OptionArg.NONE, ref show_version,
-          /* Help string for command line --version flag */
-          N_("Show release version"), null },
-        { "test-mode", 0, 0, OptionArg.NONE, ref test_mode,
-          /* Help string for command line --test-mode flag */
-          N_("Run in test mode"), null },
-        { null }
-    };
+    public static UnityGreeter singleton;
 
-    private static Timer log_timer;
+    public signal void show_message (string text, LightDM.MessageType type);
+    public signal void show_prompt (string text, LightDM.PromptType type);
+    public signal void authentication_complete ();
 
-    private static string state_file;
-    private static KeyFile state;
+    public bool test_mode = false;
 
-    private static Cairo.XlibSurface background_surface;
+    private string state_file;
+    private KeyFile state;
+
+    private Cairo.XlibSurface background_surface;
 
     private SettingsDaemon settings_daemon;
 
-    private static MainWindow main_window;
+    private MainWindow main_window;
 
-    public static LightDM.Greeter greeter;
+    private LightDM.Greeter greeter;
 
     private Canberra.Context canberra_context;
 
-    public UnityGreeter ()
+    private static Timer log_timer;
+
+    private UnityGreeter (bool test_mode_)
     {
+        singleton = this;
+        test_mode = test_mode_;
+
+        /* Prepare to set the background */
+        debug ("Creating background surface");
+        background_surface = create_root_surface (Gdk.Screen.get_default ());
+
         greeter = new LightDM.Greeter ();
+        greeter.show_message.connect ((text, type) => { show_message (text, type); });
+        greeter.show_prompt.connect ((text, type) => { show_prompt (text, type); });
+        greeter.authentication_complete.connect (() => { authentication_complete (); });
         var connected = false;
         try
         {
@@ -67,7 +72,7 @@ public class UnityGreeter
         if (!test_mode)
         {
             settings_daemon = new SettingsDaemon ();
-            settings_daemon.start ();
+            settings_daemon.start.begin ();
         }
 
         var state_dir = Path.build_filename (Environment.get_user_cache_dir (), "unity-greeter");
@@ -91,7 +96,7 @@ public class UnityGreeter
         Gdk.threads_add_idle (ready_cb);
     }
 
-    public static string? get_state (string key)
+    public string? get_state (string key)
     {
         try
         {
@@ -103,7 +108,7 @@ public class UnityGreeter
         }
     }
 
-    public static void set_state (string key, string value)
+    public void set_state (string key, string value)
     {
         state.set_value ("greeter", key, value);
         var data = state.to_data ();
@@ -117,12 +122,12 @@ public class UnityGreeter
         }
     }
 
-    public static void push_list (GreeterList widget)
+    public void push_list (GreeterList widget)
     {
         main_window.push_list (widget);
     }
 
-    public static void pop_list ()
+    public void pop_list ()
     {
         main_window.pop_list ();
     }
@@ -144,12 +149,12 @@ public class UnityGreeter
         return null;
     }
 
-    public static void start_session (string? session)
+    public void start_session (string? session)
     {
         /* Set the background */
         refresh_background (Gdk.Screen.get_default (), background_surface);
 
-        if (UnityGreeter.test_mode)
+        if (test_mode)
         {
                 debug ("Successfully logged in!  Quitting...");
                 Gtk.main_quit ();
@@ -158,7 +163,7 @@ public class UnityGreeter
         {
             try
             {
-                UnityGreeter.greeter.start_session_sync (session);
+                greeter.start_session_sync (session);
             }
             catch (Error e)
             {
@@ -192,7 +197,67 @@ public class UnityGreeter
         main_window.set_keyboard_state ();
     }
 
-    private static Gdk.FilterReturn focus_upon_map (Gdk.XEvent gxevent, Gdk.Event event)
+    public bool is_authenticated ()
+    {
+        return greeter.is_authenticated;
+    }
+
+    public void authenticate (string? userid = null)
+    {
+        greeter.authenticate (userid);
+    }
+
+    public void authenticate_as_guest ()
+    {
+        greeter.authenticate_as_guest ();
+    }
+
+    public void authenticate_remote (string? session, string? userid)
+    {
+        UnityGreeter.singleton.greeter.authenticate_remote (session, userid);
+    }
+
+    public void cancel_authentication ()
+    {
+        greeter.cancel_authentication ();
+    }
+
+    public void respond (string response)
+    {
+        greeter.respond (response);
+    }
+
+    public string authentication_user ()
+    {
+        return greeter.authentication_user;
+    }
+
+    public string default_session_hint ()
+    {
+        return greeter.default_session_hint;
+    }
+
+    public string select_user_hint ()
+    {
+        return greeter.select_user_hint;
+    }
+
+    public bool show_manual_login_hint ()
+    {
+        return greeter.show_manual_login_hint;
+    }
+
+    public bool hide_users_hint ()
+    {
+        return greeter.hide_users_hint;
+    }
+
+    public bool has_guest_account_hint ()
+    {
+        return greeter.has_guest_account_hint;
+    }
+
+    private Gdk.FilterReturn focus_upon_map (Gdk.XEvent gxevent, Gdk.Event event)
     {
         var xevent = (X.Event*)gxevent;
         if (xevent.type == X.EventType.MapNotify)
@@ -237,15 +302,15 @@ public class UnityGreeter
 
         var pixmap = X.CreatePixmap (display,
                                      Gdk.X11Window.get_xid (screen.get_root_window ()),
-                                     screen.width (),
-                                     screen.height (),
+                                     screen.get_width (),
+                                     screen.get_height (),
                                      visual.get_depth ());
 
         /* Convert into a Cairo surface */
         var surface = new Cairo.XlibSurface (display,
                                              pixmap,
                                              Gdk.X11Visual.get_xvisual (visual),
-                                             screen.width (), screen.height ());
+                                             screen.get_width (), screen.get_height ());
 
         return surface;
     }
@@ -344,9 +409,16 @@ public class UnityGreeter
         debug ("Setting cursor");
         Gdk.get_default_root_window ().set_cursor (new Gdk.Cursor (Gdk.CursorType.LEFT_PTR));
 
-        /* Prepare to set the background */
-        debug ("Creating background surface");
-        background_surface = create_root_surface (Gdk.Screen.get_default ());
+        bool do_show_version = false;
+        bool do_test_mode = false;
+        OptionEntry versionOption = { "version", 'v', 0, OptionArg.NONE, ref do_show_version,
+                /* Help string for command line --version flag */
+                N_("Show release version"), null };
+        OptionEntry testOption =  { "test-mode", 0, 0, OptionArg.NONE, ref do_test_mode,
+                /* Help string for command line --test-mode flag */
+                N_("Run in test mode"), null };
+        OptionEntry nullOption = { null };
+        OptionEntry[] options = { versionOption, testOption, nullOption };
 
         debug ("Loading command line options");
         var c = new OptionContext (/* Arguments and description for --help text */
@@ -365,17 +437,17 @@ public class UnityGreeter
             stderr.printf ("\n");
             return Posix.EXIT_FAILURE;
         }
-        if (show_version)
+        if (do_show_version)
         {
             /* Note, not translated so can be easily parsed */
             stderr.printf ("unity-greeter %s\n", Config.VERSION);
             return Posix.EXIT_SUCCESS;
         }
 
-        if (test_mode)
+        if (do_test_mode)
             debug ("Running in test mode");
 
-        if (!test_mode)
+        if (!do_test_mode)
         {
             /* Make nm-applet hide items the user does not have permissions to interact with */
             Environment.set_variable ("NM_APPLET_HIDE_POLICY_ITEMS", "1", true);
@@ -415,7 +487,7 @@ public class UnityGreeter
             settings.set ("gtk-xft-rgba", value, null);
 
         debug ("Creating Unity Greeter");
-        var greeter = new UnityGreeter ();
+        var greeter = new UnityGreeter (do_test_mode);
 
         debug ("Showing greeter");
         greeter.show ();

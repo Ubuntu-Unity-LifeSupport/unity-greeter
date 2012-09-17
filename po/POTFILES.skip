@@ -19,4 +19,9 @@ src/settings.c
 src/unity-greeter.c
 src/user-list.c
 src/user-prompt-box.c
+tests/greeter-list.c
+tests/main-window.c
+tests/prompt-box.c
+tests/session-list.c
+tests/user-list.c
 

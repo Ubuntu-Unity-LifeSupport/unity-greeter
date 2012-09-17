@@ -33,7 +33,7 @@ public class SessionPrompt : PromptBox
     {
         label = _("Select desktop environment");
 
-        if (UnityGreeter.test_mode)
+        if (UnityGreeter.singleton.test_mode)
         {
             add_session ("gnome", "GNOME");
             add_session ("kde", "KDE");
@@ -196,7 +196,7 @@ public class SessionList : GreeterList
         case "xterm":
             return "recovery_console_badge.png";
         case "remote-login":
-            return "unknown_badge.png"; //"remote_login_help.png";
+            return "remote_login_help.png";
         default:
             return null;
         }

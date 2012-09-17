@@ -110,6 +110,17 @@ typedef struct _CachedImageClass CachedImageClass;
 typedef struct _Block5Data Block5Data;
 typedef struct _Block6Data Block6Data;
 
+#define TYPE_UNITY_GREETER (unity_greeter_get_type ())
+#define UNITY_GREETER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_UNITY_GREETER, UnityGreeter))
+#define UNITY_GREETER_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_UNITY_GREETER, UnityGreeterClass))
+#define IS_UNITY_GREETER(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_UNITY_GREETER))
+#define IS_UNITY_GREETER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_UNITY_GREETER))
+#define UNITY_GREETER_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_UNITY_GREETER, UnityGreeterClass))
+
+typedef struct _UnityGreeter UnityGreeter;
+typedef struct _UnityGreeterClass UnityGreeterClass;
+typedef struct _UnityGreeterPrivate UnityGreeterPrivate;
+
 #define TYPE_DASH_BUTTON (dash_button_get_type ())
 #define DASH_BUTTON(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_DASH_BUTTON, DashButton))
 #define DASH_BUTTON_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_DASH_BUTTON, DashButtonClass))
@@ -241,6 +252,18 @@ struct _Block6Data {
 	GtkWidget* best;
 };
 
+struct _UnityGreeter {
+	GTypeInstance parent_instance;
+	volatile int ref_count;
+	UnityGreeterPrivate * priv;
+	gboolean test_mode;
+};
+
+struct _UnityGreeterClass {
+	GTypeClass parent_class;
+	void (*finalize) (UnityGreeter *self);
+};
+
 typedef enum  {
 	GREETER_LIST_MODE_ENTRY,
 	GREETER_LIST_MODE_SCROLLING
@@ -293,7 +316,7 @@ struct _SessionListPrivate {
 
 
 static gpointer session_prompt_parent_class = NULL;
-extern gboolean unity_greeter_test_mode;
+extern UnityGreeter* unity_greeter_singleton;
 static gpointer session_list_parent_class = NULL;
 static GHashTable* session_list_badges;
 static GHashTable* session_list_badges = NULL;
@@ -337,6 +360,13 @@ static void session_prompt_set_session (SessionPrompt* self, const gchar* value)
 static void session_prompt_set_default_session (SessionPrompt* self, const gchar* value);
 static GObject * session_prompt_constructor (GType type, guint n_construct_properties, GObjectConstructParam * construct_properties);
 void prompt_box_set_label (PromptBox* self, const gchar* value);
+gpointer unity_greeter_ref (gpointer instance);
+void unity_greeter_unref (gpointer instance);
+GParamSpec* param_spec_unity_greeter (const gchar* name, const gchar* nick, const gchar* blurb, GType object_type, GParamFlags flags);
+void value_set_unity_greeter (GValue* value, gpointer v_object);
+void value_take_unity_greeter (GValue* value, gpointer v_object);
+gpointer value_get_unity_greeter (const GValue* value);
+GType unity_greeter_get_type (void) G_GNUC_CONST;
 DashButton* dash_button_new (const gchar* text);
 DashButton* dash_button_construct (GType object_type, const gchar* text);
 GType dash_button_get_type (void) G_GNUC_CONST;
@@ -514,15 +544,15 @@ static void session_prompt_add_session (SessionPrompt* self, const gchar* key, c
 		gtk_css_provider_load_from_data (style, "* {padding: 8px;}", (gssize) (-1), &_inner_error_);
 		if (_inner_error_ != NULL) {
 			_g_object_unref0 (style);
-			goto __catch10_g_error;
+			goto __catch12_g_error;
 		}
 		_tmp32_ = item;
 		_tmp33_ = gtk_widget_get_style_context ((GtkWidget*) _tmp32_);
 		gtk_style_context_add_provider (_tmp33_, (GtkStyleProvider*) style, (guint) GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 		_g_object_unref0 (style);
 	}
-	goto __finally10;
-	__catch10_g_error:
+	goto __finally12;
+	__catch12_g_error:
 	{
 		GError* e = NULL;
 		GError* _tmp34_;
@@ -535,7 +565,7 @@ static void session_prompt_add_session (SessionPrompt* self, const gchar* key, c
 "s", _tmp35_);
 		_g_error_free0 (e);
 	}
-	__finally10:
+	__finally12:
 	if (_inner_error_ != NULL) {
 		_g_object_unref0 (label);
 		_g_free0 (name);
@@ -840,81 +870,83 @@ static GObject * session_prompt_constructor (GType type, guint n_construct_prope
 	GObjectClass * parent_class;
 	SessionPrompt * self;
 	const gchar* _tmp0_ = NULL;
-	gboolean _tmp1_;
-	const gchar* _tmp15_ = NULL;
-	DashButton* _tmp16_;
+	UnityGreeter* _tmp1_;
+	gboolean _tmp2_;
+	const gchar* _tmp16_ = NULL;
 	DashButton* _tmp17_;
-	DashButton* ok;
 	DashButton* _tmp18_;
+	DashButton* ok;
 	DashButton* _tmp19_;
-	FadingLabel* _tmp20_;
-	DashButton* _tmp21_;
+	DashButton* _tmp20_;
+	FadingLabel* _tmp21_;
 	DashButton* _tmp22_;
+	DashButton* _tmp23_;
 	parent_class = G_OBJECT_CLASS (session_prompt_parent_class);
 	obj = parent_class->constructor (type, n_construct_properties, construct_properties);
 	self = SESSION_PROMPT (obj);
 	_tmp0_ = _ ("Select desktop environment");
 	prompt_box_set_label ((PromptBox*) self, _tmp0_);
-	_tmp1_ = unity_greeter_test_mode;
-	if (_tmp1_) {
+	_tmp1_ = unity_greeter_singleton;
+	_tmp2_ = _tmp1_->test_mode;
+	if (_tmp2_) {
 		session_prompt_add_session (self, "gnome", "GNOME");
 		session_prompt_add_session (self, "kde", "KDE");
 		session_prompt_add_session (self, "ubuntu", "Ubuntu");
 	} else {
-		GList* _tmp2_ = NULL;
-		_tmp2_ = lightdm_get_sessions ();
+		GList* _tmp3_ = NULL;
+		_tmp3_ = lightdm_get_sessions ();
 		{
 			GList* session_collection = NULL;
 			GList* session_it = NULL;
-			session_collection = _tmp2_;
+			session_collection = _tmp3_;
 			for (session_it = session_collection; session_it != NULL; session_it = session_it->next) {
 				LightDMSession* session = NULL;
 				session = (LightDMSession*) session_it->data;
 				{
-					LightDMSession* _tmp3_;
-					const gchar* _tmp4_;
+					LightDMSession* _tmp4_;
 					const gchar* _tmp5_;
-					LightDMSession* _tmp6_;
-					const gchar* _tmp7_;
+					const gchar* _tmp6_;
+					LightDMSession* _tmp7_;
 					const gchar* _tmp8_;
-					LightDMSession* _tmp9_;
-					const gchar* _tmp10_;
+					const gchar* _tmp9_;
+					LightDMSession* _tmp10_;
 					const gchar* _tmp11_;
-					LightDMSession* _tmp12_;
-					const gchar* _tmp13_;
+					const gchar* _tmp12_;
+					LightDMSession* _tmp13_;
 					const gchar* _tmp14_;
-					_tmp3_ = session;
-					_tmp4_ = lightdm_session_get_key (_tmp3_);
-					_tmp5_ = _tmp4_;
-					_tmp6_ = session;
-					_tmp7_ = lightdm_session_get_name (_tmp6_);
-					_tmp8_ = _tmp7_;
-					g_debug ("session-list.vala:46: Adding session %s (%s)", _tmp5_, _tmp8_);
-					_tmp9_ = session;
-					_tmp10_ = lightdm_session_get_key (_tmp9_);
-					_tmp11_ = _tmp10_;
-					_tmp12_ = session;
-					_tmp13_ = lightdm_session_get_name (_tmp12_);
-					_tmp14_ = _tmp13_;
-					session_prompt_add_session (self, _tmp11_, _tmp14_);
+					const gchar* _tmp15_;
+					_tmp4_ = session;
+					_tmp5_ = lightdm_session_get_key (_tmp4_);
+					_tmp6_ = _tmp5_;
+					_tmp7_ = session;
+					_tmp8_ = lightdm_session_get_name (_tmp7_);
+					_tmp9_ = _tmp8_;
+					g_debug ("session-list.vala:46: Adding session %s (%s)", _tmp6_, _tmp9_);
+					_tmp10_ = session;
+					_tmp11_ = lightdm_session_get_key (_tmp10_);
+					_tmp12_ = _tmp11_;
+					_tmp13_ = session;
+					_tmp14_ = lightdm_session_get_name (_tmp13_);
+					_tmp15_ = _tmp14_;
+					session_prompt_add_session (self, _tmp12_, _tmp15_);
 				}
 			}
 		}
 	}
-	_tmp15_ = _ ("OK");
-	_tmp16_ = dash_button_new (_tmp15_);
-	_tmp17_ = g_object_ref_sink (_tmp16_);
-	ok = _tmp17_;
-	_tmp18_ = ok;
-	g_signal_connect_object ((GtkButton*) _tmp18_, "clicked", (GCallback) __session_prompt___lambda23__gtk_button_clicked, self, 0);
+	_tmp16_ = _ ("OK");
+	_tmp17_ = dash_button_new (_tmp16_);
+	_tmp18_ = g_object_ref_sink (_tmp17_);
+	ok = _tmp18_;
 	_tmp19_ = ok;
-	prompt_box_attach_item ((PromptBox*) self, (GtkWidget*) _tmp19_, TRUE);
-	_tmp20_ = ((PromptBox*) self)->name_label;
-	gtk_widget_set_vexpand ((GtkWidget*) _tmp20_, FALSE);
-	_tmp21_ = ok;
-	gtk_widget_set_valign ((GtkWidget*) _tmp21_, GTK_ALIGN_END);
+	g_signal_connect_object ((GtkButton*) _tmp19_, "clicked", (GCallback) __session_prompt___lambda23__gtk_button_clicked, self, 0);
+	_tmp20_ = ok;
+	prompt_box_attach_item ((PromptBox*) self, (GtkWidget*) _tmp20_, TRUE);
+	_tmp21_ = ((PromptBox*) self)->name_label;
+	gtk_widget_set_vexpand ((GtkWidget*) _tmp21_, FALSE);
 	_tmp22_ = ok;
-	gtk_widget_set_vexpand ((GtkWidget*) _tmp22_, TRUE);
+	gtk_widget_set_valign ((GtkWidget*) _tmp22_, GTK_ALIGN_END);
+	_tmp23_ = ok;
+	gtk_widget_set_vexpand ((GtkWidget*) _tmp23_, TRUE);
 	_g_object_unref0 (ok);
 	return obj;
 }
@@ -1131,7 +1163,7 @@ static gchar* session_list_get_badge_name (const gchar* session) {
 			default:
 			{
 				gchar* _tmp8_;
-				_tmp8_ = g_strdup ("unknown_badge.png");
+				_tmp8_ = g_strdup ("remote_login_help.png");
 				result = _tmp8_;
 				return result;
 			}
@@ -1248,7 +1280,7 @@ GdkPixbuf* session_list_get_badge (const gchar* session) {
 			_g_free0 (_tmp23_);
 			_tmp26_ = _tmp25_;
 			if (_inner_error_ != NULL) {
-				goto __catch11_g_error;
+				goto __catch13_g_error;
 			}
 			_g_object_unref0 (pixbuf);
 			pixbuf = _tmp26_;
@@ -1259,8 +1291,8 @@ GdkPixbuf* session_list_get_badge (const gchar* session) {
 			_tmp31_ = _g_object_ref0 (_tmp30_);
 			g_hash_table_insert (_tmp27_, _tmp29_, _tmp31_);
 		}
-		goto __finally11;
-		__catch11_g_error:
+		goto __finally13;
+		__catch13_g_error:
 		{
 			GError* e = NULL;
 			const gchar* _tmp32_;
@@ -1274,7 +1306,7 @@ GdkPixbuf* session_list_get_badge (const gchar* session) {
 			g_debug ("session-list.vala:235: Error loading badge %s: %s", _tmp32_, _tmp34_);
 			_g_error_free0 (e);
 		}
-		__finally11:
+		__finally13:
 		if (_inner_error_ != NULL) {
 			_g_object_unref0 (pixbuf);
 			_g_free0 (name);

@@ -65,12 +65,12 @@ private class IndicatorMenuItem : Gtk.MenuItem
 
 public class MenuBar : Gtk.MenuBar
 {
-    public static const int HEIGHT = 32;
     public Background? background { get; construct; default = null; }
     public bool high_contrast { get; private set; default = false; }
     public Gtk.Window? keyboard_window { get; private set; default = null; }
-
     public Gtk.AccelGroup? accel_group { get; construct; }
+
+    private static const int HEIGHT = 24;
 
     public MenuBar (Background bg, Gtk.AccelGroup ag)
     {
@@ -162,12 +162,10 @@ public class MenuBar : Gtk.MenuBar
         }
         catch (Error e)
         {
-            debug ("Internal error loading session chooser style: %s", e.message);
+            debug ("Internal error loading menubar style: %s", e.message);
         }
 
         setup_indicators ();
-
-        set_size_request (-1, HEIGHT);
     }
 
     ~MenuBar ()
@@ -179,6 +177,12 @@ public class MenuBar : Gtk.MenuBar
             Posix.waitpid (keyboard_pid, out status, 0);
             keyboard_pid = 0;
         }
+    }
+
+    public override void get_preferred_height (out int min, out int nat)
+    {
+        min = HEIGHT;
+        nat = HEIGHT;
     }
 
     private void greeter_set_env (string key, string val)
@@ -199,7 +203,7 @@ public class MenuBar : Gtk.MenuBar
             var builder = new GLib.VariantBuilder (GLib.VariantType.ARRAY);
             builder.add ("{ss}", key, val);
 
-            proxy.call ("UpdateActivationEnvironment", new GLib.Variant ("(a{ss})", builder), GLib.DBusCallFlags.NONE, -1, null);
+            proxy.call_sync ("UpdateActivationEnvironment", new GLib.Variant ("(a{ss})", builder), GLib.DBusCallFlags.NONE, -1, null);
         }
         catch (Error e)
         {
@@ -267,7 +271,7 @@ public class MenuBar : Gtk.MenuBar
         }
         keyboard_label.label = desc;
 
-        if (UnityGreeter.test_mode)
+        if (UnityGreeter.singleton.test_mode)
             debug ("Setting layout to %s", layout.name);
         else
             LightDM.set_layout (layout);

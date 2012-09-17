@@ -132,6 +132,16 @@ typedef struct _AnimateTimerClass AnimateTimerClass;
 #define _g_free0(var) (var = (g_free (var), NULL))
 #define __g_list_free__g_object_unref0_0(var) ((var == NULL) ? NULL : (var = (_g_list_free__g_object_unref0_ (var), NULL)))
 
+#define TYPE_UNITY_GREETER (unity_greeter_get_type ())
+#define UNITY_GREETER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_UNITY_GREETER, UnityGreeter))
+#define UNITY_GREETER_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_UNITY_GREETER, UnityGreeterClass))
+#define IS_UNITY_GREETER(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_UNITY_GREETER))
+#define IS_UNITY_GREETER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_UNITY_GREETER))
+#define UNITY_GREETER_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_UNITY_GREETER, UnityGreeterClass))
+
+typedef struct _UnityGreeter UnityGreeter;
+typedef struct _UnityGreeterClass UnityGreeterClass;
+
 #define TYPE_DASH_ENTRY (dash_entry_get_type ())
 #define DASH_ENTRY(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_DASH_ENTRY, DashEntry))
 #define DASH_ENTRY_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_DASH_ENTRY, DashEntryClass))
@@ -142,6 +152,7 @@ typedef struct _AnimateTimerClass AnimateTimerClass;
 typedef struct _DashEntry DashEntry;
 typedef struct _DashEntryClass DashEntryClass;
 #define _g_list_free0(var) ((var == NULL) ? NULL : (var = (g_list_free (var), NULL)))
+typedef struct _UnityGreeterPrivate UnityGreeterPrivate;
 
 struct _FadableIface {
 	GTypeInterface parent_iface;
@@ -219,11 +230,22 @@ typedef enum  {
 	GREETER_LIST_SCROLL_TARGET_DOWN
 } GreeterListScrollTarget;
 
+struct _UnityGreeter {
+	GTypeInstance parent_instance;
+	volatile int ref_count;
+	UnityGreeterPrivate * priv;
+	gboolean test_mode;
+};
+
+struct _UnityGreeterClass {
+	GTypeClass parent_class;
+	void (*finalize) (UnityGreeter *self);
+};
+
 typedef gdouble (*AnimateTimerEasingFunc) (gdouble x, void* user_data);
 
 static gpointer greeter_list_parent_class = NULL;
-extern LightDMGreeter* unity_greeter_greeter;
-extern gboolean unity_greeter_test_mode;
+extern UnityGreeter* unity_greeter_singleton;
 
 gint get_grid_offset (gint size);
 #define grid_size 40
@@ -261,6 +283,14 @@ GreeterList* greeter_list_construct (GType object_type, Background* bg, MenuBar*
 static void greeter_list_real_get_preferred_width (GtkWidget* base, gint* min, gint* nat);
 static void greeter_list_real_get_preferred_height (GtkWidget* base, gint* min, gint* nat);
 void greeter_list_cancel_authentication (GreeterList* self);
+gpointer unity_greeter_ref (gpointer instance);
+void unity_greeter_unref (gpointer instance);
+GParamSpec* param_spec_unity_greeter (const gchar* name, const gchar* nick, const gchar* blurb, GType object_type, GParamFlags flags);
+void value_set_unity_greeter (GValue* value, gpointer v_object);
+void value_take_unity_greeter (GValue* value, gpointer v_object);
+gpointer value_get_unity_greeter (const GValue* value);
+GType unity_greeter_get_type (void) G_GNUC_CONST;
+void unity_greeter_cancel_authentication (UnityGreeter* self);
 void greeter_list_scroll (GreeterList* self, GreeterListScrollTarget target);
 void greeter_list_select_entry (GreeterList* self, PromptBox* entry, gdouble direction, gboolean do_scroll);
 void greeter_list_add_with_class (GreeterList* self, GtkWidget* widget);
@@ -306,13 +336,14 @@ gint greeter_list_get_greeter_box_y (GreeterList* self);
 static gint greeter_list_get_box_y (GreeterList* self);
 gint greeter_list_get_position_y (GreeterList* self, gdouble position);
 static gint greeter_list_real_get_position_y (GreeterList* self, gdouble position);
+#define PROMPT_BOX_NAME_MARGIN_TOP 12
 static void greeter_list_move_entry (GreeterList* self, PromptBox* entry, gdouble position);
 void fadable_set_alpha (Fadable* self, gdouble alpha);
 void prompt_box_set_position (PromptBox* self, gdouble value);
 void greeter_list_greeter_box_size_allocate_cb (GreeterList* self, GtkAllocation* allocation);
 static PromptBox* greeter_list_get_scrolling_entry (GreeterList* self);
-static gboolean ___lambda32_ (GreeterList* self);
-static gboolean ____lambda32__gsource_func (gpointer self);
+static gboolean ___lambda35_ (GreeterList* self);
+static gboolean ____lambda35__gsource_func (gpointer self);
 static void greeter_list_animate_scrolling (GreeterList* self, gdouble progress);
 gboolean dash_box_get_has_base (DashBox* self);
 void greeter_list_setup_prompt_box (GreeterList* self, gboolean fade);
@@ -335,15 +366,17 @@ FadeTracker* fadable_get_fade_tracker (Fadable* self);
 gdouble fade_tracker_get_alpha (FadeTracker* self);
 void greeter_list_connect_to_lightdm (GreeterList* self);
 void greeter_list_show_message_cb (GreeterList* self, const gchar* text, LightDMMessageType type);
-static void _greeter_list_show_message_cb_lightdm_greeter_show_message (LightDMGreeter* _sender, const gchar* text, LightDMMessageType type, gpointer self);
+static void _greeter_list_show_message_cb_unity_greeter_show_message (UnityGreeter* _sender, const gchar* text, LightDMMessageType type, gpointer self);
 void greeter_list_show_prompt_cb (GreeterList* self, const gchar* text, LightDMPromptType type);
-static void _greeter_list_show_prompt_cb_lightdm_greeter_show_prompt (LightDMGreeter* _sender, const gchar* text, LightDMPromptType type, gpointer self);
+static void _greeter_list_show_prompt_cb_unity_greeter_show_prompt (UnityGreeter* _sender, const gchar* text, LightDMPromptType type, gpointer self);
 void greeter_list_authentication_complete_cb (GreeterList* self);
-static void _greeter_list_authentication_complete_cb_lightdm_greeter_authentication_complete (LightDMGreeter* _sender, gpointer self);
+static void _greeter_list_authentication_complete_cb_unity_greeter_authentication_complete (UnityGreeter* _sender, gpointer self);
 static void greeter_list_real_show_prompt_cb (GreeterList* self, const gchar* text, LightDMPromptType type);
 const gchar* greeter_list_get_manual_name (GreeterList* self);
 void greeter_list_set_manual_name (GreeterList* self, const gchar* value);
+gchar* unity_greeter_authentication_user (UnityGreeter* self);
 static void greeter_list_real_authentication_complete_cb (GreeterList* self);
+gboolean unity_greeter_is_authenticated (UnityGreeter* self);
 void greeter_list_login_complete (GreeterList* self);
 static void greeter_list_start_session (GreeterList* self);
 Background* greeter_list_get_background (GreeterList* self);
@@ -355,8 +388,10 @@ void greeter_list_start_authentication (GreeterList* self);
 gboolean prompt_box_get_has_errors (PromptBox* self);
 static void greeter_list_real_start_authentication (GreeterList* self);
 void greeter_list_test_start_authentication (GreeterList* self);
+void unity_greeter_authenticate (UnityGreeter* self, const gchar* userid);
+void unity_greeter_authenticate_as_guest (UnityGreeter* self);
 void background_set_draw_grid (Background* self, gboolean value);
-void unity_greeter_start_session (const gchar* session);
+void unity_greeter_start_session (UnityGreeter* self, const gchar* session);
 gchar* greeter_list_get_lightdm_session (GreeterList* self);
 static gchar* greeter_list_real_get_lightdm_session (GreeterList* self);
 static void greeter_list_real_test_start_authentication (GreeterList* self);
@@ -366,13 +401,13 @@ static void greeter_list_set_menubar (GreeterList* self, MenuBar* value);
 void greeter_list_set_start_scrolling (GreeterList* self, gboolean value);
 gboolean greeter_list_get_always_show_manual (GreeterList* self);
 void greeter_list_set_always_show_manual (GreeterList* self, gboolean value);
-#define MENU_BAR_HEIGHT 32
+#define MAIN_WINDOW_MENUBAR_HEIGHT 32
 void prompt_box_set_options_image (PromptBox* self, GdkPixbuf* image);
 static GObject * greeter_list_constructor (GType type, guint n_construct_properties, GObjectConstructParam * construct_properties);
 DashBox* dash_box_new (Background* bg);
 DashBox* dash_box_construct (GType object_type, Background* bg);
-static void _greeter_list___lambda33_ (GreeterList* self);
-static void __greeter_list___lambda33__g_object_notify (GObject* _sender, GParamSpec* pspec, gpointer self);
+static void _greeter_list___lambda36_ (GreeterList* self);
+static void __greeter_list___lambda36__g_object_notify (GObject* _sender, GParamSpec* pspec, gpointer self);
 static void _greeter_list_greeter_box_size_allocate_cb_gtk_widget_size_allocate (GtkWidget* _sender, GtkAllocation* allocation, gpointer self);
 gdouble animate_timer_ease_out_quint (gdouble x);
 static gdouble _animate_timer_ease_out_quint_animate_timer_easing_func (gdouble x, gpointer self);
@@ -506,13 +541,13 @@ static void greeter_list_real_get_preferred_height (GtkWidget* base, gint* min, 
 
 
 void greeter_list_cancel_authentication (GreeterList* self) {
-	LightDMGreeter* _tmp0_;
+	UnityGreeter* _tmp0_;
 	PromptBox* _tmp1_;
 	const gchar* _tmp2_;
 	const gchar* _tmp3_;
 	g_return_if_fail (self != NULL);
-	_tmp0_ = unity_greeter_greeter;
-	lightdm_greeter_cancel_authentication (_tmp0_);
+	_tmp0_ = unity_greeter_singleton;
+	unity_greeter_cancel_authentication (_tmp0_);
 	_tmp1_ = self->priv->_selected_entry;
 	_tmp2_ = prompt_box_get_id (_tmp1_);
 	_tmp3_ = _tmp2_;
@@ -1295,52 +1330,53 @@ gint greeter_list_get_greeter_box_y (GreeterList* self) {
 
 static gint greeter_list_real_get_position_y (GreeterList* self, gdouble position) {
 	gint result = 0;
-	gdouble _tmp0_;
-	gdouble grid_number;
-	gboolean _tmp1_ = FALSE;
-	gdouble _tmp2_;
-	gboolean _tmp4_;
+	gint one_above_height;
+	gint _tmp0_ = 0;
+	gint box_height;
+	gdouble offset = 0.0;
+	gdouble _tmp1_;
 	gint _tmp12_ = 0;
 	gdouble _tmp13_;
-	_tmp0_ = position;
-	grid_number = _tmp0_;
-	_tmp2_ = position;
-	if (_tmp2_ >= 0.0) {
-		gdouble _tmp3_;
-		_tmp3_ = position;
-		_tmp1_ = _tmp3_ < 1.0;
+	one_above_height = grid_size + PROMPT_BOX_NAME_MARGIN_TOP;
+	_tmp0_ = greeter_list_get_greeter_box_height_grids (self);
+	box_height = (_tmp0_ * grid_size) - PROMPT_BOX_NAME_MARGIN_TOP;
+	_tmp1_ = position;
+	if (_tmp1_ < ((gdouble) (-1))) {
+		gdouble _tmp2_;
+		gint _tmp3_;
+		_tmp2_ = position;
+		_tmp3_ = one_above_height;
+		offset = ((_tmp2_ + 1) * grid_size) - _tmp3_;
 	} else {
-		_tmp1_ = FALSE;
-	}
-	_tmp4_ = _tmp1_;
-	if (_tmp4_) {
-		gint _tmp5_ = 0;
-		gint grids;
-		gdouble _tmp6_;
-		gint _tmp7_;
-		_tmp5_ = greeter_list_get_greeter_box_height_grids (self);
-		grids = _tmp5_;
-		_tmp6_ = position;
-		_tmp7_ = grids;
-		grid_number = _tmp6_ * _tmp7_;
-	} else {
-		gdouble _tmp8_;
-		_tmp8_ = position;
-		if (_tmp8_ >= 1.0) {
-			gint _tmp9_ = 0;
-			gint grids;
-			gdouble _tmp10_;
-			gint _tmp11_;
-			_tmp9_ = greeter_list_get_greeter_box_height_grids (self);
-			grids = _tmp9_;
-			_tmp10_ = position;
-			_tmp11_ = grids;
-			grid_number = (_tmp10_ + _tmp11_) - 1.0;
+		gdouble _tmp4_;
+		_tmp4_ = position;
+		if (_tmp4_ < ((gdouble) 0)) {
+			gdouble _tmp5_;
+			gint _tmp6_;
+			_tmp5_ = position;
+			_tmp6_ = one_above_height;
+			offset = _tmp5_ * _tmp6_;
+		} else {
+			gdouble _tmp7_;
+			_tmp7_ = position;
+			if (_tmp7_ < ((gdouble) 1)) {
+				gdouble _tmp8_;
+				gint _tmp9_;
+				_tmp8_ = position;
+				_tmp9_ = box_height;
+				offset = _tmp8_ * _tmp9_;
+			} else {
+				gdouble _tmp10_;
+				gint _tmp11_;
+				_tmp10_ = position;
+				_tmp11_ = box_height;
+				offset = ((_tmp10_ - 1) * grid_size) + _tmp11_;
+			}
 		}
 	}
 	_tmp12_ = greeter_list_get_greeter_box_y (self);
-	_tmp13_ = grid_number;
-	result = _tmp12_ + ((gint) (_tmp13_ * grid_size));
+	_tmp13_ = offset;
+	result = _tmp12_ + ((gint) _tmp13_);
 	return result;
 }
 
@@ -1358,23 +1394,29 @@ static void greeter_list_move_entry (GreeterList* self, PromptBox* entry, gdoubl
 	gdouble _tmp6_;
 	PromptBox* _tmp7_;
 	gdouble _tmp8_;
+	GtkAllocation allocation = {0};
+	GtkAllocation _tmp9_ = {0};
 	GtkAllocation child_allocation = {0};
-	PromptBox* _tmp9_;
-	GtkAllocation _tmp10_;
-	gint _tmp11_;
-	gint _tmp12_ = 0;
+	PromptBox* _tmp10_;
+	GtkAllocation _tmp11_;
+	gint _tmp12_;
 	gint _tmp13_ = 0;
-	gdouble _tmp14_;
-	gint _tmp15_ = 0;
-	GtkFixed* _tmp16_;
-	PromptBox* _tmp17_;
-	GtkAllocation _tmp18_;
-	gint _tmp19_;
-	GtkAllocation _tmp20_;
-	gint _tmp21_;
+	GtkAllocation _tmp14_;
+	gint _tmp15_;
+	gint _tmp16_ = 0;
+	GtkAllocation _tmp17_;
+	gint _tmp18_;
+	gdouble _tmp19_;
+	gint _tmp20_ = 0;
+	GtkFixed* _tmp21_;
 	PromptBox* _tmp22_;
 	GtkAllocation _tmp23_;
-	PromptBox* _tmp24_;
+	gint _tmp24_;
+	GtkAllocation _tmp25_;
+	gint _tmp26_;
+	PromptBox* _tmp27_;
+	GtkAllocation _tmp28_;
+	PromptBox* _tmp29_;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (entry != NULL);
 	alpha = 1.0;
@@ -1398,34 +1440,40 @@ static void greeter_list_move_entry (GreeterList* self, PromptBox* entry, gdoubl
 	_tmp7_ = entry;
 	_tmp8_ = position;
 	prompt_box_set_position (_tmp7_, _tmp8_);
+	gtk_widget_get_allocation ((GtkWidget*) self, &_tmp9_);
+	allocation = _tmp9_;
 	memset (&child_allocation, 0, sizeof (GtkAllocation));
 	child_allocation.width = (grid_size * GREETER_LIST_BOX_WIDTH) - (GREETER_LIST_BORDER * 2);
-	_tmp9_ = entry;
-	_tmp10_ = child_allocation;
-	_tmp11_ = _tmp10_.width;
-	gtk_widget_get_preferred_height_for_width ((GtkWidget*) _tmp9_, _tmp11_, NULL, &_tmp12_);
-	child_allocation.height = _tmp12_;
-	_tmp13_ = greeter_list_get_greeter_box_x (self);
-	child_allocation.x = _tmp13_;
-	_tmp14_ = position;
-	_tmp15_ = greeter_list_get_position_y (self, _tmp14_);
-	child_allocation.y = _tmp15_;
-	_tmp16_ = self->priv->fixed;
-	_tmp17_ = entry;
-	_tmp18_ = child_allocation;
-	_tmp19_ = _tmp18_.x;
-	_tmp20_ = child_allocation;
-	_tmp21_ = _tmp20_.y;
-	gtk_fixed_move (_tmp16_, (GtkWidget*) _tmp17_, _tmp19_, _tmp21_);
+	_tmp10_ = entry;
+	_tmp11_ = child_allocation;
+	_tmp12_ = _tmp11_.width;
+	gtk_widget_get_preferred_height_for_width ((GtkWidget*) _tmp10_, _tmp12_, NULL, &_tmp13_);
+	child_allocation.height = _tmp13_;
+	_tmp14_ = allocation;
+	_tmp15_ = _tmp14_.x;
+	_tmp16_ = greeter_list_get_greeter_box_x (self);
+	child_allocation.x = _tmp15_ + _tmp16_;
+	_tmp17_ = allocation;
+	_tmp18_ = _tmp17_.y;
+	_tmp19_ = position;
+	_tmp20_ = greeter_list_get_position_y (self, _tmp19_);
+	child_allocation.y = _tmp18_ + _tmp20_;
+	_tmp21_ = self->priv->fixed;
 	_tmp22_ = entry;
 	_tmp23_ = child_allocation;
-	gtk_widget_size_allocate ((GtkWidget*) _tmp22_, &_tmp23_);
-	_tmp24_ = entry;
-	gtk_widget_show ((GtkWidget*) _tmp24_);
+	_tmp24_ = _tmp23_.x;
+	_tmp25_ = child_allocation;
+	_tmp26_ = _tmp25_.y;
+	gtk_fixed_move (_tmp21_, (GtkWidget*) _tmp22_, _tmp24_, _tmp26_);
+	_tmp27_ = entry;
+	_tmp28_ = child_allocation;
+	gtk_widget_size_allocate ((GtkWidget*) _tmp27_, &_tmp28_);
+	_tmp29_ = entry;
+	gtk_widget_show ((GtkWidget*) _tmp29_);
 }
 
 
-static gboolean ___lambda32_ (GreeterList* self) {
+static gboolean ___lambda35_ (GreeterList* self) {
 	gboolean result = FALSE;
 	greeter_list_move_names (self);
 	result = FALSE;
@@ -1433,9 +1481,9 @@ static gboolean ___lambda32_ (GreeterList* self) {
 }
 
 
-static gboolean ____lambda32__gsource_func (gpointer self) {
+static gboolean ____lambda35__gsource_func (gpointer self) {
 	gboolean result;
-	result = ___lambda32_ (self);
+	result = ___lambda35_ (self);
 	return result;
 }
 
@@ -1464,7 +1512,7 @@ void greeter_list_greeter_box_size_allocate_cb (GreeterList* self, GtkAllocation
 	}
 	_tmp6_ = _tmp0_;
 	if (_tmp6_) {
-		g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, ____lambda32__gsource_func, g_object_ref (self), g_object_unref);
+		g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, ____lambda35__gsource_func, g_object_ref (self), g_object_unref);
 	}
 	_tmp7_ = *allocation;
 	_tmp8_ = _tmp7_.height;
@@ -1883,6 +1931,7 @@ static void greeter_list_real_size_allocate (GtkWidget* base, GtkAllocation* all
 		return;
 	}
 	greeter_list_allocate_greeter_box (self);
+	greeter_list_move_names (self);
 }
 
 
@@ -2042,32 +2091,32 @@ static void greeter_list_entry_clicked_cb (GreeterList* self, PromptBox* entry) 
 }
 
 
-static void _greeter_list_show_message_cb_lightdm_greeter_show_message (LightDMGreeter* _sender, const gchar* text, LightDMMessageType type, gpointer self) {
+static void _greeter_list_show_message_cb_unity_greeter_show_message (UnityGreeter* _sender, const gchar* text, LightDMMessageType type, gpointer self) {
 	greeter_list_show_message_cb (self, text, type);
 }
 
 
-static void _greeter_list_show_prompt_cb_lightdm_greeter_show_prompt (LightDMGreeter* _sender, const gchar* text, LightDMPromptType type, gpointer self) {
+static void _greeter_list_show_prompt_cb_unity_greeter_show_prompt (UnityGreeter* _sender, const gchar* text, LightDMPromptType type, gpointer self) {
 	greeter_list_show_prompt_cb (self, text, type);
 }
 
 
-static void _greeter_list_authentication_complete_cb_lightdm_greeter_authentication_complete (LightDMGreeter* _sender, gpointer self) {
+static void _greeter_list_authentication_complete_cb_unity_greeter_authentication_complete (UnityGreeter* _sender, gpointer self) {
 	greeter_list_authentication_complete_cb (self);
 }
 
 
 void greeter_list_connect_to_lightdm (GreeterList* self) {
-	LightDMGreeter* _tmp0_;
-	LightDMGreeter* _tmp1_;
-	LightDMGreeter* _tmp2_;
+	UnityGreeter* _tmp0_;
+	UnityGreeter* _tmp1_;
+	UnityGreeter* _tmp2_;
 	g_return_if_fail (self != NULL);
-	_tmp0_ = unity_greeter_greeter;
-	g_signal_connect_object (_tmp0_, "show-message", (GCallback) _greeter_list_show_message_cb_lightdm_greeter_show_message, self, 0);
-	_tmp1_ = unity_greeter_greeter;
-	g_signal_connect_object (_tmp1_, "show-prompt", (GCallback) _greeter_list_show_prompt_cb_lightdm_greeter_show_prompt, self, 0);
-	_tmp2_ = unity_greeter_greeter;
-	g_signal_connect_object (_tmp2_, "authentication-complete", (GCallback) _greeter_list_authentication_complete_cb_lightdm_greeter_authentication_complete, self, 0);
+	_tmp0_ = unity_greeter_singleton;
+	g_signal_connect_object (_tmp0_, "show-message", (GCallback) _greeter_list_show_message_cb_unity_greeter_show_message, self, 0);
+	_tmp1_ = unity_greeter_singleton;
+	g_signal_connect_object (_tmp1_, "show-prompt", (GCallback) _greeter_list_show_prompt_cb_unity_greeter_show_prompt, self, 0);
+	_tmp2_ = unity_greeter_singleton;
+	g_signal_connect_object (_tmp2_, "authentication-complete", (GCallback) _greeter_list_authentication_complete_cb_unity_greeter_authentication_complete, self, 0);
 }
 
 
@@ -2088,12 +2137,12 @@ static void greeter_list_real_show_prompt_cb (GreeterList* self, const gchar* te
 	gchar* _tmp2_;
 	gboolean _tmp3_;
 	gboolean _tmp6_;
-	const gchar* _tmp12_;
-	const gchar* _tmp14_;
-	const gchar* _tmp16_;
-	LightDMPromptType _tmp17_;
-	DashEntry* _tmp18_ = NULL;
-	DashEntry* _tmp19_;
+	const gchar* _tmp13_;
+	const gchar* _tmp15_;
+	const gchar* _tmp17_;
+	LightDMPromptType _tmp18_;
+	DashEntry* _tmp19_ = NULL;
+	DashEntry* _tmp20_;
 	g_return_if_fail (text != NULL);
 	_tmp1_ = greeter_list_get_selected_id (self);
 	_tmp2_ = _tmp1_;
@@ -2110,40 +2159,43 @@ static void greeter_list_real_show_prompt_cb (GreeterList* self, const gchar* te
 	}
 	_tmp6_ = _tmp0_;
 	if (_tmp6_) {
-		gboolean _tmp7_;
-		_tmp7_ = unity_greeter_test_mode;
-		if (_tmp7_) {
-			const gchar* _tmp8_;
-			_tmp8_ = self->test_username;
-			greeter_list_set_manual_name (self, _tmp8_);
+		UnityGreeter* _tmp7_;
+		gboolean _tmp8_;
+		_tmp7_ = unity_greeter_singleton;
+		_tmp8_ = _tmp7_->test_mode;
+		if (_tmp8_) {
+			const gchar* _tmp9_;
+			_tmp9_ = self->test_username;
+			greeter_list_set_manual_name (self, _tmp9_);
 		} else {
-			LightDMGreeter* _tmp9_;
-			const gchar* _tmp10_;
-			const gchar* _tmp11_;
-			_tmp9_ = unity_greeter_greeter;
-			_tmp10_ = lightdm_greeter_get_authentication_user (_tmp9_);
-			_tmp11_ = _tmp10_;
-			greeter_list_set_manual_name (self, _tmp11_);
+			UnityGreeter* _tmp10_;
+			gchar* _tmp11_ = NULL;
+			gchar* _tmp12_;
+			_tmp10_ = unity_greeter_singleton;
+			_tmp11_ = unity_greeter_authentication_user (_tmp10_);
+			_tmp12_ = _tmp11_;
+			greeter_list_set_manual_name (self, _tmp12_);
+			_g_free0 (_tmp12_);
 		}
 	}
 	self->prompted = TRUE;
-	_tmp12_ = text;
-	if (g_strcmp0 (_tmp12_, "Password: ") == 0) {
-		const gchar* _tmp13_ = NULL;
-		_tmp13_ = _ ("Password:");
-		text = _tmp13_;
+	_tmp13_ = text;
+	if (g_strcmp0 (_tmp13_, "Password: ") == 0) {
+		const gchar* _tmp14_ = NULL;
+		_tmp14_ = _ ("Password:");
+		text = _tmp14_;
 	}
-	_tmp14_ = text;
-	if (g_strcmp0 (_tmp14_, "login:") == 0) {
-		const gchar* _tmp15_ = NULL;
-		_tmp15_ = _ ("Username:");
-		text = _tmp15_;
+	_tmp15_ = text;
+	if (g_strcmp0 (_tmp15_, "login:") == 0) {
+		const gchar* _tmp16_ = NULL;
+		_tmp16_ = _ ("Username:");
+		text = _tmp16_;
 	}
-	_tmp16_ = text;
-	_tmp17_ = type;
-	_tmp18_ = greeter_list_add_prompt (self, _tmp16_, _tmp17_ == LIGHTDM_PROMPT_TYPE_SECRET);
-	_tmp19_ = _tmp18_;
-	_g_object_unref0 (_tmp19_);
+	_tmp17_ = text;
+	_tmp18_ = type;
+	_tmp19_ = greeter_list_add_prompt (self, _tmp17_, _tmp18_ == LIGHTDM_PROMPT_TYPE_SECRET);
+	_tmp20_ = _tmp19_;
+	_g_object_unref0 (_tmp20_);
 }
 
 
@@ -2164,7 +2216,8 @@ static void greeter_list_real_authentication_complete_cb (GreeterList* self) {
 	const gchar* _tmp2_;
 	const gchar* _tmp3_;
 	gboolean is_authenticated = FALSE;
-	gboolean _tmp4_;
+	UnityGreeter* _tmp4_;
+	gboolean _tmp5_;
 	gboolean _tmp9_;
 	_tmp0_ = self->greeter_authenticating_user;
 	_tmp1_ = self->priv->_selected_entry;
@@ -2173,18 +2226,17 @@ static void greeter_list_real_authentication_complete_cb (GreeterList* self) {
 	if (g_strcmp0 (_tmp0_, _tmp3_) != 0) {
 		return;
 	}
-	_tmp4_ = unity_greeter_test_mode;
-	if (_tmp4_) {
-		gboolean _tmp5_;
-		_tmp5_ = self->test_is_authenticated;
-		is_authenticated = _tmp5_;
+	_tmp4_ = unity_greeter_singleton;
+	_tmp5_ = _tmp4_->test_mode;
+	if (_tmp5_) {
+		gboolean _tmp6_;
+		_tmp6_ = self->test_is_authenticated;
+		is_authenticated = _tmp6_;
 	} else {
-		LightDMGreeter* _tmp6_;
-		gboolean _tmp7_;
-		gboolean _tmp8_;
-		_tmp6_ = unity_greeter_greeter;
-		_tmp7_ = lightdm_greeter_get_is_authenticated (_tmp6_);
-		_tmp8_ = _tmp7_;
+		UnityGreeter* _tmp7_;
+		gboolean _tmp8_ = FALSE;
+		_tmp7_ = unity_greeter_singleton;
+		_tmp8_ = unity_greeter_is_authenticated (_tmp7_);
 		is_authenticated = _tmp8_;
 	}
 	_tmp9_ = is_authenticated;
@@ -2192,24 +2244,26 @@ static void greeter_list_real_authentication_complete_cb (GreeterList* self) {
 		gboolean _tmp10_;
 		_tmp10_ = self->prompted;
 		if (_tmp10_) {
-			gboolean _tmp11_;
+			UnityGreeter* _tmp11_;
+			gboolean _tmp12_;
 			greeter_list_login_complete (self);
-			_tmp11_ = unity_greeter_test_mode;
-			if (_tmp11_) {
+			_tmp11_ = unity_greeter_singleton;
+			_tmp12_ = _tmp11_->test_mode;
+			if (_tmp12_) {
 				greeter_list_start_session (self);
 			} else {
-				Background* _tmp12_;
-				gdouble _tmp13_;
+				Background* _tmp13_;
 				gdouble _tmp14_;
-				_tmp12_ = self->priv->_background;
-				_tmp13_ = background_get_alpha (_tmp12_);
-				_tmp14_ = _tmp13_;
-				if (_tmp14_ == 1.0) {
+				gdouble _tmp15_;
+				_tmp13_ = self->priv->_background;
+				_tmp14_ = background_get_alpha (_tmp13_);
+				_tmp15_ = _tmp14_;
+				if (_tmp15_ == 1.0) {
 					greeter_list_start_session (self);
 				} else {
-					Background* _tmp15_;
-					_tmp15_ = self->priv->_background;
-					g_signal_connect_object ((GObject*) _tmp15_, "notify::alpha", (GCallback) _greeter_list_background_loaded_cb_g_object_notify, self, 0);
+					Background* _tmp16_;
+					_tmp16_ = self->priv->_background;
+					g_signal_connect_object ((GObject*) _tmp16_, "notify::alpha", (GCallback) _greeter_list_background_loaded_cb_g_object_notify, self, 0);
 				}
 			}
 		} else {
@@ -2217,31 +2271,31 @@ static void greeter_list_real_authentication_complete_cb (GreeterList* self) {
 			greeter_list_show_authenticated (self, TRUE);
 		}
 	} else {
-		gboolean _tmp16_;
-		_tmp16_ = self->prompted;
-		if (_tmp16_) {
-			gboolean _tmp17_;
-			PromptBox* _tmp19_;
-			_tmp17_ = self->will_clear;
-			if (_tmp17_) {
-				const gchar* _tmp18_ = NULL;
-				_tmp18_ = _ ("Invalid password, please try again");
-				greeter_list_show_message (self, _tmp18_, TRUE);
+		gboolean _tmp17_;
+		_tmp17_ = self->prompted;
+		if (_tmp17_) {
+			gboolean _tmp18_;
+			PromptBox* _tmp20_;
+			_tmp18_ = self->will_clear;
+			if (_tmp18_) {
+				const gchar* _tmp19_ = NULL;
+				_tmp19_ = _ ("Invalid password, please try again");
+				greeter_list_show_message (self, _tmp19_, TRUE);
 			}
-			_tmp19_ = self->priv->_selected_entry;
-			prompt_box_reset_spinners (_tmp19_);
+			_tmp20_ = self->priv->_selected_entry;
+			prompt_box_reset_spinners (_tmp20_);
 			greeter_list_start_authentication (self);
 		} else {
-			PromptBox* _tmp20_;
-			gboolean _tmp21_;
+			PromptBox* _tmp21_;
 			gboolean _tmp22_;
-			_tmp20_ = self->priv->_selected_entry;
-			_tmp21_ = prompt_box_get_has_errors (_tmp20_);
-			_tmp22_ = _tmp21_;
-			if (!_tmp22_) {
-				const gchar* _tmp23_ = NULL;
-				_tmp23_ = _ ("Failed to authenticate");
-				greeter_list_show_message (self, _tmp23_, TRUE);
+			gboolean _tmp23_;
+			_tmp21_ = self->priv->_selected_entry;
+			_tmp22_ = prompt_box_get_has_errors (_tmp21_);
+			_tmp23_ = _tmp22_;
+			if (!_tmp23_) {
+				const gchar* _tmp24_ = NULL;
+				_tmp24_ = _ ("Failed to authenticate");
+				greeter_list_show_message (self, _tmp24_, TRUE);
 			}
 			greeter_list_show_authenticated (self, FALSE);
 		}
@@ -2257,49 +2311,51 @@ void greeter_list_authentication_complete_cb (GreeterList* self) {
 
 static void greeter_list_real_start_authentication (GreeterList* self) {
 	gchar* _tmp0_ = NULL;
-	gboolean _tmp1_;
+	UnityGreeter* _tmp1_;
+	gboolean _tmp2_;
 	self->prompted = FALSE;
 	greeter_list_set_manual_name (self, NULL);
 	self->will_clear = FALSE;
 	_tmp0_ = greeter_list_get_selected_id (self);
 	_g_free0 (self->greeter_authenticating_user);
 	self->greeter_authenticating_user = _tmp0_;
-	_tmp1_ = unity_greeter_test_mode;
-	if (_tmp1_) {
+	_tmp1_ = unity_greeter_singleton;
+	_tmp2_ = _tmp1_->test_mode;
+	if (_tmp2_) {
 		greeter_list_test_start_authentication (self);
 	} else {
-		gchar* _tmp2_ = NULL;
-		gchar* _tmp3_;
-		gboolean _tmp4_;
-		_tmp2_ = greeter_list_get_selected_id (self);
-		_tmp3_ = _tmp2_;
-		_tmp4_ = g_strcmp0 (_tmp3_, "*other") == 0;
-		_g_free0 (_tmp3_);
-		if (_tmp4_) {
-			LightDMGreeter* _tmp5_;
-			_tmp5_ = unity_greeter_greeter;
-			lightdm_greeter_authenticate (_tmp5_, NULL);
+		gchar* _tmp3_ = NULL;
+		gchar* _tmp4_;
+		gboolean _tmp5_;
+		_tmp3_ = greeter_list_get_selected_id (self);
+		_tmp4_ = _tmp3_;
+		_tmp5_ = g_strcmp0 (_tmp4_, "*other") == 0;
+		_g_free0 (_tmp4_);
+		if (_tmp5_) {
+			UnityGreeter* _tmp6_;
+			_tmp6_ = unity_greeter_singleton;
+			unity_greeter_authenticate (_tmp6_, NULL);
 		} else {
-			gchar* _tmp6_ = NULL;
-			gchar* _tmp7_;
-			gboolean _tmp8_;
-			_tmp6_ = greeter_list_get_selected_id (self);
-			_tmp7_ = _tmp6_;
-			_tmp8_ = g_strcmp0 (_tmp7_, "*guest") == 0;
-			_g_free0 (_tmp7_);
-			if (_tmp8_) {
-				LightDMGreeter* _tmp9_;
-				_tmp9_ = unity_greeter_greeter;
-				lightdm_greeter_authenticate_as_guest (_tmp9_);
+			gchar* _tmp7_ = NULL;
+			gchar* _tmp8_;
+			gboolean _tmp9_;
+			_tmp7_ = greeter_list_get_selected_id (self);
+			_tmp8_ = _tmp7_;
+			_tmp9_ = g_strcmp0 (_tmp8_, "*guest") == 0;
+			_g_free0 (_tmp8_);
+			if (_tmp9_) {
+				UnityGreeter* _tmp10_;
+				_tmp10_ = unity_greeter_singleton;
+				unity_greeter_authenticate_as_guest (_tmp10_);
 			} else {
-				LightDMGreeter* _tmp10_;
-				gchar* _tmp11_ = NULL;
-				gchar* _tmp12_;
-				_tmp10_ = unity_greeter_greeter;
-				_tmp11_ = greeter_list_get_selected_id (self);
-				_tmp12_ = _tmp11_;
-				lightdm_greeter_authenticate (_tmp10_, _tmp12_);
-				_g_free0 (_tmp12_);
+				UnityGreeter* _tmp11_;
+				gchar* _tmp12_ = NULL;
+				gchar* _tmp13_;
+				_tmp11_ = unity_greeter_singleton;
+				_tmp12_ = greeter_list_get_selected_id (self);
+				_tmp13_ = _tmp12_;
+				unity_greeter_authenticate (_tmp11_, _tmp13_);
+				_g_free0 (_tmp13_);
 			}
 		}
 	}
@@ -2336,17 +2392,19 @@ static void greeter_list_background_loaded_cb (GreeterList* self, GParamSpec* ps
 static void greeter_list_start_session (GreeterList* self) {
 	Background* _tmp0_;
 	Background* _tmp1_;
-	gchar* _tmp2_ = NULL;
-	gchar* _tmp3_;
+	UnityGreeter* _tmp2_;
+	gchar* _tmp3_ = NULL;
+	gchar* _tmp4_;
 	g_return_if_fail (self != NULL);
 	_tmp0_ = self->priv->_background;
 	background_set_draw_grid (_tmp0_, FALSE);
 	_tmp1_ = self->priv->_background;
 	gtk_widget_queue_draw ((GtkWidget*) _tmp1_);
-	_tmp2_ = greeter_list_get_lightdm_session (self);
-	_tmp3_ = _tmp2_;
-	unity_greeter_start_session (_tmp3_);
-	_g_free0 (_tmp3_);
+	_tmp2_ = unity_greeter_singleton;
+	_tmp3_ = greeter_list_get_lightdm_session (self);
+	_tmp4_ = _tmp3_;
+	unity_greeter_start_session (_tmp2_, _tmp4_);
+	_g_free0 (_tmp4_);
 }
 
 
@@ -2522,13 +2580,13 @@ static gint greeter_list_get_box_y (GreeterList* self) {
 	gint _tmp3_;
 	g_return_val_if_fail (self != NULL, 0);
 	_tmp0_ = gtk_widget_get_allocated_height ((GtkWidget*) self);
-	row = (MENU_BAR_HEIGHT + _tmp0_) / grid_size;
+	row = (MAIN_WINDOW_MENUBAR_HEIGHT + _tmp0_) / grid_size;
 	_tmp1_ = row;
 	row = _tmp1_ - GREETER_LIST_DEFAULT_BOX_HEIGHT;
 	_tmp2_ = row;
 	row = _tmp2_ / 2;
 	_tmp3_ = row;
-	result = (_tmp3_ * grid_size) - MENU_BAR_HEIGHT;
+	result = (_tmp3_ * grid_size) - MAIN_WINDOW_MENUBAR_HEIGHT;
 	return result;
 }
 
@@ -2593,13 +2651,13 @@ static void greeter_list_set_scrolling_entry (GreeterList* self, PromptBox* valu
 }
 
 
-static void _greeter_list___lambda33_ (GreeterList* self) {
+static void _greeter_list___lambda36_ (GreeterList* self) {
 	gtk_widget_queue_draw ((GtkWidget*) self);
 }
 
 
-static void __greeter_list___lambda33__g_object_notify (GObject* _sender, GParamSpec* pspec, gpointer self) {
-	_greeter_list___lambda33_ (self);
+static void __greeter_list___lambda36__g_object_notify (GObject* _sender, GParamSpec* pspec, gpointer self) {
+	_greeter_list___lambda36_ (self);
 }
 
 
@@ -2656,7 +2714,7 @@ static GObject * greeter_list_constructor (GType type, guint n_construct_propert
 	_g_object_unref0 (self->greeter_box);
 	self->greeter_box = _tmp6_;
 	_tmp7_ = self->greeter_box;
-	g_signal_connect_object ((GObject*) _tmp7_, "notify::base-alpha", (GCallback) __greeter_list___lambda33__g_object_notify, self, 0);
+	g_signal_connect_object ((GObject*) _tmp7_, "notify::base-alpha", (GCallback) __greeter_list___lambda36__g_object_notify, self, 0);
 	_tmp8_ = self->greeter_box;
 	gtk_widget_show ((GtkWidget*) _tmp8_);
 	_tmp9_ = self->greeter_box;

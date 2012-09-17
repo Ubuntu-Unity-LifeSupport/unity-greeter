@@ -231,11 +231,13 @@ dist_pkgdata_DATA = \
 	arrow_left.png \
 	arrow_right.png \
 	cof.png \
-	logo.png \
-	message.png \
 	gnome_badge.png \
 	kde_badge.png \
+	logo.png \
+	message.png \
 	recovery_console_badge.png \
+	remote_login_help.png \
+	shadow.png \
 	ubuntu_badge.png \
 	unknown_badge.png
 

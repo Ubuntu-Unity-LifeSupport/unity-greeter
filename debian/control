@@ -4,7 +4,10 @@ Priority: optional
 Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
 XSBC-Original-Maintainer: Robert Ancell <robert.ancell@canonical.com>
 Standards-Version: 3.9.3
-Build-Depends: debhelper (>= 7.0.50~),
+Build-Depends: appmenu-gtk3,
+               at-spi2-core,
+               dbus-x11,
+               debhelper (>= 7.0.50~),
                dh-autoreconf,
                gnome-common,
                libcanberra-dev,
@@ -12,6 +15,7 @@ Build-Depends: debhelper (>= 7.0.50~),
                libindicator3-dev,
                liblightdm-gobject-1-dev (>= 1.3.3-0ubuntu4),
                valac-0.16,
+               xvfb,
 Homepage: https://launchpad.net/unity-greeter
 Vcs-Bzr: https://code.launchpad.net/~ubuntu-desktop/unity-greeter/ubuntu
 

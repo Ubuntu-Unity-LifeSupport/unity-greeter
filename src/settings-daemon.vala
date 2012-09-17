@@ -40,15 +40,15 @@ public class SettingsDaemon : Object
                               "org.gnome.settings-daemon.plugins.print-notifications",
                               "org.gnome.settings-daemon.plugins.smartcard",
                               "org.gnome.settings-daemon.plugins.sound",
-                              "org.gnome.settings-daemon.plugins.wacom",
-                              "org.gnome.settings-daemon.plugins.xsettings" };
+                              "org.gnome.settings-daemon.plugins.wacom" };
 
         string[] enabled =  { "org.gnome.settings-daemon.plugins.a11y-keyboard",
                               "org.gnome.settings-daemon.plugins.a11y-settings",
                               "org.gnome.settings-daemon.plugins.color",
                               "org.gnome.settings-daemon.plugins.cursor",
                               "org.gnome.settings-daemon.plugins.power",
-                              "org.gnome.settings-daemon.plugins.xrandr" };
+                              "org.gnome.settings-daemon.plugins.xrandr",
+                              "org.gnome.settings-daemon.plugins.xsettings" };
 
         foreach (var schema in disabled)
             set_plugin_enabled (schema, false);

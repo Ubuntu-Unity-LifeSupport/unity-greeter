@@ -85,11 +85,11 @@ public abstract class GreeterList : FadableBox
         get
         {
             /* First, get grid row number as if menubar weren't there */
-            var row = (MenuBar.HEIGHT + get_allocated_height ()) / grid_size;
+            var row = (MainWindow.MENUBAR_HEIGHT + get_allocated_height ()) / grid_size;
             row = row - DEFAULT_BOX_HEIGHT; /* and no default dash box */
             row = row / 2; /* and in the middle */
             /* Now calculate y pixel spot keeping in mind menubar's allocation */
-            return row * grid_size - MenuBar.HEIGHT;
+            return row * grid_size - MainWindow.MENUBAR_HEIGHT;
         }
     }
 
@@ -176,7 +176,7 @@ public abstract class GreeterList : FadableBox
 
     public void cancel_authentication ()
     {
-        UnityGreeter.greeter.cancel_authentication ();
+        UnityGreeter.singleton.cancel_authentication ();
         entry_selected (selected_entry.id);
     }
 
@@ -436,20 +436,28 @@ public abstract class GreeterList : FadableBox
 
     protected virtual int get_position_y (double position)
     {
-        double grid_number = position;
+        // Most position heights are just the grid height.  Except for the one
+        // right above the greeter box and the greeter box itself.  The greeter
+        // box is some number of grids to start with.  And it is smaller by a
+        // bit, while the one above it is larger by the same amount, in order
+        // to line up names outside the greeter box in the middle of their
+        // grid, while the name inside the box is near the bottom of its first
+        // box.
+        int one_above_height = grid_size + PromptBox.NAME_MARGIN_TOP;
+        int box_height = get_greeter_box_height_grids () * grid_size -
+                         PromptBox.NAME_MARGIN_TOP;
+        double offset;
 
-        if (position >= 0.0 && position < 1.0)
-        {
-            var grids = get_greeter_box_height_grids ();
-            grid_number = position * grids; /* scaled to height of greeter box */
-        }
-        else if (position >= 1.0)
-        {
-            var grids = get_greeter_box_height_grids ();
-            grid_number = position + grids - 1.0;
-        }
+        if (position < -1)
+            offset = (position + 1) * grid_size - one_above_height;
+        else if (position < 0)
+            offset = position * one_above_height;
+        else if (position < 1)
+            offset = position * box_height;
+        else
+            offset = (position - 1) * grid_size + box_height;
 
-        return get_greeter_box_y () + (int)(grid_number * grid_size);
+        return get_greeter_box_y () + (int)offset;
     }
 
     private void move_entry (PromptBox entry, double position)
@@ -464,11 +472,14 @@ public abstract class GreeterList : FadableBox
         /* Some entry types may care where they are (e.g. wifi prompt) */
         entry.position = position;
 
+        Gtk.Allocation allocation;
+        get_allocation (out allocation);
+
         var child_allocation = Gtk.Allocation ();
         child_allocation.width = grid_size * BOX_WIDTH - BORDER * 2;
         entry.get_preferred_height_for_width (child_allocation.width, null, out child_allocation.height);
-        child_allocation.x = get_greeter_box_x ();
-        child_allocation.y = get_position_y (position);
+        child_allocation.x = allocation.x + get_greeter_box_x ();
+        child_allocation.y = allocation.y + get_position_y (position);
         fixed.move (entry, child_allocation.x, child_allocation.y);
         entry.size_allocate (child_allocation);
         entry.show ();
@@ -642,6 +653,7 @@ public abstract class GreeterList : FadableBox
             return;
 
         allocate_greeter_box ();
+        move_names ();
     }
 
     public override bool draw (Cairo.Context c)
@@ -699,9 +711,9 @@ public abstract class GreeterList : FadableBox
 
     protected void connect_to_lightdm ()
     {
-        UnityGreeter.greeter.show_message.connect (show_message_cb);
-        UnityGreeter.greeter.show_prompt.connect (show_prompt_cb);
-        UnityGreeter.greeter.authentication_complete.connect (authentication_complete_cb);
+        UnityGreeter.singleton.show_message.connect (show_message_cb);
+        UnityGreeter.singleton.show_prompt.connect (show_prompt_cb);
+        UnityGreeter.singleton.authentication_complete.connect (authentication_complete_cb);
     }
 
     protected void show_message_cb (string text, LightDM.MessageType type)
@@ -714,10 +726,10 @@ public abstract class GreeterList : FadableBox
         /* Notify the greeter on what user has been logged */
         if (get_selected_id () == "*other" && manual_name == null)
         {
-            if (UnityGreeter.test_mode)
+            if (UnityGreeter.singleton.test_mode)
                 manual_name = test_username;
             else
-                manual_name = UnityGreeter.greeter.authentication_user;
+                manual_name = UnityGreeter.singleton.authentication_user();
         }
 
         prompted = true;
@@ -743,10 +755,10 @@ public abstract class GreeterList : FadableBox
             return;
 
         bool is_authenticated;
-        if (UnityGreeter.test_mode)
+        if (UnityGreeter.singleton.test_mode)
             is_authenticated = test_is_authenticated;
         else
-            is_authenticated = UnityGreeter.greeter.is_authenticated;
+            is_authenticated = UnityGreeter.singleton.is_authenticated();
 
         if (is_authenticated)
         {
@@ -754,7 +766,7 @@ public abstract class GreeterList : FadableBox
             if (prompted)
             {
                 login_complete ();
-                if (UnityGreeter.test_mode)
+                if (UnityGreeter.singleton.test_mode)
                     start_session ();
                 else
                 {
@@ -806,16 +818,16 @@ public abstract class GreeterList : FadableBox
 
         greeter_authenticating_user = get_selected_id ();
 
-        if (UnityGreeter.test_mode)
+        if (UnityGreeter.singleton.test_mode)
             test_start_authentication ();
         else
         {
             if (get_selected_id () == "*other")
-                UnityGreeter.greeter.authenticate ();
+                UnityGreeter.singleton.authenticate ();
             else if (get_selected_id () == "*guest")
-                UnityGreeter.greeter.authenticate_as_guest ();
+                UnityGreeter.singleton.authenticate_as_guest ();
             else
-                UnityGreeter.greeter.authenticate (get_selected_id ());
+                UnityGreeter.singleton.authenticate (get_selected_id ());
         }
     }
 
@@ -834,7 +846,7 @@ public abstract class GreeterList : FadableBox
         background.draw_grid = false;
         background.queue_draw ();
 
-        UnityGreeter.start_session (get_lightdm_session ());
+        UnityGreeter.singleton.start_session (get_lightdm_session ());
     }
 
     public void login_complete ()

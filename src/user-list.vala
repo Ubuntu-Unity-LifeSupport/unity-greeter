@@ -129,7 +129,7 @@ public class UserList : GreeterList
 
         connect_to_lightdm ();
 
-        if (!UnityGreeter.test_mode && UGSettings.get_boolean (UGSettings.KEY_ENABLE_REMOTE_LOGIN))
+        if (!UnityGreeter.singleton.test_mode && UGSettings.get_boolean (UGSettings.KEY_ENABLE_REMOTE_LOGIN))
             remote_login_service_watch = Bus.watch_name (BusType.SESSION,
                                             "com.canonical.RemoteLogin",
                                             BusNameWatcherFlags.AUTO_START,
@@ -304,7 +304,7 @@ public class UserList : GreeterList
                     remote_login_service.servers_updated.connect (set_remote_directory_servers);
                     remote_login_service.login_servers_updated.connect (remote_login_servers_updated);
                     remote_login_service.login_changed.connect (remote_login_changed);
-                    query_directory_servers ();
+                    query_directory_servers.begin ();
                 }
                 catch (IOError e)
                 {
@@ -364,7 +364,7 @@ public class UserList : GreeterList
         {
             will_clear = true;
             show_message (_("Please enter a complete e-mail address"), true);
-            create_remote_fields_for_current_item (remote_directory_server_list);
+            create_remote_fields_for_current_item.begin (remote_directory_server_list);
         }
         else
         {
@@ -372,7 +372,7 @@ public class UserList : GreeterList
             try
             {
                 var url = url_from_remote_loding_server_list_name (selected_entry.id);
-                if (UnityGreeter.test_mode)
+                if (UnityGreeter.singleton.test_mode)
                 {
                     if (password_field.text == "password")
                     {
@@ -401,7 +401,11 @@ public class UserList : GreeterList
                 else
                 {
                     string data_type;
-                    yield remote_login_service.get_servers_for_login (url, email, password_field.text, true, out login_success, out data_type, out server_list);
+                    bool allowcache = true;
+                    // If we had an error and are retrying the same user and server, do not use the cache on R-L-S
+                    if (selected_entry.has_errors && currently_browsing_server_email == email && currently_browsing_server_url == url)
+                        allowcache = false;
+                    yield remote_login_service.get_servers_for_login (url, email, password_field.text, allowcache, out login_success, out data_type, out server_list);
                 }
                 currently_browsing_server_url = url;
                 currently_browsing_server_email = email;
@@ -435,7 +439,7 @@ public class UserList : GreeterList
             {
                 will_clear = true;
                 show_message (_("Incorrect e-mail address or password"), true);
-                create_remote_fields_for_current_item (remote_directory_server_list);
+                create_remote_fields_for_current_item.begin (remote_directory_server_list);
             }
         }
     }
@@ -445,7 +449,7 @@ public class UserList : GreeterList
         sensitive = false;
         will_clear = true;
         greeter_authenticating_user = selected_entry.id;
-        if (UnityGreeter.test_mode)
+        if (UnityGreeter.singleton.test_mode)
         {
             Gtk.Entry field = current_remote_fields.get ("password") as Gtk.Entry;
             test_is_authenticated = field.text == "password";
@@ -456,14 +460,15 @@ public class UserList : GreeterList
         }
         else
         {
-            UnityGreeter.greeter.authenticate_remote (get_lightdm_session (), null);
-            remote_login_service.set_last_used_server (currently_browsing_server_url, url_from_remote_loding_server_list_name (selected_entry.id));
+            UnityGreeter.singleton.authenticate_remote (get_lightdm_session (), null);
+            remote_login_service.set_last_used_server.begin (currently_browsing_server_url, url_from_remote_loding_server_list_name (selected_entry.id));
         }
     }
 
     private void show_remote_account_dialog ()
     {
         var dialog = new Gtk.MessageDialog (null, 0, Gtk.MessageType.OTHER, Gtk.ButtonsType.NONE, "");
+        dialog.set_position (Gtk.WindowPosition.CENTER_ALWAYS);
         dialog.secondary_text = _("If you have an account on an RDP or Citrix server, Remote Login lets you run applications from that server.");
         if (offer_guest)
         {
@@ -487,7 +492,7 @@ public class UserList : GreeterList
                 if (is_supported_remote_session (config_session))
                 {
                     greeter_authenticating_user = selected_entry.id;
-                    UnityGreeter.greeter.authenticate_remote (config_session, null);
+                    UnityGreeter.singleton.authenticate_remote (config_session, null);
                 }
             }
             dialog.destroy ();
@@ -546,7 +551,7 @@ public class UserList : GreeterList
 
     private void entry_selected_cb (string? username)
     {
-        UnityGreeter.set_state ("last-user", username);
+        UnityGreeter.singleton.set_state ("last-user", username);
         if (selected_entry is UserPromptBox)
             session = (selected_entry as UserPromptBox).session;
         else
@@ -566,12 +571,12 @@ public class UserList : GreeterList
         if (selected_entry.id.has_prefix ("*remote_directory"))
         {
             prompted = true;
-            create_remote_fields_for_current_item (remote_directory_server_list);
+            create_remote_fields_for_current_item.begin (remote_directory_server_list);
         }
         else if (selected_entry.id.has_prefix ("*remote_login"))
         {
             prompted = true;
-            create_remote_fields_for_current_item (remote_login_server_list);
+            create_remote_fields_for_current_item.begin (remote_login_server_list);
         }
         else
             base.start_authentication ();
@@ -680,7 +685,7 @@ public class UserList : GreeterList
                         string[] email_domains;
                         try
                         {
-                            if (UnityGreeter.test_mode)
+                            if (UnityGreeter.singleton.test_mode)
                                 email_domains = { "canonical.com", "ubuntu.org", "candy.com", "urban.net" };
                             else
                                 yield remote_login_service.get_cached_domains_for_server (url, out email_domains);
@@ -791,10 +796,10 @@ public class UserList : GreeterList
 
         foreach (var response in responses)
         {
-            if (UnityGreeter.test_mode)
+            if (UnityGreeter.singleton.test_mode)
                 test_respond (response);
             else
-                UnityGreeter.greeter.respond (response);
+                UnityGreeter.singleton.respond (response);
         }
     }
 
@@ -803,10 +808,10 @@ public class UserList : GreeterList
         debug ("Start session for %s", selected_entry.id);
 
         var is_authenticated = false;
-        if (UnityGreeter.test_mode)
+        if (UnityGreeter.singleton.test_mode)
             is_authenticated = test_is_authenticated;
         else
-            is_authenticated = UnityGreeter.greeter.is_authenticated;
+            is_authenticated = UnityGreeter.singleton.is_authenticated();
 
         /* Finish authentication (again) or restart it */
         if (is_authenticated)
@@ -822,20 +827,30 @@ public class UserList : GreeterList
     {
         var session_chooser = new SessionList (background, menubar, session, default_session);
         session_chooser.session_clicked.connect (session_clicked_cb);
-        UnityGreeter.push_list (session_chooser);
+        UnityGreeter.singleton.push_list (session_chooser);
     }
 
     private void session_clicked_cb (string session)
     {
         this.session = session;
-        UnityGreeter.pop_list ();
+        UnityGreeter.singleton.pop_list ();
+    }
+
+    private bool should_show_session_badge ()
+    {
+        if (UnityGreeter.singleton.test_mode)
+            return get_selected_id () != "no-badge";
+        else
+            return LightDM.get_sessions ().length () > 1;
     }
 
     private Gdk.Pixbuf? get_badge ()
     {
         if (selected_entry is UserPromptBox)
         {
-            if (session == null)
+            if (!should_show_session_badge ())
+                return null;
+            else if (session == null)
                 return SessionList.get_badge (default_session);
             else
                 return SessionList.get_badge (session);
@@ -851,7 +866,7 @@ public class UserList : GreeterList
 
     private bool is_supported_remote_session (string session_internal_name)
     {
-        if (UnityGreeter.test_mode)
+        if (UnityGreeter.singleton.test_mode)
             return session_internal_name == "rdp";
 
         var found = false;
@@ -893,13 +908,13 @@ public class UserList : GreeterList
 
     private void fill_list ()
     {
-        if (UnityGreeter.test_mode)
+        if (UnityGreeter.singleton.test_mode)
             test_fill_list ();
         else
         {
-            default_session = UnityGreeter.greeter.default_session_hint;
-            always_show_manual = UnityGreeter.greeter.show_manual_login_hint;
-            if (!UnityGreeter.greeter.hide_users_hint)
+            default_session = UnityGreeter.singleton.default_session_hint ();
+            always_show_manual = UnityGreeter.singleton.show_manual_login_hint ();
+            if (!UnityGreeter.singleton.hide_users_hint ())
             {
                 var users = LightDM.UserList.get_instance ();
                 users.user_added.connect (user_added_cb);
@@ -909,15 +924,19 @@ public class UserList : GreeterList
                     user_added_cb (user);
             }
 
-            if (UnityGreeter.greeter.has_guest_account_hint)
+            if (UnityGreeter.singleton.has_guest_account_hint ())
             {
                 debug ("Adding guest account entry");
                 offer_guest = true;
             }
 
-            var last_user = UnityGreeter.get_state ("last-user");
-            if (UnityGreeter.greeter.select_user_hint != null)
-                set_active_entry (UnityGreeter.greeter.select_user_hint);
+            /* If we have no entries at all, we should show manual */
+            if (!have_entries () && !always_show_manual)
+                add_manual_entry ();
+
+            var last_user = UnityGreeter.singleton.get_state ("last-user");
+            if (UnityGreeter.singleton.select_user_hint () != null)
+                set_active_entry (UnityGreeter.singleton.select_user_hint ());
             else if (last_user != null)
                 set_active_entry (last_user);
         }
@@ -956,24 +975,24 @@ public class UserList : GreeterList
             {
                 Gtk.Entry field = current_remote_fields.get ("username") as Gtk.Entry;
                 var answer = field != null ? field.text : "";
-                UnityGreeter.greeter.respond (answer);
+                UnityGreeter.singleton.respond (answer);
             }
             else if (text == "password:")
             {
                 Gtk.Entry field = current_remote_fields.get ("password") as Gtk.Entry;
                 var answer = field != null ? field.text : "";
-                UnityGreeter.greeter.respond (answer);
+                UnityGreeter.singleton.respond (answer);
             }
             else if (text == "remote host:")
             {
                 var answer = url_from_remote_loding_server_list_name (selected_entry.id);
-                UnityGreeter.greeter.respond (answer);
+                UnityGreeter.singleton.respond (answer);
             }
             else if (text == "domain:")
             {
                 Gtk.Entry field = current_remote_fields.get ("domain") as Gtk.Entry;
                 var answer = field != null ? field.text : "";
-                UnityGreeter.greeter.respond (answer);
+                UnityGreeter.singleton.respond (answer);
             }
         }
         else
@@ -1021,6 +1040,7 @@ public class UserList : GreeterList
         { "four-layouts",       "Four Layouts",      "*",              "de\tdvorak;ca;gb;fr\toss", false, false, null },
         { "hy-layout",          "Layout Is 'hy'",    "*",              "am\teastern-alt", false, false, null }, /* inherits parent layout's short_desc */
         { "no-response",        "No Response",       "*",              null,    false, false, null },
+        { "no-badge",           "No Badge",          "*",              null,    false, false, null },
         { "",                   "",                  null,             null,    false, false, null }
     };
     private List<string> test_backgrounds;
@@ -1074,7 +1094,7 @@ public class UserList : GreeterList
             return false;
         });
 
-        var last_user = UnityGreeter.get_state ("last-user");
+        var last_user = UnityGreeter.singleton.get_state ("last-user");
         if (last_user != null)
             set_active_entry (last_user);
 

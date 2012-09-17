@@ -31,6 +31,9 @@ public class MainWindow : Gtk.Window
 
     public ListStack stack;
 
+    // Menubar is smaller, but with shadow, we reserve more space
+    public static const int MENUBAR_HEIGHT = 32;
+
     construct
     {
         events |= Gdk.EventMask.POINTER_MOTION_MASK;
@@ -58,9 +61,37 @@ public class MainWindow : Gtk.Window
         login_box.show ();
         background.add (login_box);
 
+        /* Box for menubar shadow */
+        var menubox = new Gtk.EventBox ();
+        var menualign = new Gtk.Alignment (0.0f, 0.0f, 1.0f, 0.0f);
+        try
+        {
+            var shadow_path = Path.build_filename (Config.PKGDATADIR,
+                                                   "shadow.png", null);
+            var style = new Gtk.CssProvider ();
+            style.load_from_data ("* {background-color: transparent;
+                                      background-image: url('%s');
+                                      background-repeat: repeat;
+                                     }".printf(shadow_path), -1);
+            var context = menubox.get_style_context ();
+            context.add_provider (style,
+                                  Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+        }
+        catch (Error e)
+        {
+            debug ("Internal error loading menubox style: %s", e.message);
+        }
+        menubox.set_size_request (-1, MENUBAR_HEIGHT);
+        menubox.show ();
+        menualign.show ();
+        menubox.add (menualign);
+        login_box.add (menubox);
+        UnityGreeter.add_style_class (menualign);
+        UnityGreeter.add_style_class (menubox);
+
         menubar = new MenuBar (background, accel_group);
         menubar.show ();
-        login_box.add (menubar);
+        menualign.add (menubar);
         UnityGreeter.add_style_class (menubar);
 
         hbox = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
@@ -70,7 +101,7 @@ public class MainWindow : Gtk.Window
 
         var align = new Gtk.Alignment (0.5f, 0.5f, 0.0f, 0.0f);
         align.set_size_request (grid_size, -1);
-        align.margin_bottom = MenuBar.HEIGHT; /* offset for menubar at top */
+        align.margin_bottom = MENUBAR_HEIGHT; /* offset for menubar at top */
         align.show ();
         hbox.add (align);
 
@@ -93,7 +124,7 @@ public class MainWindow : Gtk.Window
 
         add_user_list ();
 
-        if (UnityGreeter.test_mode)
+        if (UnityGreeter.singleton.test_mode)
         {
             /* Simulate an 800x600 monitor to the left of a 640x480 monitor */
             monitors = new List<Monitor> ();

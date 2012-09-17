@@ -1,3 +1,29 @@
+unity-greeter (12.10.3-0ubuntu1) quantal; urgency=low
+
+  * New upstream release
+    - Rearrange some UI bits (LP: #1049231, LP: #1049235, LP: #1049236,
+      LP: #1049239)
+    - After a remote login error, do not use cache when trying same user
+      again
+    - When no users and no manual entry, force manual entry to appear
+      (LP: #1044251)
+    - When switching between monitors, re-adjust user names (LP: #1043604)
+    - Center remote login help dialog
+    - Use the xsettings plugin to apply icons-in-menus gsetting
+      (LP: #927236)
+  * debian/unity-greeter.pkla:
+    - Fix policykit file to not be order-dependent and spell out the
+      NetworkManager permissions instead of using a wildcard.
+      LP: #1048522
+  * debian/control:
+    - Add some Build-Depends for new test suite
+  * debian/patches/01_add_remote_login_help_icon.patch:
+    - Drop, remote login help icon is included upstream
+  * debian/patches/02_use_remote_login_hint.patch:
+    - Update to apply again
+
+ -- Michael Terry <mterry@ubuntu.com>  Mon, 17 Sep 2012 13:31:13 -0400
+
 unity-greeter (12.10.2-0ubuntu5) quantal; urgency=low
 
   * debian/patches/02_use_remote_login_hint.patch:
