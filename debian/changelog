@@ -1,3 +1,11 @@
+unity-greeter (12.10.3-0ubuntu3) quantal; urgency=low
+
+  * debian/patches/trunk_session_chooser.patch:
+    - backport from trunk: "Fix bug preventing user from clicking 
+      on first few sessions in session chooser (lp: #1052453)"
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Mon, 01 Oct 2012 11:02:40 +0200
+
 unity-greeter (12.10.3-0ubuntu2) quantal; urgency=low
 
   * debian/patches/move-nm-applet.patch:
