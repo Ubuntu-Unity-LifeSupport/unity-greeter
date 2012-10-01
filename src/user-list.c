@@ -1131,7 +1131,7 @@ void menu_bar_set_layouts (MenuBar* self, GList* layouts);
 static void __user_list___lambda31__greeter_list_entry_displayed_done (GreeterList* _sender, gpointer self);
 static void _user_list_entry_selected_cb_greeter_list_entry_selected (GreeterList* _sender, const gchar* name, gpointer self);
 void greeter_list_connect_to_lightdm (GreeterList* self);
-#define UG_SETTINGS_KEY_ENABLE_REMOTE_LOGIN "enable-remote-login"
+gboolean unity_greeter_show_remote_login_hint (UnityGreeter* self);
 static void _user_list_on_remote_login_service_appeared_gbus_name_appeared_callback (GDBusConnection* connection, const gchar* name, const gchar* name_owner, gpointer self);
 static void _user_list_on_remote_login_service_vanished_gbus_name_vanished_callback (GDBusConnection* connection, const gchar* name, gpointer self);
 static void user_list_finalize (GObject* obj);
@@ -1369,7 +1369,7 @@ static gboolean user_list_query_directory_servers_co (UserListQueryDirectoryServ
 		if (_data_->_inner_error_ != NULL) {
 			_data_->server_list = (_vala_RemoteServer_array_free (_data_->server_list, _data_->server_list_length1), NULL);
 			if (_data_->_inner_error_->domain == G_IO_ERROR) {
-				goto __catch23_g_io_error;
+				goto __catch24_g_io_error;
 			}
 			_data_->server_list = (_vala_RemoteServer_array_free (_data_->server_list, _data_->server_list_length1), NULL);
 			g_critical ("file %s: line %d: unexpected error: %s (%s, %d)", __FILE__, __LINE__, _data_->_inner_error_->message, g_quark_to_string (_data_->_inner_error_->domain), _data_->_inner_error_->code);
@@ -1379,19 +1379,19 @@ static gboolean user_list_query_directory_servers_co (UserListQueryDirectoryServ
 		user_list_set_remote_directory_servers (_data_->self, _data_->server_list, _data_->server_list_length1);
 		_data_->server_list = (_vala_RemoteServer_array_free (_data_->server_list, _data_->server_list_length1), NULL);
 	}
-	goto __finally23;
-	__catch23_g_io_error:
+	goto __finally24;
+	__catch24_g_io_error:
 	{
 		_data_->e = _data_->_inner_error_;
 		_data_->_inner_error_ = NULL;
 		_data_->_tmp3_ = _data_->e;
 		_data_->_tmp4_ = _data_->_tmp3_->message;
-		g_debug ("user-list.vala:164: Calling GetServers on com.canonical.RemoteLogin db" \
+		g_debug ("user-list.vala:165: Calling GetServers on com.canonical.RemoteLogin db" \
 "us service failed. Error: %s", _data_->_tmp4_);
 		user_list_remove_remote_servers (_data_->self);
 		_g_error_free0 (_data_->e);
 	}
-	__finally23:
+	__finally24:
 	if (_data_->_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _data_->_inner_error_->message, g_quark_to_string (_data_->_inner_error_->domain), _data_->_inner_error_->code);
 		g_clear_error (&_data_->_inner_error_);
@@ -1972,7 +1972,7 @@ static void __lambda27_ (UserList* self, GObject* obj, GAsyncResult* res) {
 		_tmp3_ = (RemoteLoginService*) _tmp2_;
 		if (_inner_error_ != NULL) {
 			if (_inner_error_->domain == G_IO_ERROR) {
-				goto __catch24_g_io_error;
+				goto __catch25_g_io_error;
 			}
 			g_critical ("file %s: line %d: unexpected error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 			g_clear_error (&_inner_error_);
@@ -1988,8 +1988,8 @@ static void __lambda27_ (UserList* self, GObject* obj, GAsyncResult* res) {
 		g_signal_connect_object (_tmp6_, "login-changed", (GCallback) _user_list_remote_login_changed_remote_login_service_login_changed, self, 0);
 		user_list_query_directory_servers (self, NULL, NULL);
 	}
-	goto __finally24;
-	__catch24_g_io_error:
+	goto __finally25;
+	__catch25_g_io_error:
 	{
 		GError* e = NULL;
 		GError* _tmp7_;
@@ -1998,14 +1998,14 @@ static void __lambda27_ (UserList* self, GObject* obj, GAsyncResult* res) {
 		_inner_error_ = NULL;
 		_tmp7_ = e;
 		_tmp8_ = _tmp7_->message;
-		g_debug ("user-list.vala:311: Getting the com.canonical.RemoteLogin dbus service" \
+		g_debug ("user-list.vala:312: Getting the com.canonical.RemoteLogin dbus service" \
 " failed. Error: %s", _tmp8_);
 		user_list_remove_remote_servers (self);
 		_g_object_unref0 (self->priv->remote_login_service);
 		self->priv->remote_login_service = NULL;
 		_g_error_free0 (e);
 	}
-	__finally24:
+	__finally25:
 	if (_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
@@ -2152,7 +2152,7 @@ static gboolean user_list_remote_directory_respond_cb_co (UserListRemoteDirector
 	_data_->email_field = _data_->_tmp7_;
 	_data_->_tmp8_ = _data_->password_field;
 	if (_data_->_tmp8_ == NULL) {
-		g_debug ("user-list.vala:335: Something wrong happened in remote_directory_respo" \
+		g_debug ("user-list.vala:336: Something wrong happened in remote_directory_respo" \
 "nd_cb. There was no password field");
 		_g_object_unref0 (_data_->email_field);
 		_g_object_unref0 (_data_->password_field);
@@ -2166,7 +2166,7 @@ static gboolean user_list_remote_directory_respond_cb_co (UserListRemoteDirector
 	}
 	_data_->_tmp9_ = _data_->email_field;
 	if (_data_->_tmp9_ == NULL) {
-		g_debug ("user-list.vala:340: Something wrong happened in remote_directory_respo" \
+		g_debug ("user-list.vala:341: Something wrong happened in remote_directory_respo" \
 "nd_cb. There was no email field");
 		_g_object_unref0 (_data_->email_field);
 		_g_object_unref0 (_data_->password_field);
@@ -2195,7 +2195,7 @@ static gboolean user_list_remote_directory_respond_cb_co (UserListRemoteDirector
 		_data_->re = _data_->_tmp15_;
 		if (_data_->_inner_error_ != NULL) {
 			if (_data_->_inner_error_->domain == G_REGEX_ERROR) {
-				goto __catch25_g_regex_error;
+				goto __catch26_g_regex_error;
 			}
 			_g_free0 (_data_->email);
 			_data_->server_list = (_vala_RemoteServer_array_free (_data_->server_list, _data_->server_list_length1), NULL);
@@ -2239,17 +2239,17 @@ static gboolean user_list_remote_directory_respond_cb_co (UserListRemoteDirector
 		_g_match_info_free0 (_data_->info);
 		_g_regex_unref0 (_data_->re);
 	}
-	goto __finally25;
-	__catch25_g_regex_error:
+	goto __finally26;
+	__catch26_g_regex_error:
 	{
 		_data_->e = _data_->_inner_error_;
 		_data_->_inner_error_ = NULL;
 		_data_->_tmp31_ = _data_->e;
 		_data_->_tmp32_ = _data_->_tmp31_->message;
-		g_debug ("user-list.vala:359: Calling email regex match failed. Error: %s", _data_->_tmp32_);
+		g_debug ("user-list.vala:360: Calling email regex match failed. Error: %s", _data_->_tmp32_);
 		_g_error_free0 (_data_->e);
 	}
-	__finally25:
+	__finally26:
 	if (_data_->_inner_error_ != NULL) {
 		_g_free0 (_data_->email);
 		_data_->server_list = (_vala_RemoteServer_array_free (_data_->server_list, _data_->server_list_length1), NULL);
@@ -2393,7 +2393,7 @@ static gboolean user_list_remote_directory_respond_cb_co (UserListRemoteDirector
 					_g_free0 (_data_->data_type);
 					_g_free0 (_data_->url);
 					if (_data_->_inner_error_->domain == G_IO_ERROR) {
-						goto __catch26_g_io_error;
+						goto __catch27_g_io_error;
 					}
 					_g_free0 (_data_->data_type);
 					_g_free0 (_data_->url);
@@ -2417,18 +2417,18 @@ static gboolean user_list_remote_directory_respond_cb_co (UserListRemoteDirector
 			_data_->self->priv->currently_browsing_server_email = _data_->_tmp91_;
 			_g_free0 (_data_->url);
 		}
-		goto __finally26;
-		__catch26_g_io_error:
+		goto __finally27;
+		__catch27_g_io_error:
 		{
 			_data_->_vala1_e = _data_->_inner_error_;
 			_data_->_inner_error_ = NULL;
 			_data_->_tmp92_ = _data_->_vala1_e;
 			_data_->_tmp93_ = _data_->_tmp92_->message;
-			g_debug ("user-list.vala:415: Calling get_servers in com.canonical.RemoteLogin d" \
+			g_debug ("user-list.vala:416: Calling get_servers in com.canonical.RemoteLogin d" \
 "bus service failed. Error: %s", _data_->_tmp93_);
 			_g_error_free0 (_data_->_vala1_e);
 		}
-		__finally26:
+		__finally27:
 		if (_data_->_inner_error_ != NULL) {
 			_g_free0 (_data_->email);
 			_data_->server_list = (_vala_RemoteServer_array_free (_data_->server_list, _data_->server_list_length1), NULL);
@@ -3644,7 +3644,7 @@ static gboolean user_list_create_remote_fields_for_current_item_co (UserListCrea
 														_data_->_email_domains_size_ = _data_->email_domains_length1;
 														if (_data_->_inner_error_ != NULL) {
 															if (_data_->_inner_error_->domain == G_IO_ERROR) {
-																goto __catch27_g_io_error;
+																goto __catch28_g_io_error;
 															}
 															_data_->email_domains = (_vala_array_free (_data_->email_domains, _data_->email_domains_length1, (GDestroyNotify) g_free), NULL);
 															_g_free0 (_data_->default_value);
@@ -3659,8 +3659,8 @@ static gboolean user_list_create_remote_fields_for_current_item_co (UserListCrea
 														}
 													}
 												}
-												goto __finally27;
-												__catch27_g_io_error:
+												goto __finally28;
+												__catch28_g_io_error:
 												{
 													_data_->e = _data_->_inner_error_;
 													_data_->_inner_error_ = NULL;
@@ -3672,11 +3672,11 @@ static gboolean user_list_create_remote_fields_for_current_item_co (UserListCrea
 													_data_->_email_domains_size_ = _data_->_tmp208_;
 													_data_->_tmp209_ = _data_->e;
 													_data_->_tmp210_ = _data_->_tmp209_->message;
-													g_debug ("user-list.vala:696: Calling get_cached_domains_for_server in com.canon" \
+													g_debug ("user-list.vala:697: Calling get_cached_domains_for_server in com.canon" \
 "ical.RemoteLogin dbus service failed. Error: %s", _data_->_tmp210_);
 													_g_error_free0 (_data_->e);
 												}
-												__finally27:
+												__finally28:
 												if (_data_->_inner_error_ != NULL) {
 													_data_->email_domains = (_vala_array_free (_data_->email_domains, _data_->email_domains_length1, (GDestroyNotify) g_free), NULL);
 													_g_free0 (_data_->default_value);
@@ -3716,7 +3716,7 @@ static gboolean user_list_create_remote_fields_for_current_item_co (UserListCrea
 											} else {
 												_data_->_tmp221_ = _data_->_vala1_field;
 												_data_->_tmp222_ = (*_data_->_tmp221_).type;
-												g_debug ("user-list.vala:707: Found field of type %s, don't know what to do with" \
+												g_debug ("user-list.vala:708: Found field of type %s, don't know what to do with" \
 " it", _data_->_tmp222_);
 												_g_free0 (_data_->default_value);
 												_g_object_unref0 (_data_->widget);
@@ -4110,7 +4110,7 @@ static void user_list_prompt_box_login_cb (UserList* self) {
 	_tmp1_ = _tmp0_;
 	_tmp2_ = prompt_box_get_id (_tmp1_);
 	_tmp3_ = _tmp2_;
-	g_debug ("user-list.vala:808: Start session for %s", _tmp3_);
+	g_debug ("user-list.vala:809: Start session for %s", _tmp3_);
 	is_authenticated = FALSE;
 	_tmp4_ = unity_greeter_singleton;
 	_tmp5_ = _tmp4_->test_mode;
@@ -4531,7 +4531,7 @@ static void user_list_fill_list (UserList* self) {
 		_tmp18_ = unity_greeter_singleton;
 		_tmp19_ = unity_greeter_has_guest_account_hint (_tmp18_);
 		if (_tmp19_) {
-			g_debug ("user-list.vala:929: Adding guest account entry");
+			g_debug ("user-list.vala:930: Adding guest account entry");
 			user_list_set_offer_guest (self, TRUE);
 		}
 		_tmp21_ = greeter_list_have_entries ((GreeterList*) self);
@@ -4623,7 +4623,7 @@ static void user_list_user_added_cb (UserList* self, LightDMUser* user) {
 	_tmp3_ = user;
 	_tmp4_ = lightdm_user_get_real_name (_tmp3_);
 	_tmp5_ = _tmp4_;
-	g_debug ("user-list.vala:947: Adding/updating user %s (%s)", _tmp2_, _tmp5_);
+	g_debug ("user-list.vala:948: Adding/updating user %s (%s)", _tmp2_, _tmp5_);
 	_tmp6_ = user;
 	_tmp7_ = lightdm_user_get_real_name (_tmp6_);
 	_tmp8_ = _tmp7_;
@@ -4715,7 +4715,7 @@ static void user_list_user_removed_cb (UserList* self, LightDMUser* user) {
 	_tmp0_ = user;
 	_tmp1_ = lightdm_user_get_name (_tmp0_);
 	_tmp2_ = _tmp1_;
-	g_debug ("user-list.vala:966: Removing user %s", _tmp2_);
+	g_debug ("user-list.vala:967: Removing user %s", _tmp2_);
 	_tmp3_ = user;
 	_tmp4_ = lightdm_user_get_name (_tmp3_);
 	_tmp5_ = _tmp4_;
@@ -5020,7 +5020,7 @@ static void user_list_test_fill_list (UserList* self) {
 		dir = _tmp0_;
 		if (_inner_error_ != NULL) {
 			if (_inner_error_->domain == G_FILE_ERROR) {
-				goto __catch28_g_file_error;
+				goto __catch29_g_file_error;
 			}
 			g_critical ("file %s: line %d: unexpected error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 			g_clear_error (&_inner_error_);
@@ -5050,15 +5050,15 @@ static void user_list_test_fill_list (UserList* self) {
 		}
 		_g_dir_close0 (dir);
 	}
-	goto __finally28;
-	__catch28_g_file_error:
+	goto __finally29;
+	__catch29_g_file_error:
 	{
 		GError* e = NULL;
 		e = _inner_error_;
 		_inner_error_ = NULL;
 		_g_error_free0 (e);
 	}
-	__finally28:
+	__finally29:
 	if (_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
@@ -6067,7 +6067,7 @@ static void user_list_test_respond (UserList* self, const gchar* text) {
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (text != NULL);
 	_tmp0_ = text;
-	g_debug ("user-list.vala:1329: response %s", _tmp0_);
+	g_debug ("user-list.vala:1330: response %s", _tmp0_);
 	_tmp1_ = greeter_list_get_selected_id ((GreeterList*) self);
 	_tmp2_ = _tmp1_;
 	_tmp4_ = (NULL == _tmp2_) ? 0 : g_quark_from_string (_tmp2_);
@@ -6084,7 +6084,7 @@ static void user_list_test_respond (UserList* self, const gchar* text) {
 					gchar* _tmp8_;
 					const gchar* _tmp9_ = NULL;
 					_tmp6_ = text;
-					g_debug ("user-list.vala:1335: username=%s", _tmp6_);
+					g_debug ("user-list.vala:1336: username=%s", _tmp6_);
 					_tmp7_ = text;
 					_tmp8_ = g_strdup (_tmp7_);
 					_g_free0 (((GreeterList*) self)->test_username);
@@ -6110,7 +6110,7 @@ static void user_list_test_respond (UserList* self, const gchar* text) {
 					const gchar* _tmp12_;
 					_tmp12_ = text;
 					if (g_strcmp0 (_tmp12_, "password") == 0) {
-						g_debug ("user-list.vala:1350: prompt otp");
+						g_debug ("user-list.vala:1351: prompt otp");
 						self->priv->test_prompted_sso = TRUE;
 						greeter_list_show_prompt_cb ((GreeterList*) self, "OTP:", LIGHTDM_PROMPT_TYPE_QUESTION);
 					} else {
@@ -6593,7 +6593,7 @@ static GObject * user_list_constructor (GType type, guint n_construct_properties
 	gboolean _tmp13_ = FALSE;
 	UnityGreeter* _tmp14_;
 	gboolean _tmp15_;
-	gboolean _tmp17_;
+	gboolean _tmp18_;
 	GError * _inner_error_ = NULL;
 	parent_class = G_OBJECT_CLASS (user_list_parent_class);
 	obj = parent_class->constructor (type, n_construct_properties, construct_properties);
@@ -6616,13 +6616,13 @@ static GObject * user_list_constructor (GType type, guint n_construct_properties
 		_g_free0 (_tmp3_);
 		_tmp6_ = _tmp5_;
 		if (_inner_error_ != NULL) {
-			goto __catch29_g_error;
+			goto __catch30_g_error;
 		}
 		_g_object_unref0 (self->priv->message_pixbuf);
 		self->priv->message_pixbuf = _tmp6_;
 	}
-	goto __finally29;
-	__catch29_g_error:
+	goto __finally30;
+	__catch30_g_error:
 	{
 		GError* e = NULL;
 		GError* _tmp7_;
@@ -6634,7 +6634,7 @@ static GObject * user_list_constructor (GType type, guint n_construct_properties
 		g_debug ("user-list.vala:122: Error loading message image: %s", _tmp8_);
 		_g_error_free0 (e);
 	}
-	__finally29:
+	__finally30:
 	if (_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
@@ -6650,17 +6650,19 @@ static GObject * user_list_constructor (GType type, guint n_construct_properties
 	_tmp14_ = unity_greeter_singleton;
 	_tmp15_ = _tmp14_->test_mode;
 	if (!_tmp15_) {
-		gboolean _tmp16_ = FALSE;
-		_tmp16_ = ug_settings_get_boolean (UG_SETTINGS_KEY_ENABLE_REMOTE_LOGIN);
-		_tmp13_ = _tmp16_;
+		UnityGreeter* _tmp16_;
+		gboolean _tmp17_ = FALSE;
+		_tmp16_ = unity_greeter_singleton;
+		_tmp17_ = unity_greeter_show_remote_login_hint (_tmp16_);
+		_tmp13_ = _tmp17_;
 	} else {
 		_tmp13_ = FALSE;
 	}
-	_tmp17_ = _tmp13_;
-	if (_tmp17_) {
-		guint _tmp18_ = 0U;
-		_tmp18_ = g_bus_watch_name_with_closures (G_BUS_TYPE_SESSION, "com.canonical.RemoteLogin", G_BUS_NAME_WATCHER_FLAGS_AUTO_START, (GClosure*) ((_user_list_on_remote_login_service_appeared_gbus_name_appeared_callback == NULL) ? NULL : g_cclosure_new ((GCallback) _user_list_on_remote_login_service_appeared_gbus_name_appeared_callback, g_object_ref (self), g_object_unref)), (GClosure*) ((_user_list_on_remote_login_service_vanished_gbus_name_vanished_callback == NULL) ? NULL : g_cclosure_new ((GCallback) _user_list_on_remote_login_service_vanished_gbus_name_vanished_callback, g_object_ref (self), g_object_unref)));
-		self->priv->remote_login_service_watch = _tmp18_;
+	_tmp18_ = _tmp13_;
+	if (_tmp18_) {
+		guint _tmp19_ = 0U;
+		_tmp19_ = g_bus_watch_name_with_closures (G_BUS_TYPE_SESSION, "com.canonical.RemoteLogin", G_BUS_NAME_WATCHER_FLAGS_AUTO_START, (GClosure*) ((_user_list_on_remote_login_service_appeared_gbus_name_appeared_callback == NULL) ? NULL : g_cclosure_new ((GCallback) _user_list_on_remote_login_service_appeared_gbus_name_appeared_callback, g_object_ref (self), g_object_unref)), (GClosure*) ((_user_list_on_remote_login_service_vanished_gbus_name_vanished_callback == NULL) ? NULL : g_cclosure_new ((GCallback) _user_list_on_remote_login_service_vanished_gbus_name_vanished_callback, g_object_ref (self), g_object_unref)));
+		self->priv->remote_login_service_watch = _tmp19_;
 	}
 	return obj;
 }

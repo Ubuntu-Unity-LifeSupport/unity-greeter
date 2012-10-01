@@ -129,7 +129,8 @@ public class UserList : GreeterList
 
         connect_to_lightdm ();
 
-        if (!UnityGreeter.singleton.test_mode && UGSettings.get_boolean (UGSettings.KEY_ENABLE_REMOTE_LOGIN))
+        if (!UnityGreeter.singleton.test_mode &&
+            UnityGreeter.singleton.show_remote_login_hint ())
             remote_login_service_watch = Bus.watch_name (BusType.SESSION,
                                             "com.canonical.RemoteLogin",
                                             BusNameWatcherFlags.AUTO_START,

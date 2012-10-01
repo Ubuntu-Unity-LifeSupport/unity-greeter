@@ -51,6 +51,8 @@ public class DashEntry : Gtk.Entry, Fadable
         }
     }
 
+    private static const string NO_BORDER_CLASS = "unity-greeter-no-border";
+
     protected FadeTracker fade_tracker { get; protected set; }
     private Gdk.Rectangle icon_area;
 
@@ -64,17 +66,44 @@ public class DashEntry : Gtk.Entry, Fadable
 
         override_font (Pango.FontDescription.from_string (font));
 
-        get_style_context ().add_class (Gtk.STYLE_CLASS_SPINNER);
+        // We add the styles and classes we need for normal operation of the
+        // spinner animation.  These are always "on" and we just turn them off
+        // right before drawing our parent class's draw function.  This is done
+        // opt-out like that rather than just turning the styles on when we
+        // need to draw the spinner because the animation doesn't work right
+        // otherwise.  See the draw() function for how we turn it off.
+        var style_ctx = get_style_context ();
+        var no_border_provider = new Gtk.CssProvider ();
+        try
+        {
+            var css = ".%s {border: 0px;}".printf (NO_BORDER_CLASS);
+            no_border_provider.load_from_data (css, -1);
+        }
+        catch (Error e)
+        {
+            debug ("Internal error loading spinner style: %s", e.message);
+        }
+        style_ctx.add_provider (no_border_provider,
+                                Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+        style_ctx.add_class (NO_BORDER_CLASS);
+        style_ctx.add_class (Gtk.STYLE_CLASS_SPINNER);
     }
 
     public override bool draw (Cairo.Context c)
     {
+        var style_ctx = get_style_context ();
+
+        // See construct method for explanation of why we remove classes
+        style_ctx.save ();
+        style_ctx.remove_class (Gtk.STYLE_CLASS_SPINNER);
+        style_ctx.remove_class (NO_BORDER_CLASS);
         c.save ();
         c.push_group ();
         base.draw (c);
         c.pop_group_to_source ();
         c.paint_with_alpha (fade_tracker.alpha);
         c.restore ();
+        style_ctx.restore ();
 
         /* Now draw the prompt text */
         if (get_text_length () == 0 && constant_placeholder_text.length > 0)
@@ -82,20 +111,24 @@ public class DashEntry : Gtk.Entry, Fadable
 
         /* Draw activity spinner if we need to */
         if (did_respond)
-        {
-            Gtk.Allocation allocation;
-            get_allocation (out allocation);
-            int spinner_side = allocation.height / 2;
-            int margin = (allocation.height - spinner_side) / 2;
-
-            get_style_context ().render_activity (c,
-                                                  allocation.width - spinner_side - margin,
-                                                  margin,
-                                                  spinner_side,
-                                                  spinner_side);
-        }
+            draw_spinner (c);
 
         return false;
+    }
+
+    private void draw_spinner (Cairo.Context c)
+    {
+        Gtk.Allocation allocation;
+        get_allocation (out allocation);
+        int spinner_side = allocation.height / 2;
+        int margin = (allocation.height - spinner_side) / 2;
+
+        var style_ctx = get_style_context ();
+        style_ctx.render_activity (c,
+                                   allocation.width - spinner_side - margin,
+                                   margin,
+                                   spinner_side,
+                                   spinner_side);
     }
 
     private void draw_prompt_text (Cairo.Context c)

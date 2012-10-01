@@ -37,7 +37,6 @@ public class UGSettings
     public static const string KEY_HIGH_CONTRAST = "high-contrast";
     public static const string KEY_SCREEN_READER = "screen-reader";
     public static const string KEY_PLAY_READY_SOUND = "play-ready-sound";
-    public static const string KEY_ENABLE_REMOTE_LOGIN = "enable-remote-login";
 
     public static bool get_boolean (string key)
     {

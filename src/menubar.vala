@@ -166,9 +166,11 @@ public class MenuBar : Gtk.MenuBar
         }
 
         setup_indicators ();
+
+        UnityGreeter.singleton.starting_session.connect (cleanup);
     }
 
-    ~MenuBar ()
+    public void cleanup ()
     {
         if (keyboard_pid != 0)
         {

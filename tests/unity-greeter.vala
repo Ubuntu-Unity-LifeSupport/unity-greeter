@@ -77,6 +77,11 @@ public class UnityGreeter
         return false;
     }
 
+    public bool show_remote_login_hint ()
+    {
+        return true;
+    }
+
     public bool hide_users_hint ()
     {
         return false;

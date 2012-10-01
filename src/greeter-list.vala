@@ -457,7 +457,7 @@ public abstract class GreeterList : FadableBox
         else
             offset = (position - 1) * grid_size + box_height;
 
-        return get_greeter_box_y () + (int)offset;
+        return get_greeter_box_y () + (int)Math.round(offset);
     }
 
     private void move_entry (PromptBox entry, double position)
@@ -482,7 +482,6 @@ public abstract class GreeterList : FadableBox
         child_allocation.y = allocation.y + get_position_y (position);
         fixed.move (entry, child_allocation.x, child_allocation.y);
         entry.size_allocate (child_allocation);
-        entry.show ();
     }
 
     public void greeter_box_size_allocate_cb (Gtk.Allocation allocation)
@@ -507,7 +506,15 @@ public abstract class GreeterList : FadableBox
 
             /* Draw entries above, in and below the box */
             if (position > -1 * (int)(n_above + 1) && position < n_below + 1)
+            {
                 move_entry (entry, position);
+                // Sometimes we will be overlayed by another widget like the
+                // session chooser.  In such cases, don't try to show ourselves
+                var is_hidden = (position == 0 && greeter_box.has_base &&
+                                 greeter_box.base_alpha == 0.0);
+                if (!is_hidden)
+                    entry.show ();
+            }
             else
                 entry.hide ();
 

@@ -26,6 +26,7 @@ public class UnityGreeter
     public signal void show_message (string text, LightDM.MessageType type);
     public signal void show_prompt (string text, LightDM.PromptType type);
     public signal void authentication_complete ();
+    public signal void starting_session ();
 
     public bool test_mode = false;
 
@@ -161,6 +162,7 @@ public class UnityGreeter
         }
         else
         {
+            starting_session ();
             try
             {
                 greeter.start_session_sync (session);
@@ -247,6 +249,11 @@ public class UnityGreeter
         return greeter.show_manual_login_hint;
     }
 
+    public bool show_remote_login_hint ()
+    {
+        return greeter.show_remote_login_hint;
+    }
+
     public bool hide_users_hint ()
     {
         return greeter.hide_users_hint;
@@ -262,7 +269,7 @@ public class UnityGreeter
         var xevent = (X.Event*)gxevent;
         if (xevent.type == X.EventType.MapNotify)
         {
-            var display = Gdk.Display.get_default ();
+            var display = Gdk.x11_lookup_xdisplay (xevent.xmap.display);
             var xwin = xevent.xmap.window;
             var win = Gdk.X11Window.foreign_new_for_display (display, xwin);
 
@@ -274,6 +281,29 @@ public class UnityGreeter
             if (xwin != keyboard_xid && win.get_type_hint() != Gdk.WindowTypeHint.NOTIFICATION)
             {
                 win.focus (Gdk.CURRENT_TIME);
+
+                /* Make sure to keep keyboard above */
+                if (main_window.menubar.keyboard_window != null)
+                    main_window.menubar.keyboard_window.get_window ().raise ();
+            }
+        }
+        else if (xevent.type == X.EventType.UnmapNotify)
+        {
+            // Since we aren't keeping track of focus (for example, we don't
+            // track the Z stack of windows) like a normal WM would, when we
+            // decide here where to return focus after another window unmaps,
+            // we don't have much to go on.  X will tell us if we should take
+            // focus back.  (I could not find an obvious way to determine this,
+            // but checking if the X input focus is RevertTo.None seems
+            // reliable.)
+
+            X.Window xwin;
+            int revert_to;
+            xevent.xunmap.display.get_input_focus (out xwin, out revert_to);
+
+            if (revert_to == X.RevertTo.None)
+            {
+                main_window.get_window ().focus (Gdk.CURRENT_TIME);
 
                 /* Make sure to keep keyboard above */
                 if (main_window.menubar.keyboard_window != null)

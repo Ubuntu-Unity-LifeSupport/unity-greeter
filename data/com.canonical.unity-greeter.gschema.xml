@@ -82,9 +82,5 @@
       <default>true</default>
       <summary>Whether to play sound when greeter is ready</summary>
     </key>
-    <key name="enable-remote-login" type="b">
-      <default>false</default>
-      <summary>Whether to enable Remote Login or not</summary>
-    </key>
   </schema>
 </schemalist>

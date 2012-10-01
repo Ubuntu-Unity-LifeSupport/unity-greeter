@@ -107,6 +107,7 @@ gchar* unity_greeter_authentication_user (UnityGreeter* self);
 gchar* unity_greeter_default_session_hint (UnityGreeter* self);
 gchar* unity_greeter_select_user_hint (UnityGreeter* self);
 gboolean unity_greeter_show_manual_login_hint (UnityGreeter* self);
+gboolean unity_greeter_show_remote_login_hint (UnityGreeter* self);
 gboolean unity_greeter_hide_users_hint (UnityGreeter* self);
 gboolean unity_greeter_has_guest_account_hint (UnityGreeter* self);
 void unity_greeter_start_session (UnityGreeter* self, const gchar* session);
@@ -198,6 +199,14 @@ gboolean unity_greeter_show_manual_login_hint (UnityGreeter* self) {
 	gboolean result = FALSE;
 	g_return_val_if_fail (self != NULL, FALSE);
 	result = FALSE;
+	return result;
+}
+
+
+gboolean unity_greeter_show_remote_login_hint (UnityGreeter* self) {
+	gboolean result = FALSE;
+	g_return_val_if_fail (self != NULL, FALSE);
+	result = TRUE;
 	return result;
 }
 

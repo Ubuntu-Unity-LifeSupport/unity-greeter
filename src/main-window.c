@@ -1091,7 +1091,7 @@ static GObject * main_window_constructor (GType type, guint n_construct_properti
 		if (_inner_error_ != NULL) {
 			_g_object_unref0 (style);
 			_g_free0 (shadow_path);
-			goto __catch5_g_error;
+			goto __catch6_g_error;
 		}
 		_tmp43_ = menubox;
 		_tmp44_ = gtk_widget_get_style_context ((GtkWidget*) _tmp43_);
@@ -1104,8 +1104,8 @@ static GObject * main_window_constructor (GType type, guint n_construct_properti
 		_g_object_unref0 (style);
 		_g_free0 (shadow_path);
 	}
-	goto __finally5;
-	__catch5_g_error:
+	goto __finally6;
+	__catch6_g_error:
 	{
 		GError* e = NULL;
 		GError* _tmp48_;
@@ -1117,7 +1117,7 @@ static GObject * main_window_constructor (GType type, guint n_construct_properti
 		g_debug ("main-window.vala:82: Internal error loading menubox style: %s", _tmp49_);
 		_g_error_free0 (e);
 	}
-	__finally5:
+	__finally6:
 	if (_inner_error_ != NULL) {
 		_g_object_unref0 (menualign);
 		_g_object_unref0 (menubox);

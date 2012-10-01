@@ -344,8 +344,9 @@ void greeter_list_greeter_box_size_allocate_cb (GreeterList* self, GtkAllocation
 static PromptBox* greeter_list_get_scrolling_entry (GreeterList* self);
 static gboolean ___lambda35_ (GreeterList* self);
 static gboolean ____lambda35__gsource_func (gpointer self);
-static void greeter_list_animate_scrolling (GreeterList* self, gdouble progress);
 gboolean dash_box_get_has_base (DashBox* self);
+gdouble dash_box_get_base_alpha (DashBox* self);
+static void greeter_list_animate_scrolling (GreeterList* self, gdouble progress);
 void greeter_list_setup_prompt_box (GreeterList* self, gboolean fade);
 static void greeter_list_finished_scrolling (GreeterList* self);
 static void greeter_list_set_scrolling_entry (GreeterList* self, PromptBox* value);
@@ -361,7 +362,6 @@ static void greeter_list_allocate_greeter_box (GreeterList* self);
 void prompt_box_set_zone (PromptBox* self, GtkWidget* zone);
 static void greeter_list_real_size_allocate (GtkWidget* base, GtkAllocation* allocation);
 static gboolean greeter_list_real_draw (GtkWidget* base, cairo_t* c);
-gdouble dash_box_get_base_alpha (DashBox* self);
 FadeTracker* fadable_get_fade_tracker (Fadable* self);
 gdouble fade_tracker_get_alpha (FadeTracker* self);
 void greeter_list_connect_to_lightdm (GreeterList* self);
@@ -1337,6 +1337,7 @@ static gint greeter_list_real_get_position_y (GreeterList* self, gdouble positio
 	gdouble _tmp1_;
 	gint _tmp12_ = 0;
 	gdouble _tmp13_;
+	gdouble _tmp14_ = 0.0;
 	one_above_height = grid_size + PROMPT_BOX_NAME_MARGIN_TOP;
 	_tmp0_ = greeter_list_get_greeter_box_height_grids (self);
 	box_height = (_tmp0_ * grid_size) - PROMPT_BOX_NAME_MARGIN_TOP;
@@ -1376,7 +1377,8 @@ static gint greeter_list_real_get_position_y (GreeterList* self, gdouble positio
 	}
 	_tmp12_ = greeter_list_get_greeter_box_y (self);
 	_tmp13_ = offset;
-	result = _tmp12_ + ((gint) _tmp13_);
+	_tmp14_ = round (_tmp13_);
+	result = _tmp12_ + ((gint) _tmp14_);
 	return result;
 }
 
@@ -1416,7 +1418,6 @@ static void greeter_list_move_entry (GreeterList* self, PromptBox* entry, gdoubl
 	gint _tmp26_;
 	PromptBox* _tmp27_;
 	GtkAllocation _tmp28_;
-	PromptBox* _tmp29_;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (entry != NULL);
 	alpha = 1.0;
@@ -1468,8 +1469,6 @@ static void greeter_list_move_entry (GreeterList* self, PromptBox* entry, gdoubl
 	_tmp27_ = entry;
 	_tmp28_ = child_allocation;
 	gtk_widget_size_allocate ((GtkWidget*) _tmp27_, &_tmp28_);
-	_tmp29_ = entry;
-	gtk_widget_show ((GtkWidget*) _tmp29_);
 }
 
 
@@ -1543,7 +1542,7 @@ void greeter_list_move_names (GreeterList* self) {
 				gdouble _tmp5_;
 				guint _tmp6_;
 				gboolean _tmp9_;
-				gint _tmp13_;
+				gint _tmp26_;
 				_tmp2_ = index;
 				_tmp3_ = self->priv->scroll_location;
 				position = _tmp2_ - _tmp3_;
@@ -1562,16 +1561,55 @@ void greeter_list_move_names (GreeterList* self) {
 				if (_tmp9_) {
 					PromptBox* _tmp10_;
 					gdouble _tmp11_;
+					gboolean _tmp12_ = FALSE;
+					gboolean _tmp13_ = FALSE;
+					gdouble _tmp14_;
+					gboolean _tmp18_;
+					gboolean _tmp22_;
+					gboolean is_hidden;
+					gboolean _tmp23_;
 					_tmp10_ = entry;
 					_tmp11_ = position;
 					greeter_list_move_entry (self, _tmp10_, _tmp11_);
+					_tmp14_ = position;
+					if (_tmp14_ == ((gdouble) 0)) {
+						DashBox* _tmp15_;
+						gboolean _tmp16_;
+						gboolean _tmp17_;
+						_tmp15_ = self->greeter_box;
+						_tmp16_ = dash_box_get_has_base (_tmp15_);
+						_tmp17_ = _tmp16_;
+						_tmp13_ = _tmp17_;
+					} else {
+						_tmp13_ = FALSE;
+					}
+					_tmp18_ = _tmp13_;
+					if (_tmp18_) {
+						DashBox* _tmp19_;
+						gdouble _tmp20_;
+						gdouble _tmp21_;
+						_tmp19_ = self->greeter_box;
+						_tmp20_ = dash_box_get_base_alpha (_tmp19_);
+						_tmp21_ = _tmp20_;
+						_tmp12_ = _tmp21_ == 0.0;
+					} else {
+						_tmp12_ = FALSE;
+					}
+					_tmp22_ = _tmp12_;
+					is_hidden = _tmp22_;
+					_tmp23_ = is_hidden;
+					if (!_tmp23_) {
+						PromptBox* _tmp24_;
+						_tmp24_ = entry;
+						gtk_widget_show ((GtkWidget*) _tmp24_);
+					}
 				} else {
-					PromptBox* _tmp12_;
-					_tmp12_ = entry;
-					gtk_widget_hide ((GtkWidget*) _tmp12_);
+					PromptBox* _tmp25_;
+					_tmp25_ = entry;
+					gtk_widget_hide ((GtkWidget*) _tmp25_);
 				}
-				_tmp13_ = index;
-				index = _tmp13_ + 1;
+				_tmp26_ = index;
+				index = _tmp26_ + 1;
 				_g_object_unref0 (entry);
 			}
 		}

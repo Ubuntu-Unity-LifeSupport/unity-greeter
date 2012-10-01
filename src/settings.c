@@ -90,7 +90,6 @@ enum  {
 #define UG_SETTINGS_KEY_HIGH_CONTRAST "high-contrast"
 #define UG_SETTINGS_KEY_SCREEN_READER "screen-reader"
 #define UG_SETTINGS_KEY_PLAY_READY_SOUND "play-ready-sound"
-#define UG_SETTINGS_KEY_ENABLE_REMOTE_LOGIN "enable-remote-login"
 #define UG_SETTINGS_SCHEMA "com.canonical.unity-greeter"
 gboolean ug_settings_get_boolean (const gchar* key);
 gboolean ug_settings_safe_get_boolean (const gchar* key, gboolean _default_);

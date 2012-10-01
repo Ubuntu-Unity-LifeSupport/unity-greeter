@@ -66,6 +66,7 @@ typedef struct _DashEntryPrivate DashEntryPrivate;
 #define _g_free0(var) (var = (g_free (var), NULL))
 #define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
 #define _pango_font_description_free0(var) ((var == NULL) ? NULL : (var = (pango_font_description_free (var), NULL)))
+#define _g_error_free0(var) ((var == NULL) ? NULL : (var = (g_error_free (var), NULL)))
 
 struct _FadableIface {
 	GTypeInterface parent_iface;
@@ -109,12 +110,14 @@ enum  {
 	DASH_ENTRY_DID_RESPOND,
 	DASH_ENTRY_FADE_TRACKER
 };
+#define DASH_ENTRY_NO_BORDER_CLASS "unity-greeter-no-border"
 static gboolean dash_entry_real_draw (GtkWidget* base, cairo_t* c);
 FadeTracker* fadable_get_fade_tracker (Fadable* self);
 gdouble fade_tracker_get_alpha (FadeTracker* self);
 const gchar* dash_entry_get_constant_placeholder_text (DashEntry* self);
 static void dash_entry_draw_prompt_text (DashEntry* self, cairo_t* c);
 gboolean dash_entry_get_did_respond (DashEntry* self);
+static void dash_entry_draw_spinner (DashEntry* self, cairo_t* c);
 static void dash_entry_real_activate (GtkEntry* base);
 gboolean dash_entry_get_can_respond (DashEntry* self);
 void dash_entry_set_did_respond (DashEntry* self, gboolean value);
@@ -137,108 +140,129 @@ static void _vala_dash_entry_get_property (GObject * object, guint property_id, 
 static void _vala_dash_entry_set_property (GObject * object, guint property_id, const GValue * value, GParamSpec * pspec);
 
 
+static gpointer _g_object_ref0 (gpointer self) {
+	return self ? g_object_ref (self) : NULL;
+}
+
+
 static gboolean dash_entry_real_draw (GtkWidget* base, cairo_t* c) {
 	DashEntry * self;
 	gboolean result = FALSE;
-	cairo_t* _tmp0_;
-	cairo_t* _tmp1_;
-	cairo_t* _tmp2_;
-	cairo_t* _tmp3_;
-	cairo_t* _tmp4_;
-	FadeTracker* _tmp5_;
-	FadeTracker* _tmp6_;
-	gdouble _tmp7_;
-	gdouble _tmp8_;
+	GtkStyleContext* _tmp0_ = NULL;
+	GtkStyleContext* _tmp1_;
+	GtkStyleContext* style_ctx;
+	GtkStyleContext* _tmp2_;
+	GtkStyleContext* _tmp3_;
+	GtkStyleContext* _tmp4_;
+	cairo_t* _tmp5_;
+	cairo_t* _tmp6_;
+	cairo_t* _tmp7_;
+	cairo_t* _tmp8_;
 	cairo_t* _tmp9_;
-	gboolean _tmp10_ = FALSE;
-	guint16 _tmp11_ = 0U;
-	gboolean _tmp15_;
-	gboolean _tmp17_;
-	gboolean _tmp18_;
+	FadeTracker* _tmp10_;
+	FadeTracker* _tmp11_;
+	gdouble _tmp12_;
+	gdouble _tmp13_;
+	cairo_t* _tmp14_;
+	GtkStyleContext* _tmp15_;
+	gboolean _tmp16_ = FALSE;
+	guint16 _tmp17_ = 0U;
+	gboolean _tmp21_;
+	gboolean _tmp23_;
+	gboolean _tmp24_;
 	self = (DashEntry*) base;
 	g_return_val_if_fail (c != NULL, FALSE);
-	_tmp0_ = c;
-	cairo_save (_tmp0_);
-	_tmp1_ = c;
-	cairo_push_group (_tmp1_);
-	_tmp2_ = c;
-	GTK_WIDGET_CLASS (dash_entry_parent_class)->draw ((GtkWidget*) GTK_ENTRY (self), _tmp2_);
-	_tmp3_ = c;
-	cairo_pop_group_to_source (_tmp3_);
-	_tmp4_ = c;
-	_tmp5_ = fadable_get_fade_tracker ((Fadable*) self);
-	_tmp6_ = _tmp5_;
-	_tmp7_ = fade_tracker_get_alpha (_tmp6_);
-	_tmp8_ = _tmp7_;
-	cairo_paint_with_alpha (_tmp4_, _tmp8_);
+	_tmp0_ = gtk_widget_get_style_context ((GtkWidget*) self);
+	_tmp1_ = _g_object_ref0 (_tmp0_);
+	style_ctx = _tmp1_;
+	_tmp2_ = style_ctx;
+	gtk_style_context_save (_tmp2_);
+	_tmp3_ = style_ctx;
+	gtk_style_context_remove_class (_tmp3_, GTK_STYLE_CLASS_SPINNER);
+	_tmp4_ = style_ctx;
+	gtk_style_context_remove_class (_tmp4_, DASH_ENTRY_NO_BORDER_CLASS);
+	_tmp5_ = c;
+	cairo_save (_tmp5_);
+	_tmp6_ = c;
+	cairo_push_group (_tmp6_);
+	_tmp7_ = c;
+	GTK_WIDGET_CLASS (dash_entry_parent_class)->draw ((GtkWidget*) GTK_ENTRY (self), _tmp7_);
+	_tmp8_ = c;
+	cairo_pop_group_to_source (_tmp8_);
 	_tmp9_ = c;
-	cairo_restore (_tmp9_);
-	_tmp11_ = gtk_entry_get_text_length ((GtkEntry*) self);
-	if (((gint) _tmp11_) == 0) {
-		const gchar* _tmp12_;
-		gint _tmp13_;
-		gint _tmp14_;
-		_tmp12_ = self->priv->_constant_placeholder_text;
-		_tmp13_ = strlen (_tmp12_);
-		_tmp14_ = _tmp13_;
-		_tmp10_ = _tmp14_ > 0;
+	_tmp10_ = fadable_get_fade_tracker ((Fadable*) self);
+	_tmp11_ = _tmp10_;
+	_tmp12_ = fade_tracker_get_alpha (_tmp11_);
+	_tmp13_ = _tmp12_;
+	cairo_paint_with_alpha (_tmp9_, _tmp13_);
+	_tmp14_ = c;
+	cairo_restore (_tmp14_);
+	_tmp15_ = style_ctx;
+	gtk_style_context_restore (_tmp15_);
+	_tmp17_ = gtk_entry_get_text_length ((GtkEntry*) self);
+	if (((gint) _tmp17_) == 0) {
+		const gchar* _tmp18_;
+		gint _tmp19_;
+		gint _tmp20_;
+		_tmp18_ = self->priv->_constant_placeholder_text;
+		_tmp19_ = strlen (_tmp18_);
+		_tmp20_ = _tmp19_;
+		_tmp16_ = _tmp20_ > 0;
 	} else {
-		_tmp10_ = FALSE;
+		_tmp16_ = FALSE;
 	}
-	_tmp15_ = _tmp10_;
-	if (_tmp15_) {
-		cairo_t* _tmp16_;
-		_tmp16_ = c;
-		dash_entry_draw_prompt_text (self, _tmp16_);
+	_tmp21_ = _tmp16_;
+	if (_tmp21_) {
+		cairo_t* _tmp22_;
+		_tmp22_ = c;
+		dash_entry_draw_prompt_text (self, _tmp22_);
 	}
-	_tmp17_ = dash_entry_get_did_respond (self);
-	_tmp18_ = _tmp17_;
-	if (_tmp18_) {
-		GtkAllocation allocation = {0};
-		GtkAllocation _tmp19_ = {0};
-		GtkAllocation _tmp20_;
-		gint _tmp21_;
-		gint spinner_side;
-		GtkAllocation _tmp22_;
-		gint _tmp23_;
-		gint _tmp24_;
-		gint margin;
-		GtkStyleContext* _tmp25_ = NULL;
-		cairo_t* _tmp26_;
-		GtkAllocation _tmp27_;
-		gint _tmp28_;
-		gint _tmp29_;
-		gint _tmp30_;
-		gint _tmp31_;
-		gint _tmp32_;
-		gint _tmp33_;
-		gtk_widget_get_allocation ((GtkWidget*) self, &_tmp19_);
-		allocation = _tmp19_;
-		_tmp20_ = allocation;
-		_tmp21_ = _tmp20_.height;
-		spinner_side = _tmp21_ / 2;
-		_tmp22_ = allocation;
-		_tmp23_ = _tmp22_.height;
-		_tmp24_ = spinner_side;
-		margin = (_tmp23_ - _tmp24_) / 2;
-		_tmp25_ = gtk_widget_get_style_context ((GtkWidget*) self);
-		_tmp26_ = c;
-		_tmp27_ = allocation;
-		_tmp28_ = _tmp27_.width;
-		_tmp29_ = spinner_side;
-		_tmp30_ = margin;
-		_tmp31_ = margin;
-		_tmp32_ = spinner_side;
-		_tmp33_ = spinner_side;
-		gtk_render_activity (_tmp25_, _tmp26_, (gdouble) ((_tmp28_ - _tmp29_) - _tmp30_), (gdouble) _tmp31_, (gdouble) _tmp32_, (gdouble) _tmp33_);
+	_tmp23_ = dash_entry_get_did_respond (self);
+	_tmp24_ = _tmp23_;
+	if (_tmp24_) {
+		cairo_t* _tmp25_;
+		_tmp25_ = c;
+		dash_entry_draw_spinner (self, _tmp25_);
 	}
 	result = FALSE;
+	_g_object_unref0 (style_ctx);
 	return result;
 }
 
 
-static gpointer _g_object_ref0 (gpointer self) {
-	return self ? g_object_ref (self) : NULL;
+static void dash_entry_draw_spinner (DashEntry* self, cairo_t* c) {
+	GtkAllocation allocation = {0};
+	GtkAllocation _tmp0_ = {0};
+	GtkAllocation _tmp1_;
+	gint _tmp2_;
+	gint spinner_side;
+	GtkAllocation _tmp3_;
+	gint _tmp4_;
+	gint margin;
+	GtkStyleContext* _tmp5_ = NULL;
+	GtkStyleContext* _tmp6_;
+	GtkStyleContext* style_ctx;
+	cairo_t* _tmp7_;
+	GtkAllocation _tmp8_;
+	gint _tmp9_;
+	g_return_if_fail (self != NULL);
+	g_return_if_fail (c != NULL);
+	gtk_widget_get_allocation ((GtkWidget*) self, &_tmp0_);
+	allocation = _tmp0_;
+	_tmp1_ = allocation;
+	_tmp2_ = _tmp1_.height;
+	spinner_side = _tmp2_ / 2;
+	_tmp3_ = allocation;
+	_tmp4_ = _tmp3_.height;
+	margin = (_tmp4_ - spinner_side) / 2;
+	_tmp5_ = gtk_widget_get_style_context ((GtkWidget*) self);
+	_tmp6_ = _g_object_ref0 (_tmp5_);
+	style_ctx = _tmp6_;
+	_tmp7_ = c;
+	_tmp8_ = allocation;
+	_tmp9_ = _tmp8_.width;
+	gtk_render_activity (style_ctx, _tmp7_, (gdouble) ((_tmp9_ - spinner_side) - margin), (gdouble) margin, (gdouble) spinner_side, (gdouble) spinner_side);
+	_g_object_unref0 (style_ctx);
 }
 
 
@@ -534,6 +558,15 @@ static GObject * dash_entry_constructor (GType type, guint n_construct_propertie
 	PangoFontDescription* _tmp3_ = NULL;
 	PangoFontDescription* _tmp4_;
 	GtkStyleContext* _tmp5_ = NULL;
+	GtkStyleContext* _tmp6_;
+	GtkStyleContext* style_ctx;
+	GtkCssProvider* _tmp7_;
+	GtkCssProvider* no_border_provider;
+	GtkStyleContext* _tmp13_;
+	GtkCssProvider* _tmp14_;
+	GtkStyleContext* _tmp15_;
+	GtkStyleContext* _tmp16_;
+	GError * _inner_error_ = NULL;
 	parent_class = G_OBJECT_CLASS (dash_entry_parent_class);
 	obj = parent_class->constructor (type, n_construct_properties, construct_properties);
 	self = DASH_ENTRY (obj);
@@ -550,7 +583,55 @@ static GObject * dash_entry_constructor (GType type, guint n_construct_propertie
 	gtk_widget_override_font ((GtkWidget*) self, _tmp4_);
 	_pango_font_description_free0 (_tmp4_);
 	_tmp5_ = gtk_widget_get_style_context ((GtkWidget*) self);
-	gtk_style_context_add_class (_tmp5_, GTK_STYLE_CLASS_SPINNER);
+	_tmp6_ = _g_object_ref0 (_tmp5_);
+	style_ctx = _tmp6_;
+	_tmp7_ = gtk_css_provider_new ();
+	no_border_provider = _tmp7_;
+	{
+		gchar* _tmp8_ = NULL;
+		gchar* css;
+		GtkCssProvider* _tmp9_;
+		const gchar* _tmp10_;
+		_tmp8_ = g_strdup_printf (".%s {border: 0px;}", DASH_ENTRY_NO_BORDER_CLASS);
+		css = _tmp8_;
+		_tmp9_ = no_border_provider;
+		_tmp10_ = css;
+		gtk_css_provider_load_from_data (_tmp9_, _tmp10_, (gssize) (-1), &_inner_error_);
+		if (_inner_error_ != NULL) {
+			_g_free0 (css);
+			goto __catch5_g_error;
+		}
+		_g_free0 (css);
+	}
+	goto __finally5;
+	__catch5_g_error:
+	{
+		GError* e = NULL;
+		GError* _tmp11_;
+		const gchar* _tmp12_;
+		e = _inner_error_;
+		_inner_error_ = NULL;
+		_tmp11_ = e;
+		_tmp12_ = _tmp11_->message;
+		g_debug ("dash-entry.vala:84: Internal error loading spinner style: %s", _tmp12_);
+		_g_error_free0 (e);
+	}
+	__finally5:
+	if (_inner_error_ != NULL) {
+		_g_object_unref0 (no_border_provider);
+		_g_object_unref0 (style_ctx);
+		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
+		g_clear_error (&_inner_error_);
+	}
+	_tmp13_ = style_ctx;
+	_tmp14_ = no_border_provider;
+	gtk_style_context_add_provider (_tmp13_, (GtkStyleProvider*) _tmp14_, (guint) GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+	_tmp15_ = style_ctx;
+	gtk_style_context_add_class (_tmp15_, DASH_ENTRY_NO_BORDER_CLASS);
+	_tmp16_ = style_ctx;
+	gtk_style_context_add_class (_tmp16_, GTK_STYLE_CLASS_SPINNER);
+	_g_object_unref0 (no_border_provider);
+	_g_object_unref0 (style_ctx);
 	return obj;
 }
 

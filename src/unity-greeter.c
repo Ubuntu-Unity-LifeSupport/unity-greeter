@@ -245,6 +245,7 @@ gchar* unity_greeter_authentication_user (UnityGreeter* self);
 gchar* unity_greeter_default_session_hint (UnityGreeter* self);
 gchar* unity_greeter_select_user_hint (UnityGreeter* self);
 gboolean unity_greeter_show_manual_login_hint (UnityGreeter* self);
+gboolean unity_greeter_show_remote_login_hint (UnityGreeter* self);
 gboolean unity_greeter_hide_users_hint (UnityGreeter* self);
 gboolean unity_greeter_has_guest_account_hint (UnityGreeter* self);
 static GdkFilterReturn unity_greeter_focus_upon_map (UnityGreeter* self, GdkXEvent* gxevent, GdkEvent* event);
@@ -352,7 +353,7 @@ static UnityGreeter* unity_greeter_construct (GType object_type, gboolean test_m
 	unity_greeter_singleton = _tmp0_;
 	_tmp1_ = test_mode_;
 	self->test_mode = _tmp1_;
-	g_debug ("unity-greeter.vala:53: Creating background surface");
+	g_debug ("unity-greeter.vala:54: Creating background surface");
 	_tmp2_ = gdk_screen_get_default ();
 	_tmp3_ = unity_greeter_create_root_surface (_tmp2_);
 	_cairo_surface_destroy0 (self->priv->background_surface);
@@ -375,20 +376,20 @@ static UnityGreeter* unity_greeter_construct (GType object_type, gboolean test_m
 		_tmp9_ = lightdm_greeter_connect_sync (_tmp8_, &_inner_error_);
 		_tmp10_ = _tmp9_;
 		if (_inner_error_ != NULL) {
-			goto __catch15_g_error;
+			goto __catch16_g_error;
 		}
 		connected = _tmp10_;
 	}
-	goto __finally15;
-	__catch15_g_error:
+	goto __finally16;
+	__catch16_g_error:
 	{
 		GError* e = NULL;
 		e = _inner_error_;
 		_inner_error_ = NULL;
-		g_warning ("unity-greeter.vala:67: Failed to connect to LightDM daemon");
+		g_warning ("unity-greeter.vala:68: Failed to connect to LightDM daemon");
 		_g_error_free0 (e);
 	}
-	__finally15:
+	__finally16:
 	if (_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
@@ -433,11 +434,11 @@ static UnityGreeter* unity_greeter_construct (GType object_type, gboolean test_m
 		_tmp23_ = self->priv->state_file;
 		g_key_file_load_from_file (_tmp22_, _tmp23_, G_KEY_FILE_NONE, &_inner_error_);
 		if (_inner_error_ != NULL) {
-			goto __catch16_g_error;
+			goto __catch17_g_error;
 		}
 	}
-	goto __finally16;
-	__catch16_g_error:
+	goto __finally17;
+	__catch17_g_error:
 	{
 		GError* e = NULL;
 		GError* _tmp24_;
@@ -451,11 +452,11 @@ static UnityGreeter* unity_greeter_construct (GType object_type, gboolean test_m
 			_tmp25_ = self->priv->state_file;
 			_tmp26_ = e;
 			_tmp27_ = _tmp26_->message;
-			g_warning ("unity-greeter.vala:90: Failed to load state from %s: %s\n", _tmp25_, _tmp27_);
+			g_warning ("unity-greeter.vala:91: Failed to load state from %s: %s\n", _tmp25_, _tmp27_);
 		}
 		_g_error_free0 (e);
 	}
-	__finally16:
+	__finally17:
 	if (_inner_error_ != NULL) {
 		_g_free0 (state_dir);
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
@@ -493,13 +494,13 @@ gchar* unity_greeter_get_state (UnityGreeter* self, const gchar* key) {
 		_tmp2_ = g_key_file_get_value (_tmp0_, "greeter", _tmp1_, &_inner_error_);
 		_tmp3_ = _tmp2_;
 		if (_inner_error_ != NULL) {
-			goto __catch17_g_error;
+			goto __catch18_g_error;
 		}
 		result = _tmp3_;
 		return result;
 	}
-	goto __finally17;
-	__catch17_g_error:
+	goto __finally18;
+	__catch18_g_error:
 	{
 		GError* e = NULL;
 		e = _inner_error_;
@@ -508,7 +509,7 @@ gchar* unity_greeter_get_state (UnityGreeter* self, const gchar* key) {
 		_g_error_free0 (e);
 		return result;
 	}
-	__finally17:
+	__finally18:
 	g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 	g_clear_error (&_inner_error_);
 	return NULL;
@@ -538,11 +539,11 @@ void unity_greeter_set_state (UnityGreeter* self, const gchar* key, const gchar*
 		_tmp5_ = self->priv->state_file;
 		g_file_set_contents (_tmp5_, data, (gssize) (-1), &_inner_error_);
 		if (_inner_error_ != NULL) {
-			goto __catch18_g_error;
+			goto __catch19_g_error;
 		}
 	}
-	goto __finally18;
-	__catch18_g_error:
+	goto __finally19;
+	__catch19_g_error:
 	{
 		GError* e = NULL;
 		GError* _tmp6_;
@@ -551,10 +552,10 @@ void unity_greeter_set_state (UnityGreeter* self, const gchar* key, const gchar*
 		_inner_error_ = NULL;
 		_tmp6_ = e;
 		_tmp7_ = _tmp6_->message;
-		g_debug ("unity-greeter.vala:121: Failed to write state: %s", _tmp7_);
+		g_debug ("unity-greeter.vala:122: Failed to write state: %s", _tmp7_);
 		_g_error_free0 (e);
 	}
-	__finally18:
+	__finally19:
 	if (_inner_error_ != NULL) {
 		_g_free0 (data);
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
@@ -652,9 +653,10 @@ void unity_greeter_start_session (UnityGreeter* self, const gchar* session) {
 	unity_greeter_refresh_background (_tmp0_, _tmp1_);
 	_tmp2_ = self->test_mode;
 	if (_tmp2_) {
-		g_debug ("unity-greeter.vala:159: Successfully logged in!  Quitting...");
+		g_debug ("unity-greeter.vala:160: Successfully logged in!  Quitting...");
 		gtk_main_quit ();
 	} else {
+		g_signal_emit_by_name (self, "starting-session");
 		{
 			LightDMGreeter* _tmp3_;
 			const gchar* _tmp4_;
@@ -662,11 +664,11 @@ void unity_greeter_start_session (UnityGreeter* self, const gchar* session) {
 			_tmp4_ = session;
 			lightdm_greeter_start_session_sync (_tmp3_, _tmp4_, &_inner_error_);
 			if (_inner_error_ != NULL) {
-				goto __catch19_g_error;
+				goto __catch20_g_error;
 			}
 		}
-		goto __finally19;
-		__catch19_g_error:
+		goto __finally20;
+		__catch20_g_error:
 		{
 			GError* e = NULL;
 			GError* _tmp5_;
@@ -675,10 +677,10 @@ void unity_greeter_start_session (UnityGreeter* self, const gchar* session) {
 			_inner_error_ = NULL;
 			_tmp5_ = e;
 			_tmp6_ = _tmp5_->message;
-			g_warning ("unity-greeter.vala:170: Failed to start session: %s", _tmp6_);
+			g_warning ("unity-greeter.vala:172: Failed to start session: %s", _tmp6_);
 			_g_error_free0 (e);
 		}
-		__finally19:
+		__finally20:
 		if (_inner_error_ != NULL) {
 			g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 			g_clear_error (&_inner_error_);
@@ -693,7 +695,7 @@ static gboolean unity_greeter_ready_cb (UnityGreeter* self) {
 	ca_context* _tmp0_ = NULL;
 	gboolean _tmp1_ = FALSE;
 	g_return_val_if_fail (self != NULL, FALSE);
-	g_debug ("unity-greeter.vala:177: starting system-ready sound");
+	g_debug ("unity-greeter.vala:179: starting system-ready sound");
 	ca_context_create (&_tmp0_);
 	_ca_context_destroy0 (self->priv->canberra_context);
 	self->priv->canberra_context = _tmp0_;
@@ -714,7 +716,7 @@ void unity_greeter_show (UnityGreeter* self) {
 	GdkWindow* _tmp2_ = NULL;
 	MainWindow* _tmp3_;
 	g_return_if_fail (self != NULL);
-	g_debug ("unity-greeter.vala:194: Showing main window");
+	g_debug ("unity-greeter.vala:196: Showing main window");
 	_tmp0_ = self->priv->main_window;
 	gtk_widget_show ((GtkWidget*) _tmp0_);
 	_tmp1_ = self->priv->main_window;
@@ -852,6 +854,20 @@ gboolean unity_greeter_show_manual_login_hint (UnityGreeter* self) {
 }
 
 
+gboolean unity_greeter_show_remote_login_hint (UnityGreeter* self) {
+	gboolean result = FALSE;
+	LightDMGreeter* _tmp0_;
+	gboolean _tmp1_;
+	gboolean _tmp2_;
+	g_return_val_if_fail (self != NULL, FALSE);
+	_tmp0_ = self->priv->greeter;
+	_tmp1_ = lightdm_greeter_get_show_remote_login_hint (_tmp0_);
+	_tmp2_ = _tmp1_;
+	result = _tmp2_;
+	return result;
+}
+
+
 gboolean unity_greeter_hide_users_hint (UnityGreeter* self) {
 	gboolean result = FALSE;
 	LightDMGreeter* _tmp0_;
@@ -894,99 +910,155 @@ static GdkFilterReturn unity_greeter_focus_upon_map (UnityGreeter* self, GdkXEve
 	_tmp1_ = xevent;
 	_tmp2_ = (*_tmp1_).type;
 	if (_tmp2_ == ((gint) MapNotify)) {
-		GdkDisplay* _tmp3_ = NULL;
-		GdkDisplay* _tmp4_;
+		XEvent* _tmp3_;
+		XMapEvent _tmp4_;
+		Display* _tmp5_;
+		GdkDisplay* _tmp6_ = NULL;
+		GdkDisplay* _tmp7_;
 		GdkDisplay* display;
-		XEvent* _tmp5_;
-		XMapEvent _tmp6_;
-		Window _tmp7_;
+		XEvent* _tmp8_;
+		XMapEvent _tmp9_;
+		Window _tmp10_;
 		Window xwin;
-		GdkDisplay* _tmp8_;
-		Window _tmp9_;
-		GdkWindow* _tmp10_ = NULL;
-		GdkWindow* _tmp11_;
+		GdkDisplay* _tmp11_;
+		Window _tmp12_;
+		GdkWindow* _tmp13_ = NULL;
+		GdkWindow* _tmp14_;
 		GdkWindow* win;
 		Window keyboard_xid;
-		MainWindow* _tmp12_;
-		MenuBar* _tmp13_;
-		GtkWindow* _tmp14_;
-		GtkWindow* _tmp15_;
-		gboolean _tmp22_ = FALSE;
-		Window _tmp23_;
-		Window _tmp24_;
-		gboolean _tmp27_;
-		_tmp3_ = gdk_display_get_default ();
-		_tmp4_ = _g_object_ref0 (_tmp3_);
-		display = _tmp4_;
-		_tmp5_ = xevent;
-		_tmp6_ = (*_tmp5_).xmap;
-		_tmp7_ = _tmp6_.window;
-		xwin = _tmp7_;
-		_tmp8_ = display;
-		_tmp9_ = xwin;
-		_tmp10_ = gdk_x11_window_foreign_new_for_display (_tmp8_, _tmp9_);
-		_tmp11_ = _g_object_ref0 (_tmp10_);
-		win = _tmp11_;
+		MainWindow* _tmp15_;
+		MenuBar* _tmp16_;
+		GtkWindow* _tmp17_;
+		GtkWindow* _tmp18_;
+		gboolean _tmp25_ = FALSE;
+		Window _tmp26_;
+		Window _tmp27_;
+		gboolean _tmp30_;
+		_tmp3_ = xevent;
+		_tmp4_ = (*_tmp3_).xmap;
+		_tmp5_ = _tmp4_.display;
+		_tmp6_ = gdk_x11_lookup_xdisplay (_tmp5_);
+		_tmp7_ = _g_object_ref0 (_tmp6_);
+		display = _tmp7_;
+		_tmp8_ = xevent;
+		_tmp9_ = (*_tmp8_).xmap;
+		_tmp10_ = _tmp9_.window;
+		xwin = _tmp10_;
+		_tmp11_ = display;
+		_tmp12_ = xwin;
+		_tmp13_ = gdk_x11_window_foreign_new_for_display (_tmp11_, _tmp12_);
+		_tmp14_ = _g_object_ref0 (_tmp13_);
+		win = _tmp14_;
 		keyboard_xid = (Window) 0;
-		_tmp12_ = self->priv->main_window;
-		_tmp13_ = _tmp12_->menubar;
-		_tmp14_ = menu_bar_get_keyboard_window (_tmp13_);
-		_tmp15_ = _tmp14_;
-		if (_tmp15_ != NULL) {
-			MainWindow* _tmp16_;
-			MenuBar* _tmp17_;
-			GtkWindow* _tmp18_;
-			GtkWindow* _tmp19_;
-			GdkWindow* _tmp20_ = NULL;
-			Window _tmp21_ = 0;
-			_tmp16_ = self->priv->main_window;
-			_tmp17_ = _tmp16_->menubar;
-			_tmp18_ = menu_bar_get_keyboard_window (_tmp17_);
-			_tmp19_ = _tmp18_;
-			_tmp20_ = gtk_widget_get_window ((GtkWidget*) _tmp19_);
-			_tmp21_ = gdk_x11_window_get_xid (_tmp20_);
-			keyboard_xid = _tmp21_;
+		_tmp15_ = self->priv->main_window;
+		_tmp16_ = _tmp15_->menubar;
+		_tmp17_ = menu_bar_get_keyboard_window (_tmp16_);
+		_tmp18_ = _tmp17_;
+		if (_tmp18_ != NULL) {
+			MainWindow* _tmp19_;
+			MenuBar* _tmp20_;
+			GtkWindow* _tmp21_;
+			GtkWindow* _tmp22_;
+			GdkWindow* _tmp23_ = NULL;
+			Window _tmp24_ = 0;
+			_tmp19_ = self->priv->main_window;
+			_tmp20_ = _tmp19_->menubar;
+			_tmp21_ = menu_bar_get_keyboard_window (_tmp20_);
+			_tmp22_ = _tmp21_;
+			_tmp23_ = gtk_widget_get_window ((GtkWidget*) _tmp22_);
+			_tmp24_ = gdk_x11_window_get_xid (_tmp23_);
+			keyboard_xid = _tmp24_;
 		}
-		_tmp23_ = xwin;
-		_tmp24_ = keyboard_xid;
-		if (_tmp23_ != _tmp24_) {
-			GdkWindow* _tmp25_;
-			GdkWindowTypeHint _tmp26_ = 0;
-			_tmp25_ = win;
-			_tmp26_ = gdk_window_get_type_hint (_tmp25_);
-			_tmp22_ = _tmp26_ != GDK_WINDOW_TYPE_HINT_NOTIFICATION;
-		} else {
-			_tmp22_ = FALSE;
-		}
-		_tmp27_ = _tmp22_;
-		if (_tmp27_) {
+		_tmp26_ = xwin;
+		_tmp27_ = keyboard_xid;
+		if (_tmp26_ != _tmp27_) {
 			GdkWindow* _tmp28_;
-			MainWindow* _tmp29_;
-			MenuBar* _tmp30_;
-			GtkWindow* _tmp31_;
-			GtkWindow* _tmp32_;
+			GdkWindowTypeHint _tmp29_ = 0;
 			_tmp28_ = win;
-			gdk_window_focus (_tmp28_, (guint32) GDK_CURRENT_TIME);
-			_tmp29_ = self->priv->main_window;
-			_tmp30_ = _tmp29_->menubar;
-			_tmp31_ = menu_bar_get_keyboard_window (_tmp30_);
-			_tmp32_ = _tmp31_;
-			if (_tmp32_ != NULL) {
-				MainWindow* _tmp33_;
-				MenuBar* _tmp34_;
-				GtkWindow* _tmp35_;
-				GtkWindow* _tmp36_;
-				GdkWindow* _tmp37_ = NULL;
-				_tmp33_ = self->priv->main_window;
-				_tmp34_ = _tmp33_->menubar;
-				_tmp35_ = menu_bar_get_keyboard_window (_tmp34_);
-				_tmp36_ = _tmp35_;
-				_tmp37_ = gtk_widget_get_window ((GtkWidget*) _tmp36_);
-				gdk_window_raise (_tmp37_);
+			_tmp29_ = gdk_window_get_type_hint (_tmp28_);
+			_tmp25_ = _tmp29_ != GDK_WINDOW_TYPE_HINT_NOTIFICATION;
+		} else {
+			_tmp25_ = FALSE;
+		}
+		_tmp30_ = _tmp25_;
+		if (_tmp30_) {
+			GdkWindow* _tmp31_;
+			MainWindow* _tmp32_;
+			MenuBar* _tmp33_;
+			GtkWindow* _tmp34_;
+			GtkWindow* _tmp35_;
+			_tmp31_ = win;
+			gdk_window_focus (_tmp31_, (guint32) GDK_CURRENT_TIME);
+			_tmp32_ = self->priv->main_window;
+			_tmp33_ = _tmp32_->menubar;
+			_tmp34_ = menu_bar_get_keyboard_window (_tmp33_);
+			_tmp35_ = _tmp34_;
+			if (_tmp35_ != NULL) {
+				MainWindow* _tmp36_;
+				MenuBar* _tmp37_;
+				GtkWindow* _tmp38_;
+				GtkWindow* _tmp39_;
+				GdkWindow* _tmp40_ = NULL;
+				_tmp36_ = self->priv->main_window;
+				_tmp37_ = _tmp36_->menubar;
+				_tmp38_ = menu_bar_get_keyboard_window (_tmp37_);
+				_tmp39_ = _tmp38_;
+				_tmp40_ = gtk_widget_get_window ((GtkWidget*) _tmp39_);
+				gdk_window_raise (_tmp40_);
 			}
 		}
 		_g_object_unref0 (win);
 		_g_object_unref0 (display);
+	} else {
+		XEvent* _tmp41_;
+		gint _tmp42_;
+		_tmp41_ = xevent;
+		_tmp42_ = (*_tmp41_).type;
+		if (_tmp42_ == ((gint) UnmapNotify)) {
+			Window xwin = 0;
+			gint revert_to = 0;
+			XEvent* _tmp43_;
+			XUnmapEvent _tmp44_;
+			Display* _tmp45_;
+			Window _tmp46_ = 0;
+			gint _tmp47_ = 0;
+			gint _tmp48_;
+			_tmp43_ = xevent;
+			_tmp44_ = (*_tmp43_).xunmap;
+			_tmp45_ = _tmp44_.display;
+			XGetInputFocus (_tmp45_, &_tmp46_, &_tmp47_);
+			xwin = _tmp46_;
+			revert_to = _tmp47_;
+			_tmp48_ = revert_to;
+			if (_tmp48_ == ((gint) RevertToNone)) {
+				MainWindow* _tmp49_;
+				GdkWindow* _tmp50_ = NULL;
+				MainWindow* _tmp51_;
+				MenuBar* _tmp52_;
+				GtkWindow* _tmp53_;
+				GtkWindow* _tmp54_;
+				_tmp49_ = self->priv->main_window;
+				_tmp50_ = gtk_widget_get_window ((GtkWidget*) _tmp49_);
+				gdk_window_focus (_tmp50_, (guint32) GDK_CURRENT_TIME);
+				_tmp51_ = self->priv->main_window;
+				_tmp52_ = _tmp51_->menubar;
+				_tmp53_ = menu_bar_get_keyboard_window (_tmp52_);
+				_tmp54_ = _tmp53_;
+				if (_tmp54_ != NULL) {
+					MainWindow* _tmp55_;
+					MenuBar* _tmp56_;
+					GtkWindow* _tmp57_;
+					GtkWindow* _tmp58_;
+					GdkWindow* _tmp59_ = NULL;
+					_tmp55_ = self->priv->main_window;
+					_tmp56_ = _tmp55_->menubar;
+					_tmp57_ = menu_bar_get_keyboard_window (_tmp56_);
+					_tmp58_ = _tmp57_;
+					_tmp59_ = gtk_widget_get_window ((GtkWidget*) _tmp58_);
+					gdk_window_raise (_tmp59_);
+				}
+			}
+		}
 	}
 	result = GDK_FILTER_CONTINUE;
 	return result;
@@ -1280,7 +1352,7 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 		_argv_size_ = argv_length1;
 		if (_inner_error_ != NULL) {
 			argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
-			goto __catch20_g_error;
+			goto __catch21_g_error;
 		}
 		_tmp2_ = argv;
 		_tmp2__length1 = argv_length1;
@@ -1288,12 +1360,12 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 		atspi_pid = _tmp3_;
 		if (_inner_error_ != NULL) {
 			argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
-			goto __catch20_g_error;
+			goto __catch21_g_error;
 		}
 		argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
 	}
-	goto __finally20;
-	__catch20_g_error:
+	goto __finally21;
+	__catch21_g_error:
 	{
 		GError* e = NULL;
 		GError* _tmp4_;
@@ -1302,10 +1374,10 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 		_inner_error_ = NULL;
 		_tmp4_ = e;
 		_tmp5_ = _tmp4_->message;
-		g_warning ("unity-greeter.vala:398: Error starting the at-spi registry: %s", _tmp5_);
+		g_warning ("unity-greeter.vala:428: Error starting the at-spi registry: %s", _tmp5_);
 		_g_error_free0 (e);
 	}
-	__finally20:
+	__finally21:
 	if (_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
@@ -1318,8 +1390,8 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 	g_log_set_default_handler (_unity_greeter_log_cb_glog_func, NULL);
 	_tmp7_ = getuid ();
 	_tmp8_ = g_getenv ("LANG");
-	g_debug ("unity-greeter.vala:406: Starting unity-greeter %s UID=%d LANG=%s", VERSION, (gint) _tmp7_, _tmp8_);
-	g_debug ("unity-greeter.vala:409: Setting cursor");
+	g_debug ("unity-greeter.vala:436: Starting unity-greeter %s UID=%d LANG=%s", VERSION, (gint) _tmp7_, _tmp8_);
+	g_debug ("unity-greeter.vala:439: Setting cursor");
 	_tmp9_ = gdk_get_default_root_window ();
 	_tmp10_ = gdk_cursor_new (GDK_LEFT_PTR);
 	_tmp11_ = _tmp10_;
@@ -1355,7 +1427,7 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 	options = _tmp18_;
 	options_length1 = 3;
 	_options_size_ = options_length1;
-	g_debug ("unity-greeter.vala:423: Loading command line options");
+	g_debug ("unity-greeter.vala:453: Loading command line options");
 	_tmp19_ = _ ("- Unity Greeter");
 	_tmp20_ = g_option_context_new (_tmp19_);
 	c = _tmp20_;
@@ -1371,11 +1443,11 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 		_tmp25_ = c;
 		g_option_context_parse (_tmp25_, &args_length1, &args, &_inner_error_);
 		if (_inner_error_ != NULL) {
-			goto __catch21_g_error;
+			goto __catch22_g_error;
 		}
 	}
-	goto __finally21;
-	__catch21_g_error:
+	goto __finally22;
+	__catch22_g_error:
 	{
 		GError* e = NULL;
 		FILE* _tmp26_;
@@ -1407,7 +1479,7 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 		options = (g_free (options), NULL);
 		return result;
 	}
-	__finally21:
+	__finally22:
 	if (_inner_error_ != NULL) {
 		_g_option_context_free0 (c);
 		options = (g_free (options), NULL);
@@ -1427,7 +1499,7 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 	}
 	_tmp36_ = do_test_mode;
 	if (_tmp36_) {
-		g_debug ("unity-greeter.vala:448: Running in test mode");
+		g_debug ("unity-greeter.vala:478: Running in test mode");
 	}
 	_tmp37_ = do_test_mode;
 	if (!_tmp37_) {
@@ -1435,11 +1507,11 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 		{
 			g_spawn_command_line_async ("nm-applet", &_inner_error_);
 			if (_inner_error_ != NULL) {
-				goto __catch22_g_error;
+				goto __catch23_g_error;
 			}
 		}
-		goto __finally22;
-		__catch22_g_error:
+		goto __finally23;
+		__catch23_g_error:
 		{
 			GError* e = NULL;
 			GError* _tmp38_;
@@ -1448,10 +1520,10 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 			_inner_error_ = NULL;
 			_tmp38_ = e;
 			_tmp39_ = _tmp38_->message;
-			g_warning ("unity-greeter.vala:461: Error starting nm-applet: %s", _tmp39_);
+			g_warning ("unity-greeter.vala:491: Error starting nm-applet: %s", _tmp39_);
 			_g_error_free0 (e);
 		}
-		__finally22:
+		__finally23:
 		if (_inner_error_ != NULL) {
 			_g_option_context_free0 (c);
 			options = (g_free (options), NULL);
@@ -1460,7 +1532,7 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 			return 0;
 		}
 	}
-	g_debug ("unity-greeter.vala:466: Setting GTK+ settings");
+	g_debug ("unity-greeter.vala:496: Setting GTK+ settings");
 	_tmp40_ = gtk_settings_get_default ();
 	_tmp41_ = _g_object_ref0 (_tmp40_);
 	settings = _tmp41_;
@@ -1533,14 +1605,14 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 		_tmp68_ = value;
 		g_object_set ((GObject*) _tmp67_, "gtk-xft-rgba", _tmp68_, NULL, NULL);
 	}
-	g_debug ("unity-greeter.vala:489: Creating Unity Greeter");
+	g_debug ("unity-greeter.vala:519: Creating Unity Greeter");
 	_tmp69_ = do_test_mode;
 	_tmp70_ = unity_greeter_new (_tmp69_);
 	greeter = _tmp70_;
-	g_debug ("unity-greeter.vala:492: Showing greeter");
+	g_debug ("unity-greeter.vala:522: Showing greeter");
 	_tmp71_ = greeter;
 	unity_greeter_show (_tmp71_);
-	g_debug ("unity-greeter.vala:495: Starting main loop");
+	g_debug ("unity-greeter.vala:525: Starting main loop");
 	gtk_main ();
 	_tmp72_ = atspi_pid;
 	if (_tmp72_ != ((GPid) 0)) {
@@ -1708,6 +1780,7 @@ static void unity_greeter_class_init (UnityGreeterClass * klass) {
 	g_signal_new ("show_message", TYPE_UNITY_GREETER, G_SIGNAL_RUN_LAST, 0, NULL, NULL, g_cclosure_user_marshal_VOID__STRING_INT, G_TYPE_NONE, 2, G_TYPE_STRING, G_TYPE_INT);
 	g_signal_new ("show_prompt", TYPE_UNITY_GREETER, G_SIGNAL_RUN_LAST, 0, NULL, NULL, g_cclosure_user_marshal_VOID__STRING_INT, G_TYPE_NONE, 2, G_TYPE_STRING, G_TYPE_INT);
 	g_signal_new ("authentication_complete", TYPE_UNITY_GREETER, G_SIGNAL_RUN_LAST, 0, NULL, NULL, g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
+	g_signal_new ("starting_session", TYPE_UNITY_GREETER, G_SIGNAL_RUN_LAST, 0, NULL, NULL, g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
 }
 
 

@@ -518,15 +518,15 @@ static GtkGrid* prompt_box_real_create_name_grid (PromptBox* self) {
 		_g_free0 (_tmp20_);
 		_tmp23_ = _tmp22_;
 		if (_inner_error_ != NULL) {
-			goto __catch10_g_error;
+			goto __catch11_g_error;
 		}
 		_tmp24_ = self->priv->message_image;
 		_tmp25_ = _tmp23_;
 		g_object_set ((GtkImage*) _tmp24_, "pixbuf", _tmp25_, NULL);
 		_g_object_unref0 (_tmp25_);
 	}
-	goto __finally10;
-	__catch10_g_error:
+	goto __finally11;
+	__catch11_g_error:
 	{
 		GError* e = NULL;
 		GError* _tmp26_;
@@ -538,7 +538,7 @@ static GtkGrid* prompt_box_real_create_name_grid (PromptBox* self) {
 		g_debug ("prompt-box.vala:195: Error loading message image: %s", _tmp27_);
 		_g_error_free0 (e);
 	}
-	__finally10:
+	__finally11:
 	if (_inner_error_ != NULL) {
 		_g_object_unref0 (name_grid);
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
@@ -596,15 +596,15 @@ static GtkGrid* prompt_box_real_create_name_grid (PromptBox* self) {
 		gtk_css_provider_load_from_data (style, "* {padding: 2px;}", (gssize) (-1), &_inner_error_);
 		if (_inner_error_ != NULL) {
 			_g_object_unref0 (style);
-			goto __catch11_g_error;
+			goto __catch12_g_error;
 		}
 		_tmp49_ = self->option_button;
 		_tmp50_ = gtk_widget_get_style_context ((GtkWidget*) _tmp49_);
 		gtk_style_context_add_provider (_tmp50_, (GtkStyleProvider*) style, (guint) GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 		_g_object_unref0 (style);
 	}
-	goto __finally11;
-	__catch11_g_error:
+	goto __finally12;
+	__catch12_g_error:
 	{
 		GError* e = NULL;
 		GError* _tmp51_;
@@ -616,7 +616,7 @@ static GtkGrid* prompt_box_real_create_name_grid (PromptBox* self) {
 		g_debug ("prompt-box.vala:226: Internal error loading session chooser style: %s", _tmp52_);
 		_g_error_free0 (e);
 	}
-	__finally11:
+	__finally12:
 	if (_inner_error_ != NULL) {
 		_g_object_unref0 (align);
 		_g_object_unref0 (name_grid);

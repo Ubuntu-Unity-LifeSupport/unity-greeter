@@ -33,13 +33,13 @@
 #include <atk/atk.h>
 #include <stdlib.h>
 #include <string.h>
-#include <signal.h>
-#include <sys/types.h>
-#include <sys/wait.h>
 #include <lightdm.h>
 #include <cairo.h>
 #include <float.h>
 #include <math.h>
+#include <signal.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <gio/gio.h>
 #include <glib/gi18n-lib.h>
 #include <gdk/gdk.h>
@@ -197,6 +197,7 @@ void background_draw_full (Background* self, cairo_t* c, BackgroundDrawFlags fla
 void menu_bar_set_keyboard_state (MenuBar* self);
 gboolean ug_settings_get_boolean (const gchar* key);
 #define UG_SETTINGS_KEY_ONSCREEN_KEYBOARD "onscreen-keyboard"
+void menu_bar_cleanup (MenuBar* self);
 static void menu_bar_real_get_preferred_height (GtkWidget* base, gint* min, gint* nat);
 static void menu_bar_greeter_set_env (MenuBar* self, const gchar* key, const gchar* val);
 static GtkWidget* menu_bar_make_a11y_indicator (MenuBar* self);
@@ -236,6 +237,7 @@ static IndicatorObject* menu_bar_get_indicator_object_from_entry (MenuBar* self,
 static void menu_bar_set_background (MenuBar* self, Background* value);
 static void menu_bar_set_accel_group (MenuBar* self, GtkAccelGroup* value);
 static GObject * menu_bar_constructor (GType type, guint n_construct_properties, GObjectConstructParam * construct_properties);
+static void _menu_bar_cleanup_unity_greeter_starting_session (UnityGreeter* _sender, gpointer self);
 static void menu_bar_finalize (GObject* obj);
 static void _vala_menu_bar_get_property (GObject * object, guint property_id, GValue * value, GParamSpec * pspec);
 static void _vala_menu_bar_set_property (GObject * object, guint property_id, const GValue * value, GParamSpec * pspec);
@@ -600,6 +602,25 @@ void menu_bar_set_keyboard_state (MenuBar* self) {
 }
 
 
+void menu_bar_cleanup (MenuBar* self) {
+	GPid _tmp0_;
+	g_return_if_fail (self != NULL);
+	_tmp0_ = self->priv->keyboard_pid;
+	if (_tmp0_ != ((GPid) 0)) {
+		GPid _tmp1_;
+		gint status = 0;
+		GPid _tmp2_;
+		gint _tmp3_ = 0;
+		_tmp1_ = self->priv->keyboard_pid;
+		kill ((pid_t) _tmp1_, SIGKILL);
+		_tmp2_ = self->priv->keyboard_pid;
+		waitpid ((pid_t) _tmp2_, &_tmp3_, 0);
+		status = _tmp3_;
+		self->priv->keyboard_pid = (GPid) 0;
+	}
+}
+
+
 static void menu_bar_real_get_preferred_height (GtkWidget* base, gint* min, gint* nat) {
 	MenuBar * self;
 	gint _vala_min = 0;
@@ -644,7 +665,7 @@ static void menu_bar_greeter_set_env (MenuBar* self, const gchar* key, const gch
 		_tmp2_ = g_dbus_proxy_new_for_bus_sync (G_BUS_TYPE_SESSION, G_DBUS_PROXY_FLAGS_NONE, NULL, "org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus", NULL, &_inner_error_);
 		proxy = _tmp2_;
 		if (_inner_error_ != NULL) {
-			goto __catch6_g_error;
+			goto __catch7_g_error;
 		}
 		_tmp3_ = G_VARIANT_TYPE_ARRAY;
 		_tmp4_ = g_variant_builder_new (_tmp3_);
@@ -664,13 +685,13 @@ static void menu_bar_greeter_set_env (MenuBar* self, const gchar* key, const gch
 		if (_inner_error_ != NULL) {
 			_g_variant_builder_unref0 (builder);
 			_g_object_unref0 (proxy);
-			goto __catch6_g_error;
+			goto __catch7_g_error;
 		}
 		_g_variant_builder_unref0 (builder);
 		_g_object_unref0 (proxy);
 	}
-	goto __finally6;
-	__catch6_g_error:
+	goto __finally7;
+	__catch7_g_error:
 	{
 		GError* e = NULL;
 		GError* _tmp14_;
@@ -679,11 +700,11 @@ static void menu_bar_greeter_set_env (MenuBar* self, const gchar* key, const gch
 		_inner_error_ = NULL;
 		_tmp14_ = e;
 		_tmp15_ = _tmp14_->message;
-		g_warning ("menubar.vala:210: Could not get set environment for indicators: %s", _tmp15_);
+		g_warning ("menubar.vala:212: Could not get set environment for indicators: %s", _tmp15_);
 		_g_error_free0 (e);
 		return;
 	}
-	__finally6:
+	__finally7:
 	if (_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
@@ -984,7 +1005,7 @@ static void menu_bar_layout_toggled_cb (MenuBar* self, GtkCheckMenuItem* item) {
 		_tmp51_ = layout;
 		_tmp52_ = lightdm_layout_get_name (_tmp51_);
 		_tmp53_ = _tmp52_;
-		g_debug ("menubar.vala:275: Setting layout to %s", _tmp53_);
+		g_debug ("menubar.vala:277: Setting layout to %s", _tmp53_);
 	} else {
 		LightDMLayout* _tmp54_;
 		_tmp54_ = layout;
@@ -1166,7 +1187,7 @@ static void menu_bar_setup_indicators (MenuBar* self) {
 	_g_list_free0 (_tmp8_);
 	_tmp10_ = g_getenv ("LANG");
 	_tmp11_ = g_getenv ("LANGUAGE");
-	g_debug ("menubar.vala:333: LANG=%s LANGUAGE=%s", _tmp10_, _tmp11_);
+	g_debug ("menubar.vala:335: LANG=%s LANGUAGE=%s", _tmp10_, _tmp11_);
 	_tmp12_ = g_build_filename (INDICATORDIR, "libsession.so", NULL);
 	_tmp13_ = g_build_filename (INDICATORDIR, "libdatetime.so", NULL);
 	_tmp14_ = g_build_filename (INDICATORDIR, "libpower.so", NULL);
@@ -1248,7 +1269,7 @@ static void menu_bar_setup_indicators (MenuBar* self) {
 	}
 	_tmp31_ = g_getenv ("LANG");
 	_tmp32_ = g_getenv ("LANGUAGE");
-	g_debug ("menubar.vala:351: LANG=%s LANGUAGE=%s", _tmp31_, _tmp32_);
+	g_debug ("menubar.vala:353: LANG=%s LANGUAGE=%s", _tmp31_, _tmp32_);
 	filenames = (_vala_array_free (filenames, filenames_length1, (GDestroyNotify) g_free), NULL);
 	_g_object_unref0 (a11y_item);
 	_g_object_unref0 (keyboard_item);
@@ -1337,7 +1358,7 @@ static void menu_bar_keyboard_toggled_cb (MenuBar* self, GtkCheckMenuItem* item)
 			_argv_size_ = argv_length1;
 			if (_inner_error_ != NULL) {
 				argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
-				goto __catch7_g_error;
+				goto __catch8_g_error;
 			}
 			_tmp6_ = argv;
 			_tmp6__length1 = argv_length1;
@@ -1346,7 +1367,7 @@ static void menu_bar_keyboard_toggled_cb (MenuBar* self, GtkCheckMenuItem* item)
 			onboard_stdout_fd = _tmp8_;
 			if (_inner_error_ != NULL) {
 				argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
-				goto __catch7_g_error;
+				goto __catch8_g_error;
 			}
 			_tmp9_ = onboard_stdout_fd;
 			_tmp10_ = fdopen (_tmp9_, "r");
@@ -1372,8 +1393,8 @@ static void menu_bar_keyboard_toggled_cb (MenuBar* self, GtkCheckMenuItem* item)
 			_fclose0 (f);
 			argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
 		}
-		goto __finally7;
-		__catch7_g_error:
+		goto __finally8;
+		__catch8_g_error:
 		{
 			GError* e = NULL;
 			GError* _tmp17_;
@@ -1382,11 +1403,11 @@ static void menu_bar_keyboard_toggled_cb (MenuBar* self, GtkCheckMenuItem* item)
 			_inner_error_ = NULL;
 			_tmp17_ = e;
 			_tmp18_ = _tmp17_->message;
-			g_warning ("menubar.vala:391: Error setting up keyboard: %s", _tmp18_);
+			g_warning ("menubar.vala:393: Error setting up keyboard: %s", _tmp18_);
 			_g_error_free0 (e);
 			return;
 		}
-		__finally7:
+		__finally8:
 		if (_inner_error_ != NULL) {
 			g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 			g_clear_error (&_inner_error_);
@@ -1629,17 +1650,17 @@ static void menu_bar_screen_reader_toggled_cb (MenuBar* self, GtkCheckMenuItem* 
 		if (_tmp5_) {
 			g_spawn_command_line_async ("orca --replace --no-setup --disable splash-window,main-window", &_inner_error_);
 			if (_inner_error_ != NULL) {
-				goto __catch8_g_error;
+				goto __catch9_g_error;
 			}
 		} else {
 			g_spawn_command_line_async ("orca --quit", &_inner_error_);
 			if (_inner_error_ != NULL) {
-				goto __catch8_g_error;
+				goto __catch9_g_error;
 			}
 		}
 	}
-	goto __finally8;
-	__catch8_g_error:
+	goto __finally9;
+	__catch9_g_error:
 	{
 		GError* e = NULL;
 		GError* _tmp6_;
@@ -1648,10 +1669,10 @@ static void menu_bar_screen_reader_toggled_cb (MenuBar* self, GtkCheckMenuItem* 
 		_inner_error_ = NULL;
 		_tmp6_ = e;
 		_tmp7_ = _tmp6_->message;
-		g_warning ("menubar.vala:478: Failed to run Orca: %s", _tmp7_);
+		g_warning ("menubar.vala:480: Failed to run Orca: %s", _tmp7_);
 		_g_error_free0 (e);
 	}
-	__finally8:
+	__finally9:
 	if (_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
@@ -1823,7 +1844,7 @@ static void menu_bar_indicator_added_cb (MenuBar* self, IndicatorObject* object,
 	}
 	_tmp14_ = entry;
 	_tmp15_ = pos;
-	g_debug ("menubar.vala:527: Adding indicator object %p at position %d", _tmp14_, _tmp15_);
+	g_debug ("menubar.vala:529: Adding indicator object %p at position %d", _tmp14_, _tmp15_);
 	_tmp16_ = entry;
 	_tmp17_ = indicator_menu_item_new (_tmp16_);
 	_tmp18_ = g_object_ref_sink (_tmp17_);
@@ -1842,7 +1863,7 @@ static void menu_bar_indicator_removed_cb (MenuBar* self, IndicatorObject* objec
 	g_return_if_fail (object != NULL);
 	g_return_if_fail (entry != NULL);
 	_tmp0_ = entry;
-	g_debug ("menubar.vala:535: Removing indicator object %p", _tmp0_);
+	g_debug ("menubar.vala:537: Removing indicator object %p", _tmp0_);
 	_tmp1_ = gtk_container_get_children ((GtkContainer*) self);
 	{
 		GList* child_collection = NULL;
@@ -1878,7 +1899,7 @@ static void menu_bar_indicator_removed_cb (MenuBar* self, IndicatorObject* objec
 		_g_list_free0 (child_collection);
 	}
 	_tmp8_ = entry;
-	g_warning ("menubar.vala:547: Indicator object %p not in menubar", _tmp8_);
+	g_warning ("menubar.vala:549: Indicator object %p not in menubar", _tmp8_);
 }
 
 
@@ -1967,6 +1988,11 @@ static void menu_bar_set_accel_group (MenuBar* self, GtkAccelGroup* value) {
 }
 
 
+static void _menu_bar_cleanup_unity_greeter_starting_session (UnityGreeter* _sender, gpointer self) {
+	menu_bar_cleanup (self);
+}
+
+
 static GObject * menu_bar_constructor (GType type, guint n_construct_properties, GObjectConstructParam * construct_properties) {
 	GObject * obj;
 	GObjectClass * parent_class;
@@ -1994,6 +2020,7 @@ static GObject * menu_bar_constructor (GType type, guint n_construct_properties,
 	GdkColor* _tmp18_;
 	gint _tmp18__length1;
 	GdkColor _tmp19_;
+	UnityGreeter* _tmp26_;
 	GError * _inner_error_ = NULL;
 	parent_class = G_OBJECT_CLASS (menu_bar_parent_class);
 	obj = parent_class->constructor (type, n_construct_properties, construct_properties);
@@ -2043,15 +2070,15 @@ static GObject * menu_bar_constructor (GType type, guint n_construct_properties,
 		gtk_css_provider_load_from_data (_tmp21_, "* {-GtkWidget-window-dragging: false;}", (gssize) (-1), &_inner_error_);
 		if (_inner_error_ != NULL) {
 			_g_object_unref0 (style);
-			goto __catch9_g_error;
+			goto __catch10_g_error;
 		}
 		_tmp22_ = gtk_widget_get_style_context ((GtkWidget*) self);
 		_tmp23_ = style;
 		gtk_style_context_add_provider (_tmp22_, (GtkStyleProvider*) _tmp23_, (guint) GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 		_g_object_unref0 (style);
 	}
-	goto __finally9;
-	__catch9_g_error:
+	goto __finally10;
+	__catch10_g_error:
 	{
 		GError* e = NULL;
 		GError* _tmp24_;
@@ -2063,7 +2090,7 @@ static GObject * menu_bar_constructor (GType type, guint n_construct_properties,
 		g_debug ("menubar.vala:165: Internal error loading menubar style: %s", _tmp25_);
 		_g_error_free0 (e);
 	}
-	__finally9:
+	__finally10:
 	if (_inner_error_ != NULL) {
 		_g_object_unref0 (hostname_item);
 		_g_object_unref0 (label);
@@ -2071,6 +2098,8 @@ static GObject * menu_bar_constructor (GType type, guint n_construct_properties,
 		g_clear_error (&_inner_error_);
 	}
 	menu_bar_setup_indicators (self);
+	_tmp26_ = unity_greeter_singleton;
+	g_signal_connect_object (_tmp26_, "starting-session", (GCallback) _menu_bar_cleanup_unity_greeter_starting_session, self, 0);
 	_g_object_unref0 (hostname_item);
 	_g_object_unref0 (label);
 	return obj;
@@ -2105,21 +2134,7 @@ static void menu_bar_instance_init (MenuBar * self) {
 
 static void menu_bar_finalize (GObject* obj) {
 	MenuBar * self;
-	GPid _tmp0_;
 	self = MENU_BAR (obj);
-	_tmp0_ = self->priv->keyboard_pid;
-	if (_tmp0_ != ((GPid) 0)) {
-		GPid _tmp1_;
-		gint status = 0;
-		GPid _tmp2_;
-		gint _tmp3_ = 0;
-		_tmp1_ = self->priv->keyboard_pid;
-		kill ((pid_t) _tmp1_, SIGKILL);
-		_tmp2_ = self->priv->keyboard_pid;
-		waitpid ((pid_t) _tmp2_, &_tmp3_, 0);
-		status = _tmp3_;
-		self->priv->keyboard_pid = (GPid) 0;
-	}
 	_g_object_unref0 (self->priv->_background);
 	_g_object_unref0 (self->priv->_keyboard_window);
 	_g_object_unref0 (self->priv->_accel_group);
