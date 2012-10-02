@@ -1,3 +1,11 @@
+unity-greeter (12.10.4-0ubuntu2) quantal; urgency=low
+
+  * debian/patches/do-not-mention-citrix-support.patch:
+    - We don't actually support Citrix out of the box, so don't mention it
+      in the remote login help dialog.  LP: #1059663
+
+ -- Michael Terry <mterry@ubuntu.com>  Tue, 02 Oct 2012 13:22:50 -0400
+
 unity-greeter (12.10.4-0ubuntu1) quantal; urgency=low
 
   * New upstream bug fix release
