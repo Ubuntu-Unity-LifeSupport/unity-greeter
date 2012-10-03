@@ -1,3 +1,11 @@
+unity-greeter (12.10.4-0ubuntu3) quantal; urgency=low
+
+  * debian/patches/sigterm-onboard.patch:
+    - Send SIGTERM not SIGKILL to onboard, to allow it to release keys
+      LP: #978430
+
+ -- Michael Terry <mterry@ubuntu.com>  Wed, 03 Oct 2012 10:17:06 -0400
+
 unity-greeter (12.10.4-0ubuntu2) quantal; urgency=low
 
   * debian/patches/do-not-mention-citrix-support.patch:
