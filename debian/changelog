@@ -1,3 +1,15 @@
+unity-greeter (12.10.4-0ubuntu4) quantal; urgency=low
+
+  * debian/patches/close-orca.patch:
+    - Make turning off the screen reader work again, now that the --quit
+      argument to orca was dropped.
+  * debian/patches/do-not-read-password.patch:
+    - Workaround an orca problem where it doesn't notice the currently
+      focused widget on startup.  With this fix, it will no longer read
+      your password as you type it.  LP: #944159
+
+ -- Michael Terry <mterry@ubuntu.com>  Sun, 07 Oct 2012 17:12:31 -0400
+
 unity-greeter (12.10.4-0ubuntu3) quantal; urgency=low
 
   * debian/patches/sigterm-onboard.patch:
