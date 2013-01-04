@@ -1,3 +1,11 @@
+Overview of changes in unity-greeter 13.04.0
+
+    - Support timed login
+    - Drop OK button in session chooser
+    - Various small layout changes
+    - Fix orca not closing when disabled
+    - Fix display corruption when logging in
+
 Overview of changes in unity-greeter 12.10.4
 
     - Fix rendering of password entry's spinner

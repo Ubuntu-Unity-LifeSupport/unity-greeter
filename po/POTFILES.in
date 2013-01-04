@@ -9,6 +9,7 @@ src/dash-entry.vala
 src/fadable-box.vala
 src/fadable.vala
 src/fading-label.vala
+src/flat-button.vala
 src/greeter-list.vala
 src/list-stack.vala
 src/main-window.vala
@@ -18,6 +19,7 @@ src/prompt-box.vala
 src/session-list.vala
 src/settings-daemon.vala
 src/settings.vala
+src/toggle-box.vala
 src/unity-greeter.vala
 src/user-list.vala
 src/user-prompt-box.vala

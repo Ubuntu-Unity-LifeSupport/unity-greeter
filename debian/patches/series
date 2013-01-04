@@ -1,6 +1,2 @@
 move-nm-applet.patch
-do-not-mention-citrix-support.patch
-sigterm-onboard.patch
-close-orca.patch
 do-not-read-password.patch
-fix-timed-autologin.patch

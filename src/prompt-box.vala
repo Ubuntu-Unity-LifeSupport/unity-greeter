@@ -20,8 +20,6 @@
 
 public class PromptBox : FadableBox
 {
-    public static const int NAME_MARGIN_TOP = 12;
-
     public signal void respond (string[] response);
     public signal void login ();
     public signal void show_options ();
@@ -45,14 +43,12 @@ public class PromptBox : FadableBox
     private Gtk.Fixed fixed;
     private Gtk.Widget zone; /* when overlapping zone we are fully expanded */
 
-    private int name_grid_height = grid_size - NAME_MARGIN_TOP;
-
     /* Expanded widgets */
     protected Gtk.Grid box_grid;
     protected Gtk.Grid name_grid;
     private ActiveIndicator active_indicator;
     protected FadingLabel name_label;
-    protected Gtk.Button option_button;
+    protected FlatButton option_button;
     private CachedImage option_image;
     private CachedImage message_image;
 
@@ -101,13 +97,11 @@ public class PromptBox : FadableBox
         fixed.show ();
         add (fixed);
 
-        /* Create fully expanded version of ourselves */
-        name_grid = create_name_grid ();
-
         box_grid = new Gtk.Grid ();
         box_grid.column_spacing = 4;
         box_grid.row_spacing = 3;
-        box_grid.margin_bottom = 10;
+        box_grid.margin_top = GreeterList.BORDER;
+        box_grid.margin_bottom = 6;
         box_grid.expand = true;
 
         /** Grid layout:
@@ -119,7 +113,7 @@ public class PromptBox : FadableBox
 
         active_indicator = new ActiveIndicator ();
         active_indicator.valign = Gtk.Align.START;
-        active_indicator.margin_top = 12 + NAME_MARGIN_TOP;
+        active_indicator.margin_top = (grid_size - ActiveIndicator.HEIGHT) / 2;
         active_indicator.show ();
         box_grid.attach (active_indicator, COL_ACTIVE, last_row, 1, 1);
 
@@ -129,6 +123,9 @@ public class PromptBox : FadableBox
         box_grid.attach (dummy_indicator, COL_SPACER, last_row, 1, 1);
 
         box_grid.show ();
+
+        /* Create fully expanded version of ourselves */
+        name_grid = create_name_grid ();
         box_grid.attach (name_grid, COL_CONTENT, last_row, 1, 1);
 
         /* Now prep small versions of the above normal widgets.  These are
@@ -140,8 +137,8 @@ public class PromptBox : FadableBox
         small_box_grid.show ();
 
         small_active_indicator = new ActiveIndicator ();
-        small_active_indicator.valign = Gtk.Align.CENTER;
-        small_active_indicator.margin_top = NAME_MARGIN_TOP;
+        small_active_indicator.valign = Gtk.Align.START;
+        small_active_indicator.margin_top = (grid_size - ActiveIndicator.HEIGHT) / 2;
         small_active_indicator.show ();
         small_box_grid.attach (small_active_indicator, 0, 0, 1, 1);
 
@@ -177,11 +174,12 @@ public class PromptBox : FadableBox
         name_label = new FadingLabel ("");
         name_label.override_font (Pango.FontDescription.from_string ("Ubuntu 13"));
         name_label.override_color (Gtk.StateFlags.NORMAL, { 1.0f, 1.0f, 1.0f, 1.0f });
-        name_label.margin_top = NAME_MARGIN_TOP;
         name_label.valign = Gtk.Align.START;
         name_label.vexpand = true;
+        name_label.yalign = 0.5f;
         name_label.xalign = 0.0f;
-        name_label.set_size_request (-1, name_grid_height);
+        name_label.margin_left = 2;
+        name_label.set_size_request (-1, grid_size);
         name_label.show ();
         name_grid.attach (name_label, COL_NAME_LABEL, ROW_NAME, 1, 1);
 
@@ -197,24 +195,23 @@ public class PromptBox : FadableBox
 
         var align = new Gtk.Alignment (0.5f, 0.5f, 0.0f, 0.0f);
         align.valign = Gtk.Align.START;
-        align.margin_top = NAME_MARGIN_TOP;
-        align.set_size_request (-1, name_grid_height);
+        align.set_size_request (-1, grid_size);
         align.add (message_image);
         align.show ();
         name_grid.attach (align, COL_NAME_MESSAGE, ROW_NAME, 1, 1);
 
-        option_button = new Gtk.Button ();
+        option_button = new FlatButton ();
         option_button.hexpand = true;
         option_button.halign = Gtk.Align.END;
         option_button.valign = Gtk.Align.START;
-        option_button.margin_top = NAME_MARGIN_TOP;
+        // Keep as much space on top as on the right
+        option_button.margin_top = ActiveIndicator.WIDTH + box_grid.column_spacing;
         option_button.focus_on_click = false;
         option_button.relief = Gtk.ReliefStyle.NONE;
         option_button.get_accessible ().set_name (_("Session Options"));
         option_button.clicked.connect (option_button_clicked_cb);
         option_image = new CachedImage (null);
         option_image.show ();
-        UnityGreeter.add_style_class (option_button);
         try
         {
             var style = new Gtk.CssProvider ();
@@ -241,9 +238,10 @@ public class PromptBox : FadableBox
         small_name_label = new FadingLabel ("");
         small_name_label.override_font (Pango.FontDescription.from_string ("Ubuntu 13"));
         small_name_label.override_color (Gtk.StateFlags.NORMAL, { 1.0f, 1.0f, 1.0f, 1.0f });
-        small_name_label.margin_top = NAME_MARGIN_TOP;
+        small_name_label.yalign = 0.5f;
         small_name_label.xalign = 0.0f;
-        small_name_label.set_size_request (-1, name_grid_height);
+        small_name_label.margin_left = 2;
+        small_name_label.set_size_request (-1, grid_size);
         small_name_label.show ();
         small_name_grid.attach (small_name_label, 1, 0, 1, 1);
 
@@ -251,8 +249,7 @@ public class PromptBox : FadableBox
         small_message_image.pixbuf = message_image.pixbuf;
 
         var align = new Gtk.Alignment (0.5f, 0.5f, 0.0f, 0.0f);
-        align.margin_top = NAME_MARGIN_TOP;
-        align.set_size_request (-1, name_grid_height);
+        align.set_size_request (-1, grid_size);
         align.add (small_message_image);
         align.show ();
         small_name_grid.attach (align, 2, 0, 1, 1);
@@ -441,11 +438,9 @@ public class PromptBox : FadableBox
 
         label.override_font (Pango.FontDescription.from_string ("Ubuntu 10"));
 
-        Gdk.RGBA color;
+        Gdk.RGBA color = { 1.0f, 1.0f, 1.0f, 1.0f };
         if (is_error)
-            color = { 1.0f, 0.0f, 0.0f, 1.0f };
-        else
-            color = { 1.0f, 1.0f, 1.0f, 1.0f };
+            color.parse ("#df382c");
         label.override_color (Gtk.StateFlags.NORMAL, color);
 
         label.xalign = 0.0f;
@@ -626,16 +621,25 @@ public class PromptBox : FadableBox
     }
 }
 
-private class ActiveIndicator : Gtk.Label
+private class ActiveIndicator : Gtk.Image
 {
-    public static const int WIDTH = 4;
-    public static const int HEIGHT = 5;
-
     public bool active { get; set; }
+    public static const int WIDTH = 8;
+    public static const int HEIGHT = 7;
 
     construct
     {
+        var filename = Path.build_filename (Config.PKGDATADIR, "active.png");
+        try
+        {
+            pixbuf = new Gdk.Pixbuf.from_file (filename);
+        }
+        catch (Error e)
+        {
+            debug ("Could not load active image: %s", e.message);
+        }
         notify["active"].connect (() => { queue_draw (); });
+        xalign = 0.0f;
     }
 
     public override void get_preferred_width (out int min, out int nat)
@@ -654,14 +658,6 @@ private class ActiveIndicator : Gtk.Label
     {
         if (!active)
             return false;
-
-        c.move_to (0, 0);
-        c.rel_line_to (WIDTH, HEIGHT/2.0);
-        c.rel_line_to (-WIDTH, HEIGHT/2.0);
-        c.close_path ();
-        c.set_source_rgb (1.0, 1.0, 1.0);
-        c.stroke_preserve ();
-        c.fill ();
-        return false;
+        return base.draw (c);
     }
 }

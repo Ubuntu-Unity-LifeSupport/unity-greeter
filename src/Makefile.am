@@ -16,6 +16,7 @@ unity_greeter_SOURCES = \
 	fadable.vala \
 	fadable-box.vala \
 	fading-label.vala \
+	flat-button.vala \
 	greeter-list.vala \
 	list-stack.vala \
 	main-window.vala \
@@ -26,6 +27,7 @@ unity_greeter_SOURCES = \
 	remote-login-service.vala \
 	settings.vala \
 	settings-daemon.vala \
+	toggle-box.vala \
 	unity-greeter.vala \
 	user-list.vala \
 	user-prompt-box.vala

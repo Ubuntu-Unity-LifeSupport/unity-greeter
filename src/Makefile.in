@@ -56,14 +56,14 @@ subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	animate-timer.c background.c cached-image.c dash-box.c \
 	dash-button.c dash-entry.c email-autocompleter.c fadable-box.c \
-	fadable.c fading-label.c greeter-list.c list-stack.c \
-	main-window.c menu.c menubar.c prompt-box.c \
+	fadable.c fading-label.c flat-button.c greeter-list.c \
+	list-stack.c main-window.c menu.c menubar.c prompt-box.c \
 	remote-login-service.c session-list.c settings-daemon.c \
-	settings.c unity-greeter.c unity_greeter_vala.stamp \
-	user-list.c user-prompt-box.c
+	settings.c toggle-box.c unity-greeter.c \
+	unity_greeter_vala.stamp user-list.c user-prompt-box.c
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
-	$(top_srcdir)/configure.ac
+am__aclocal_m4_deps = $(top_srcdir)/m4/intltool.m4 \
+	$(top_srcdir)/acinclude.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -82,6 +82,7 @@ am_unity_greeter_OBJECTS = unity_greeter-animate-timer.$(OBJEXT) \
 	unity_greeter-fadable.$(OBJEXT) \
 	unity_greeter-fadable-box.$(OBJEXT) \
 	unity_greeter-fading-label.$(OBJEXT) \
+	unity_greeter-flat-button.$(OBJEXT) \
 	unity_greeter-greeter-list.$(OBJEXT) \
 	unity_greeter-list-stack.$(OBJEXT) \
 	unity_greeter-main-window.$(OBJEXT) \
@@ -91,6 +92,7 @@ am_unity_greeter_OBJECTS = unity_greeter-animate-timer.$(OBJEXT) \
 	unity_greeter-remote-login-service.$(OBJEXT) \
 	unity_greeter-settings.$(OBJEXT) \
 	unity_greeter-settings-daemon.$(OBJEXT) \
+	unity_greeter-toggle-box.$(OBJEXT) \
 	unity_greeter-unity-greeter.$(OBJEXT) \
 	unity_greeter-user-list.$(OBJEXT) \
 	unity_greeter-user-prompt-box.$(OBJEXT)
@@ -263,6 +265,7 @@ unity_greeter_SOURCES = \
 	fadable.vala \
 	fadable-box.vala \
 	fading-label.vala \
+	flat-button.vala \
 	greeter-list.vala \
 	list-stack.vala \
 	main-window.vala \
@@ -273,6 +276,7 @@ unity_greeter_SOURCES = \
 	remote-login-service.vala \
 	settings.vala \
 	settings-daemon.vala \
+	toggle-box.vala \
 	unity-greeter.vala \
 	user-list.vala \
 	user-prompt-box.vala
@@ -398,6 +402,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-fadable-box.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-fadable.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-fading-label.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-flat-button.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-greeter-list.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-list-stack.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-main-window.Po@am__quote@
@@ -408,6 +413,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-session-list.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-settings-daemon.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-settings.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-toggle-box.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-unity-greeter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-user-list.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-user-prompt-box.Po@am__quote@
@@ -566,6 +572,20 @@ unity_greeter-fading-label.obj: fading-label.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-fading-label.obj `if test -f 'fading-label.c'; then $(CYGPATH_W) 'fading-label.c'; else $(CYGPATH_W) '$(srcdir)/fading-label.c'; fi`
 
+unity_greeter-flat-button.o: flat-button.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-flat-button.o -MD -MP -MF $(DEPDIR)/unity_greeter-flat-button.Tpo -c -o unity_greeter-flat-button.o `test -f 'flat-button.c' || echo '$(srcdir)/'`flat-button.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-flat-button.Tpo $(DEPDIR)/unity_greeter-flat-button.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='flat-button.c' object='unity_greeter-flat-button.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-flat-button.o `test -f 'flat-button.c' || echo '$(srcdir)/'`flat-button.c
+
+unity_greeter-flat-button.obj: flat-button.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-flat-button.obj -MD -MP -MF $(DEPDIR)/unity_greeter-flat-button.Tpo -c -o unity_greeter-flat-button.obj `if test -f 'flat-button.c'; then $(CYGPATH_W) 'flat-button.c'; else $(CYGPATH_W) '$(srcdir)/flat-button.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-flat-button.Tpo $(DEPDIR)/unity_greeter-flat-button.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='flat-button.c' object='unity_greeter-flat-button.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-flat-button.obj `if test -f 'flat-button.c'; then $(CYGPATH_W) 'flat-button.c'; else $(CYGPATH_W) '$(srcdir)/flat-button.c'; fi`
+
 unity_greeter-greeter-list.o: greeter-list.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-greeter-list.o -MD -MP -MF $(DEPDIR)/unity_greeter-greeter-list.Tpo -c -o unity_greeter-greeter-list.o `test -f 'greeter-list.c' || echo '$(srcdir)/'`greeter-list.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-greeter-list.Tpo $(DEPDIR)/unity_greeter-greeter-list.Po
@@ -706,6 +726,20 @@ unity_greeter-settings-daemon.obj: settings-daemon.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-settings-daemon.obj `if test -f 'settings-daemon.c'; then $(CYGPATH_W) 'settings-daemon.c'; else $(CYGPATH_W) '$(srcdir)/settings-daemon.c'; fi`
 
+unity_greeter-toggle-box.o: toggle-box.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-toggle-box.o -MD -MP -MF $(DEPDIR)/unity_greeter-toggle-box.Tpo -c -o unity_greeter-toggle-box.o `test -f 'toggle-box.c' || echo '$(srcdir)/'`toggle-box.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-toggle-box.Tpo $(DEPDIR)/unity_greeter-toggle-box.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='toggle-box.c' object='unity_greeter-toggle-box.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-toggle-box.o `test -f 'toggle-box.c' || echo '$(srcdir)/'`toggle-box.c
+
+unity_greeter-toggle-box.obj: toggle-box.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-toggle-box.obj -MD -MP -MF $(DEPDIR)/unity_greeter-toggle-box.Tpo -c -o unity_greeter-toggle-box.obj `if test -f 'toggle-box.c'; then $(CYGPATH_W) 'toggle-box.c'; else $(CYGPATH_W) '$(srcdir)/toggle-box.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-toggle-box.Tpo $(DEPDIR)/unity_greeter-toggle-box.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='toggle-box.c' object='unity_greeter-toggle-box.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-toggle-box.obj `if test -f 'toggle-box.c'; then $(CYGPATH_W) 'toggle-box.c'; else $(CYGPATH_W) '$(srcdir)/toggle-box.c'; fi`
+
 unity_greeter-unity-greeter.o: unity-greeter.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-unity-greeter.o -MD -MP -MF $(DEPDIR)/unity_greeter-unity-greeter.Tpo -c -o unity_greeter-unity-greeter.o `test -f 'unity-greeter.c' || echo '$(srcdir)/'`unity-greeter.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-unity-greeter.Tpo $(DEPDIR)/unity_greeter-unity-greeter.Po
@@ -797,6 +831,11 @@ $(srcdir)/fading-label.c: $(srcdir)/unity_greeter_vala.stamp
 	@if test -f $@; then :; else \
 	  $(MAKE) $(AM_MAKEFLAGS) $(srcdir)/unity_greeter_vala.stamp; \
 	fi
+$(srcdir)/flat-button.c: $(srcdir)/unity_greeter_vala.stamp
+	@if test -f $@; then :; else rm -f $(srcdir)/unity_greeter_vala.stamp; fi
+	@if test -f $@; then :; else \
+	  $(MAKE) $(AM_MAKEFLAGS) $(srcdir)/unity_greeter_vala.stamp; \
+	fi
 $(srcdir)/greeter-list.c: $(srcdir)/unity_greeter_vala.stamp
 	@if test -f $@; then :; else rm -f $(srcdir)/unity_greeter_vala.stamp; fi
 	@if test -f $@; then :; else \
@@ -847,6 +886,11 @@ $(srcdir)/settings-daemon.c: $(srcdir)/unity_greeter_vala.stamp
 	@if test -f $@; then :; else \
 	  $(MAKE) $(AM_MAKEFLAGS) $(srcdir)/unity_greeter_vala.stamp; \
 	fi
+$(srcdir)/toggle-box.c: $(srcdir)/unity_greeter_vala.stamp
+	@if test -f $@; then :; else rm -f $(srcdir)/unity_greeter_vala.stamp; fi
+	@if test -f $@; then :; else \
+	  $(MAKE) $(AM_MAKEFLAGS) $(srcdir)/unity_greeter_vala.stamp; \
+	fi
 $(srcdir)/unity-greeter.c: $(srcdir)/unity_greeter_vala.stamp
 	@if test -f $@; then :; else rm -f $(srcdir)/unity_greeter_vala.stamp; fi
 	@if test -f $@; then :; else \
@@ -862,9 +906,9 @@ $(srcdir)/user-prompt-box.c: $(srcdir)/unity_greeter_vala.stamp
 	@if test -f $@; then :; else \
 	  $(MAKE) $(AM_MAKEFLAGS) $(srcdir)/unity_greeter_vala.stamp; \
 	fi
-$(srcdir)/unity_greeter_vala.stamp: config.vapi fixes.vapi indicator.vapi animate-timer.vala background.vala cached-image.vala email-autocompleter.vala dash-box.vala dash-button.vala dash-entry.vala fadable.vala fadable-box.vala fading-label.vala greeter-list.vala list-stack.vala main-window.vala menu.vala menubar.vala prompt-box.vala session-list.vala remote-login-service.vala settings.vala settings-daemon.vala unity-greeter.vala user-list.vala user-prompt-box.vala
+$(srcdir)/unity_greeter_vala.stamp: config.vapi fixes.vapi indicator.vapi animate-timer.vala background.vala cached-image.vala email-autocompleter.vala dash-box.vala dash-button.vala dash-entry.vala fadable.vala fadable-box.vala fading-label.vala flat-button.vala greeter-list.vala list-stack.vala main-window.vala menu.vala menubar.vala prompt-box.vala session-list.vala remote-login-service.vala settings.vala settings-daemon.vala toggle-box.vala unity-greeter.vala user-list.vala user-prompt-box.vala
 	$(AM_V_at)rm -f $@ && echo stamp > $@-t
-	$(AM_V_VALAC)$(am__cd) $(srcdir) && $(VALAC) $(unity_greeter_VALAFLAGS) $(VALAFLAGS) -C config.vapi fixes.vapi indicator.vapi animate-timer.vala background.vala cached-image.vala email-autocompleter.vala dash-box.vala dash-button.vala dash-entry.vala fadable.vala fadable-box.vala fading-label.vala greeter-list.vala list-stack.vala main-window.vala menu.vala menubar.vala prompt-box.vala session-list.vala remote-login-service.vala settings.vala settings-daemon.vala unity-greeter.vala user-list.vala user-prompt-box.vala
+	$(AM_V_VALAC)$(am__cd) $(srcdir) && $(VALAC) $(unity_greeter_VALAFLAGS) $(VALAFLAGS) -C config.vapi fixes.vapi indicator.vapi animate-timer.vala background.vala cached-image.vala email-autocompleter.vala dash-box.vala dash-button.vala dash-entry.vala fadable.vala fadable-box.vala fading-label.vala flat-button.vala greeter-list.vala list-stack.vala main-window.vala menu.vala menubar.vala prompt-box.vala session-list.vala remote-login-service.vala settings.vala settings-daemon.vala toggle-box.vala unity-greeter.vala user-list.vala user-prompt-box.vala
 	$(AM_V_at)mv -f $@-t $@
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
@@ -997,6 +1041,7 @@ maintainer-clean-generic:
 	-rm -f fadable-box.c
 	-rm -f fadable.c
 	-rm -f fading-label.c
+	-rm -f flat-button.c
 	-rm -f greeter-list.c
 	-rm -f list-stack.c
 	-rm -f main-window.c
@@ -1007,6 +1052,7 @@ maintainer-clean-generic:
 	-rm -f session-list.c
 	-rm -f settings-daemon.c
 	-rm -f settings.c
+	-rm -f toggle-box.c
 	-rm -f unity-greeter.c
 	-rm -f unity_greeter_vala.stamp
 	-rm -f user-list.c

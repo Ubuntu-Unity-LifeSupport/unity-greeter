@@ -436,28 +436,19 @@ public abstract class GreeterList : FadableBox
 
     protected virtual int get_position_y (double position)
     {
-        // Most position heights are just the grid height.  Except for the one
-        // right above the greeter box and the greeter box itself.  The greeter
-        // box is some number of grids to start with.  And it is smaller by a
-        // bit, while the one above it is larger by the same amount, in order
-        // to line up names outside the greeter box in the middle of their
-        // grid, while the name inside the box is near the bottom of its first
-        // box.
-        int one_above_height = grid_size + PromptBox.NAME_MARGIN_TOP;
-        int box_height = get_greeter_box_height_grids () * grid_size -
-                         PromptBox.NAME_MARGIN_TOP;
+        // Most position heights are just the grid height.  Except for the
+        // greeter box itself.
+        int box_height = get_greeter_box_height_grids () * grid_size;
         double offset;
 
-        if (position < -1)
-            offset = (position + 1) * grid_size - one_above_height;
-        else if (position < 0)
-            offset = position * one_above_height;
+        if (position < 0)
+            offset = position * grid_size;
         else if (position < 1)
             offset = position * box_height;
         else
             offset = (position - 1) * grid_size + box_height;
 
-        return get_greeter_box_y () + (int)Math.round(offset);
+        return box_y + (int)Math.round(offset);
     }
 
     private void move_entry (PromptBox entry, double position)
@@ -853,7 +844,7 @@ public abstract class GreeterList : FadableBox
         background.draw_grid = false;
         background.queue_draw ();
 
-        UnityGreeter.singleton.start_session (get_lightdm_session ());
+        UnityGreeter.singleton.start_session (get_lightdm_session (), background);
     }
 
     public void login_complete ()

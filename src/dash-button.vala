@@ -17,7 +17,7 @@
  * Authors: Michael Terry <michael.terry@canonical.com>
  */
 
-public class DashButton : Gtk.Button, Fadable
+public class DashButton : FlatButton, Fadable
 {
     protected FadeTracker fade_tracker { get; protected set; }
     private Gtk.Label text_label;
@@ -67,7 +67,9 @@ public class DashButton : Gtk.Button, Fadable
         try
         {
             var style = new Gtk.CssProvider ();
-            style.load_from_data ("* {padding: 8px;}", -1);
+            style.load_from_data ("* {padding: 6px 8px 6px 8px;
+                                      -GtkWidget-focus-line-width: 0px;
+                                     }", -1);
             this.get_style_context ().add_provider (style, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
         }
         catch (Error e)

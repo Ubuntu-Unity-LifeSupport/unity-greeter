@@ -228,9 +228,9 @@ public class DashBox : Gtk.Box
         return base.draw (c);
     }
 
-    private void cairo_rounded_rectangle (Cairo.Context c, double x, double y,
-                                          double width, double height,
-                                          double radius)
+    public static void cairo_rounded_rectangle (Cairo.Context c, double x,
+                                                double y, double width,
+                                                double height, double radius)
     {
         var w = width - radius * 2;
         var h = height - radius * 2;

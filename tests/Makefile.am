@@ -3,7 +3,7 @@
 check_PROGRAMS = unity-greeter-test
 
 check: unity-greeter-test
-	. xvfb-run dbus-launch ./unity-greeter-test
+	top_srcdir=$(top_srcdir) . xvfb-run ./unity-greeter-test
 
 unity_greeter_test_SOURCES = \
 	test.vala \
@@ -11,6 +11,8 @@ unity_greeter_test_SOURCES = \
 	test-main-window.vala \
 	menubar.vala \
 	unity-greeter.vala \
+	../src/flat-button.vala \
+	../src/toggle-box.vala \
 	../src/user-list.vala \
 	../src/greeter-list.vala \
 	../src/remote-login-service.vala \

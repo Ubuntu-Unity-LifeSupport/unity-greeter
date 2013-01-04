@@ -647,7 +647,10 @@ public class Test
             var data_dirs = Environment.get_variable("XDG_DATA_DIRS");
             Environment.set_variable("XDG_DATA_DIRS", "%s:%s".printf(Path.build_filename(dir, "share"), data_dirs), true);
 
-            if (Posix.system("cp ../data/com.canonical.unity-greeter.gschema.xml %s".printf(schema_dir)) != 0)
+            var top_srcdir = Environment.get_variable("top_srcdir");
+            if (top_srcdir == null || top_srcdir == "")
+                top_srcdir = "..";
+            if (Posix.system("cp %s/data/com.canonical.unity-greeter.gschema.xml %s".printf(top_srcdir, schema_dir)) != 0)
                 warning("Could not copy schema to %s", schema_dir);
 
             if (Posix.system("glib-compile-schemas %s".printf(schema_dir)) != 0)

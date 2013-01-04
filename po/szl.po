@@ -7,43 +7,43 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2012-09-30 05:09+0000\n"
+"POT-Creation-Date: 2013-01-03 05:27+0000\n"
 "PO-Revision-Date: 2012-05-06 07:06+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: Silesian <szl@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2012-10-01 05:05+0000\n"
-"X-Generator: Launchpad (build 16049)\n"
+"X-Launchpad-Export-Date: 2013-01-04 05:05+0000\n"
+"X-Generator: Launchpad (build 16393)\n"
 
 #: ../src/greeter-list.vala:245
 #, c-format
 msgid "Enter password for %s"
 msgstr "Wkludźcie hasło dlŏ %s"
 
-#: ../src/greeter-list.vala:744 ../src/user-list.vala:619
-#: ../src/user-list.vala:1337 ../src/user-list.vala:1431
-#: ../src/user-list.vala:1454 ../src/user-list.vala:1458
-#: ../src/user-list.vala:1462 ../src/user-list.vala:1468
-#: ../src/user-list.vala:1472 ../src/user-list.vala:1475
+#: ../src/greeter-list.vala:735 ../src/user-list.vala:622
+#: ../src/user-list.vala:1340 ../src/user-list.vala:1434
+#: ../src/user-list.vala:1457 ../src/user-list.vala:1461
+#: ../src/user-list.vala:1465 ../src/user-list.vala:1471
+#: ../src/user-list.vala:1475 ../src/user-list.vala:1478
 msgid "Password:"
 msgstr "Hasło:"
 
-#: ../src/greeter-list.vala:746 ../src/user-list.vala:613
-#: ../src/user-list.vala:1434
+#: ../src/greeter-list.vala:737 ../src/user-list.vala:616
+#: ../src/user-list.vala:1437
 msgid "Username:"
 msgstr "Używŏcz:"
 
-#: ../src/greeter-list.vala:798
+#: ../src/greeter-list.vala:789
 msgid "Invalid password, please try again"
 msgstr "Złe hasło. Sprōbujcie, proszã, jeszcze rŏz"
 
-#: ../src/greeter-list.vala:809
+#: ../src/greeter-list.vala:800
 msgid "Failed to authenticate"
 msgstr "Uwierzytelniyniy niy zdarziło sie"
 
-#: ../src/greeter-list.vala:864
+#: ../src/greeter-list.vala:855
 msgid "Logging in..."
 msgstr "Logowaniy..."
 
@@ -51,19 +51,19 @@ msgstr "Logowaniy..."
 msgid "Login Screen"
 msgstr "Ôbrŏz logowaniŏ"
 
-#: ../src/menubar.vala:226
+#: ../src/menubar.vala:236
 msgid "Onscreen keyboard"
 msgstr "Tastatura na ôbrŏzie"
 
-#: ../src/menubar.vala:231
+#: ../src/menubar.vala:241
 msgid "High Contrast"
 msgstr "Wysoki kōntrast"
 
-#: ../src/menubar.vala:237
+#: ../src/menubar.vala:247
 msgid "Screen Reader"
 msgstr "Czytŏcz ôbrŏzu"
 
-#: ../src/prompt-box.vala:213
+#: ../src/prompt-box.vala:211
 msgid "Session Options"
 msgstr "Ôpcyje sesyje"
 
@@ -71,33 +71,29 @@ msgstr "Ôpcyje sesyje"
 msgid "Select desktop environment"
 msgstr ""
 
-#: ../src/session-list.vala:51 ../src/user-list.vala:482
-msgid "OK"
-msgstr ""
-
 #. Translators: %s is a session name like KDE or Ubuntu
-#: ../src/session-list.vala:86
+#: ../src/toggle-box.vala:93
 #, c-format
 msgid "%s (Default)"
 msgstr ""
 
 #. Help string for command line --version flag
-#: ../src/unity-greeter.vala:416
+#: ../src/unity-greeter.vala:447
 msgid "Show release version"
 msgstr "Pokazowaniy wersyje"
 
 #. Help string for command line --test-mode flag
-#: ../src/unity-greeter.vala:419
+#: ../src/unity-greeter.vala:450
 msgid "Run in test mode"
 msgstr "Włōncz w testowym trybie"
 
 #. Arguments and description for --help text
-#: ../src/unity-greeter.vala:425
+#: ../src/unity-greeter.vala:456
 msgid "- Unity Greeter"
 msgstr "- Unity Greeter"
 
 #. Text printed out when an unknown command-line argument provided
-#: ../src/unity-greeter.vala:436
+#: ../src/unity-greeter.vala:467
 #, c-format
 msgid "Run '%s --help' to see a full list of available command line options."
 msgstr ""
@@ -107,76 +103,87 @@ msgstr ""
 msgid "Guest Session"
 msgstr "Sesyjŏ gościa"
 
-#: ../src/user-list.vala:366
+#: ../src/user-list.vala:367
 msgid "Please enter a complete e-mail address"
 msgstr ""
 
-#: ../src/user-list.vala:441
+#: ../src/user-list.vala:442
 msgid "Incorrect e-mail address or password"
 msgstr ""
 
-#: ../src/user-list.vala:472
+#: ../src/user-list.vala:473
 msgid ""
 "If you have an account on an RDP or Citrix server, Remote Login lets you run "
 "applications from that server."
 msgstr ""
 
+#. For 12.10 we still don't support Citrix
 #: ../src/user-list.vala:475
-msgid "Cancel"
-msgstr ""
-
-#: ../src/user-list.vala:476
-msgid "Set Up…"
+msgid ""
+"If you have an account on an RDP server, Remote Login lets you run "
+"applications from that server."
 msgstr ""
 
 #: ../src/user-list.vala:478
+msgid "Cancel"
+msgstr ""
+
+#: ../src/user-list.vala:479
+msgid "Set Up…"
+msgstr ""
+
+#: ../src/user-list.vala:481
 msgid ""
 "You need an Ubuntu Remote Login account to use this service. Would you like "
 "to set up an account now?"
 msgstr ""
 
-#: ../src/user-list.vala:483
+#: ../src/user-list.vala:485
+msgid "OK"
+msgstr ""
+
+#: ../src/user-list.vala:486
 msgid ""
 "You need an Ubuntu Remote Login account to use this service. Visit "
 "uccs.canonical.com to set up an account."
 msgstr ""
 
-#: ../src/user-list.vala:597
+#: ../src/user-list.vala:600
 msgid "Server type not supported."
 msgstr ""
 
-#: ../src/user-list.vala:638
+#: ../src/user-list.vala:641
 msgid "Domain:"
 msgstr ""
 
-#: ../src/user-list.vala:699
+#: ../src/user-list.vala:702
 msgid "Email address:"
 msgstr ""
 
 #. 'Log In' here is the button for logging in.
-#: ../src/user-list.vala:743
+#: ../src/user-list.vala:746
 msgid "Log In"
 msgstr "Wchōd"
 
-#: ../src/user-list.vala:744
+#: ../src/user-list.vala:747
 #, c-format
 msgid "Login as %s"
 msgstr "Logowaniy jako %s"
 
-#: ../src/user-list.vala:748
+#: ../src/user-list.vala:751
 msgid "Retry"
 msgstr "Jeszcze rŏz"
 
-#: ../src/user-list.vala:749
+#: ../src/user-list.vala:752
 #, c-format
 msgid "Retry as %s"
 msgstr ""
 
-#: ../src/user-list.vala:788
+#: ../src/user-list.vala:791
 msgid "Login"
 msgstr "Login"
 
-#: ../src/user-list.vala:1471
+#: ../src/user-list.vala:1474
 msgid "Favorite Color (blue):"
 msgstr ""
 

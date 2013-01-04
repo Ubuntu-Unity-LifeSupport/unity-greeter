@@ -5,6 +5,7 @@ dist_xgreeter_DATA = unity-greeter.desktop
 
 dist_pkgdata_DATA = \
 	a11y.svg \
+	active.png \
 	arrow_left.png \
 	arrow_right.png \
 	cof.png \

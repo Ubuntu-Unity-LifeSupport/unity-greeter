@@ -105,12 +105,12 @@ public class MainWindow : Gtk.Window
         align.show ();
         hbox.add (align);
 
-        back_button = new Gtk.Button ();
+        back_button = new FlatButton ();
+        back_button.focus_on_click = false;
         var image = new Gtk.Image.from_file (Path.build_filename (Config.PKGDATADIR, "arrow_left.png", null));
         image.show ();
         back_button.set_size_request (grid_size - GreeterList.BORDER * 2, grid_size - GreeterList.BORDER * 2);
         back_button.add (image);
-        UnityGreeter.add_style_class (back_button);
         back_button.clicked.connect (pop_list);
         align.add (back_button);
 

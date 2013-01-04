@@ -2,11 +2,11 @@
 
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT(unity-greeter, 12.10.4)
+AC_INIT(unity-greeter, 13.04.0)
 AC_CONFIG_MACRO_DIR(m4)
 AM_INIT_AUTOMAKE
 AM_PROG_CC_C_O
-UG_PROG_VALAC([valac-0.16 valac], [0.15.1])
+UG_PROG_VALAC([valac-0.18 valac-0.16 valac], [0.15.1])
 AM_CONFIG_HEADER(config.h)
 AM_MAINTAINER_MODE
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES(yes)])
@@ -21,7 +21,7 @@ PKG_CHECK_MODULES(UNITY_GREETER, [
     gtk+-3.0
     gdk-x11-3.0
     indicator3-0.4
-    liblightdm-gobject-1 >= 1.3.3
+    liblightdm-gobject-1 >= 1.4.0
     freetype2
     cairo-ft
     libcanberra

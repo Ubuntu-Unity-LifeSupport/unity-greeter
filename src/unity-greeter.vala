@@ -57,6 +57,7 @@ public class UnityGreeter
         greeter = new LightDM.Greeter ();
         greeter.show_message.connect ((text, type) => { show_message (text, type); });
         greeter.show_prompt.connect ((text, type) => { show_prompt (text, type); });
+        greeter.autologin_timer_expired.connect (() => { greeter.authenticate_autologin (); });
         greeter.authentication_complete.connect (() => { authentication_complete (); });
         var connected = false;
         try
@@ -150,9 +151,12 @@ public class UnityGreeter
         return null;
     }
 
-    public void start_session (string? session)
+    public void start_session (string? session, Background bg)
     {
-        /* Set the background */
+        /* Paint our background onto the root window before we close our own window */
+        var c = new Cairo.Context (background_surface);
+        bg.draw_full (c, Background.DrawFlags.NONE);
+        c = null;
         refresh_background (Gdk.Screen.get_default (), background_surface);
 
         if (test_mode)

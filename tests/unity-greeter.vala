@@ -92,7 +92,7 @@ public class UnityGreeter
         return false;
     }
 
-    public void start_session (string? session)
+    public void start_session (string? session, Background bg)
     {
         session_started = true;
     }

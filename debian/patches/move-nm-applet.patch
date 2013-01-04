@@ -1,9 +1,9 @@
 === modified file 'src/unity-greeter.vala'
-Index: unity-greeter-12.10.3/src/unity-greeter.vala
+Index: unity-greeter-13.04.0/src/unity-greeter.vala
 ===================================================================
---- unity-greeter-12.10.3.orig/src/unity-greeter.vala	2012-09-20 15:35:40.803122424 -0400
-+++ unity-greeter-12.10.3/src/unity-greeter.vala	2012-09-20 15:36:12.755122762 -0400
-@@ -452,21 +452,6 @@
+--- unity-greeter-13.04.0.orig/src/unity-greeter.vala	2013-01-04 11:01:55.026774146 -0500
++++ unity-greeter-13.04.0/src/unity-greeter.vala	2013-01-04 11:01:55.014774145 -0500
+@@ -481,21 +481,6 @@
          if (do_test_mode)
              debug ("Running in test mode");
  
@@ -25,7 +25,7 @@ Index: unity-greeter-12.10.3/src/unity-greeter.vala
          /* Set GTK+ settings */
          debug ("Setting GTK+ settings");
          var settings = Gtk.Settings.get_default ();
-@@ -497,6 +482,21 @@
+@@ -526,6 +511,21 @@
          debug ("Showing greeter");
          greeter.show ();
  

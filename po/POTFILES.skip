@@ -7,6 +7,7 @@ src/dash-entry.c
 src/fadable-box.c
 src/fadable.c
 src/fading-label.c
+src/flat-button.c
 src/greeter-list.c
 src/list-stack.c
 src/main-window.c
@@ -16,6 +17,7 @@ src/prompt-box.c
 src/session-list.c
 src/settings-daemon.c
 src/settings.c
+src/toggle-box.c
 src/unity-greeter.c
 src/user-list.c
 src/user-prompt-box.c
@@ -23,5 +25,6 @@ tests/greeter-list.c
 tests/main-window.c
 tests/prompt-box.c
 tests/session-list.c
+tests/toggle-box.c
 tests/user-list.c
 

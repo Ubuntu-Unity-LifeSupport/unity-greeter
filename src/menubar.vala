@@ -132,6 +132,7 @@ public class MenuBar : Gtk.MenuBar
     private Gtk.CheckMenuItem high_contrast_item;
     private Gtk.Label keyboard_label = null;
     private Pid keyboard_pid = 0;
+    private Pid reader_pid = 0;
     private Gtk.CheckMenuItem onscreen_keyboard_item;
 
     construct
@@ -151,7 +152,8 @@ public class MenuBar : Gtk.MenuBar
 
         /* Hack to get a label showing on the menubar */
         label.ensure_style ();
-        label.modify_fg (Gtk.StateType.INSENSITIVE, label.get_style ().fg[Gtk.StateType.NORMAL]);
+        var fg = label.get_style_context ().get_color (Gtk.StateFlags.NORMAL);
+        label.override_color (Gtk.StateFlags.INSENSITIVE, fg);
 
         /* Prevent dragging the window by the menubar */
         try
@@ -170,15 +172,21 @@ public class MenuBar : Gtk.MenuBar
         UnityGreeter.singleton.starting_session.connect (cleanup);
     }
 
+    private void close_pid (ref Pid pid)
+    {
+        if (pid != 0)
+        {
+            Posix.kill (pid, Posix.SIGTERM);
+            int status;
+            Posix.waitpid (pid, out status, 0);
+            pid = 0;
+        }
+    }
+
     public void cleanup ()
     {
-        if (keyboard_pid != 0)
-        {
-            Posix.kill (keyboard_pid, Posix.SIGKILL);
-            int status;
-            Posix.waitpid (keyboard_pid, out status, 0);
-            keyboard_pid = 0;
-        }
+        close_pid (ref keyboard_pid);
+        close_pid (ref reader_pid);
     }
 
     public override void get_preferred_height (out int min, out int nat)
@@ -468,17 +476,26 @@ public class MenuBar : Gtk.MenuBar
         UGSettings.set_boolean (UGSettings.KEY_SCREEN_READER, item.active);
 
         /* Hardcoded orca: */
-        try
+        if (item.active)
         {
-            if (item.active)
-                Process.spawn_command_line_async ("orca --replace --no-setup --disable splash-window,main-window");
-            else
-                Process.spawn_command_line_async ("orca --quit");
+            try
+            {
+                string[] argv;
+                Shell.parse_argv ("orca --replace --no-setup --disable splash-window,main-window", out argv);
+                Process.spawn_async (null,
+                                     argv,
+                                     null,
+                                     SpawnFlags.SEARCH_PATH,
+                                     null,
+                                     out reader_pid);
+            }
+            catch (Error e)
+            {
+                warning ("Failed to run Orca: %s", e.message);
+            }
         }
-        catch (Error e)
-        {
-            warning ("Failed to run Orca: %s", e.message);
-        }
+        else
+            close_pid (ref reader_pid);
     }
 
     private uint get_indicator_index (Indicator.Object object)
