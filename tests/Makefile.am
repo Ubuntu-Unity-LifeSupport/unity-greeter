@@ -3,7 +3,7 @@
 check_PROGRAMS = unity-greeter-test
 
 check: unity-greeter-test
-	top_srcdir=$(top_srcdir) . xvfb-run ./unity-greeter-test
+	UBUNTU_MENUPROXY=0 top_srcdir=$(top_srcdir) . xvfb-run ./unity-greeter-test
 
 unity_greeter_test_SOURCES = \
 	test.vala \

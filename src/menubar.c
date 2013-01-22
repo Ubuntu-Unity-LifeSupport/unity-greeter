@@ -1652,7 +1652,7 @@ static void menu_bar_screen_reader_toggled_cb (MenuBar* self, GtkCheckMenuItem* 
 			gchar** _tmp8_;
 			gint _tmp8__length1;
 			GPid _tmp9_ = 0;
-			g_shell_parse_argv ("orca --replace --no-setup --disable splash-window,main-window", &_tmp7_, &_tmp6_, &_inner_error_);
+			g_shell_parse_argv ("orca --replace --no-setup --disable splash-window,", &_tmp7_, &_tmp6_, &_inner_error_);
 			argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
 			argv = _tmp6_;
 			argv_length1 = _tmp7_;

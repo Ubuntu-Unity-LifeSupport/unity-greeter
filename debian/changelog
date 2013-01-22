@@ -1,3 +1,10 @@
+unity-greeter (13.04.1-0ubuntu1) raring; urgency=low
+
+  * New upstream release
+    - Updated logo for 13.04 (LP: #1083333)
+
+ -- Michael Terry <mterry@ubuntu.com>  Tue, 22 Jan 2013 15:55:26 -0500
+
 unity-greeter (13.04.0-0ubuntu1) raring; urgency=low
 
   * New upstream release

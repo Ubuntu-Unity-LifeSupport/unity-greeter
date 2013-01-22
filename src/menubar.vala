@@ -481,7 +481,7 @@ public class MenuBar : Gtk.MenuBar
             try
             {
                 string[] argv;
-                Shell.parse_argv ("orca --replace --no-setup --disable splash-window,main-window", out argv);
+                Shell.parse_argv ("orca --replace --no-setup --disable splash-window,", out argv);
                 Process.spawn_async (null,
                                      argv,
                                      null,
