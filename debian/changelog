@@ -1,3 +1,11 @@
+unity-greeter (13.04.1-0ubuntu2) raring; urgency=low
+
+  * debian/patches/spawn-gsd-directly.patch:
+    - Spawn gnome-settings-daemon directly, since it dropped DBus activation
+      support in 3.6.  LP: #1110716
+
+ -- Michael Terry <mterry@ubuntu.com>  Thu, 31 Jan 2013 12:39:26 -0500
+
 unity-greeter (13.04.1-0ubuntu1) raring; urgency=low
 
   * New upstream release
