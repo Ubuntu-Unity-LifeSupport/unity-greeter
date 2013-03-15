@@ -41,6 +41,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <gio/gio.h>
+#include "config.h"
 #include <glib/gi18n-lib.h>
 #include <gdk/gdk.h>
 #include <stdio.h>
@@ -149,6 +150,7 @@ struct _UnityGreeter {
 	volatile int ref_count;
 	UnityGreeterPrivate * priv;
 	gboolean test_mode;
+	gboolean orca_needs_kick;
 };
 
 struct _UnityGreeterClass {
@@ -222,11 +224,14 @@ gpointer value_get_unity_greeter (const GValue* value);
 GType unity_greeter_get_type (void) G_GNUC_CONST;
 static gint menu_bar_cmp_layout (LightDMLayout* a, LightDMLayout* b);
 static GtkWidget* menu_bar_make_keyboard_indicator (MenuBar* self);
-static void menu_bar_setup_indicators (MenuBar* self);
+static void menu_bar_load_indicator (MenuBar* self, const gchar* indicator_name);
 static void menu_bar_indicator_added_cb (MenuBar* self, IndicatorObject* object, IndicatorObjectEntry* entry);
 static void _menu_bar_indicator_added_cb_indicator_object_entry_added (IndicatorObject* _sender, IndicatorObjectEntry* entry, gpointer self);
 static void menu_bar_indicator_removed_cb (MenuBar* self, IndicatorObject* object, IndicatorObjectEntry* entry);
 static void _menu_bar_indicator_removed_cb_indicator_object_entry_removed (IndicatorObject* _sender, IndicatorObjectEntry* entry, gpointer self);
+static void menu_bar_setup_indicators (MenuBar* self);
+gchar** ug_settings_get_strv (const gchar* key, int* result_length1);
+#define UG_SETTINGS_KEY_INDICATORS "indicators"
 gboolean ug_settings_set_boolean (const gchar* key, gboolean value);
 GtkWindow* menu_bar_get_keyboard_window (MenuBar* self);
 static void menu_bar_set_keyboard_window (MenuBar* self, GtkWindow* value);
@@ -234,6 +239,8 @@ static gint _menu_bar_cmp_layout_gcompare_func (gconstpointer a, gconstpointer b
 static void _menu_bar_layout_toggled_cb_gtk_check_menu_item_toggled (GtkCheckMenuItem* _sender, gpointer self);
 static void menu_bar_set_high_contrast (MenuBar* self, gboolean value);
 gboolean menu_bar_get_high_contrast (MenuBar* self);
+static gboolean ____lambda33_ (MenuBar* self);
+static gboolean _____lambda33__gsource_func (gpointer self);
 static guint menu_bar_get_indicator_index (MenuBar* self, IndicatorObject* object);
 static IndicatorObject* menu_bar_get_indicator_object_from_entry (MenuBar* self, IndicatorObjectEntry* entry);
 static void menu_bar_set_background (MenuBar* self, Background* value);
@@ -673,7 +680,7 @@ static void menu_bar_greeter_set_env (MenuBar* self, const gchar* key, const gch
 		_tmp2_ = g_dbus_proxy_new_for_bus_sync (G_BUS_TYPE_SESSION, G_DBUS_PROXY_FLAGS_NONE, NULL, "org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus", NULL, &_inner_error_);
 		proxy = _tmp2_;
 		if (_inner_error_ != NULL) {
-			goto __catch10_g_error;
+			goto __catch12_g_error;
 		}
 		_tmp3_ = G_VARIANT_TYPE_ARRAY;
 		_tmp4_ = g_variant_builder_new (_tmp3_);
@@ -694,13 +701,13 @@ static void menu_bar_greeter_set_env (MenuBar* self, const gchar* key, const gch
 		if (_inner_error_ != NULL) {
 			_g_variant_builder_unref0 (builder);
 			_g_object_unref0 (proxy);
-			goto __catch10_g_error;
+			goto __catch12_g_error;
 		}
 		_g_variant_builder_unref0 (builder);
 		_g_object_unref0 (proxy);
 	}
-	goto __finally10;
-	__catch10_g_error:
+	goto __finally12;
+	__catch12_g_error:
 	{
 		GError* e = NULL;
 		GError* _tmp14_;
@@ -713,7 +720,7 @@ static void menu_bar_greeter_set_env (MenuBar* self, const gchar* key, const gch
 		_g_error_free0 (e);
 		return;
 	}
-	__finally10:
+	__finally12:
 	if (_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
@@ -1134,143 +1141,249 @@ static void _menu_bar_indicator_removed_cb_indicator_object_entry_removed (Indic
 }
 
 
+static void menu_bar_load_indicator (MenuBar* self, const gchar* indicator_name) {
+	const gchar* _tmp0_;
+	g_return_if_fail (self != NULL);
+	g_return_if_fail (indicator_name != NULL);
+	_tmp0_ = indicator_name;
+	if (g_strcmp0 (_tmp0_, "ug-keyboard") == 0) {
+		GtkWidget* _tmp1_ = NULL;
+		GtkWidget* keyboard_item;
+		GtkWidget* _tmp2_;
+		GList* _tmp3_ = NULL;
+		GList* _tmp4_;
+		guint _tmp5_ = 0U;
+		_tmp1_ = menu_bar_make_keyboard_indicator (self);
+		keyboard_item = _tmp1_;
+		_tmp2_ = keyboard_item;
+		_tmp3_ = gtk_container_get_children ((GtkContainer*) self);
+		_tmp4_ = _tmp3_;
+		_tmp5_ = g_list_length (_tmp4_);
+		gtk_menu_shell_insert ((GtkMenuShell*) self, _tmp2_, ((gint) _tmp5_) - 1);
+		_g_list_free0 (_tmp4_);
+		_g_object_unref0 (keyboard_item);
+	} else {
+		const gchar* _tmp6_;
+		_tmp6_ = indicator_name;
+		if (g_strcmp0 (_tmp6_, "ug-accessibility") == 0) {
+			GtkWidget* _tmp7_ = NULL;
+			GtkWidget* a11y_item;
+			GtkWidget* _tmp8_;
+			GList* _tmp9_ = NULL;
+			GList* _tmp10_;
+			guint _tmp11_ = 0U;
+			_tmp7_ = menu_bar_make_a11y_indicator (self);
+			a11y_item = _tmp7_;
+			_tmp8_ = a11y_item;
+			_tmp9_ = gtk_container_get_children ((GtkContainer*) self);
+			_tmp10_ = _tmp9_;
+			_tmp11_ = g_list_length (_tmp10_);
+			gtk_menu_shell_insert ((GtkMenuShell*) self, _tmp8_, ((gint) _tmp11_) - 1);
+			_g_list_free0 (_tmp10_);
+			_g_object_unref0 (a11y_item);
+		} else {
+			const gchar* _tmp12_;
+			gchar* _tmp13_;
+			gchar* _tmp14_;
+			gchar* _tmp15_;
+			const gchar* _tmp16_;
+			gchar* _tmp17_;
+			const gchar* _tmp18_;
+			gchar* _tmp19_;
+			gchar** _tmp20_ = NULL;
+			gchar** _tmp21_;
+			gint _tmp21__length1;
+			gchar** names_to_try;
+			gint names_to_try_length1;
+			gint _names_to_try_size_;
+			gchar** _tmp22_;
+			gint _tmp22__length1;
+			_tmp12_ = indicator_name;
+			_tmp13_ = g_strconcat ("lib", _tmp12_, NULL);
+			_tmp14_ = _tmp13_;
+			_tmp15_ = g_strconcat (_tmp14_, ".so", NULL);
+			_tmp16_ = indicator_name;
+			_tmp17_ = g_strconcat (_tmp16_, ".so", NULL);
+			_tmp18_ = indicator_name;
+			_tmp19_ = g_strdup (_tmp18_);
+			_tmp20_ = g_new0 (gchar*, 3 + 1);
+			_tmp20_[0] = _tmp15_;
+			_tmp20_[1] = _tmp17_;
+			_tmp20_[2] = _tmp19_;
+			_tmp21_ = _tmp20_;
+			_tmp21__length1 = 3;
+			_g_free0 (_tmp14_);
+			names_to_try = _tmp21_;
+			names_to_try_length1 = _tmp21__length1;
+			_names_to_try_size_ = names_to_try_length1;
+			_tmp22_ = names_to_try;
+			_tmp22__length1 = names_to_try_length1;
+			{
+				gchar** filename_collection = NULL;
+				gint filename_collection_length1 = 0;
+				gint _filename_collection_size_ = 0;
+				gint filename_it = 0;
+				filename_collection = _tmp22_;
+				filename_collection_length1 = _tmp22__length1;
+				for (filename_it = 0; filename_it < _tmp22__length1; filename_it = filename_it + 1) {
+					gchar* _tmp23_;
+					gchar* filename = NULL;
+					_tmp23_ = g_strdup (filename_collection[filename_it]);
+					filename = _tmp23_;
+					{
+						const gchar* _tmp24_;
+						gchar* _tmp25_ = NULL;
+						gchar* full_path;
+						const gchar* _tmp26_;
+						IndicatorObject* _tmp27_;
+						IndicatorObject* io;
+						IndicatorObject* _tmp28_;
+						IndicatorObject* _tmp29_;
+						IndicatorObject* _tmp30_;
+						IndicatorObject* _tmp31_;
+						IndicatorObject* _tmp32_;
+						IndicatorObject* _tmp33_;
+						GList* _tmp34_ = NULL;
+						_tmp24_ = filename;
+						_tmp25_ = g_build_filename (INDICATORDIR, _tmp24_, NULL);
+						full_path = _tmp25_;
+						_tmp26_ = full_path;
+						_tmp27_ = indicator_object_new_from_file (_tmp26_);
+						io = _tmp27_;
+						_tmp28_ = io;
+						if (_tmp28_ == NULL) {
+							_g_object_unref0 (io);
+							_g_free0 (full_path);
+							_g_free0 (filename);
+							continue;
+						}
+						_tmp29_ = io;
+						_tmp30_ = _g_object_ref0 (_tmp29_);
+						self->priv->indicator_objects = g_list_append (self->priv->indicator_objects, _tmp30_);
+						_tmp31_ = io;
+						g_signal_connect_object (_tmp31_, "entry-added", (GCallback) _menu_bar_indicator_added_cb_indicator_object_entry_added, self, 0);
+						_tmp32_ = io;
+						g_signal_connect_object (_tmp32_, "entry-removed", (GCallback) _menu_bar_indicator_removed_cb_indicator_object_entry_removed, self, 0);
+						_tmp33_ = io;
+						_tmp34_ = indicator_object_get_entries (_tmp33_);
+						{
+							GList* entry_collection = NULL;
+							GList* entry_it = NULL;
+							entry_collection = _tmp34_;
+							for (entry_it = entry_collection; entry_it != NULL; entry_it = entry_it->next) {
+								IndicatorObjectEntry* entry = NULL;
+								entry = (IndicatorObjectEntry*) entry_it->data;
+								{
+									IndicatorObject* _tmp35_;
+									IndicatorObjectEntry* _tmp36_;
+									_tmp35_ = io;
+									_tmp36_ = entry;
+									menu_bar_indicator_added_cb (self, _tmp35_, _tmp36_);
+								}
+							}
+							_g_list_free0 (entry_collection);
+						}
+						_g_object_unref0 (io);
+						_g_free0 (full_path);
+						_g_free0 (filename);
+						break;
+					}
+				}
+			}
+			names_to_try = (_vala_array_free (names_to_try, names_to_try_length1, (GDestroyNotify) g_free), NULL);
+		}
+	}
+}
+
+
 static void menu_bar_setup_indicators (MenuBar* self) {
-	GtkWidget* _tmp0_ = NULL;
-	GtkWidget* keyboard_item;
-	GtkWidget* _tmp1_;
-	GList* _tmp2_ = NULL;
-	GList* _tmp3_;
-	guint _tmp4_ = 0U;
-	GtkWidget* _tmp5_ = NULL;
-	GtkWidget* a11y_item;
-	GtkWidget* _tmp6_;
-	GList* _tmp7_ = NULL;
-	GList* _tmp8_;
-	guint _tmp9_ = 0U;
-	const gchar* _tmp10_ = NULL;
+	const gchar* _tmp4_ = NULL;
+	const gchar* _tmp5_ = NULL;
+	gint _tmp6_ = 0;
+	gchar** _tmp7_ = NULL;
+	gchar** indicator_list;
+	gint indicator_list_length1;
+	gint _indicator_list_size_;
+	gchar** _tmp8_;
+	gint _tmp8__length1;
 	const gchar* _tmp11_ = NULL;
-	gchar* _tmp12_ = NULL;
-	gchar* _tmp13_ = NULL;
-	gchar* _tmp14_ = NULL;
-	gchar* _tmp15_ = NULL;
-	gchar* _tmp16_ = NULL;
-	gchar** _tmp17_ = NULL;
-	gchar** filenames;
-	gint filenames_length1;
-	gint _filenames_size_;
-	gchar** _tmp18_;
-	gint _tmp18__length1;
-	const gchar* _tmp31_ = NULL;
-	const gchar* _tmp32_ = NULL;
+	const gchar* _tmp12_ = NULL;
+	GError * _inner_error_ = NULL;
 	g_return_if_fail (self != NULL);
 	menu_bar_greeter_set_env (self, "INDICATOR_GREETER_MODE", "1");
 	menu_bar_greeter_set_env (self, "GIO_USE_VFS", "local");
 	menu_bar_greeter_set_env (self, "GVFS_DISABLE_FUSE", "1");
 	menu_bar_greeter_set_env (self, "RUNNING_UNDER_GDM", "1");
-	_tmp0_ = menu_bar_make_keyboard_indicator (self);
-	keyboard_item = _tmp0_;
-	_tmp1_ = keyboard_item;
-	_tmp2_ = gtk_container_get_children ((GtkContainer*) self);
-	_tmp3_ = _tmp2_;
-	_tmp4_ = g_list_length (_tmp3_);
-	gtk_menu_shell_insert ((GtkMenuShell*) self, _tmp1_, ((gint) _tmp4_) - 1);
-	_g_list_free0 (_tmp3_);
-	_tmp5_ = menu_bar_make_a11y_indicator (self);
-	a11y_item = _tmp5_;
-	_tmp6_ = a11y_item;
-	_tmp7_ = gtk_container_get_children ((GtkContainer*) self);
-	_tmp8_ = _tmp7_;
-	_tmp9_ = g_list_length (_tmp8_);
-	gtk_menu_shell_insert ((GtkMenuShell*) self, _tmp6_, ((gint) _tmp9_) - 1);
-	_g_list_free0 (_tmp8_);
-	_tmp10_ = g_getenv ("LANG");
-	_tmp11_ = g_getenv ("LANGUAGE");
-	g_debug ("menubar.vala:343: LANG=%s LANGUAGE=%s", _tmp10_, _tmp11_);
-	_tmp12_ = g_build_filename (INDICATORDIR, "libsession.so", NULL);
-	_tmp13_ = g_build_filename (INDICATORDIR, "libdatetime.so", NULL);
-	_tmp14_ = g_build_filename (INDICATORDIR, "libpower.so", NULL);
-	_tmp15_ = g_build_filename (INDICATORDIR, "libsoundmenu.so", NULL);
-	_tmp16_ = g_build_filename (INDICATORDIR, "libapplication.so", NULL);
-	_tmp17_ = g_new0 (gchar*, 5 + 1);
-	_tmp17_[0] = _tmp12_;
-	_tmp17_[1] = _tmp13_;
-	_tmp17_[2] = _tmp14_;
-	_tmp17_[3] = _tmp15_;
-	_tmp17_[4] = _tmp16_;
-	filenames = _tmp17_;
-	filenames_length1 = 5;
-	_filenames_size_ = filenames_length1;
-	_tmp18_ = filenames;
-	_tmp18__length1 = filenames_length1;
 	{
-		gchar** filename_collection = NULL;
-		gint filename_collection_length1 = 0;
-		gint _filename_collection_size_ = 0;
-		gint filename_it = 0;
-		filename_collection = _tmp18_;
-		filename_collection_length1 = _tmp18__length1;
-		for (filename_it = 0; filename_it < _tmp18__length1; filename_it = filename_it + 1) {
-			gchar* _tmp19_;
-			gchar* filename = NULL;
-			_tmp19_ = g_strdup (filename_collection[filename_it]);
-			filename = _tmp19_;
+		GDBusConnection* _tmp0_ = NULL;
+		GDBusConnection* conn;
+		const gchar* _tmp1_ = NULL;
+		_tmp0_ = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, &_inner_error_);
+		conn = _tmp0_;
+		if (_inner_error_ != NULL) {
+			if (_inner_error_->domain == G_IO_ERROR) {
+				goto __catch13_g_io_error;
+			}
+			g_critical ("file %s: line %d: unexpected error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
+			g_clear_error (&_inner_error_);
+			return;
+		}
+		_tmp1_ = g_dbus_connection_get_unique_name (conn);
+		menu_bar_greeter_set_env (self, "UNITY_GREETER_DBUS_NAME", _tmp1_);
+		_g_object_unref0 (conn);
+	}
+	goto __finally13;
+	__catch13_g_io_error:
+	{
+		GError* e = NULL;
+		GError* _tmp2_;
+		const gchar* _tmp3_;
+		e = _inner_error_;
+		_inner_error_ = NULL;
+		_tmp2_ = e;
+		_tmp3_ = _tmp2_->message;
+		g_debug ("menubar.vala:381: Could not set DBUS_NAME: %s", _tmp3_);
+		_g_error_free0 (e);
+	}
+	__finally13:
+	if (_inner_error_ != NULL) {
+		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
+		g_clear_error (&_inner_error_);
+		return;
+	}
+	_tmp4_ = g_getenv ("LANG");
+	_tmp5_ = g_getenv ("LANGUAGE");
+	g_debug ("menubar.vala:384: LANG=%s LANGUAGE=%s", _tmp4_, _tmp5_);
+	_tmp7_ = ug_settings_get_strv (UG_SETTINGS_KEY_INDICATORS, &_tmp6_);
+	indicator_list = _tmp7_;
+	indicator_list_length1 = _tmp6_;
+	_indicator_list_size_ = indicator_list_length1;
+	_tmp8_ = indicator_list;
+	_tmp8__length1 = indicator_list_length1;
+	{
+		gchar** indicator_collection = NULL;
+		gint indicator_collection_length1 = 0;
+		gint _indicator_collection_size_ = 0;
+		gint indicator_it = 0;
+		indicator_collection = _tmp8_;
+		indicator_collection_length1 = _tmp8__length1;
+		for (indicator_it = 0; indicator_it < _tmp8__length1; indicator_it = indicator_it + 1) {
+			gchar* _tmp9_;
+			gchar* indicator = NULL;
+			_tmp9_ = g_strdup (indicator_collection[indicator_it]);
+			indicator = _tmp9_;
 			{
-				const gchar* _tmp20_;
-				IndicatorObject* _tmp21_;
-				IndicatorObject* io;
-				IndicatorObject* _tmp22_;
-				IndicatorObject* _tmp23_;
-				IndicatorObject* _tmp24_;
-				IndicatorObject* _tmp25_;
-				IndicatorObject* _tmp26_;
-				IndicatorObject* _tmp27_;
-				GList* _tmp28_ = NULL;
-				_tmp20_ = filename;
-				_tmp21_ = indicator_object_new_from_file (_tmp20_);
-				io = _tmp21_;
-				_tmp22_ = io;
-				if (_tmp22_ == NULL) {
-					_g_object_unref0 (io);
-					_g_free0 (filename);
-					continue;
-				}
-				_tmp23_ = io;
-				_tmp24_ = _g_object_ref0 (_tmp23_);
-				self->priv->indicator_objects = g_list_append (self->priv->indicator_objects, _tmp24_);
-				_tmp25_ = io;
-				g_signal_connect_object (_tmp25_, "entry-added", (GCallback) _menu_bar_indicator_added_cb_indicator_object_entry_added, self, 0);
-				_tmp26_ = io;
-				g_signal_connect_object (_tmp26_, "entry-removed", (GCallback) _menu_bar_indicator_removed_cb_indicator_object_entry_removed, self, 0);
-				_tmp27_ = io;
-				_tmp28_ = indicator_object_get_entries (_tmp27_);
-				{
-					GList* entry_collection = NULL;
-					GList* entry_it = NULL;
-					entry_collection = _tmp28_;
-					for (entry_it = entry_collection; entry_it != NULL; entry_it = entry_it->next) {
-						IndicatorObjectEntry* entry = NULL;
-						entry = (IndicatorObjectEntry*) entry_it->data;
-						{
-							IndicatorObject* _tmp29_;
-							IndicatorObjectEntry* _tmp30_;
-							_tmp29_ = io;
-							_tmp30_ = entry;
-							menu_bar_indicator_added_cb (self, _tmp29_, _tmp30_);
-						}
-					}
-					_g_list_free0 (entry_collection);
-				}
-				_g_object_unref0 (io);
-				_g_free0 (filename);
+				const gchar* _tmp10_;
+				_tmp10_ = indicator;
+				menu_bar_load_indicator (self, _tmp10_);
+				_g_free0 (indicator);
 			}
 		}
 	}
-	_tmp31_ = g_getenv ("LANG");
-	_tmp32_ = g_getenv ("LANGUAGE");
-	g_debug ("menubar.vala:361: LANG=%s LANGUAGE=%s", _tmp31_, _tmp32_);
-	filenames = (_vala_array_free (filenames, filenames_length1, (GDestroyNotify) g_free), NULL);
-	_g_object_unref0 (a11y_item);
-	_g_object_unref0 (keyboard_item);
+	_tmp11_ = g_getenv ("LANG");
+	_tmp12_ = g_getenv ("LANGUAGE");
+	g_debug ("menubar.vala:390: LANG=%s LANGUAGE=%s", _tmp11_, _tmp12_);
+	indicator_list = (_vala_array_free (indicator_list, indicator_list_length1, (GDestroyNotify) g_free), NULL);
 }
 
 
@@ -1355,7 +1468,7 @@ static void menu_bar_keyboard_toggled_cb (MenuBar* self, GtkCheckMenuItem* item)
 			_argv_size_ = argv_length1;
 			if (_inner_error_ != NULL) {
 				argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
-				goto __catch11_g_error;
+				goto __catch14_g_error;
 			}
 			_tmp6_ = argv;
 			_tmp6__length1 = argv_length1;
@@ -1364,7 +1477,7 @@ static void menu_bar_keyboard_toggled_cb (MenuBar* self, GtkCheckMenuItem* item)
 			onboard_stdout_fd = _tmp8_;
 			if (_inner_error_ != NULL) {
 				argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
-				goto __catch11_g_error;
+				goto __catch14_g_error;
 			}
 			_tmp9_ = onboard_stdout_fd;
 			_tmp10_ = fdopen (_tmp9_, "r");
@@ -1390,8 +1503,8 @@ static void menu_bar_keyboard_toggled_cb (MenuBar* self, GtkCheckMenuItem* item)
 			_fclose0 (f);
 			argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
 		}
-		goto __finally11;
-		__catch11_g_error:
+		goto __finally14;
+		__catch14_g_error:
 		{
 			GError* e = NULL;
 			GError* _tmp17_;
@@ -1400,11 +1513,11 @@ static void menu_bar_keyboard_toggled_cb (MenuBar* self, GtkCheckMenuItem* item)
 			_inner_error_ = NULL;
 			_tmp17_ = e;
 			_tmp18_ = _tmp17_->message;
-			g_warning ("menubar.vala:401: Error setting up keyboard: %s", _tmp18_);
+			g_warning ("menubar.vala:430: Error setting up keyboard: %s", _tmp18_);
 			_g_error_free0 (e);
 			return;
 		}
-		__finally11:
+		__finally14:
 		if (_inner_error_ != NULL) {
 			g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 			g_clear_error (&_inner_error_);
@@ -1625,6 +1738,27 @@ static void menu_bar_high_contrast_toggled_cb (MenuBar* self, GtkCheckMenuItem* 
 }
 
 
+static gboolean ____lambda33_ (MenuBar* self) {
+	gboolean result = FALSE;
+	GtkWidget* _tmp0_ = NULL;
+	GtkWidget* _tmp1_ = NULL;
+	AtkObject* _tmp2_ = NULL;
+	_tmp0_ = gtk_widget_get_toplevel ((GtkWidget*) self);
+	_tmp1_ = gtk_window_get_focus (G_TYPE_CHECK_INSTANCE_TYPE (_tmp0_, GTK_TYPE_WINDOW) ? ((GtkWindow*) _tmp0_) : NULL);
+	_tmp2_ = gtk_widget_get_accessible (_tmp1_);
+	g_signal_emit_by_name (_tmp2_, "focus-event", TRUE, NULL);
+	result = FALSE;
+	return result;
+}
+
+
+static gboolean _____lambda33__gsource_func (gpointer self) {
+	gboolean result;
+	result = ____lambda33_ (self);
+	return result;
+}
+
+
 static void menu_bar_screen_reader_toggled_cb (MenuBar* self, GtkCheckMenuItem* item) {
 	GtkCheckMenuItem* _tmp0_;
 	gboolean _tmp1_;
@@ -1652,6 +1786,7 @@ static void menu_bar_screen_reader_toggled_cb (MenuBar* self, GtkCheckMenuItem* 
 			gchar** _tmp8_;
 			gint _tmp8__length1;
 			GPid _tmp9_ = 0;
+			UnityGreeter* _tmp10_;
 			g_shell_parse_argv ("orca --replace --no-setup --disable splash-window,", &_tmp7_, &_tmp6_, &_inner_error_);
 			argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
 			argv = _tmp6_;
@@ -1659,7 +1794,7 @@ static void menu_bar_screen_reader_toggled_cb (MenuBar* self, GtkCheckMenuItem* 
 			_argv_size_ = argv_length1;
 			if (_inner_error_ != NULL) {
 				argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
-				goto __catch12_g_error;
+				goto __catch15_g_error;
 			}
 			_tmp8_ = argv;
 			_tmp8__length1 = argv_length1;
@@ -1667,24 +1802,27 @@ static void menu_bar_screen_reader_toggled_cb (MenuBar* self, GtkCheckMenuItem* 
 			self->priv->reader_pid = _tmp9_;
 			if (_inner_error_ != NULL) {
 				argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
-				goto __catch12_g_error;
+				goto __catch15_g_error;
 			}
+			_tmp10_ = unity_greeter_singleton;
+			_tmp10_->orca_needs_kick = TRUE;
+			g_timeout_add_seconds_full (G_PRIORITY_DEFAULT, (guint) 1, _____lambda33__gsource_func, g_object_ref (self), g_object_unref);
 			argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
 		}
-		goto __finally12;
-		__catch12_g_error:
+		goto __finally15;
+		__catch15_g_error:
 		{
 			GError* e = NULL;
-			GError* _tmp10_;
-			const gchar* _tmp11_;
+			GError* _tmp11_;
+			const gchar* _tmp12_;
 			e = _inner_error_;
 			_inner_error_ = NULL;
-			_tmp10_ = e;
-			_tmp11_ = _tmp10_->message;
-			g_warning ("menubar.vala:494: Failed to run Orca: %s", _tmp11_);
+			_tmp11_ = e;
+			_tmp12_ = _tmp11_->message;
+			g_warning ("menubar.vala:540: Failed to run Orca: %s", _tmp12_);
 			_g_error_free0 (e);
 		}
-		__finally12:
+		__finally15:
 		if (_inner_error_ != NULL) {
 			g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 			g_clear_error (&_inner_error_);
@@ -1858,7 +1996,7 @@ static void menu_bar_indicator_added_cb (MenuBar* self, IndicatorObject* object,
 	}
 	_tmp14_ = entry;
 	_tmp15_ = pos;
-	g_debug ("menubar.vala:546: Adding indicator object %p at position %d", _tmp14_, _tmp15_);
+	g_debug ("menubar.vala:592: Adding indicator object %p at position %d", _tmp14_, _tmp15_);
 	_tmp16_ = entry;
 	_tmp17_ = indicator_menu_item_new (_tmp16_);
 	g_object_ref_sink (_tmp17_);
@@ -1877,7 +2015,7 @@ static void menu_bar_indicator_removed_cb (MenuBar* self, IndicatorObject* objec
 	g_return_if_fail (object != NULL);
 	g_return_if_fail (entry != NULL);
 	_tmp0_ = entry;
-	g_debug ("menubar.vala:554: Removing indicator object %p", _tmp0_);
+	g_debug ("menubar.vala:600: Removing indicator object %p", _tmp0_);
 	_tmp1_ = gtk_container_get_children ((GtkContainer*) self);
 	{
 		GList* child_collection = NULL;
@@ -1913,7 +2051,7 @@ static void menu_bar_indicator_removed_cb (MenuBar* self, IndicatorObject* objec
 		_g_list_free0 (child_collection);
 	}
 	_tmp8_ = entry;
-	g_warning ("menubar.vala:566: Indicator object %p not in menubar", _tmp8_);
+	g_warning ("menubar.vala:612: Indicator object %p not in menubar", _tmp8_);
 }
 
 
@@ -2082,15 +2220,15 @@ static GObject * menu_bar_constructor (GType type, guint n_construct_properties,
 		gtk_css_provider_load_from_data (_tmp19_, "* {-GtkWidget-window-dragging: false;}", (gssize) (-1), &_inner_error_);
 		if (_inner_error_ != NULL) {
 			_g_object_unref0 (style);
-			goto __catch13_g_error;
+			goto __catch16_g_error;
 		}
 		_tmp20_ = gtk_widget_get_style_context ((GtkWidget*) self);
 		_tmp21_ = style;
 		gtk_style_context_add_provider (_tmp20_, (GtkStyleProvider*) _tmp21_, (guint) GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 		_g_object_unref0 (style);
 	}
-	goto __finally13;
-	__catch13_g_error:
+	goto __finally16;
+	__catch16_g_error:
 	{
 		GError* e = NULL;
 		GError* _tmp22_;
@@ -2102,7 +2240,7 @@ static GObject * menu_bar_constructor (GType type, guint n_construct_properties,
 		g_debug ("menubar.vala:167: Internal error loading menubar style: %s", _tmp23_);
 		_g_error_free0 (e);
 	}
-	__finally13:
+	__finally16:
 	if (_inner_error_ != NULL) {
 		_g_object_unref0 (hostname_item);
 		_g_object_unref0 (label);

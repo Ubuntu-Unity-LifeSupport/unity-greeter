@@ -31,6 +31,7 @@
 #include <lightdm.h>
 #include <float.h>
 #include <math.h>
+#include "config.h"
 #include <glib/gstdio.h>
 
 
@@ -242,6 +243,7 @@ struct _UnityGreeter {
 	volatile int ref_count;
 	UnityGreeterPrivate * priv;
 	gboolean test_mode;
+	gboolean orca_needs_kick;
 };
 
 struct _UnityGreeterClass {
@@ -920,7 +922,7 @@ GdkPixbuf* session_list_get_badge (const gchar* session) {
 			_g_free0 (_tmp23_);
 			_tmp26_ = _tmp25_;
 			if (_inner_error_ != NULL) {
-				goto __catch17_g_error;
+				goto __catch20_g_error;
 			}
 			_g_object_unref0 (pixbuf);
 			pixbuf = _tmp26_;
@@ -931,8 +933,8 @@ GdkPixbuf* session_list_get_badge (const gchar* session) {
 			_tmp31_ = _g_object_ref0 (_tmp30_);
 			g_hash_table_insert (_tmp27_, _tmp29_, _tmp31_);
 		}
-		goto __finally17;
-		__catch17_g_error:
+		goto __finally20;
+		__catch20_g_error:
 		{
 			GError* e = NULL;
 			const gchar* _tmp32_;
@@ -946,7 +948,7 @@ GdkPixbuf* session_list_get_badge (const gchar* session) {
 			g_debug ("session-list.vala:149: Error loading badge %s: %s", _tmp32_, _tmp34_);
 			_g_error_free0 (e);
 		}
-		__finally17:
+		__finally20:
 		if (_inner_error_ != NULL) {
 			_g_object_unref0 (pixbuf);
 			_g_free0 (name);

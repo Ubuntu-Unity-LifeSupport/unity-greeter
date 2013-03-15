@@ -3,7 +3,7 @@
 check_PROGRAMS = unity-greeter-test
 
 check: unity-greeter-test
-	UBUNTU_MENUPROXY=0 top_srcdir=$(top_srcdir) . xvfb-run ./unity-greeter-test
+	UBUNTU_MENUPROXY=0 top_srcdir=$(top_srcdir) . xvfb-run -a ./unity-greeter-test
 
 unity_greeter_test_SOURCES = \
 	test.vala \
@@ -59,7 +59,11 @@ unity_greeter_test_VALAFLAGS = \
 	--target-glib 2.32
 
 unity_greeter_test_LDADD = \
-	$(UNITY_GREETER_LIBS)
+	$(UNITY_GREETER_LIBS) \
+	-lm
+
+CLEANFILES = \
+	$(notdir $(unity_greeter_test_SOURCES:.vala=.c))
 
 DISTCLEANFILES = \
 	Makefile.in

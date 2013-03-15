@@ -2,12 +2,11 @@ Source: unity-greeter
 Section: x11
 Priority: optional
 Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
-XSBC-Original-Maintainer: Robert Ancell <robert.ancell@canonical.com>
 Standards-Version: 3.9.3
 Build-Depends: appmenu-gtk3,
                at-spi2-core,
                dbus-x11,
-               debhelper (>= 7.0.50~),
+               debhelper (>= 9),
                dh-autoreconf,
                gnome-common,
                gnome-settings-daemon-dev,
@@ -18,14 +17,17 @@ Build-Depends: appmenu-gtk3,
                valac-0.16,
                xvfb,
 Homepage: https://launchpad.net/unity-greeter
-Vcs-Bzr: https://code.launchpad.net/~ubuntu-desktop/unity-greeter/ubuntu
+# If you aren't a member of ~unity-greeter-team but need to upload packaging
+# changes, just go ahead.  ~unity-greeter-team will notice and sync up the code
+# again.
+Vcs-Bzr: https://code.launchpad.net/~unity-greeter-team/unity-greeter/trunk
 
 Package: unity-greeter
 Architecture: any
 Depends: ${misc:Depends},
          ${shlibs:Depends},
-         gnome-settings-daemon,
-Recommends: indicator-application,
+Recommends: gnome-settings-daemon,
+            indicator-application,
             indicator-datetime,
             indicator-power,
             indicator-session,

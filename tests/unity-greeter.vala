@@ -30,6 +30,7 @@ public class UnityGreeter
     public bool test_mode = false;
     public bool session_started = false;
     public string last_respond_response;
+    public bool orca_needs_kick;
 
     public bool is_authenticated ()
     {

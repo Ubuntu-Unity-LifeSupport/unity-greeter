@@ -7,43 +7,43 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2013-01-21 04:59+0000\n"
+"POT-Creation-Date: 2013-03-14 05:17+0000\n"
 "PO-Revision-Date: 2012-05-23 09:54+0000\n"
 "Last-Translator: Hasan Yılmaz <iletisim@hasanyilmaz.net>\n"
 "Language-Team: Turkish <tr@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-01-22 05:07+0000\n"
-"X-Generator: Launchpad (build 16430)\n"
+"X-Launchpad-Export-Date: 2013-03-15 06:15+0000\n"
+"X-Generator: Launchpad (build 16532)\n"
 
-#: ../src/greeter-list.vala:245
+#: ../src/greeter-list.vala:285
 #, c-format
 msgid "Enter password for %s"
 msgstr "Parola girin: %s"
 
-#: ../src/greeter-list.vala:735 ../src/user-list.vala:622
-#: ../src/user-list.vala:1340 ../src/user-list.vala:1434
-#: ../src/user-list.vala:1457 ../src/user-list.vala:1461
-#: ../src/user-list.vala:1465 ../src/user-list.vala:1471
-#: ../src/user-list.vala:1475 ../src/user-list.vala:1478
+#: ../src/greeter-list.vala:783 ../src/user-list.vala:650
+#: ../src/user-list.vala:1412 ../src/user-list.vala:1506
+#: ../src/user-list.vala:1529 ../src/user-list.vala:1533
+#: ../src/user-list.vala:1537 ../src/user-list.vala:1543
+#: ../src/user-list.vala:1547 ../src/user-list.vala:1550
 msgid "Password:"
 msgstr "Parola:"
 
-#: ../src/greeter-list.vala:737 ../src/user-list.vala:616
-#: ../src/user-list.vala:1437
+#: ../src/greeter-list.vala:785 ../src/user-list.vala:644
+#: ../src/user-list.vala:1509
 msgid "Username:"
 msgstr "Kullanıcı Adı:"
 
-#: ../src/greeter-list.vala:789
+#: ../src/greeter-list.vala:837
 msgid "Invalid password, please try again"
 msgstr "Geçersiz parola, lütfen yeniden deneyin"
 
-#: ../src/greeter-list.vala:800
+#: ../src/greeter-list.vala:848
 msgid "Failed to authenticate"
 msgstr "Kimlik doğrulama başarısız"
 
-#: ../src/greeter-list.vala:855
+#: ../src/greeter-list.vala:903
 msgid "Logging in..."
 msgstr "Oturum açılıyor..."
 
@@ -78,22 +78,22 @@ msgid "%s (Default)"
 msgstr "%s (Varsayılan)"
 
 #. Help string for command line --version flag
-#: ../src/unity-greeter.vala:450
+#: ../src/unity-greeter.vala:451
 msgid "Show release version"
 msgstr "Yayım sürümünü göster"
 
 #. Help string for command line --test-mode flag
-#: ../src/unity-greeter.vala:453
+#: ../src/unity-greeter.vala:454
 msgid "Run in test mode"
 msgstr "Sınama kipinde çalıştır"
 
 #. Arguments and description for --help text
-#: ../src/unity-greeter.vala:459
+#: ../src/unity-greeter.vala:460
 msgid "- Unity Greeter"
 msgstr "- Unity Karşılayıcısı"
 
 #. Text printed out when an unknown command-line argument provided
-#: ../src/unity-greeter.vala:470
+#: ../src/unity-greeter.vala:471
 #, c-format
 msgid "Run '%s --help' to see a full list of available command line options."
 msgstr ""
@@ -104,15 +104,15 @@ msgstr ""
 msgid "Guest Session"
 msgstr "Konuk Oturumu"
 
-#: ../src/user-list.vala:367
+#: ../src/user-list.vala:387
 msgid "Please enter a complete e-mail address"
 msgstr "Lütfen tam bir e-posta adresi girin"
 
-#: ../src/user-list.vala:442
+#: ../src/user-list.vala:467
 msgid "Incorrect e-mail address or password"
 msgstr "E-posta veya şifre yanlış"
 
-#: ../src/user-list.vala:473
+#: ../src/user-list.vala:498
 msgid ""
 "If you have an account on an RDP or Citrix server, Remote Login lets you run "
 "applications from that server."
@@ -121,7 +121,7 @@ msgstr ""
 "Giriş uygulamaları bu sunucudan çalıştırmanızı sağlar."
 
 #. For 12.10 we still don't support Citrix
-#: ../src/user-list.vala:475
+#: ../src/user-list.vala:500
 msgid ""
 "If you have an account on an RDP server, Remote Login lets you run "
 "applications from that server."
@@ -129,15 +129,15 @@ msgstr ""
 "Eğer bir RDP sunucusunda bir hesabınız varsa, Uzaktan Erişim uygulamaları bu "
 "sunucudan çalıştırmanıza izin verir."
 
-#: ../src/user-list.vala:478
+#: ../src/user-list.vala:503
 msgid "Cancel"
 msgstr "Vazgeç"
 
-#: ../src/user-list.vala:479
+#: ../src/user-list.vala:504
 msgid "Set Up…"
 msgstr "Kurulum..."
 
-#: ../src/user-list.vala:481
+#: ../src/user-list.vala:506
 msgid ""
 "You need an Ubuntu Remote Login account to use this service. Would you like "
 "to set up an account now?"
@@ -145,11 +145,11 @@ msgstr ""
 "Bu hizmeti kullanmak için Ubuntu Uzaktan Giriş hesabınız olması gerekir. "
 "Şimdi bir hesap kurmak ister miydiniz?"
 
-#: ../src/user-list.vala:485
+#: ../src/user-list.vala:510
 msgid "OK"
 msgstr "Tamam"
 
-#: ../src/user-list.vala:486
+#: ../src/user-list.vala:511
 msgid ""
 "You need an Ubuntu Remote Login account to use this service. Visit "
 "uccs.canonical.com to set up an account."
@@ -157,42 +157,42 @@ msgstr ""
 "Bu hizmeti kullanmak için Ubuntu Uzaktan Giriş hesabınız olması gerekir. Bir "
 "hesap kurmak için uccs.canonical.com adresini ziyaret edin."
 
-#: ../src/user-list.vala:600
+#: ../src/user-list.vala:628
 msgid "Server type not supported."
 msgstr "Sunucu türü desteklenmiyor."
 
-#: ../src/user-list.vala:641
+#: ../src/user-list.vala:669
 msgid "Domain:"
 msgstr "Alan adı:"
 
-#: ../src/user-list.vala:702
+#: ../src/user-list.vala:730
 msgid "Email address:"
 msgstr "E-posta adresi:"
 
 #. 'Log In' here is the button for logging in.
-#: ../src/user-list.vala:746
+#: ../src/user-list.vala:774
 msgid "Log In"
 msgstr "Oturum aç"
 
-#: ../src/user-list.vala:747
+#: ../src/user-list.vala:775
 #, c-format
 msgid "Login as %s"
 msgstr "Oturum aç: %s"
 
-#: ../src/user-list.vala:751
+#: ../src/user-list.vala:779
 msgid "Retry"
 msgstr "Yeniden dene"
 
-#: ../src/user-list.vala:752
+#: ../src/user-list.vala:780
 #, c-format
 msgid "Retry as %s"
 msgstr "Olarak yeniden dene: %s"
 
-#: ../src/user-list.vala:791
+#: ../src/user-list.vala:819
 msgid "Login"
 msgstr "Oturum aç"
 
-#: ../src/user-list.vala:1474
+#: ../src/user-list.vala:1546
 msgid "Favorite Color (blue):"
 msgstr "Tercih Edilen Renk (mavi):"
 

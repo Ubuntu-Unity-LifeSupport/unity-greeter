@@ -183,7 +183,7 @@ public class Test
         pwd.text = "password";
         list.selected_entry.respond ({});
         GLib.assert (!list.selected_entry.has_errors);
-        GLib.assert (list.selected_entry.id == "*remote_login*http://rdpdefaultusername2.com");
+        GLib.assert (list.selected_entry.id == "*remote_login*http://rdpdefaultusername2.com*lwola");
         wait_for_scrolling_end (list);
 
         // Go back to the remote_directory entry and write the same password but an invalid email
@@ -215,7 +215,7 @@ public class Test
         pwd.text = "delay1";
         list.selected_entry.respond ({});
         GLib.assert (!list.selected_entry.has_errors);
-        GLib.assert (list.selected_entry.id == "*remote_login*http://rdpdefaultusername2.com");
+        GLib.assert (list.selected_entry.id == "*remote_login*http://rdpdefaultusername2.com*lwola");
 
         bool done = false;
         // The delay1 code triggers at 5 seconds
@@ -253,7 +253,7 @@ public class Test
         pwd.text = "delay1";
         list.selected_entry.respond ({});
         GLib.assert (!list.selected_entry.has_errors);
-        GLib.assert (list.selected_entry.id == "*remote_login*http://rdpdefaultusername2.com");
+        GLib.assert (list.selected_entry.id == "*remote_login*http://rdpdefaultusername2.com*lwola");
         wait_for_scrolling_end (list);
 
         while (list.selected_entry.id.has_prefix("*remote_"))
@@ -299,7 +299,7 @@ public class Test
         pwd.text = "delay2";
         list.selected_entry.respond ({});
         GLib.assert (!list.selected_entry.has_errors);
-        GLib.assert (list.selected_entry.id == "*remote_login*http://rdpdefaultusername2.com");
+        GLib.assert (list.selected_entry.id == "*remote_login*http://rdpdefaultusername2.com*lwola");
 
         bool done = false;
         // The delay2 code triggers at 5 seconds
@@ -307,7 +307,7 @@ public class Test
             {
                 // If the login server we were disappears we get moved to a different one
                 wait_for_scrolling_end (list);
-                GLib.assert (list.selected_entry.id == "*remote_login*http://megacoolrdpserver.com");
+                GLib.assert (list.selected_entry.id == "*remote_login*http://megacoolrdpserver.com*");
                 done = true;
                 return false;
             }
@@ -336,10 +336,10 @@ public class Test
         pwd.text = "delay2";
         list.selected_entry.respond ({});
         GLib.assert (!list.selected_entry.has_errors);
-        GLib.assert (list.selected_entry.id == "*remote_login*http://rdpdefaultusername2.com");
+        GLib.assert (list.selected_entry.id == "*remote_login*http://rdpdefaultusername2.com*lwola");
 
         // Move to a server that won't be removed
-        while (list.selected_entry.id != "*remote_login*http://coolrdpserver.com")
+        while (list.selected_entry.id != "*remote_login*http://coolrdpserver.com*")
             do_scroll (list, GreeterList.ScrollTarget.UP);
 
         bool done = false;
@@ -348,7 +348,7 @@ public class Test
             {
                 // If the login server we were did not disappear we are still in the same one
                 wait_for_scrolling_end (list);
-                GLib.assert (list.selected_entry.id == "*remote_login*http://coolrdpserver.com");
+                GLib.assert (list.selected_entry.id == "*remote_login*http://coolrdpserver.com*");
                 done = true;
                 return false;
             }
@@ -377,7 +377,7 @@ public class Test
         pwd.text = "delay3";
         list.selected_entry.respond ({});
         GLib.assert (!list.selected_entry.has_errors);
-        GLib.assert (list.selected_entry.id == "*remote_login*http://rdpdefaultusername2.com");
+        GLib.assert (list.selected_entry.id == "*remote_login*http://rdpdefaultusername2.com*lwola");
 
         bool done = false;
         // The delay3 code triggers at 5 seconds
@@ -419,7 +419,7 @@ public class Test
         pwd.text = "delay3";
         list.selected_entry.respond ({});
         GLib.assert (!list.selected_entry.has_errors);
-        GLib.assert (list.selected_entry.id == "*remote_login*http://rdpdefaultusername2.com");
+        GLib.assert (list.selected_entry.id == "*remote_login*http://rdpdefaultusername2.com*lwola");
         wait_for_scrolling_end (list);
 
         while (list.selected_entry.id.has_prefix("*remote_"))
@@ -473,7 +473,7 @@ public class Test
         pwd.text = "password";
         list.selected_entry.respond ({});
         GLib.assert (!list.selected_entry.has_errors);
-        GLib.assert (list.selected_entry.id == "*remote_login*http://rdpdefaultusername2.com");
+        GLib.assert (list.selected_entry.id == "*remote_login*http://rdpdefaultusername2.com*lwola");
         wait_for_scrolling_end (list);
 
         UnityGreeter.singleton.session_started = false;
@@ -503,7 +503,7 @@ public class Test
         pwd.text = "password";
         list.selected_entry.respond ({});
         GLib.assert (!list.selected_entry.has_errors);
-        GLib.assert (list.selected_entry.id == "*remote_login*http://rdpdefaultusername2.com");
+        GLib.assert (list.selected_entry.id == "*remote_login*http://rdpdefaultusername2.com*lwola");
         wait_for_scrolling_end (list);
 
         UnityGreeter.singleton.session_started = false;
@@ -517,6 +517,49 @@ public class Test
         GLib.assert (list.sensitive); // We are sensitive again because we cancelled the login
         GLib.assert (!pwd.did_respond); // We are not showing the spinner anymore
 
+        mw.hide ();
+    }
+
+    public static void remote_login_duplicate_entries()
+    {
+        MainWindow mw = setup ();
+        TestList list = mw.stack.top () as TestList;
+
+        scroll_to_remote_login (list); //Wait until remote login appears.
+        GLib.assert (list.selected_entry.id == "*remote_directory*http://crazyurl.com");
+        GLib.assert (!list.selected_entry.has_errors);
+
+        // If we answer without filling in any field -> error
+        list.selected_entry.respond ({});
+        GLib.assert (list.selected_entry.has_errors);
+
+        // Go to first and back to last to clear the error
+        do_scroll (list, GreeterList.ScrollTarget.START);
+        do_scroll (list, GreeterList.ScrollTarget.END);
+        GLib.assert (!list.selected_entry.has_errors);
+
+        // Fill in a valid email and password
+        // Check there is no error and we moved to the last logged in server
+        var email = remote_directory_entry_email_field (list);
+        var pwd = remote_directory_entry_password_field (list);
+        email.text = "a@canonical.com";
+        pwd.text = "duplicate";
+        list.selected_entry.respond ({});
+        GLib.assert (!list.selected_entry.has_errors);        
+        GLib.assert (list.selected_entry.id == "*remote_login*http://rdpdefaultusername.com*alowl2");        
+        
+        var username = remote_login_entry_username_field(list);
+        var domain = remote_login_entry_domain_field(list);
+        var password = remote_login_entry_password_field(list);		
+        GLib.assert (username.text == "alowl2" && domain.text == "PRINTERS" && password.text == "duplicate2");
+                        
+        do_scroll (list, GreeterList.ScrollTarget.DOWN);
+        GLib.assert (list.selected_entry.id == "*remote_login*http://rdpdefaultusername.com*alowl1");
+        username = remote_login_entry_username_field(list);
+        domain = remote_login_entry_domain_field(list);
+        password = remote_login_entry_password_field(list);
+        GLib.assert (username.text == "alowl1" && domain.text == "SCANNERS" && password.text == "duplicate1");	
+        wait_for_scrolling_end (list);
         mw.hide ();
     }
 
@@ -587,7 +630,7 @@ public class Test
         list.selected_entry.respond ({});
         wait_for_scrolling_end (list);
 
-        while (list.selected_entry.id != "*remote_login*http://coolrdpserver.com")
+        while (list.selected_entry.id != "*remote_login*http://coolrdpserver.com*")
             do_scroll (list, GreeterList.ScrollTarget.UP);
 
         var domain = remote_login_entry_domain_field (list);
@@ -626,7 +669,7 @@ public class Test
         list.selected_entry.respond ({});
         wait_for_scrolling_end (list);
 
-        while (list.selected_entry.id != "*remote_login*http://notsupportedserver.com")
+        while (list.selected_entry.id != "*remote_login*http://notsupportedserver.com*")
             do_scroll (list, GreeterList.ScrollTarget.UP);
 
         GLib.assert (list.selected_entry.has_errors);
@@ -675,6 +718,7 @@ public class Test
 
         GLib.Test.add_func ("/Simple Navigation", simple_navigation);
         GLib.Test.add_func ("/Remote Login", remote_login);
+        GLib.Test.add_func ("/Remote Login duplicate entries", remote_login_duplicate_entries);
         GLib.Test.add_func ("/Remote Login with Servers Updated signal", remote_login_servers_updated_signal);
         GLib.Test.add_func ("/Remote Login with Servers Updated signal and not in remote server", remote_login_servers_updated_signal_focus_not_in_remote_server);
         GLib.Test.add_func ("/Remote Login with Login Servers Updated signal", remote_login_login_servers_updated_signal);

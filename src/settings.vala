@@ -37,6 +37,7 @@ public class UGSettings
     public static const string KEY_HIGH_CONTRAST = "high-contrast";
     public static const string KEY_SCREEN_READER = "screen-reader";
     public static const string KEY_PLAY_READY_SOUND = "play-ready-sound";
+    public static const string KEY_INDICATORS = "indicators";
 
     public static bool get_boolean (string key)
     {
@@ -73,6 +74,12 @@ public class UGSettings
     {
         var gsettings = new Settings (SCHEMA);
         return gsettings.set_boolean (key, value);
+    }
+
+    public static string[] get_strv (string key)
+    {
+        var gsettings = new Settings (SCHEMA);
+        return gsettings.get_strv (key);
     }
 
     private static const string SCHEMA = "com.canonical.unity-greeter";

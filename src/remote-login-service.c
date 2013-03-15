@@ -583,138 +583,138 @@ static void _dbus_handle_remote_login_service_servers_updated (RemoteLoginServic
 	GVariantIter _arguments_iter;
 	RemoteServer* serverList = NULL;
 	int serverList_length1;
-	GVariant* _tmp0_;
-	RemoteServer* _tmp1_;
-	int _tmp1__length;
-	int _tmp1__size;
-	int _tmp1__length1;
-	GVariantIter _tmp2_;
-	GVariant* _tmp3_;
+	GVariant* _tmp1_;
+	RemoteServer* _tmp2_;
+	int _tmp2__length;
+	int _tmp2__size;
+	int _tmp2__length1;
+	GVariantIter _tmp3_;
+	GVariant* _tmp4_;
 	g_variant_iter_init (&_arguments_iter, parameters);
 	serverList_length1 = 0;
-	_tmp0_ = g_variant_iter_next_value (&_arguments_iter);
-	_tmp1_ = g_new (RemoteServer, 5);
-	_tmp1__length = 0;
-	_tmp1__size = 4;
-	_tmp1__length1 = 0;
-	g_variant_iter_init (&_tmp2_, _tmp0_);
-	for (; (_tmp3_ = g_variant_iter_next_value (&_tmp2_)) != NULL; _tmp1__length1++) {
-		RemoteServer _tmp4_;
-		GVariantIter _tmp5_;
-		GVariant* _tmp6_;
+	_tmp1_ = g_variant_iter_next_value (&_arguments_iter);
+	_tmp2_ = g_new (RemoteServer, 5);
+	_tmp2__length = 0;
+	_tmp2__size = 4;
+	_tmp2__length1 = 0;
+	g_variant_iter_init (&_tmp3_, _tmp1_);
+	for (; (_tmp4_ = g_variant_iter_next_value (&_tmp3_)) != NULL; _tmp2__length1++) {
+		RemoteServer _tmp5_;
+		GVariantIter _tmp6_;
 		GVariant* _tmp7_;
 		GVariant* _tmp8_;
 		GVariant* _tmp9_;
 		GVariant* _tmp10_;
-		RemoteServerField* _tmp11_;
-		int _tmp11__length;
-		int _tmp11__size;
-		int _tmp11__length1;
-		GVariantIter _tmp12_;
-		GVariant* _tmp13_;
-		GVariant* _tmp24_;
-		RemoteServerApplication* _tmp25_;
-		int _tmp25__length;
-		int _tmp25__size;
-		int _tmp25__length1;
-		GVariantIter _tmp26_;
-		GVariant* _tmp27_;
-		if (_tmp1__size == _tmp1__length) {
-			_tmp1__size = 2 * _tmp1__size;
-			_tmp1_ = g_renew (RemoteServer, _tmp1_, _tmp1__size + 1);
+		GVariant* _tmp11_;
+		RemoteServerField* _tmp12_;
+		int _tmp12__length;
+		int _tmp12__size;
+		int _tmp12__length1;
+		GVariantIter _tmp13_;
+		GVariant* _tmp14_;
+		GVariant* _tmp25_;
+		RemoteServerApplication* _tmp26_;
+		int _tmp26__length;
+		int _tmp26__size;
+		int _tmp26__length1;
+		GVariantIter _tmp27_;
+		GVariant* _tmp28_;
+		if (_tmp2__size == _tmp2__length) {
+			_tmp2__size = 2 * _tmp2__size;
+			_tmp2_ = g_renew (RemoteServer, _tmp2_, _tmp2__size + 1);
 		}
-		g_variant_iter_init (&_tmp5_, _tmp3_);
-		_tmp6_ = g_variant_iter_next_value (&_tmp5_);
-		_tmp4_.type = g_variant_dup_string (_tmp6_, NULL);
-		g_variant_unref (_tmp6_);
-		_tmp7_ = g_variant_iter_next_value (&_tmp5_);
-		_tmp4_.name = g_variant_dup_string (_tmp7_, NULL);
+		g_variant_iter_init (&_tmp6_, _tmp4_);
+		_tmp7_ = g_variant_iter_next_value (&_tmp6_);
+		_tmp5_.type = g_variant_dup_string (_tmp7_, NULL);
 		g_variant_unref (_tmp7_);
-		_tmp8_ = g_variant_iter_next_value (&_tmp5_);
-		_tmp4_.url = g_variant_dup_string (_tmp8_, NULL);
+		_tmp8_ = g_variant_iter_next_value (&_tmp6_);
+		_tmp5_.name = g_variant_dup_string (_tmp8_, NULL);
 		g_variant_unref (_tmp8_);
-		_tmp9_ = g_variant_iter_next_value (&_tmp5_);
-		_tmp4_.last_used_server = g_variant_get_boolean (_tmp9_);
+		_tmp9_ = g_variant_iter_next_value (&_tmp6_);
+		_tmp5_.url = g_variant_dup_string (_tmp9_, NULL);
 		g_variant_unref (_tmp9_);
-		_tmp10_ = g_variant_iter_next_value (&_tmp5_);
-		_tmp11_ = g_new (RemoteServerField, 5);
-		_tmp11__length = 0;
-		_tmp11__size = 4;
-		_tmp11__length1 = 0;
-		g_variant_iter_init (&_tmp12_, _tmp10_);
-		for (; (_tmp13_ = g_variant_iter_next_value (&_tmp12_)) != NULL; _tmp11__length1++) {
-			RemoteServerField _tmp14_;
-			GVariantIter _tmp15_;
-			GVariant* _tmp16_;
+		_tmp10_ = g_variant_iter_next_value (&_tmp6_);
+		_tmp5_.last_used_server = g_variant_get_boolean (_tmp10_);
+		g_variant_unref (_tmp10_);
+		_tmp11_ = g_variant_iter_next_value (&_tmp6_);
+		_tmp12_ = g_new (RemoteServerField, 5);
+		_tmp12__length = 0;
+		_tmp12__size = 4;
+		_tmp12__length1 = 0;
+		g_variant_iter_init (&_tmp13_, _tmp11_);
+		for (; (_tmp14_ = g_variant_iter_next_value (&_tmp13_)) != NULL; _tmp12__length1++) {
+			RemoteServerField _tmp15_;
+			GVariantIter _tmp16_;
 			GVariant* _tmp17_;
 			GVariant* _tmp18_;
 			GVariant* _tmp19_;
-			GHashTable* _tmp20_;
-			GVariantIter _tmp21_;
-			GVariant* _tmp22_;
+			GVariant* _tmp20_;
+			GHashTable* _tmp21_;
+			GVariantIter _tmp22_;
 			GVariant* _tmp23_;
-			if (_tmp11__size == _tmp11__length) {
-				_tmp11__size = 2 * _tmp11__size;
-				_tmp11_ = g_renew (RemoteServerField, _tmp11_, _tmp11__size + 1);
+			GVariant* _tmp24_;
+			if (_tmp12__size == _tmp12__length) {
+				_tmp12__size = 2 * _tmp12__size;
+				_tmp12_ = g_renew (RemoteServerField, _tmp12_, _tmp12__size + 1);
 			}
-			g_variant_iter_init (&_tmp15_, _tmp13_);
-			_tmp16_ = g_variant_iter_next_value (&_tmp15_);
-			_tmp14_.type = g_variant_dup_string (_tmp16_, NULL);
-			g_variant_unref (_tmp16_);
-			_tmp17_ = g_variant_iter_next_value (&_tmp15_);
-			_tmp14_.required = g_variant_get_boolean (_tmp17_);
+			g_variant_iter_init (&_tmp16_, _tmp14_);
+			_tmp17_ = g_variant_iter_next_value (&_tmp16_);
+			_tmp15_.type = g_variant_dup_string (_tmp17_, NULL);
 			g_variant_unref (_tmp17_);
-			_tmp18_ = g_variant_iter_next_value (&_tmp15_);
-			_tmp14_.default_value = g_variant_get_variant (_tmp18_);
+			_tmp18_ = g_variant_iter_next_value (&_tmp16_);
+			_tmp15_.required = g_variant_get_boolean (_tmp18_);
 			g_variant_unref (_tmp18_);
-			_tmp19_ = g_variant_iter_next_value (&_tmp15_);
-			_tmp20_ = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
-			g_variant_iter_init (&_tmp21_, _tmp19_);
-			while (g_variant_iter_loop (&_tmp21_, "{?*}", &_tmp22_, &_tmp23_)) {
-				g_hash_table_insert (_tmp20_, g_variant_dup_string (_tmp22_, NULL), g_variant_get_variant (_tmp23_));
-			}
-			_tmp14_.properties = _tmp20_;
+			_tmp19_ = g_variant_iter_next_value (&_tmp16_);
+			_tmp15_.default_value = g_variant_get_variant (_tmp19_);
 			g_variant_unref (_tmp19_);
-			_tmp11_[_tmp11__length++] = _tmp14_;
-			g_variant_unref (_tmp13_);
-		}
-		_tmp4_.fields_length1 = _tmp11__length1;
-		_tmp4_.fields = _tmp11_;
-		g_variant_unref (_tmp10_);
-		_tmp24_ = g_variant_iter_next_value (&_tmp5_);
-		_tmp25_ = g_new (RemoteServerApplication, 5);
-		_tmp25__length = 0;
-		_tmp25__size = 4;
-		_tmp25__length1 = 0;
-		g_variant_iter_init (&_tmp26_, _tmp24_);
-		for (; (_tmp27_ = g_variant_iter_next_value (&_tmp26_)) != NULL; _tmp25__length1++) {
-			RemoteServerApplication _tmp28_;
-			GVariantIter _tmp29_;
-			GVariant* _tmp30_;
-			GVariant* _tmp31_;
-			if (_tmp25__size == _tmp25__length) {
-				_tmp25__size = 2 * _tmp25__size;
-				_tmp25_ = g_renew (RemoteServerApplication, _tmp25_, _tmp25__size + 1);
+			_tmp20_ = g_variant_iter_next_value (&_tmp16_);
+			_tmp21_ = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+			g_variant_iter_init (&_tmp22_, _tmp20_);
+			while (g_variant_iter_loop (&_tmp22_, "{?*}", &_tmp23_, &_tmp24_)) {
+				g_hash_table_insert (_tmp21_, g_variant_dup_string (_tmp23_, NULL), g_variant_get_variant (_tmp24_));
 			}
-			g_variant_iter_init (&_tmp29_, _tmp27_);
-			_tmp30_ = g_variant_iter_next_value (&_tmp29_);
-			_tmp28_.application_id = g_variant_dup_string (_tmp30_, NULL);
-			g_variant_unref (_tmp30_);
-			_tmp31_ = g_variant_iter_next_value (&_tmp29_);
-			_tmp28_.pin_position = g_variant_get_int32 (_tmp31_);
-			g_variant_unref (_tmp31_);
-			_tmp25_[_tmp25__length++] = _tmp28_;
-			g_variant_unref (_tmp27_);
+			_tmp15_.properties = _tmp21_;
+			g_variant_unref (_tmp20_);
+			_tmp12_[_tmp12__length++] = _tmp15_;
+			g_variant_unref (_tmp14_);
 		}
-		_tmp4_.applications_length1 = _tmp25__length1;
-		_tmp4_.applications = _tmp25_;
-		g_variant_unref (_tmp24_);
-		_tmp1_[_tmp1__length++] = _tmp4_;
-		g_variant_unref (_tmp3_);
+		_tmp5_.fields_length1 = _tmp12__length1;
+		_tmp5_.fields = _tmp12_;
+		g_variant_unref (_tmp11_);
+		_tmp25_ = g_variant_iter_next_value (&_tmp6_);
+		_tmp26_ = g_new (RemoteServerApplication, 5);
+		_tmp26__length = 0;
+		_tmp26__size = 4;
+		_tmp26__length1 = 0;
+		g_variant_iter_init (&_tmp27_, _tmp25_);
+		for (; (_tmp28_ = g_variant_iter_next_value (&_tmp27_)) != NULL; _tmp26__length1++) {
+			RemoteServerApplication _tmp29_;
+			GVariantIter _tmp30_;
+			GVariant* _tmp31_;
+			GVariant* _tmp32_;
+			if (_tmp26__size == _tmp26__length) {
+				_tmp26__size = 2 * _tmp26__size;
+				_tmp26_ = g_renew (RemoteServerApplication, _tmp26_, _tmp26__size + 1);
+			}
+			g_variant_iter_init (&_tmp30_, _tmp28_);
+			_tmp31_ = g_variant_iter_next_value (&_tmp30_);
+			_tmp29_.application_id = g_variant_dup_string (_tmp31_, NULL);
+			g_variant_unref (_tmp31_);
+			_tmp32_ = g_variant_iter_next_value (&_tmp30_);
+			_tmp29_.pin_position = g_variant_get_int32 (_tmp32_);
+			g_variant_unref (_tmp32_);
+			_tmp26_[_tmp26__length++] = _tmp29_;
+			g_variant_unref (_tmp28_);
+		}
+		_tmp5_.applications_length1 = _tmp26__length1;
+		_tmp5_.applications = _tmp26_;
+		g_variant_unref (_tmp25_);
+		_tmp2_[_tmp2__length++] = _tmp5_;
+		g_variant_unref (_tmp4_);
 	}
-	serverList_length1 = _tmp1__length1;
-	serverList = _tmp1_;
-	g_variant_unref (_tmp0_);
+	serverList_length1 = _tmp2__length1;
+	serverList = _tmp2_;
+	g_variant_unref (_tmp1_);
 	g_signal_emit_by_name (self, "servers-updated", serverList, serverList_length1);
 	serverList = (_vala_RemoteServer_array_free (serverList, serverList_length1), NULL);
 }
@@ -723,154 +723,154 @@ static void _dbus_handle_remote_login_service_servers_updated (RemoteLoginServic
 static void _dbus_handle_remote_login_service_login_servers_updated (RemoteLoginService* self, GVariant* parameters) {
 	GVariantIter _arguments_iter;
 	gchar* url = NULL;
-	GVariant* _tmp32_;
-	gchar* emailAddress = NULL;
 	GVariant* _tmp33_;
-	gchar* dataType = NULL;
+	gchar* emailAddress = NULL;
 	GVariant* _tmp34_;
+	gchar* dataType = NULL;
+	GVariant* _tmp35_;
 	RemoteServer* serverList = NULL;
 	int serverList_length1;
-	GVariant* _tmp35_;
-	RemoteServer* _tmp36_;
-	int _tmp36__length;
-	int _tmp36__size;
-	int _tmp36__length1;
-	GVariantIter _tmp37_;
-	GVariant* _tmp38_;
+	GVariant* _tmp36_;
+	RemoteServer* _tmp37_;
+	int _tmp37__length;
+	int _tmp37__size;
+	int _tmp37__length1;
+	GVariantIter _tmp38_;
+	GVariant* _tmp39_;
 	g_variant_iter_init (&_arguments_iter, parameters);
-	_tmp32_ = g_variant_iter_next_value (&_arguments_iter);
-	url = g_variant_dup_string (_tmp32_, NULL);
-	g_variant_unref (_tmp32_);
 	_tmp33_ = g_variant_iter_next_value (&_arguments_iter);
-	emailAddress = g_variant_dup_string (_tmp33_, NULL);
+	url = g_variant_dup_string (_tmp33_, NULL);
 	g_variant_unref (_tmp33_);
 	_tmp34_ = g_variant_iter_next_value (&_arguments_iter);
-	dataType = g_variant_dup_string (_tmp34_, NULL);
+	emailAddress = g_variant_dup_string (_tmp34_, NULL);
 	g_variant_unref (_tmp34_);
-	serverList_length1 = 0;
 	_tmp35_ = g_variant_iter_next_value (&_arguments_iter);
-	_tmp36_ = g_new (RemoteServer, 5);
-	_tmp36__length = 0;
-	_tmp36__size = 4;
-	_tmp36__length1 = 0;
-	g_variant_iter_init (&_tmp37_, _tmp35_);
-	for (; (_tmp38_ = g_variant_iter_next_value (&_tmp37_)) != NULL; _tmp36__length1++) {
-		RemoteServer _tmp39_;
-		GVariantIter _tmp40_;
-		GVariant* _tmp41_;
+	dataType = g_variant_dup_string (_tmp35_, NULL);
+	g_variant_unref (_tmp35_);
+	serverList_length1 = 0;
+	_tmp36_ = g_variant_iter_next_value (&_arguments_iter);
+	_tmp37_ = g_new (RemoteServer, 5);
+	_tmp37__length = 0;
+	_tmp37__size = 4;
+	_tmp37__length1 = 0;
+	g_variant_iter_init (&_tmp38_, _tmp36_);
+	for (; (_tmp39_ = g_variant_iter_next_value (&_tmp38_)) != NULL; _tmp37__length1++) {
+		RemoteServer _tmp40_;
+		GVariantIter _tmp41_;
 		GVariant* _tmp42_;
 		GVariant* _tmp43_;
 		GVariant* _tmp44_;
 		GVariant* _tmp45_;
-		RemoteServerField* _tmp46_;
-		int _tmp46__length;
-		int _tmp46__size;
-		int _tmp46__length1;
-		GVariantIter _tmp47_;
-		GVariant* _tmp48_;
-		GVariant* _tmp59_;
-		RemoteServerApplication* _tmp60_;
-		int _tmp60__length;
-		int _tmp60__size;
-		int _tmp60__length1;
-		GVariantIter _tmp61_;
-		GVariant* _tmp62_;
-		if (_tmp36__size == _tmp36__length) {
-			_tmp36__size = 2 * _tmp36__size;
-			_tmp36_ = g_renew (RemoteServer, _tmp36_, _tmp36__size + 1);
+		GVariant* _tmp46_;
+		RemoteServerField* _tmp47_;
+		int _tmp47__length;
+		int _tmp47__size;
+		int _tmp47__length1;
+		GVariantIter _tmp48_;
+		GVariant* _tmp49_;
+		GVariant* _tmp60_;
+		RemoteServerApplication* _tmp61_;
+		int _tmp61__length;
+		int _tmp61__size;
+		int _tmp61__length1;
+		GVariantIter _tmp62_;
+		GVariant* _tmp63_;
+		if (_tmp37__size == _tmp37__length) {
+			_tmp37__size = 2 * _tmp37__size;
+			_tmp37_ = g_renew (RemoteServer, _tmp37_, _tmp37__size + 1);
 		}
-		g_variant_iter_init (&_tmp40_, _tmp38_);
-		_tmp41_ = g_variant_iter_next_value (&_tmp40_);
-		_tmp39_.type = g_variant_dup_string (_tmp41_, NULL);
-		g_variant_unref (_tmp41_);
-		_tmp42_ = g_variant_iter_next_value (&_tmp40_);
-		_tmp39_.name = g_variant_dup_string (_tmp42_, NULL);
+		g_variant_iter_init (&_tmp41_, _tmp39_);
+		_tmp42_ = g_variant_iter_next_value (&_tmp41_);
+		_tmp40_.type = g_variant_dup_string (_tmp42_, NULL);
 		g_variant_unref (_tmp42_);
-		_tmp43_ = g_variant_iter_next_value (&_tmp40_);
-		_tmp39_.url = g_variant_dup_string (_tmp43_, NULL);
+		_tmp43_ = g_variant_iter_next_value (&_tmp41_);
+		_tmp40_.name = g_variant_dup_string (_tmp43_, NULL);
 		g_variant_unref (_tmp43_);
-		_tmp44_ = g_variant_iter_next_value (&_tmp40_);
-		_tmp39_.last_used_server = g_variant_get_boolean (_tmp44_);
+		_tmp44_ = g_variant_iter_next_value (&_tmp41_);
+		_tmp40_.url = g_variant_dup_string (_tmp44_, NULL);
 		g_variant_unref (_tmp44_);
-		_tmp45_ = g_variant_iter_next_value (&_tmp40_);
-		_tmp46_ = g_new (RemoteServerField, 5);
-		_tmp46__length = 0;
-		_tmp46__size = 4;
-		_tmp46__length1 = 0;
-		g_variant_iter_init (&_tmp47_, _tmp45_);
-		for (; (_tmp48_ = g_variant_iter_next_value (&_tmp47_)) != NULL; _tmp46__length1++) {
-			RemoteServerField _tmp49_;
-			GVariantIter _tmp50_;
-			GVariant* _tmp51_;
+		_tmp45_ = g_variant_iter_next_value (&_tmp41_);
+		_tmp40_.last_used_server = g_variant_get_boolean (_tmp45_);
+		g_variant_unref (_tmp45_);
+		_tmp46_ = g_variant_iter_next_value (&_tmp41_);
+		_tmp47_ = g_new (RemoteServerField, 5);
+		_tmp47__length = 0;
+		_tmp47__size = 4;
+		_tmp47__length1 = 0;
+		g_variant_iter_init (&_tmp48_, _tmp46_);
+		for (; (_tmp49_ = g_variant_iter_next_value (&_tmp48_)) != NULL; _tmp47__length1++) {
+			RemoteServerField _tmp50_;
+			GVariantIter _tmp51_;
 			GVariant* _tmp52_;
 			GVariant* _tmp53_;
 			GVariant* _tmp54_;
-			GHashTable* _tmp55_;
-			GVariantIter _tmp56_;
-			GVariant* _tmp57_;
+			GVariant* _tmp55_;
+			GHashTable* _tmp56_;
+			GVariantIter _tmp57_;
 			GVariant* _tmp58_;
-			if (_tmp46__size == _tmp46__length) {
-				_tmp46__size = 2 * _tmp46__size;
-				_tmp46_ = g_renew (RemoteServerField, _tmp46_, _tmp46__size + 1);
+			GVariant* _tmp59_;
+			if (_tmp47__size == _tmp47__length) {
+				_tmp47__size = 2 * _tmp47__size;
+				_tmp47_ = g_renew (RemoteServerField, _tmp47_, _tmp47__size + 1);
 			}
-			g_variant_iter_init (&_tmp50_, _tmp48_);
-			_tmp51_ = g_variant_iter_next_value (&_tmp50_);
-			_tmp49_.type = g_variant_dup_string (_tmp51_, NULL);
-			g_variant_unref (_tmp51_);
-			_tmp52_ = g_variant_iter_next_value (&_tmp50_);
-			_tmp49_.required = g_variant_get_boolean (_tmp52_);
+			g_variant_iter_init (&_tmp51_, _tmp49_);
+			_tmp52_ = g_variant_iter_next_value (&_tmp51_);
+			_tmp50_.type = g_variant_dup_string (_tmp52_, NULL);
 			g_variant_unref (_tmp52_);
-			_tmp53_ = g_variant_iter_next_value (&_tmp50_);
-			_tmp49_.default_value = g_variant_get_variant (_tmp53_);
+			_tmp53_ = g_variant_iter_next_value (&_tmp51_);
+			_tmp50_.required = g_variant_get_boolean (_tmp53_);
 			g_variant_unref (_tmp53_);
-			_tmp54_ = g_variant_iter_next_value (&_tmp50_);
-			_tmp55_ = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
-			g_variant_iter_init (&_tmp56_, _tmp54_);
-			while (g_variant_iter_loop (&_tmp56_, "{?*}", &_tmp57_, &_tmp58_)) {
-				g_hash_table_insert (_tmp55_, g_variant_dup_string (_tmp57_, NULL), g_variant_get_variant (_tmp58_));
-			}
-			_tmp49_.properties = _tmp55_;
+			_tmp54_ = g_variant_iter_next_value (&_tmp51_);
+			_tmp50_.default_value = g_variant_get_variant (_tmp54_);
 			g_variant_unref (_tmp54_);
-			_tmp46_[_tmp46__length++] = _tmp49_;
-			g_variant_unref (_tmp48_);
-		}
-		_tmp39_.fields_length1 = _tmp46__length1;
-		_tmp39_.fields = _tmp46_;
-		g_variant_unref (_tmp45_);
-		_tmp59_ = g_variant_iter_next_value (&_tmp40_);
-		_tmp60_ = g_new (RemoteServerApplication, 5);
-		_tmp60__length = 0;
-		_tmp60__size = 4;
-		_tmp60__length1 = 0;
-		g_variant_iter_init (&_tmp61_, _tmp59_);
-		for (; (_tmp62_ = g_variant_iter_next_value (&_tmp61_)) != NULL; _tmp60__length1++) {
-			RemoteServerApplication _tmp63_;
-			GVariantIter _tmp64_;
-			GVariant* _tmp65_;
-			GVariant* _tmp66_;
-			if (_tmp60__size == _tmp60__length) {
-				_tmp60__size = 2 * _tmp60__size;
-				_tmp60_ = g_renew (RemoteServerApplication, _tmp60_, _tmp60__size + 1);
+			_tmp55_ = g_variant_iter_next_value (&_tmp51_);
+			_tmp56_ = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+			g_variant_iter_init (&_tmp57_, _tmp55_);
+			while (g_variant_iter_loop (&_tmp57_, "{?*}", &_tmp58_, &_tmp59_)) {
+				g_hash_table_insert (_tmp56_, g_variant_dup_string (_tmp58_, NULL), g_variant_get_variant (_tmp59_));
 			}
-			g_variant_iter_init (&_tmp64_, _tmp62_);
-			_tmp65_ = g_variant_iter_next_value (&_tmp64_);
-			_tmp63_.application_id = g_variant_dup_string (_tmp65_, NULL);
-			g_variant_unref (_tmp65_);
-			_tmp66_ = g_variant_iter_next_value (&_tmp64_);
-			_tmp63_.pin_position = g_variant_get_int32 (_tmp66_);
-			g_variant_unref (_tmp66_);
-			_tmp60_[_tmp60__length++] = _tmp63_;
-			g_variant_unref (_tmp62_);
+			_tmp50_.properties = _tmp56_;
+			g_variant_unref (_tmp55_);
+			_tmp47_[_tmp47__length++] = _tmp50_;
+			g_variant_unref (_tmp49_);
 		}
-		_tmp39_.applications_length1 = _tmp60__length1;
-		_tmp39_.applications = _tmp60_;
-		g_variant_unref (_tmp59_);
-		_tmp36_[_tmp36__length++] = _tmp39_;
-		g_variant_unref (_tmp38_);
+		_tmp40_.fields_length1 = _tmp47__length1;
+		_tmp40_.fields = _tmp47_;
+		g_variant_unref (_tmp46_);
+		_tmp60_ = g_variant_iter_next_value (&_tmp41_);
+		_tmp61_ = g_new (RemoteServerApplication, 5);
+		_tmp61__length = 0;
+		_tmp61__size = 4;
+		_tmp61__length1 = 0;
+		g_variant_iter_init (&_tmp62_, _tmp60_);
+		for (; (_tmp63_ = g_variant_iter_next_value (&_tmp62_)) != NULL; _tmp61__length1++) {
+			RemoteServerApplication _tmp64_;
+			GVariantIter _tmp65_;
+			GVariant* _tmp66_;
+			GVariant* _tmp67_;
+			if (_tmp61__size == _tmp61__length) {
+				_tmp61__size = 2 * _tmp61__size;
+				_tmp61_ = g_renew (RemoteServerApplication, _tmp61_, _tmp61__size + 1);
+			}
+			g_variant_iter_init (&_tmp65_, _tmp63_);
+			_tmp66_ = g_variant_iter_next_value (&_tmp65_);
+			_tmp64_.application_id = g_variant_dup_string (_tmp66_, NULL);
+			g_variant_unref (_tmp66_);
+			_tmp67_ = g_variant_iter_next_value (&_tmp65_);
+			_tmp64_.pin_position = g_variant_get_int32 (_tmp67_);
+			g_variant_unref (_tmp67_);
+			_tmp61_[_tmp61__length++] = _tmp64_;
+			g_variant_unref (_tmp63_);
+		}
+		_tmp40_.applications_length1 = _tmp61__length1;
+		_tmp40_.applications = _tmp61_;
+		g_variant_unref (_tmp60_);
+		_tmp37_[_tmp37__length++] = _tmp40_;
+		g_variant_unref (_tmp39_);
 	}
-	serverList_length1 = _tmp36__length1;
-	serverList = _tmp36_;
-	g_variant_unref (_tmp35_);
+	serverList_length1 = _tmp37__length1;
+	serverList = _tmp37_;
+	g_variant_unref (_tmp36_);
 	g_signal_emit_by_name (self, "login-servers-updated", url, emailAddress, dataType, serverList, serverList_length1);
 	_g_free0 (url);
 	_g_free0 (emailAddress);
@@ -882,16 +882,16 @@ static void _dbus_handle_remote_login_service_login_servers_updated (RemoteLogin
 static void _dbus_handle_remote_login_service_login_changed (RemoteLoginService* self, GVariant* parameters) {
 	GVariantIter _arguments_iter;
 	gchar* url = NULL;
-	GVariant* _tmp67_;
-	gchar* emailAddress = NULL;
 	GVariant* _tmp68_;
+	gchar* emailAddress = NULL;
+	GVariant* _tmp69_;
 	g_variant_iter_init (&_arguments_iter, parameters);
-	_tmp67_ = g_variant_iter_next_value (&_arguments_iter);
-	url = g_variant_dup_string (_tmp67_, NULL);
-	g_variant_unref (_tmp67_);
 	_tmp68_ = g_variant_iter_next_value (&_arguments_iter);
-	emailAddress = g_variant_dup_string (_tmp68_, NULL);
+	url = g_variant_dup_string (_tmp68_, NULL);
 	g_variant_unref (_tmp68_);
+	_tmp69_ = g_variant_iter_next_value (&_arguments_iter);
+	emailAddress = g_variant_dup_string (_tmp69_, NULL);
+	g_variant_unref (_tmp69_);
 	g_signal_emit_by_name (self, "login-changed", url, emailAddress);
 	_g_free0 (url);
 	_g_free0 (emailAddress);
@@ -940,13 +940,13 @@ static void remote_login_service_proxy_get_servers_finish (RemoteLoginService* s
 	GVariantIter _reply_iter;
 	RemoteServer* _vala_serverList;
 	int _vala_serverList_length1;
-	GVariant* _tmp69_;
-	RemoteServer* _tmp70_;
-	int _tmp70__length;
-	int _tmp70__size;
-	int _tmp70__length1;
-	GVariantIter _tmp71_;
-	GVariant* _tmp72_;
+	GVariant* _tmp70_;
+	RemoteServer* _tmp71_;
+	int _tmp71__length;
+	int _tmp71__size;
+	int _tmp71__length1;
+	GVariantIter _tmp72_;
+	GVariant* _tmp73_;
 	_reply_message = g_dbus_connection_send_message_with_reply_finish (g_dbus_proxy_get_connection ((GDBusProxy *) self), g_simple_async_result_get_op_res_gpointer ((GSimpleAsyncResult *) _res_), error);
 	if (!_reply_message) {
 		return;
@@ -958,129 +958,129 @@ static void remote_login_service_proxy_get_servers_finish (RemoteLoginService* s
 	_reply = g_dbus_message_get_body (_reply_message);
 	g_variant_iter_init (&_reply_iter, _reply);
 	_vala_serverList_length1 = 0;
-	_tmp69_ = g_variant_iter_next_value (&_reply_iter);
-	_tmp70_ = g_new (RemoteServer, 5);
-	_tmp70__length = 0;
-	_tmp70__size = 4;
-	_tmp70__length1 = 0;
-	g_variant_iter_init (&_tmp71_, _tmp69_);
-	for (; (_tmp72_ = g_variant_iter_next_value (&_tmp71_)) != NULL; _tmp70__length1++) {
-		RemoteServer _tmp73_;
-		GVariantIter _tmp74_;
-		GVariant* _tmp75_;
+	_tmp70_ = g_variant_iter_next_value (&_reply_iter);
+	_tmp71_ = g_new (RemoteServer, 5);
+	_tmp71__length = 0;
+	_tmp71__size = 4;
+	_tmp71__length1 = 0;
+	g_variant_iter_init (&_tmp72_, _tmp70_);
+	for (; (_tmp73_ = g_variant_iter_next_value (&_tmp72_)) != NULL; _tmp71__length1++) {
+		RemoteServer _tmp74_;
+		GVariantIter _tmp75_;
 		GVariant* _tmp76_;
 		GVariant* _tmp77_;
 		GVariant* _tmp78_;
 		GVariant* _tmp79_;
-		RemoteServerField* _tmp80_;
-		int _tmp80__length;
-		int _tmp80__size;
-		int _tmp80__length1;
-		GVariantIter _tmp81_;
-		GVariant* _tmp82_;
-		GVariant* _tmp93_;
-		RemoteServerApplication* _tmp94_;
-		int _tmp94__length;
-		int _tmp94__size;
-		int _tmp94__length1;
-		GVariantIter _tmp95_;
-		GVariant* _tmp96_;
-		if (_tmp70__size == _tmp70__length) {
-			_tmp70__size = 2 * _tmp70__size;
-			_tmp70_ = g_renew (RemoteServer, _tmp70_, _tmp70__size + 1);
+		GVariant* _tmp80_;
+		RemoteServerField* _tmp81_;
+		int _tmp81__length;
+		int _tmp81__size;
+		int _tmp81__length1;
+		GVariantIter _tmp82_;
+		GVariant* _tmp83_;
+		GVariant* _tmp94_;
+		RemoteServerApplication* _tmp95_;
+		int _tmp95__length;
+		int _tmp95__size;
+		int _tmp95__length1;
+		GVariantIter _tmp96_;
+		GVariant* _tmp97_;
+		if (_tmp71__size == _tmp71__length) {
+			_tmp71__size = 2 * _tmp71__size;
+			_tmp71_ = g_renew (RemoteServer, _tmp71_, _tmp71__size + 1);
 		}
-		g_variant_iter_init (&_tmp74_, _tmp72_);
-		_tmp75_ = g_variant_iter_next_value (&_tmp74_);
-		_tmp73_.type = g_variant_dup_string (_tmp75_, NULL);
-		g_variant_unref (_tmp75_);
-		_tmp76_ = g_variant_iter_next_value (&_tmp74_);
-		_tmp73_.name = g_variant_dup_string (_tmp76_, NULL);
+		g_variant_iter_init (&_tmp75_, _tmp73_);
+		_tmp76_ = g_variant_iter_next_value (&_tmp75_);
+		_tmp74_.type = g_variant_dup_string (_tmp76_, NULL);
 		g_variant_unref (_tmp76_);
-		_tmp77_ = g_variant_iter_next_value (&_tmp74_);
-		_tmp73_.url = g_variant_dup_string (_tmp77_, NULL);
+		_tmp77_ = g_variant_iter_next_value (&_tmp75_);
+		_tmp74_.name = g_variant_dup_string (_tmp77_, NULL);
 		g_variant_unref (_tmp77_);
-		_tmp78_ = g_variant_iter_next_value (&_tmp74_);
-		_tmp73_.last_used_server = g_variant_get_boolean (_tmp78_);
+		_tmp78_ = g_variant_iter_next_value (&_tmp75_);
+		_tmp74_.url = g_variant_dup_string (_tmp78_, NULL);
 		g_variant_unref (_tmp78_);
-		_tmp79_ = g_variant_iter_next_value (&_tmp74_);
-		_tmp80_ = g_new (RemoteServerField, 5);
-		_tmp80__length = 0;
-		_tmp80__size = 4;
-		_tmp80__length1 = 0;
-		g_variant_iter_init (&_tmp81_, _tmp79_);
-		for (; (_tmp82_ = g_variant_iter_next_value (&_tmp81_)) != NULL; _tmp80__length1++) {
-			RemoteServerField _tmp83_;
-			GVariantIter _tmp84_;
-			GVariant* _tmp85_;
+		_tmp79_ = g_variant_iter_next_value (&_tmp75_);
+		_tmp74_.last_used_server = g_variant_get_boolean (_tmp79_);
+		g_variant_unref (_tmp79_);
+		_tmp80_ = g_variant_iter_next_value (&_tmp75_);
+		_tmp81_ = g_new (RemoteServerField, 5);
+		_tmp81__length = 0;
+		_tmp81__size = 4;
+		_tmp81__length1 = 0;
+		g_variant_iter_init (&_tmp82_, _tmp80_);
+		for (; (_tmp83_ = g_variant_iter_next_value (&_tmp82_)) != NULL; _tmp81__length1++) {
+			RemoteServerField _tmp84_;
+			GVariantIter _tmp85_;
 			GVariant* _tmp86_;
 			GVariant* _tmp87_;
 			GVariant* _tmp88_;
-			GHashTable* _tmp89_;
-			GVariantIter _tmp90_;
-			GVariant* _tmp91_;
+			GVariant* _tmp89_;
+			GHashTable* _tmp90_;
+			GVariantIter _tmp91_;
 			GVariant* _tmp92_;
-			if (_tmp80__size == _tmp80__length) {
-				_tmp80__size = 2 * _tmp80__size;
-				_tmp80_ = g_renew (RemoteServerField, _tmp80_, _tmp80__size + 1);
+			GVariant* _tmp93_;
+			if (_tmp81__size == _tmp81__length) {
+				_tmp81__size = 2 * _tmp81__size;
+				_tmp81_ = g_renew (RemoteServerField, _tmp81_, _tmp81__size + 1);
 			}
-			g_variant_iter_init (&_tmp84_, _tmp82_);
-			_tmp85_ = g_variant_iter_next_value (&_tmp84_);
-			_tmp83_.type = g_variant_dup_string (_tmp85_, NULL);
-			g_variant_unref (_tmp85_);
-			_tmp86_ = g_variant_iter_next_value (&_tmp84_);
-			_tmp83_.required = g_variant_get_boolean (_tmp86_);
+			g_variant_iter_init (&_tmp85_, _tmp83_);
+			_tmp86_ = g_variant_iter_next_value (&_tmp85_);
+			_tmp84_.type = g_variant_dup_string (_tmp86_, NULL);
 			g_variant_unref (_tmp86_);
-			_tmp87_ = g_variant_iter_next_value (&_tmp84_);
-			_tmp83_.default_value = g_variant_get_variant (_tmp87_);
+			_tmp87_ = g_variant_iter_next_value (&_tmp85_);
+			_tmp84_.required = g_variant_get_boolean (_tmp87_);
 			g_variant_unref (_tmp87_);
-			_tmp88_ = g_variant_iter_next_value (&_tmp84_);
-			_tmp89_ = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
-			g_variant_iter_init (&_tmp90_, _tmp88_);
-			while (g_variant_iter_loop (&_tmp90_, "{?*}", &_tmp91_, &_tmp92_)) {
-				g_hash_table_insert (_tmp89_, g_variant_dup_string (_tmp91_, NULL), g_variant_get_variant (_tmp92_));
-			}
-			_tmp83_.properties = _tmp89_;
+			_tmp88_ = g_variant_iter_next_value (&_tmp85_);
+			_tmp84_.default_value = g_variant_get_variant (_tmp88_);
 			g_variant_unref (_tmp88_);
-			_tmp80_[_tmp80__length++] = _tmp83_;
-			g_variant_unref (_tmp82_);
-		}
-		_tmp73_.fields_length1 = _tmp80__length1;
-		_tmp73_.fields = _tmp80_;
-		g_variant_unref (_tmp79_);
-		_tmp93_ = g_variant_iter_next_value (&_tmp74_);
-		_tmp94_ = g_new (RemoteServerApplication, 5);
-		_tmp94__length = 0;
-		_tmp94__size = 4;
-		_tmp94__length1 = 0;
-		g_variant_iter_init (&_tmp95_, _tmp93_);
-		for (; (_tmp96_ = g_variant_iter_next_value (&_tmp95_)) != NULL; _tmp94__length1++) {
-			RemoteServerApplication _tmp97_;
-			GVariantIter _tmp98_;
-			GVariant* _tmp99_;
-			GVariant* _tmp100_;
-			if (_tmp94__size == _tmp94__length) {
-				_tmp94__size = 2 * _tmp94__size;
-				_tmp94_ = g_renew (RemoteServerApplication, _tmp94_, _tmp94__size + 1);
+			_tmp89_ = g_variant_iter_next_value (&_tmp85_);
+			_tmp90_ = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+			g_variant_iter_init (&_tmp91_, _tmp89_);
+			while (g_variant_iter_loop (&_tmp91_, "{?*}", &_tmp92_, &_tmp93_)) {
+				g_hash_table_insert (_tmp90_, g_variant_dup_string (_tmp92_, NULL), g_variant_get_variant (_tmp93_));
 			}
-			g_variant_iter_init (&_tmp98_, _tmp96_);
-			_tmp99_ = g_variant_iter_next_value (&_tmp98_);
-			_tmp97_.application_id = g_variant_dup_string (_tmp99_, NULL);
-			g_variant_unref (_tmp99_);
-			_tmp100_ = g_variant_iter_next_value (&_tmp98_);
-			_tmp97_.pin_position = g_variant_get_int32 (_tmp100_);
-			g_variant_unref (_tmp100_);
-			_tmp94_[_tmp94__length++] = _tmp97_;
-			g_variant_unref (_tmp96_);
+			_tmp84_.properties = _tmp90_;
+			g_variant_unref (_tmp89_);
+			_tmp81_[_tmp81__length++] = _tmp84_;
+			g_variant_unref (_tmp83_);
 		}
-		_tmp73_.applications_length1 = _tmp94__length1;
-		_tmp73_.applications = _tmp94_;
-		g_variant_unref (_tmp93_);
-		_tmp70_[_tmp70__length++] = _tmp73_;
-		g_variant_unref (_tmp72_);
+		_tmp74_.fields_length1 = _tmp81__length1;
+		_tmp74_.fields = _tmp81_;
+		g_variant_unref (_tmp80_);
+		_tmp94_ = g_variant_iter_next_value (&_tmp75_);
+		_tmp95_ = g_new (RemoteServerApplication, 5);
+		_tmp95__length = 0;
+		_tmp95__size = 4;
+		_tmp95__length1 = 0;
+		g_variant_iter_init (&_tmp96_, _tmp94_);
+		for (; (_tmp97_ = g_variant_iter_next_value (&_tmp96_)) != NULL; _tmp95__length1++) {
+			RemoteServerApplication _tmp98_;
+			GVariantIter _tmp99_;
+			GVariant* _tmp100_;
+			GVariant* _tmp101_;
+			if (_tmp95__size == _tmp95__length) {
+				_tmp95__size = 2 * _tmp95__size;
+				_tmp95_ = g_renew (RemoteServerApplication, _tmp95_, _tmp95__size + 1);
+			}
+			g_variant_iter_init (&_tmp99_, _tmp97_);
+			_tmp100_ = g_variant_iter_next_value (&_tmp99_);
+			_tmp98_.application_id = g_variant_dup_string (_tmp100_, NULL);
+			g_variant_unref (_tmp100_);
+			_tmp101_ = g_variant_iter_next_value (&_tmp99_);
+			_tmp98_.pin_position = g_variant_get_int32 (_tmp101_);
+			g_variant_unref (_tmp101_);
+			_tmp95_[_tmp95__length++] = _tmp98_;
+			g_variant_unref (_tmp97_);
+		}
+		_tmp74_.applications_length1 = _tmp95__length1;
+		_tmp74_.applications = _tmp95_;
+		g_variant_unref (_tmp94_);
+		_tmp71_[_tmp71__length++] = _tmp74_;
+		g_variant_unref (_tmp73_);
 	}
-	_vala_serverList_length1 = _tmp70__length1;
-	_vala_serverList = _tmp70_;
-	g_variant_unref (_tmp69_);
+	_vala_serverList_length1 = _tmp71__length1;
+	_vala_serverList = _tmp71_;
+	g_variant_unref (_tmp70_);
 	*serverList = _vala_serverList;
 	*serverList_length1 = _vala_serverList_length1;
 	g_object_unref (_reply_message);
@@ -1110,18 +1110,18 @@ static void remote_login_service_proxy_get_servers_for_login_finish (RemoteLogin
 	GVariant *_reply;
 	GVariantIter _reply_iter;
 	gboolean _vala_loginSuccess;
-	GVariant* _tmp101_;
-	gchar* _vala_dataType;
 	GVariant* _tmp102_;
+	gchar* _vala_dataType;
+	GVariant* _tmp103_;
 	RemoteServer* _vala_serverList;
 	int _vala_serverList_length1;
-	GVariant* _tmp103_;
-	RemoteServer* _tmp104_;
-	int _tmp104__length;
-	int _tmp104__size;
-	int _tmp104__length1;
-	GVariantIter _tmp105_;
-	GVariant* _tmp106_;
+	GVariant* _tmp104_;
+	RemoteServer* _tmp105_;
+	int _tmp105__length;
+	int _tmp105__size;
+	int _tmp105__length1;
+	GVariantIter _tmp106_;
+	GVariant* _tmp107_;
 	_reply_message = g_dbus_connection_send_message_with_reply_finish (g_dbus_proxy_get_connection ((GDBusProxy *) self), g_simple_async_result_get_op_res_gpointer ((GSimpleAsyncResult *) _res_), error);
 	if (!_reply_message) {
 		return;
@@ -1132,138 +1132,138 @@ static void remote_login_service_proxy_get_servers_for_login_finish (RemoteLogin
 	}
 	_reply = g_dbus_message_get_body (_reply_message);
 	g_variant_iter_init (&_reply_iter, _reply);
-	_tmp101_ = g_variant_iter_next_value (&_reply_iter);
-	_vala_loginSuccess = g_variant_get_boolean (_tmp101_);
-	g_variant_unref (_tmp101_);
-	*loginSuccess = _vala_loginSuccess;
 	_tmp102_ = g_variant_iter_next_value (&_reply_iter);
-	_vala_dataType = g_variant_dup_string (_tmp102_, NULL);
+	_vala_loginSuccess = g_variant_get_boolean (_tmp102_);
 	g_variant_unref (_tmp102_);
+	*loginSuccess = _vala_loginSuccess;
+	_tmp103_ = g_variant_iter_next_value (&_reply_iter);
+	_vala_dataType = g_variant_dup_string (_tmp103_, NULL);
+	g_variant_unref (_tmp103_);
 	*dataType = _vala_dataType;
 	_vala_serverList_length1 = 0;
-	_tmp103_ = g_variant_iter_next_value (&_reply_iter);
-	_tmp104_ = g_new (RemoteServer, 5);
-	_tmp104__length = 0;
-	_tmp104__size = 4;
-	_tmp104__length1 = 0;
-	g_variant_iter_init (&_tmp105_, _tmp103_);
-	for (; (_tmp106_ = g_variant_iter_next_value (&_tmp105_)) != NULL; _tmp104__length1++) {
-		RemoteServer _tmp107_;
-		GVariantIter _tmp108_;
-		GVariant* _tmp109_;
+	_tmp104_ = g_variant_iter_next_value (&_reply_iter);
+	_tmp105_ = g_new (RemoteServer, 5);
+	_tmp105__length = 0;
+	_tmp105__size = 4;
+	_tmp105__length1 = 0;
+	g_variant_iter_init (&_tmp106_, _tmp104_);
+	for (; (_tmp107_ = g_variant_iter_next_value (&_tmp106_)) != NULL; _tmp105__length1++) {
+		RemoteServer _tmp108_;
+		GVariantIter _tmp109_;
 		GVariant* _tmp110_;
 		GVariant* _tmp111_;
 		GVariant* _tmp112_;
 		GVariant* _tmp113_;
-		RemoteServerField* _tmp114_;
-		int _tmp114__length;
-		int _tmp114__size;
-		int _tmp114__length1;
-		GVariantIter _tmp115_;
-		GVariant* _tmp116_;
-		GVariant* _tmp127_;
-		RemoteServerApplication* _tmp128_;
-		int _tmp128__length;
-		int _tmp128__size;
-		int _tmp128__length1;
-		GVariantIter _tmp129_;
-		GVariant* _tmp130_;
-		if (_tmp104__size == _tmp104__length) {
-			_tmp104__size = 2 * _tmp104__size;
-			_tmp104_ = g_renew (RemoteServer, _tmp104_, _tmp104__size + 1);
+		GVariant* _tmp114_;
+		RemoteServerField* _tmp115_;
+		int _tmp115__length;
+		int _tmp115__size;
+		int _tmp115__length1;
+		GVariantIter _tmp116_;
+		GVariant* _tmp117_;
+		GVariant* _tmp128_;
+		RemoteServerApplication* _tmp129_;
+		int _tmp129__length;
+		int _tmp129__size;
+		int _tmp129__length1;
+		GVariantIter _tmp130_;
+		GVariant* _tmp131_;
+		if (_tmp105__size == _tmp105__length) {
+			_tmp105__size = 2 * _tmp105__size;
+			_tmp105_ = g_renew (RemoteServer, _tmp105_, _tmp105__size + 1);
 		}
-		g_variant_iter_init (&_tmp108_, _tmp106_);
-		_tmp109_ = g_variant_iter_next_value (&_tmp108_);
-		_tmp107_.type = g_variant_dup_string (_tmp109_, NULL);
-		g_variant_unref (_tmp109_);
-		_tmp110_ = g_variant_iter_next_value (&_tmp108_);
-		_tmp107_.name = g_variant_dup_string (_tmp110_, NULL);
+		g_variant_iter_init (&_tmp109_, _tmp107_);
+		_tmp110_ = g_variant_iter_next_value (&_tmp109_);
+		_tmp108_.type = g_variant_dup_string (_tmp110_, NULL);
 		g_variant_unref (_tmp110_);
-		_tmp111_ = g_variant_iter_next_value (&_tmp108_);
-		_tmp107_.url = g_variant_dup_string (_tmp111_, NULL);
+		_tmp111_ = g_variant_iter_next_value (&_tmp109_);
+		_tmp108_.name = g_variant_dup_string (_tmp111_, NULL);
 		g_variant_unref (_tmp111_);
-		_tmp112_ = g_variant_iter_next_value (&_tmp108_);
-		_tmp107_.last_used_server = g_variant_get_boolean (_tmp112_);
+		_tmp112_ = g_variant_iter_next_value (&_tmp109_);
+		_tmp108_.url = g_variant_dup_string (_tmp112_, NULL);
 		g_variant_unref (_tmp112_);
-		_tmp113_ = g_variant_iter_next_value (&_tmp108_);
-		_tmp114_ = g_new (RemoteServerField, 5);
-		_tmp114__length = 0;
-		_tmp114__size = 4;
-		_tmp114__length1 = 0;
-		g_variant_iter_init (&_tmp115_, _tmp113_);
-		for (; (_tmp116_ = g_variant_iter_next_value (&_tmp115_)) != NULL; _tmp114__length1++) {
-			RemoteServerField _tmp117_;
-			GVariantIter _tmp118_;
-			GVariant* _tmp119_;
+		_tmp113_ = g_variant_iter_next_value (&_tmp109_);
+		_tmp108_.last_used_server = g_variant_get_boolean (_tmp113_);
+		g_variant_unref (_tmp113_);
+		_tmp114_ = g_variant_iter_next_value (&_tmp109_);
+		_tmp115_ = g_new (RemoteServerField, 5);
+		_tmp115__length = 0;
+		_tmp115__size = 4;
+		_tmp115__length1 = 0;
+		g_variant_iter_init (&_tmp116_, _tmp114_);
+		for (; (_tmp117_ = g_variant_iter_next_value (&_tmp116_)) != NULL; _tmp115__length1++) {
+			RemoteServerField _tmp118_;
+			GVariantIter _tmp119_;
 			GVariant* _tmp120_;
 			GVariant* _tmp121_;
 			GVariant* _tmp122_;
-			GHashTable* _tmp123_;
-			GVariantIter _tmp124_;
-			GVariant* _tmp125_;
+			GVariant* _tmp123_;
+			GHashTable* _tmp124_;
+			GVariantIter _tmp125_;
 			GVariant* _tmp126_;
-			if (_tmp114__size == _tmp114__length) {
-				_tmp114__size = 2 * _tmp114__size;
-				_tmp114_ = g_renew (RemoteServerField, _tmp114_, _tmp114__size + 1);
+			GVariant* _tmp127_;
+			if (_tmp115__size == _tmp115__length) {
+				_tmp115__size = 2 * _tmp115__size;
+				_tmp115_ = g_renew (RemoteServerField, _tmp115_, _tmp115__size + 1);
 			}
-			g_variant_iter_init (&_tmp118_, _tmp116_);
-			_tmp119_ = g_variant_iter_next_value (&_tmp118_);
-			_tmp117_.type = g_variant_dup_string (_tmp119_, NULL);
-			g_variant_unref (_tmp119_);
-			_tmp120_ = g_variant_iter_next_value (&_tmp118_);
-			_tmp117_.required = g_variant_get_boolean (_tmp120_);
+			g_variant_iter_init (&_tmp119_, _tmp117_);
+			_tmp120_ = g_variant_iter_next_value (&_tmp119_);
+			_tmp118_.type = g_variant_dup_string (_tmp120_, NULL);
 			g_variant_unref (_tmp120_);
-			_tmp121_ = g_variant_iter_next_value (&_tmp118_);
-			_tmp117_.default_value = g_variant_get_variant (_tmp121_);
+			_tmp121_ = g_variant_iter_next_value (&_tmp119_);
+			_tmp118_.required = g_variant_get_boolean (_tmp121_);
 			g_variant_unref (_tmp121_);
-			_tmp122_ = g_variant_iter_next_value (&_tmp118_);
-			_tmp123_ = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
-			g_variant_iter_init (&_tmp124_, _tmp122_);
-			while (g_variant_iter_loop (&_tmp124_, "{?*}", &_tmp125_, &_tmp126_)) {
-				g_hash_table_insert (_tmp123_, g_variant_dup_string (_tmp125_, NULL), g_variant_get_variant (_tmp126_));
-			}
-			_tmp117_.properties = _tmp123_;
+			_tmp122_ = g_variant_iter_next_value (&_tmp119_);
+			_tmp118_.default_value = g_variant_get_variant (_tmp122_);
 			g_variant_unref (_tmp122_);
-			_tmp114_[_tmp114__length++] = _tmp117_;
-			g_variant_unref (_tmp116_);
-		}
-		_tmp107_.fields_length1 = _tmp114__length1;
-		_tmp107_.fields = _tmp114_;
-		g_variant_unref (_tmp113_);
-		_tmp127_ = g_variant_iter_next_value (&_tmp108_);
-		_tmp128_ = g_new (RemoteServerApplication, 5);
-		_tmp128__length = 0;
-		_tmp128__size = 4;
-		_tmp128__length1 = 0;
-		g_variant_iter_init (&_tmp129_, _tmp127_);
-		for (; (_tmp130_ = g_variant_iter_next_value (&_tmp129_)) != NULL; _tmp128__length1++) {
-			RemoteServerApplication _tmp131_;
-			GVariantIter _tmp132_;
-			GVariant* _tmp133_;
-			GVariant* _tmp134_;
-			if (_tmp128__size == _tmp128__length) {
-				_tmp128__size = 2 * _tmp128__size;
-				_tmp128_ = g_renew (RemoteServerApplication, _tmp128_, _tmp128__size + 1);
+			_tmp123_ = g_variant_iter_next_value (&_tmp119_);
+			_tmp124_ = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+			g_variant_iter_init (&_tmp125_, _tmp123_);
+			while (g_variant_iter_loop (&_tmp125_, "{?*}", &_tmp126_, &_tmp127_)) {
+				g_hash_table_insert (_tmp124_, g_variant_dup_string (_tmp126_, NULL), g_variant_get_variant (_tmp127_));
 			}
-			g_variant_iter_init (&_tmp132_, _tmp130_);
-			_tmp133_ = g_variant_iter_next_value (&_tmp132_);
-			_tmp131_.application_id = g_variant_dup_string (_tmp133_, NULL);
-			g_variant_unref (_tmp133_);
-			_tmp134_ = g_variant_iter_next_value (&_tmp132_);
-			_tmp131_.pin_position = g_variant_get_int32 (_tmp134_);
-			g_variant_unref (_tmp134_);
-			_tmp128_[_tmp128__length++] = _tmp131_;
-			g_variant_unref (_tmp130_);
+			_tmp118_.properties = _tmp124_;
+			g_variant_unref (_tmp123_);
+			_tmp115_[_tmp115__length++] = _tmp118_;
+			g_variant_unref (_tmp117_);
 		}
-		_tmp107_.applications_length1 = _tmp128__length1;
-		_tmp107_.applications = _tmp128_;
-		g_variant_unref (_tmp127_);
-		_tmp104_[_tmp104__length++] = _tmp107_;
-		g_variant_unref (_tmp106_);
+		_tmp108_.fields_length1 = _tmp115__length1;
+		_tmp108_.fields = _tmp115_;
+		g_variant_unref (_tmp114_);
+		_tmp128_ = g_variant_iter_next_value (&_tmp109_);
+		_tmp129_ = g_new (RemoteServerApplication, 5);
+		_tmp129__length = 0;
+		_tmp129__size = 4;
+		_tmp129__length1 = 0;
+		g_variant_iter_init (&_tmp130_, _tmp128_);
+		for (; (_tmp131_ = g_variant_iter_next_value (&_tmp130_)) != NULL; _tmp129__length1++) {
+			RemoteServerApplication _tmp132_;
+			GVariantIter _tmp133_;
+			GVariant* _tmp134_;
+			GVariant* _tmp135_;
+			if (_tmp129__size == _tmp129__length) {
+				_tmp129__size = 2 * _tmp129__size;
+				_tmp129_ = g_renew (RemoteServerApplication, _tmp129_, _tmp129__size + 1);
+			}
+			g_variant_iter_init (&_tmp133_, _tmp131_);
+			_tmp134_ = g_variant_iter_next_value (&_tmp133_);
+			_tmp132_.application_id = g_variant_dup_string (_tmp134_, NULL);
+			g_variant_unref (_tmp134_);
+			_tmp135_ = g_variant_iter_next_value (&_tmp133_);
+			_tmp132_.pin_position = g_variant_get_int32 (_tmp135_);
+			g_variant_unref (_tmp135_);
+			_tmp129_[_tmp129__length++] = _tmp132_;
+			g_variant_unref (_tmp131_);
+		}
+		_tmp108_.applications_length1 = _tmp129__length1;
+		_tmp108_.applications = _tmp129_;
+		g_variant_unref (_tmp128_);
+		_tmp105_[_tmp105__length++] = _tmp108_;
+		g_variant_unref (_tmp107_);
 	}
-	_vala_serverList_length1 = _tmp104__length1;
-	_vala_serverList = _tmp104_;
-	g_variant_unref (_tmp103_);
+	_vala_serverList_length1 = _tmp105__length1;
+	_vala_serverList = _tmp105_;
+	g_variant_unref (_tmp104_);
 	*serverList = _vala_serverList;
 	*serverList_length1 = _vala_serverList_length1;
 	g_object_unref (_reply_message);
@@ -1291,13 +1291,13 @@ static void remote_login_service_proxy_get_cached_domains_for_server_finish (Rem
 	GVariantIter _reply_iter;
 	gchar** _vala_domains;
 	int _vala_domains_length1;
-	GVariant* _tmp135_;
-	gchar** _tmp136_;
-	int _tmp136__length;
-	int _tmp136__size;
-	int _tmp136__length1;
-	GVariantIter _tmp137_;
-	GVariant* _tmp138_;
+	GVariant* _tmp136_;
+	gchar** _tmp137_;
+	int _tmp137__length;
+	int _tmp137__size;
+	int _tmp137__length1;
+	GVariantIter _tmp138_;
+	GVariant* _tmp139_;
 	_reply_message = g_dbus_connection_send_message_with_reply_finish (g_dbus_proxy_get_connection ((GDBusProxy *) self), g_simple_async_result_get_op_res_gpointer ((GSimpleAsyncResult *) _res_), error);
 	if (!_reply_message) {
 		return;
@@ -1309,24 +1309,24 @@ static void remote_login_service_proxy_get_cached_domains_for_server_finish (Rem
 	_reply = g_dbus_message_get_body (_reply_message);
 	g_variant_iter_init (&_reply_iter, _reply);
 	_vala_domains_length1 = 0;
-	_tmp135_ = g_variant_iter_next_value (&_reply_iter);
-	_tmp136_ = g_new (gchar*, 5);
-	_tmp136__length = 0;
-	_tmp136__size = 4;
-	_tmp136__length1 = 0;
-	g_variant_iter_init (&_tmp137_, _tmp135_);
-	for (; (_tmp138_ = g_variant_iter_next_value (&_tmp137_)) != NULL; _tmp136__length1++) {
-		if (_tmp136__size == _tmp136__length) {
-			_tmp136__size = 2 * _tmp136__size;
-			_tmp136_ = g_renew (gchar*, _tmp136_, _tmp136__size + 1);
+	_tmp136_ = g_variant_iter_next_value (&_reply_iter);
+	_tmp137_ = g_new (gchar*, 5);
+	_tmp137__length = 0;
+	_tmp137__size = 4;
+	_tmp137__length1 = 0;
+	g_variant_iter_init (&_tmp138_, _tmp136_);
+	for (; (_tmp139_ = g_variant_iter_next_value (&_tmp138_)) != NULL; _tmp137__length1++) {
+		if (_tmp137__size == _tmp137__length) {
+			_tmp137__size = 2 * _tmp137__size;
+			_tmp137_ = g_renew (gchar*, _tmp137_, _tmp137__size + 1);
 		}
-		_tmp136_[_tmp136__length++] = g_variant_dup_string (_tmp138_, NULL);
-		g_variant_unref (_tmp138_);
+		_tmp137_[_tmp137__length++] = g_variant_dup_string (_tmp139_, NULL);
+		g_variant_unref (_tmp139_);
 	}
-	_vala_domains_length1 = _tmp136__length1;
-	_tmp136_[_tmp136__length] = NULL;
-	_vala_domains = _tmp136_;
-	g_variant_unref (_tmp135_);
+	_vala_domains_length1 = _tmp137__length1;
+	_tmp137_[_tmp137__length] = NULL;
+	_vala_domains = _tmp137_;
+	g_variant_unref (_tmp136_);
 	*domains = _vala_domains;
 	*domains_length1 = _vala_domains_length1;
 	g_object_unref (_reply_message);
@@ -1390,9 +1390,9 @@ static void _dbus_remote_login_service_get_servers_ready (GObject * source_objec
 	GVariantBuilder _reply_builder;
 	RemoteServer* serverList = NULL;
 	int serverList_length1 = 0;
-	RemoteServer* _tmp139_;
-	GVariantBuilder _tmp140_;
-	int _tmp141_;
+	RemoteServer* _tmp140_;
+	GVariantBuilder _tmp141_;
+	int _tmp142_;
 	invocation = _user_data_;
 	remote_login_service_get_servers_finish ((RemoteLoginService*) source_object, _res_, &serverList, &serverList_length1, &error);
 	if (error) {
@@ -1401,62 +1401,62 @@ static void _dbus_remote_login_service_get_servers_ready (GObject * source_objec
 	}
 	_reply_message = g_dbus_message_new_method_reply (g_dbus_method_invocation_get_message (invocation));
 	g_variant_builder_init (&_reply_builder, G_VARIANT_TYPE_TUPLE);
-	_tmp139_ = serverList;
-	g_variant_builder_init (&_tmp140_, G_VARIANT_TYPE ("a(sssba(sbva{sv})a(si))"));
-	for (_tmp141_ = 0; _tmp141_ < serverList_length1; _tmp141_++) {
-		GVariantBuilder _tmp142_;
-		RemoteServerField* _tmp143_;
-		GVariantBuilder _tmp144_;
-		int _tmp145_;
-		RemoteServerApplication* _tmp151_;
-		GVariantBuilder _tmp152_;
-		int _tmp153_;
-		g_variant_builder_init (&_tmp142_, G_VARIANT_TYPE_TUPLE);
-		g_variant_builder_add_value (&_tmp142_, g_variant_new_string ((*_tmp139_).type));
-		g_variant_builder_add_value (&_tmp142_, g_variant_new_string ((*_tmp139_).name));
-		g_variant_builder_add_value (&_tmp142_, g_variant_new_string ((*_tmp139_).url));
-		g_variant_builder_add_value (&_tmp142_, g_variant_new_boolean ((*_tmp139_).last_used_server));
-		_tmp143_ = (*_tmp139_).fields;
-		g_variant_builder_init (&_tmp144_, G_VARIANT_TYPE ("a(sbva{sv})"));
-		for (_tmp145_ = 0; _tmp145_ < (*_tmp139_).fields_length1; _tmp145_++) {
-			GVariantBuilder _tmp146_;
+	_tmp140_ = serverList;
+	g_variant_builder_init (&_tmp141_, G_VARIANT_TYPE ("a(sssba(sbva{sv})a(si))"));
+	for (_tmp142_ = 0; _tmp142_ < serverList_length1; _tmp142_++) {
+		GVariantBuilder _tmp143_;
+		RemoteServerField* _tmp144_;
+		GVariantBuilder _tmp145_;
+		int _tmp146_;
+		RemoteServerApplication* _tmp152_;
+		GVariantBuilder _tmp153_;
+		int _tmp154_;
+		g_variant_builder_init (&_tmp143_, G_VARIANT_TYPE_TUPLE);
+		g_variant_builder_add_value (&_tmp143_, g_variant_new_string ((*_tmp140_).type));
+		g_variant_builder_add_value (&_tmp143_, g_variant_new_string ((*_tmp140_).name));
+		g_variant_builder_add_value (&_tmp143_, g_variant_new_string ((*_tmp140_).url));
+		g_variant_builder_add_value (&_tmp143_, g_variant_new_boolean ((*_tmp140_).last_used_server));
+		_tmp144_ = (*_tmp140_).fields;
+		g_variant_builder_init (&_tmp145_, G_VARIANT_TYPE ("a(sbva{sv})"));
+		for (_tmp146_ = 0; _tmp146_ < (*_tmp140_).fields_length1; _tmp146_++) {
 			GVariantBuilder _tmp147_;
-			GHashTableIter _tmp148_;
-			gpointer _tmp149_;
+			GVariantBuilder _tmp148_;
+			GHashTableIter _tmp149_;
 			gpointer _tmp150_;
-			g_variant_builder_init (&_tmp146_, G_VARIANT_TYPE_TUPLE);
-			g_variant_builder_add_value (&_tmp146_, g_variant_new_string ((*_tmp143_).type));
-			g_variant_builder_add_value (&_tmp146_, g_variant_new_boolean ((*_tmp143_).required));
-			g_variant_builder_add_value (&_tmp146_, g_variant_new_variant ((*_tmp143_).default_value));
-			g_hash_table_iter_init (&_tmp148_, (*_tmp143_).properties);
-			g_variant_builder_init (&_tmp147_, G_VARIANT_TYPE ("a{sv}"));
-			while (g_hash_table_iter_next (&_tmp148_, &_tmp149_, &_tmp150_)) {
+			gpointer _tmp151_;
+			g_variant_builder_init (&_tmp147_, G_VARIANT_TYPE_TUPLE);
+			g_variant_builder_add_value (&_tmp147_, g_variant_new_string ((*_tmp144_).type));
+			g_variant_builder_add_value (&_tmp147_, g_variant_new_boolean ((*_tmp144_).required));
+			g_variant_builder_add_value (&_tmp147_, g_variant_new_variant ((*_tmp144_).default_value));
+			g_hash_table_iter_init (&_tmp149_, (*_tmp144_).properties);
+			g_variant_builder_init (&_tmp148_, G_VARIANT_TYPE ("a{sv}"));
+			while (g_hash_table_iter_next (&_tmp149_, &_tmp150_, &_tmp151_)) {
 				gchar* _key;
 				GVariant* _value;
-				_key = (gchar*) _tmp149_;
-				_value = (GVariant*) _tmp150_;
-				g_variant_builder_add (&_tmp147_, "{?*}", g_variant_new_string (_key), g_variant_new_variant (_value));
+				_key = (gchar*) _tmp150_;
+				_value = (GVariant*) _tmp151_;
+				g_variant_builder_add (&_tmp148_, "{?*}", g_variant_new_string (_key), g_variant_new_variant (_value));
 			}
-			g_variant_builder_add_value (&_tmp146_, g_variant_builder_end (&_tmp147_));
-			g_variant_builder_add_value (&_tmp144_, g_variant_builder_end (&_tmp146_));
-			_tmp143_++;
+			g_variant_builder_add_value (&_tmp147_, g_variant_builder_end (&_tmp148_));
+			g_variant_builder_add_value (&_tmp145_, g_variant_builder_end (&_tmp147_));
+			_tmp144_++;
 		}
-		g_variant_builder_add_value (&_tmp142_, g_variant_builder_end (&_tmp144_));
-		_tmp151_ = (*_tmp139_).applications;
-		g_variant_builder_init (&_tmp152_, G_VARIANT_TYPE ("a(si)"));
-		for (_tmp153_ = 0; _tmp153_ < (*_tmp139_).applications_length1; _tmp153_++) {
-			GVariantBuilder _tmp154_;
-			g_variant_builder_init (&_tmp154_, G_VARIANT_TYPE_TUPLE);
-			g_variant_builder_add_value (&_tmp154_, g_variant_new_string ((*_tmp151_).application_id));
-			g_variant_builder_add_value (&_tmp154_, g_variant_new_int32 ((*_tmp151_).pin_position));
-			g_variant_builder_add_value (&_tmp152_, g_variant_builder_end (&_tmp154_));
-			_tmp151_++;
+		g_variant_builder_add_value (&_tmp143_, g_variant_builder_end (&_tmp145_));
+		_tmp152_ = (*_tmp140_).applications;
+		g_variant_builder_init (&_tmp153_, G_VARIANT_TYPE ("a(si)"));
+		for (_tmp154_ = 0; _tmp154_ < (*_tmp140_).applications_length1; _tmp154_++) {
+			GVariantBuilder _tmp155_;
+			g_variant_builder_init (&_tmp155_, G_VARIANT_TYPE_TUPLE);
+			g_variant_builder_add_value (&_tmp155_, g_variant_new_string ((*_tmp152_).application_id));
+			g_variant_builder_add_value (&_tmp155_, g_variant_new_int32 ((*_tmp152_).pin_position));
+			g_variant_builder_add_value (&_tmp153_, g_variant_builder_end (&_tmp155_));
+			_tmp152_++;
 		}
-		g_variant_builder_add_value (&_tmp142_, g_variant_builder_end (&_tmp152_));
-		g_variant_builder_add_value (&_tmp140_, g_variant_builder_end (&_tmp142_));
-		_tmp139_++;
+		g_variant_builder_add_value (&_tmp143_, g_variant_builder_end (&_tmp153_));
+		g_variant_builder_add_value (&_tmp141_, g_variant_builder_end (&_tmp143_));
+		_tmp140_++;
 	}
-	g_variant_builder_add_value (&_reply_builder, g_variant_builder_end (&_tmp140_));
+	g_variant_builder_add_value (&_reply_builder, g_variant_builder_end (&_tmp141_));
 	_reply = g_variant_builder_end (&_reply_builder);
 	g_dbus_message_set_body (_reply_message, _reply);
 	serverList = (_vala_RemoteServer_array_free (serverList, serverList_length1), NULL);
@@ -1469,26 +1469,26 @@ static void _dbus_remote_login_service_get_servers_ready (GObject * source_objec
 static void _dbus_remote_login_service_get_servers_for_login (RemoteLoginService* self, GVariant* parameters, GDBusMethodInvocation* invocation) {
 	GVariantIter _arguments_iter;
 	gchar* url = NULL;
-	GVariant* _tmp155_;
-	gchar* emailAddress = NULL;
 	GVariant* _tmp156_;
-	gchar* password = NULL;
+	gchar* emailAddress = NULL;
 	GVariant* _tmp157_;
-	gboolean allowCache = FALSE;
+	gchar* password = NULL;
 	GVariant* _tmp158_;
+	gboolean allowCache = FALSE;
+	GVariant* _tmp159_;
 	g_variant_iter_init (&_arguments_iter, parameters);
-	_tmp155_ = g_variant_iter_next_value (&_arguments_iter);
-	url = g_variant_dup_string (_tmp155_, NULL);
-	g_variant_unref (_tmp155_);
 	_tmp156_ = g_variant_iter_next_value (&_arguments_iter);
-	emailAddress = g_variant_dup_string (_tmp156_, NULL);
+	url = g_variant_dup_string (_tmp156_, NULL);
 	g_variant_unref (_tmp156_);
 	_tmp157_ = g_variant_iter_next_value (&_arguments_iter);
-	password = g_variant_dup_string (_tmp157_, NULL);
+	emailAddress = g_variant_dup_string (_tmp157_, NULL);
 	g_variant_unref (_tmp157_);
 	_tmp158_ = g_variant_iter_next_value (&_arguments_iter);
-	allowCache = g_variant_get_boolean (_tmp158_);
+	password = g_variant_dup_string (_tmp158_, NULL);
 	g_variant_unref (_tmp158_);
+	_tmp159_ = g_variant_iter_next_value (&_arguments_iter);
+	allowCache = g_variant_get_boolean (_tmp159_);
+	g_variant_unref (_tmp159_);
 	remote_login_service_get_servers_for_login (self, url, emailAddress, password, allowCache, (GAsyncReadyCallback) _dbus_remote_login_service_get_servers_for_login_ready, invocation);
 	_g_free0 (url);
 	_g_free0 (emailAddress);
@@ -1506,9 +1506,9 @@ static void _dbus_remote_login_service_get_servers_for_login_ready (GObject * so
 	gchar* dataType = NULL;
 	RemoteServer* serverList = NULL;
 	int serverList_length1 = 0;
-	RemoteServer* _tmp159_;
-	GVariantBuilder _tmp160_;
-	int _tmp161_;
+	RemoteServer* _tmp160_;
+	GVariantBuilder _tmp161_;
+	int _tmp162_;
 	invocation = _user_data_;
 	remote_login_service_get_servers_for_login_finish ((RemoteLoginService*) source_object, _res_, &loginSuccess, &dataType, &serverList, &serverList_length1, &error);
 	if (error) {
@@ -1519,62 +1519,62 @@ static void _dbus_remote_login_service_get_servers_for_login_ready (GObject * so
 	g_variant_builder_init (&_reply_builder, G_VARIANT_TYPE_TUPLE);
 	g_variant_builder_add_value (&_reply_builder, g_variant_new_boolean (loginSuccess));
 	g_variant_builder_add_value (&_reply_builder, g_variant_new_string (dataType));
-	_tmp159_ = serverList;
-	g_variant_builder_init (&_tmp160_, G_VARIANT_TYPE ("a(sssba(sbva{sv})a(si))"));
-	for (_tmp161_ = 0; _tmp161_ < serverList_length1; _tmp161_++) {
-		GVariantBuilder _tmp162_;
-		RemoteServerField* _tmp163_;
-		GVariantBuilder _tmp164_;
-		int _tmp165_;
-		RemoteServerApplication* _tmp171_;
-		GVariantBuilder _tmp172_;
-		int _tmp173_;
-		g_variant_builder_init (&_tmp162_, G_VARIANT_TYPE_TUPLE);
-		g_variant_builder_add_value (&_tmp162_, g_variant_new_string ((*_tmp159_).type));
-		g_variant_builder_add_value (&_tmp162_, g_variant_new_string ((*_tmp159_).name));
-		g_variant_builder_add_value (&_tmp162_, g_variant_new_string ((*_tmp159_).url));
-		g_variant_builder_add_value (&_tmp162_, g_variant_new_boolean ((*_tmp159_).last_used_server));
-		_tmp163_ = (*_tmp159_).fields;
-		g_variant_builder_init (&_tmp164_, G_VARIANT_TYPE ("a(sbva{sv})"));
-		for (_tmp165_ = 0; _tmp165_ < (*_tmp159_).fields_length1; _tmp165_++) {
-			GVariantBuilder _tmp166_;
+	_tmp160_ = serverList;
+	g_variant_builder_init (&_tmp161_, G_VARIANT_TYPE ("a(sssba(sbva{sv})a(si))"));
+	for (_tmp162_ = 0; _tmp162_ < serverList_length1; _tmp162_++) {
+		GVariantBuilder _tmp163_;
+		RemoteServerField* _tmp164_;
+		GVariantBuilder _tmp165_;
+		int _tmp166_;
+		RemoteServerApplication* _tmp172_;
+		GVariantBuilder _tmp173_;
+		int _tmp174_;
+		g_variant_builder_init (&_tmp163_, G_VARIANT_TYPE_TUPLE);
+		g_variant_builder_add_value (&_tmp163_, g_variant_new_string ((*_tmp160_).type));
+		g_variant_builder_add_value (&_tmp163_, g_variant_new_string ((*_tmp160_).name));
+		g_variant_builder_add_value (&_tmp163_, g_variant_new_string ((*_tmp160_).url));
+		g_variant_builder_add_value (&_tmp163_, g_variant_new_boolean ((*_tmp160_).last_used_server));
+		_tmp164_ = (*_tmp160_).fields;
+		g_variant_builder_init (&_tmp165_, G_VARIANT_TYPE ("a(sbva{sv})"));
+		for (_tmp166_ = 0; _tmp166_ < (*_tmp160_).fields_length1; _tmp166_++) {
 			GVariantBuilder _tmp167_;
-			GHashTableIter _tmp168_;
-			gpointer _tmp169_;
+			GVariantBuilder _tmp168_;
+			GHashTableIter _tmp169_;
 			gpointer _tmp170_;
-			g_variant_builder_init (&_tmp166_, G_VARIANT_TYPE_TUPLE);
-			g_variant_builder_add_value (&_tmp166_, g_variant_new_string ((*_tmp163_).type));
-			g_variant_builder_add_value (&_tmp166_, g_variant_new_boolean ((*_tmp163_).required));
-			g_variant_builder_add_value (&_tmp166_, g_variant_new_variant ((*_tmp163_).default_value));
-			g_hash_table_iter_init (&_tmp168_, (*_tmp163_).properties);
-			g_variant_builder_init (&_tmp167_, G_VARIANT_TYPE ("a{sv}"));
-			while (g_hash_table_iter_next (&_tmp168_, &_tmp169_, &_tmp170_)) {
+			gpointer _tmp171_;
+			g_variant_builder_init (&_tmp167_, G_VARIANT_TYPE_TUPLE);
+			g_variant_builder_add_value (&_tmp167_, g_variant_new_string ((*_tmp164_).type));
+			g_variant_builder_add_value (&_tmp167_, g_variant_new_boolean ((*_tmp164_).required));
+			g_variant_builder_add_value (&_tmp167_, g_variant_new_variant ((*_tmp164_).default_value));
+			g_hash_table_iter_init (&_tmp169_, (*_tmp164_).properties);
+			g_variant_builder_init (&_tmp168_, G_VARIANT_TYPE ("a{sv}"));
+			while (g_hash_table_iter_next (&_tmp169_, &_tmp170_, &_tmp171_)) {
 				gchar* _key;
 				GVariant* _value;
-				_key = (gchar*) _tmp169_;
-				_value = (GVariant*) _tmp170_;
-				g_variant_builder_add (&_tmp167_, "{?*}", g_variant_new_string (_key), g_variant_new_variant (_value));
+				_key = (gchar*) _tmp170_;
+				_value = (GVariant*) _tmp171_;
+				g_variant_builder_add (&_tmp168_, "{?*}", g_variant_new_string (_key), g_variant_new_variant (_value));
 			}
-			g_variant_builder_add_value (&_tmp166_, g_variant_builder_end (&_tmp167_));
-			g_variant_builder_add_value (&_tmp164_, g_variant_builder_end (&_tmp166_));
-			_tmp163_++;
+			g_variant_builder_add_value (&_tmp167_, g_variant_builder_end (&_tmp168_));
+			g_variant_builder_add_value (&_tmp165_, g_variant_builder_end (&_tmp167_));
+			_tmp164_++;
 		}
-		g_variant_builder_add_value (&_tmp162_, g_variant_builder_end (&_tmp164_));
-		_tmp171_ = (*_tmp159_).applications;
-		g_variant_builder_init (&_tmp172_, G_VARIANT_TYPE ("a(si)"));
-		for (_tmp173_ = 0; _tmp173_ < (*_tmp159_).applications_length1; _tmp173_++) {
-			GVariantBuilder _tmp174_;
-			g_variant_builder_init (&_tmp174_, G_VARIANT_TYPE_TUPLE);
-			g_variant_builder_add_value (&_tmp174_, g_variant_new_string ((*_tmp171_).application_id));
-			g_variant_builder_add_value (&_tmp174_, g_variant_new_int32 ((*_tmp171_).pin_position));
-			g_variant_builder_add_value (&_tmp172_, g_variant_builder_end (&_tmp174_));
-			_tmp171_++;
+		g_variant_builder_add_value (&_tmp163_, g_variant_builder_end (&_tmp165_));
+		_tmp172_ = (*_tmp160_).applications;
+		g_variant_builder_init (&_tmp173_, G_VARIANT_TYPE ("a(si)"));
+		for (_tmp174_ = 0; _tmp174_ < (*_tmp160_).applications_length1; _tmp174_++) {
+			GVariantBuilder _tmp175_;
+			g_variant_builder_init (&_tmp175_, G_VARIANT_TYPE_TUPLE);
+			g_variant_builder_add_value (&_tmp175_, g_variant_new_string ((*_tmp172_).application_id));
+			g_variant_builder_add_value (&_tmp175_, g_variant_new_int32 ((*_tmp172_).pin_position));
+			g_variant_builder_add_value (&_tmp173_, g_variant_builder_end (&_tmp175_));
+			_tmp172_++;
 		}
-		g_variant_builder_add_value (&_tmp162_, g_variant_builder_end (&_tmp172_));
-		g_variant_builder_add_value (&_tmp160_, g_variant_builder_end (&_tmp162_));
-		_tmp159_++;
+		g_variant_builder_add_value (&_tmp163_, g_variant_builder_end (&_tmp173_));
+		g_variant_builder_add_value (&_tmp161_, g_variant_builder_end (&_tmp163_));
+		_tmp160_++;
 	}
-	g_variant_builder_add_value (&_reply_builder, g_variant_builder_end (&_tmp160_));
+	g_variant_builder_add_value (&_reply_builder, g_variant_builder_end (&_tmp161_));
 	_reply = g_variant_builder_end (&_reply_builder);
 	g_dbus_message_set_body (_reply_message, _reply);
 	_g_free0 (dataType);
@@ -1588,11 +1588,11 @@ static void _dbus_remote_login_service_get_servers_for_login_ready (GObject * so
 static void _dbus_remote_login_service_get_cached_domains_for_server (RemoteLoginService* self, GVariant* parameters, GDBusMethodInvocation* invocation) {
 	GVariantIter _arguments_iter;
 	gchar* url = NULL;
-	GVariant* _tmp175_;
+	GVariant* _tmp176_;
 	g_variant_iter_init (&_arguments_iter, parameters);
-	_tmp175_ = g_variant_iter_next_value (&_arguments_iter);
-	url = g_variant_dup_string (_tmp175_, NULL);
-	g_variant_unref (_tmp175_);
+	_tmp176_ = g_variant_iter_next_value (&_arguments_iter);
+	url = g_variant_dup_string (_tmp176_, NULL);
+	g_variant_unref (_tmp176_);
 	remote_login_service_get_cached_domains_for_server (self, url, (GAsyncReadyCallback) _dbus_remote_login_service_get_cached_domains_for_server_ready, invocation);
 	_g_free0 (url);
 }
@@ -1606,9 +1606,9 @@ static void _dbus_remote_login_service_get_cached_domains_for_server_ready (GObj
 	GVariantBuilder _reply_builder;
 	gchar** domains = NULL;
 	int domains_length1 = 0;
-	gchar** _tmp176_;
-	GVariantBuilder _tmp177_;
-	int _tmp178_;
+	gchar** _tmp177_;
+	GVariantBuilder _tmp178_;
+	int _tmp179_;
 	invocation = _user_data_;
 	remote_login_service_get_cached_domains_for_server_finish ((RemoteLoginService*) source_object, _res_, &domains, &domains_length1, &error);
 	if (error) {
@@ -1617,13 +1617,13 @@ static void _dbus_remote_login_service_get_cached_domains_for_server_ready (GObj
 	}
 	_reply_message = g_dbus_message_new_method_reply (g_dbus_method_invocation_get_message (invocation));
 	g_variant_builder_init (&_reply_builder, G_VARIANT_TYPE_TUPLE);
-	_tmp176_ = domains;
-	g_variant_builder_init (&_tmp177_, G_VARIANT_TYPE ("as"));
-	for (_tmp178_ = 0; _tmp178_ < domains_length1; _tmp178_++) {
-		g_variant_builder_add_value (&_tmp177_, g_variant_new_string (*_tmp176_));
-		_tmp176_++;
+	_tmp177_ = domains;
+	g_variant_builder_init (&_tmp178_, G_VARIANT_TYPE ("as"));
+	for (_tmp179_ = 0; _tmp179_ < domains_length1; _tmp179_++) {
+		g_variant_builder_add_value (&_tmp178_, g_variant_new_string (*_tmp177_));
+		_tmp177_++;
 	}
-	g_variant_builder_add_value (&_reply_builder, g_variant_builder_end (&_tmp177_));
+	g_variant_builder_add_value (&_reply_builder, g_variant_builder_end (&_tmp178_));
 	_reply = g_variant_builder_end (&_reply_builder);
 	g_dbus_message_set_body (_reply_message, _reply);
 	domains = (_vala_array_free (domains, domains_length1, (GDestroyNotify) g_free), NULL);
@@ -1636,16 +1636,16 @@ static void _dbus_remote_login_service_get_cached_domains_for_server_ready (GObj
 static void _dbus_remote_login_service_set_last_used_server (RemoteLoginService* self, GVariant* parameters, GDBusMethodInvocation* invocation) {
 	GVariantIter _arguments_iter;
 	gchar* uccsUrl = NULL;
-	GVariant* _tmp179_;
-	gchar* serverUrl = NULL;
 	GVariant* _tmp180_;
+	gchar* serverUrl = NULL;
+	GVariant* _tmp181_;
 	g_variant_iter_init (&_arguments_iter, parameters);
-	_tmp179_ = g_variant_iter_next_value (&_arguments_iter);
-	uccsUrl = g_variant_dup_string (_tmp179_, NULL);
-	g_variant_unref (_tmp179_);
 	_tmp180_ = g_variant_iter_next_value (&_arguments_iter);
-	serverUrl = g_variant_dup_string (_tmp180_, NULL);
+	uccsUrl = g_variant_dup_string (_tmp180_, NULL);
 	g_variant_unref (_tmp180_);
+	_tmp181_ = g_variant_iter_next_value (&_arguments_iter);
+	serverUrl = g_variant_dup_string (_tmp181_, NULL);
+	g_variant_unref (_tmp181_);
 	remote_login_service_set_last_used_server (self, uccsUrl, serverUrl, (GAsyncReadyCallback) _dbus_remote_login_service_set_last_used_server_ready, invocation);
 	_g_free0 (uccsUrl);
 	_g_free0 (serverUrl);
@@ -1716,68 +1716,68 @@ static void _dbus_remote_login_service_servers_updated (GObject* _sender, Remote
 	const gchar * _path;
 	GVariant *_arguments;
 	GVariantBuilder _arguments_builder;
-	RemoteServer* _tmp181_;
-	GVariantBuilder _tmp182_;
-	int _tmp183_;
+	RemoteServer* _tmp182_;
+	GVariantBuilder _tmp183_;
+	int _tmp184_;
 	_connection = _data[1];
 	_path = _data[2];
 	g_variant_builder_init (&_arguments_builder, G_VARIANT_TYPE_TUPLE);
-	_tmp181_ = serverList;
-	g_variant_builder_init (&_tmp182_, G_VARIANT_TYPE ("a(sssba(sbva{sv})a(si))"));
-	for (_tmp183_ = 0; _tmp183_ < serverList_length1; _tmp183_++) {
-		GVariantBuilder _tmp184_;
-		RemoteServerField* _tmp185_;
-		GVariantBuilder _tmp186_;
-		int _tmp187_;
-		RemoteServerApplication* _tmp193_;
-		GVariantBuilder _tmp194_;
-		int _tmp195_;
-		g_variant_builder_init (&_tmp184_, G_VARIANT_TYPE_TUPLE);
-		g_variant_builder_add_value (&_tmp184_, g_variant_new_string ((*_tmp181_).type));
-		g_variant_builder_add_value (&_tmp184_, g_variant_new_string ((*_tmp181_).name));
-		g_variant_builder_add_value (&_tmp184_, g_variant_new_string ((*_tmp181_).url));
-		g_variant_builder_add_value (&_tmp184_, g_variant_new_boolean ((*_tmp181_).last_used_server));
-		_tmp185_ = (*_tmp181_).fields;
-		g_variant_builder_init (&_tmp186_, G_VARIANT_TYPE ("a(sbva{sv})"));
-		for (_tmp187_ = 0; _tmp187_ < (*_tmp181_).fields_length1; _tmp187_++) {
-			GVariantBuilder _tmp188_;
+	_tmp182_ = serverList;
+	g_variant_builder_init (&_tmp183_, G_VARIANT_TYPE ("a(sssba(sbva{sv})a(si))"));
+	for (_tmp184_ = 0; _tmp184_ < serverList_length1; _tmp184_++) {
+		GVariantBuilder _tmp185_;
+		RemoteServerField* _tmp186_;
+		GVariantBuilder _tmp187_;
+		int _tmp188_;
+		RemoteServerApplication* _tmp194_;
+		GVariantBuilder _tmp195_;
+		int _tmp196_;
+		g_variant_builder_init (&_tmp185_, G_VARIANT_TYPE_TUPLE);
+		g_variant_builder_add_value (&_tmp185_, g_variant_new_string ((*_tmp182_).type));
+		g_variant_builder_add_value (&_tmp185_, g_variant_new_string ((*_tmp182_).name));
+		g_variant_builder_add_value (&_tmp185_, g_variant_new_string ((*_tmp182_).url));
+		g_variant_builder_add_value (&_tmp185_, g_variant_new_boolean ((*_tmp182_).last_used_server));
+		_tmp186_ = (*_tmp182_).fields;
+		g_variant_builder_init (&_tmp187_, G_VARIANT_TYPE ("a(sbva{sv})"));
+		for (_tmp188_ = 0; _tmp188_ < (*_tmp182_).fields_length1; _tmp188_++) {
 			GVariantBuilder _tmp189_;
-			GHashTableIter _tmp190_;
-			gpointer _tmp191_;
+			GVariantBuilder _tmp190_;
+			GHashTableIter _tmp191_;
 			gpointer _tmp192_;
-			g_variant_builder_init (&_tmp188_, G_VARIANT_TYPE_TUPLE);
-			g_variant_builder_add_value (&_tmp188_, g_variant_new_string ((*_tmp185_).type));
-			g_variant_builder_add_value (&_tmp188_, g_variant_new_boolean ((*_tmp185_).required));
-			g_variant_builder_add_value (&_tmp188_, g_variant_new_variant ((*_tmp185_).default_value));
-			g_hash_table_iter_init (&_tmp190_, (*_tmp185_).properties);
-			g_variant_builder_init (&_tmp189_, G_VARIANT_TYPE ("a{sv}"));
-			while (g_hash_table_iter_next (&_tmp190_, &_tmp191_, &_tmp192_)) {
+			gpointer _tmp193_;
+			g_variant_builder_init (&_tmp189_, G_VARIANT_TYPE_TUPLE);
+			g_variant_builder_add_value (&_tmp189_, g_variant_new_string ((*_tmp186_).type));
+			g_variant_builder_add_value (&_tmp189_, g_variant_new_boolean ((*_tmp186_).required));
+			g_variant_builder_add_value (&_tmp189_, g_variant_new_variant ((*_tmp186_).default_value));
+			g_hash_table_iter_init (&_tmp191_, (*_tmp186_).properties);
+			g_variant_builder_init (&_tmp190_, G_VARIANT_TYPE ("a{sv}"));
+			while (g_hash_table_iter_next (&_tmp191_, &_tmp192_, &_tmp193_)) {
 				gchar* _key;
 				GVariant* _value;
-				_key = (gchar*) _tmp191_;
-				_value = (GVariant*) _tmp192_;
-				g_variant_builder_add (&_tmp189_, "{?*}", g_variant_new_string (_key), g_variant_new_variant (_value));
+				_key = (gchar*) _tmp192_;
+				_value = (GVariant*) _tmp193_;
+				g_variant_builder_add (&_tmp190_, "{?*}", g_variant_new_string (_key), g_variant_new_variant (_value));
 			}
-			g_variant_builder_add_value (&_tmp188_, g_variant_builder_end (&_tmp189_));
-			g_variant_builder_add_value (&_tmp186_, g_variant_builder_end (&_tmp188_));
-			_tmp185_++;
+			g_variant_builder_add_value (&_tmp189_, g_variant_builder_end (&_tmp190_));
+			g_variant_builder_add_value (&_tmp187_, g_variant_builder_end (&_tmp189_));
+			_tmp186_++;
 		}
-		g_variant_builder_add_value (&_tmp184_, g_variant_builder_end (&_tmp186_));
-		_tmp193_ = (*_tmp181_).applications;
-		g_variant_builder_init (&_tmp194_, G_VARIANT_TYPE ("a(si)"));
-		for (_tmp195_ = 0; _tmp195_ < (*_tmp181_).applications_length1; _tmp195_++) {
-			GVariantBuilder _tmp196_;
-			g_variant_builder_init (&_tmp196_, G_VARIANT_TYPE_TUPLE);
-			g_variant_builder_add_value (&_tmp196_, g_variant_new_string ((*_tmp193_).application_id));
-			g_variant_builder_add_value (&_tmp196_, g_variant_new_int32 ((*_tmp193_).pin_position));
-			g_variant_builder_add_value (&_tmp194_, g_variant_builder_end (&_tmp196_));
-			_tmp193_++;
+		g_variant_builder_add_value (&_tmp185_, g_variant_builder_end (&_tmp187_));
+		_tmp194_ = (*_tmp182_).applications;
+		g_variant_builder_init (&_tmp195_, G_VARIANT_TYPE ("a(si)"));
+		for (_tmp196_ = 0; _tmp196_ < (*_tmp182_).applications_length1; _tmp196_++) {
+			GVariantBuilder _tmp197_;
+			g_variant_builder_init (&_tmp197_, G_VARIANT_TYPE_TUPLE);
+			g_variant_builder_add_value (&_tmp197_, g_variant_new_string ((*_tmp194_).application_id));
+			g_variant_builder_add_value (&_tmp197_, g_variant_new_int32 ((*_tmp194_).pin_position));
+			g_variant_builder_add_value (&_tmp195_, g_variant_builder_end (&_tmp197_));
+			_tmp194_++;
 		}
-		g_variant_builder_add_value (&_tmp184_, g_variant_builder_end (&_tmp194_));
-		g_variant_builder_add_value (&_tmp182_, g_variant_builder_end (&_tmp184_));
-		_tmp181_++;
+		g_variant_builder_add_value (&_tmp185_, g_variant_builder_end (&_tmp195_));
+		g_variant_builder_add_value (&_tmp183_, g_variant_builder_end (&_tmp185_));
+		_tmp182_++;
 	}
-	g_variant_builder_add_value (&_arguments_builder, g_variant_builder_end (&_tmp182_));
+	g_variant_builder_add_value (&_arguments_builder, g_variant_builder_end (&_tmp183_));
 	_arguments = g_variant_builder_end (&_arguments_builder);
 	g_dbus_connection_emit_signal (_connection, NULL, _path, "com.canonical.RemoteLogin", "ServersUpdated", _arguments, NULL);
 }
@@ -1788,71 +1788,71 @@ static void _dbus_remote_login_service_login_servers_updated (GObject* _sender, 
 	const gchar * _path;
 	GVariant *_arguments;
 	GVariantBuilder _arguments_builder;
-	RemoteServer* _tmp197_;
-	GVariantBuilder _tmp198_;
-	int _tmp199_;
+	RemoteServer* _tmp198_;
+	GVariantBuilder _tmp199_;
+	int _tmp200_;
 	_connection = _data[1];
 	_path = _data[2];
 	g_variant_builder_init (&_arguments_builder, G_VARIANT_TYPE_TUPLE);
 	g_variant_builder_add_value (&_arguments_builder, g_variant_new_string (url));
 	g_variant_builder_add_value (&_arguments_builder, g_variant_new_string (emailAddress));
 	g_variant_builder_add_value (&_arguments_builder, g_variant_new_string (dataType));
-	_tmp197_ = serverList;
-	g_variant_builder_init (&_tmp198_, G_VARIANT_TYPE ("a(sssba(sbva{sv})a(si))"));
-	for (_tmp199_ = 0; _tmp199_ < serverList_length1; _tmp199_++) {
-		GVariantBuilder _tmp200_;
-		RemoteServerField* _tmp201_;
-		GVariantBuilder _tmp202_;
-		int _tmp203_;
-		RemoteServerApplication* _tmp209_;
-		GVariantBuilder _tmp210_;
-		int _tmp211_;
-		g_variant_builder_init (&_tmp200_, G_VARIANT_TYPE_TUPLE);
-		g_variant_builder_add_value (&_tmp200_, g_variant_new_string ((*_tmp197_).type));
-		g_variant_builder_add_value (&_tmp200_, g_variant_new_string ((*_tmp197_).name));
-		g_variant_builder_add_value (&_tmp200_, g_variant_new_string ((*_tmp197_).url));
-		g_variant_builder_add_value (&_tmp200_, g_variant_new_boolean ((*_tmp197_).last_used_server));
-		_tmp201_ = (*_tmp197_).fields;
-		g_variant_builder_init (&_tmp202_, G_VARIANT_TYPE ("a(sbva{sv})"));
-		for (_tmp203_ = 0; _tmp203_ < (*_tmp197_).fields_length1; _tmp203_++) {
-			GVariantBuilder _tmp204_;
+	_tmp198_ = serverList;
+	g_variant_builder_init (&_tmp199_, G_VARIANT_TYPE ("a(sssba(sbva{sv})a(si))"));
+	for (_tmp200_ = 0; _tmp200_ < serverList_length1; _tmp200_++) {
+		GVariantBuilder _tmp201_;
+		RemoteServerField* _tmp202_;
+		GVariantBuilder _tmp203_;
+		int _tmp204_;
+		RemoteServerApplication* _tmp210_;
+		GVariantBuilder _tmp211_;
+		int _tmp212_;
+		g_variant_builder_init (&_tmp201_, G_VARIANT_TYPE_TUPLE);
+		g_variant_builder_add_value (&_tmp201_, g_variant_new_string ((*_tmp198_).type));
+		g_variant_builder_add_value (&_tmp201_, g_variant_new_string ((*_tmp198_).name));
+		g_variant_builder_add_value (&_tmp201_, g_variant_new_string ((*_tmp198_).url));
+		g_variant_builder_add_value (&_tmp201_, g_variant_new_boolean ((*_tmp198_).last_used_server));
+		_tmp202_ = (*_tmp198_).fields;
+		g_variant_builder_init (&_tmp203_, G_VARIANT_TYPE ("a(sbva{sv})"));
+		for (_tmp204_ = 0; _tmp204_ < (*_tmp198_).fields_length1; _tmp204_++) {
 			GVariantBuilder _tmp205_;
-			GHashTableIter _tmp206_;
-			gpointer _tmp207_;
+			GVariantBuilder _tmp206_;
+			GHashTableIter _tmp207_;
 			gpointer _tmp208_;
-			g_variant_builder_init (&_tmp204_, G_VARIANT_TYPE_TUPLE);
-			g_variant_builder_add_value (&_tmp204_, g_variant_new_string ((*_tmp201_).type));
-			g_variant_builder_add_value (&_tmp204_, g_variant_new_boolean ((*_tmp201_).required));
-			g_variant_builder_add_value (&_tmp204_, g_variant_new_variant ((*_tmp201_).default_value));
-			g_hash_table_iter_init (&_tmp206_, (*_tmp201_).properties);
-			g_variant_builder_init (&_tmp205_, G_VARIANT_TYPE ("a{sv}"));
-			while (g_hash_table_iter_next (&_tmp206_, &_tmp207_, &_tmp208_)) {
+			gpointer _tmp209_;
+			g_variant_builder_init (&_tmp205_, G_VARIANT_TYPE_TUPLE);
+			g_variant_builder_add_value (&_tmp205_, g_variant_new_string ((*_tmp202_).type));
+			g_variant_builder_add_value (&_tmp205_, g_variant_new_boolean ((*_tmp202_).required));
+			g_variant_builder_add_value (&_tmp205_, g_variant_new_variant ((*_tmp202_).default_value));
+			g_hash_table_iter_init (&_tmp207_, (*_tmp202_).properties);
+			g_variant_builder_init (&_tmp206_, G_VARIANT_TYPE ("a{sv}"));
+			while (g_hash_table_iter_next (&_tmp207_, &_tmp208_, &_tmp209_)) {
 				gchar* _key;
 				GVariant* _value;
-				_key = (gchar*) _tmp207_;
-				_value = (GVariant*) _tmp208_;
-				g_variant_builder_add (&_tmp205_, "{?*}", g_variant_new_string (_key), g_variant_new_variant (_value));
+				_key = (gchar*) _tmp208_;
+				_value = (GVariant*) _tmp209_;
+				g_variant_builder_add (&_tmp206_, "{?*}", g_variant_new_string (_key), g_variant_new_variant (_value));
 			}
-			g_variant_builder_add_value (&_tmp204_, g_variant_builder_end (&_tmp205_));
-			g_variant_builder_add_value (&_tmp202_, g_variant_builder_end (&_tmp204_));
-			_tmp201_++;
+			g_variant_builder_add_value (&_tmp205_, g_variant_builder_end (&_tmp206_));
+			g_variant_builder_add_value (&_tmp203_, g_variant_builder_end (&_tmp205_));
+			_tmp202_++;
 		}
-		g_variant_builder_add_value (&_tmp200_, g_variant_builder_end (&_tmp202_));
-		_tmp209_ = (*_tmp197_).applications;
-		g_variant_builder_init (&_tmp210_, G_VARIANT_TYPE ("a(si)"));
-		for (_tmp211_ = 0; _tmp211_ < (*_tmp197_).applications_length1; _tmp211_++) {
-			GVariantBuilder _tmp212_;
-			g_variant_builder_init (&_tmp212_, G_VARIANT_TYPE_TUPLE);
-			g_variant_builder_add_value (&_tmp212_, g_variant_new_string ((*_tmp209_).application_id));
-			g_variant_builder_add_value (&_tmp212_, g_variant_new_int32 ((*_tmp209_).pin_position));
-			g_variant_builder_add_value (&_tmp210_, g_variant_builder_end (&_tmp212_));
-			_tmp209_++;
+		g_variant_builder_add_value (&_tmp201_, g_variant_builder_end (&_tmp203_));
+		_tmp210_ = (*_tmp198_).applications;
+		g_variant_builder_init (&_tmp211_, G_VARIANT_TYPE ("a(si)"));
+		for (_tmp212_ = 0; _tmp212_ < (*_tmp198_).applications_length1; _tmp212_++) {
+			GVariantBuilder _tmp213_;
+			g_variant_builder_init (&_tmp213_, G_VARIANT_TYPE_TUPLE);
+			g_variant_builder_add_value (&_tmp213_, g_variant_new_string ((*_tmp210_).application_id));
+			g_variant_builder_add_value (&_tmp213_, g_variant_new_int32 ((*_tmp210_).pin_position));
+			g_variant_builder_add_value (&_tmp211_, g_variant_builder_end (&_tmp213_));
+			_tmp210_++;
 		}
-		g_variant_builder_add_value (&_tmp200_, g_variant_builder_end (&_tmp210_));
-		g_variant_builder_add_value (&_tmp198_, g_variant_builder_end (&_tmp200_));
-		_tmp197_++;
+		g_variant_builder_add_value (&_tmp201_, g_variant_builder_end (&_tmp211_));
+		g_variant_builder_add_value (&_tmp199_, g_variant_builder_end (&_tmp201_));
+		_tmp198_++;
 	}
-	g_variant_builder_add_value (&_arguments_builder, g_variant_builder_end (&_tmp198_));
+	g_variant_builder_add_value (&_arguments_builder, g_variant_builder_end (&_tmp199_));
 	_arguments = g_variant_builder_end (&_arguments_builder);
 	g_dbus_connection_emit_signal (_connection, NULL, _path, "com.canonical.RemoteLogin", "LoginServersUpdated", _arguments, NULL);
 }

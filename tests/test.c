@@ -238,6 +238,7 @@ struct _UnityGreeter {
 	gboolean test_mode;
 	gboolean session_started;
 	gchar* last_respond_response;
+	gboolean orca_needs_kick;
 };
 
 struct _UnityGreeterClass {
@@ -343,6 +344,7 @@ GType unity_greeter_get_type (void) G_GNUC_CONST;
 void test_remote_login_cancel_authentication (void);
 gboolean dash_entry_get_did_respond (DashEntry* self);
 void greeter_list_cancel_authentication (GreeterList* self);
+void test_remote_login_duplicate_entries (void);
 void test_email_autocomplete (void);
 void test_greeter_communcation (void);
 void test_unsupported_server_type (void);
@@ -352,6 +354,7 @@ UnityGreeter* unity_greeter_new (void);
 UnityGreeter* unity_greeter_construct (GType object_type);
 static void _test_simple_navigation_gtest_func (void);
 static void _test_remote_login_gtest_func (void);
+static void _test_remote_login_duplicate_entries_gtest_func (void);
 static void _test_remote_login_servers_updated_signal_gtest_func (void);
 static void _test_remote_login_servers_updated_signal_focus_not_in_remote_server_gtest_func (void);
 static void _test_remote_login_login_servers_updated_signal_gtest_func (void);
@@ -992,7 +995,7 @@ void test_remote_login (void) {
 	_tmp50_ = _tmp49_;
 	_tmp51_ = prompt_box_get_id (_tmp50_);
 	_tmp52_ = _tmp51_;
-	_vala_assert (g_strcmp0 (_tmp52_, "*remote_login*http://rdpdefaultusername2.com") == 0, "list.selected_entry.id == \"*remote_login*http://rdpdefaultusername2.com\"");
+	_vala_assert (g_strcmp0 (_tmp52_, "*remote_login*http://rdpdefaultusername2.com*lwola") == 0, "list.selected_entry.id == \"*remote_login*http://rdpdefaultusername2.com*lwola\"");
 	_tmp53_ = list;
 	test_wait_for_scrolling_end (_tmp53_);
 	while (TRUE) {
@@ -1173,7 +1176,7 @@ void test_remote_login_servers_updated_signal (void) {
 	_tmp23_ = _tmp22_;
 	_tmp24_ = prompt_box_get_id (_tmp23_);
 	_tmp25_ = _tmp24_;
-	_vala_assert (g_strcmp0 (_tmp25_, "*remote_login*http://rdpdefaultusername2.com") == 0, "list.selected_entry.id == \"*remote_login*http://rdpdefaultusername2.com\"");
+	_vala_assert (g_strcmp0 (_tmp25_, "*remote_login*http://rdpdefaultusername2.com*lwola") == 0, "list.selected_entry.id == \"*remote_login*http://rdpdefaultusername2.com*lwola\"");
 	_data1_->done = FALSE;
 	g_timeout_add_full (G_PRIORITY_DEFAULT, (guint) 5250, ___lambda31__gsource_func, block1_data_ref (_data1_), block1_data_unref);
 	while (TRUE) {
@@ -1333,7 +1336,7 @@ void test_remote_login_servers_updated_signal_focus_not_in_remote_server (void) 
 	_tmp23_ = _tmp22_;
 	_tmp24_ = prompt_box_get_id (_tmp23_);
 	_tmp25_ = _tmp24_;
-	_vala_assert (g_strcmp0 (_tmp25_, "*remote_login*http://rdpdefaultusername2.com") == 0, "list.selected_entry.id == \"*remote_login*http://rdpdefaultusername2.com\"");
+	_vala_assert (g_strcmp0 (_tmp25_, "*remote_login*http://rdpdefaultusername2.com*lwola") == 0, "list.selected_entry.id == \"*remote_login*http://rdpdefaultusername2.com*lwola\"");
 	_tmp26_ = _data2_->list;
 	test_wait_for_scrolling_end (_tmp26_);
 	while (TRUE) {
@@ -1415,7 +1418,7 @@ static gboolean __lambda33_ (Block3Data* _data3_) {
 	_tmp3_ = _tmp2_;
 	_tmp4_ = prompt_box_get_id (_tmp3_);
 	_tmp5_ = _tmp4_;
-	_vala_assert (g_strcmp0 (_tmp5_, "*remote_login*http://megacoolrdpserver.com") == 0, "list.selected_entry.id == \"*remote_login*http://megacoolrdpserver.com\"");
+	_vala_assert (g_strcmp0 (_tmp5_, "*remote_login*http://megacoolrdpserver.com*") == 0, "list.selected_entry.id == \"*remote_login*http://megacoolrdpserver.com*\"");
 	_data3_->done = TRUE;
 	result = FALSE;
 	return result;
@@ -1501,7 +1504,7 @@ void test_remote_login_login_servers_updated_signal (void) {
 	_tmp23_ = _tmp22_;
 	_tmp24_ = prompt_box_get_id (_tmp23_);
 	_tmp25_ = _tmp24_;
-	_vala_assert (g_strcmp0 (_tmp25_, "*remote_login*http://rdpdefaultusername2.com") == 0, "list.selected_entry.id == \"*remote_login*http://rdpdefaultusername2.com\"");
+	_vala_assert (g_strcmp0 (_tmp25_, "*remote_login*http://rdpdefaultusername2.com*lwola") == 0, "list.selected_entry.id == \"*remote_login*http://rdpdefaultusername2.com*lwola\"");
 	_data3_->done = FALSE;
 	g_timeout_add_full (G_PRIORITY_DEFAULT, (guint) 5250, ___lambda33__gsource_func, block3_data_ref (_data3_), block3_data_unref);
 	while (TRUE) {
@@ -1554,7 +1557,7 @@ static gboolean __lambda34_ (Block4Data* _data4_) {
 	_tmp3_ = _tmp2_;
 	_tmp4_ = prompt_box_get_id (_tmp3_);
 	_tmp5_ = _tmp4_;
-	_vala_assert (g_strcmp0 (_tmp5_, "*remote_login*http://coolrdpserver.com") == 0, "list.selected_entry.id == \"*remote_login*http://coolrdpserver.com\"");
+	_vala_assert (g_strcmp0 (_tmp5_, "*remote_login*http://coolrdpserver.com*") == 0, "list.selected_entry.id == \"*remote_login*http://coolrdpserver.com*\"");
 	_data4_->done = TRUE;
 	result = FALSE;
 	return result;
@@ -1640,7 +1643,7 @@ void test_remote_login_login_servers_updated_signal_focus_not_in_removed_server 
 	_tmp23_ = _tmp22_;
 	_tmp24_ = prompt_box_get_id (_tmp23_);
 	_tmp25_ = _tmp24_;
-	_vala_assert (g_strcmp0 (_tmp25_, "*remote_login*http://rdpdefaultusername2.com") == 0, "list.selected_entry.id == \"*remote_login*http://rdpdefaultusername2.com\"");
+	_vala_assert (g_strcmp0 (_tmp25_, "*remote_login*http://rdpdefaultusername2.com*lwola") == 0, "list.selected_entry.id == \"*remote_login*http://rdpdefaultusername2.com*lwola\"");
 	while (TRUE) {
 		TestList* _tmp26_;
 		PromptBox* _tmp27_;
@@ -1653,7 +1656,7 @@ void test_remote_login_login_servers_updated_signal_focus_not_in_removed_server 
 		_tmp28_ = _tmp27_;
 		_tmp29_ = prompt_box_get_id (_tmp28_);
 		_tmp30_ = _tmp29_;
-		if (!(g_strcmp0 (_tmp30_, "*remote_login*http://coolrdpserver.com") != 0)) {
+		if (!(g_strcmp0 (_tmp30_, "*remote_login*http://coolrdpserver.com*") != 0)) {
 			break;
 		}
 		_tmp31_ = _data4_->list;
@@ -1811,7 +1814,7 @@ void test_remote_login_remote_login_changed_signal (void) {
 	_tmp23_ = _tmp22_;
 	_tmp24_ = prompt_box_get_id (_tmp23_);
 	_tmp25_ = _tmp24_;
-	_vala_assert (g_strcmp0 (_tmp25_, "*remote_login*http://rdpdefaultusername2.com") == 0, "list.selected_entry.id == \"*remote_login*http://rdpdefaultusername2.com\"");
+	_vala_assert (g_strcmp0 (_tmp25_, "*remote_login*http://rdpdefaultusername2.com*lwola") == 0, "list.selected_entry.id == \"*remote_login*http://rdpdefaultusername2.com*lwola\"");
 	_data5_->done = FALSE;
 	g_timeout_add_full (G_PRIORITY_DEFAULT, (guint) 5250, ___lambda35__gsource_func, block5_data_ref (_data5_), block5_data_unref);
 	while (TRUE) {
@@ -1985,7 +1988,7 @@ void test_remote_login_remote_login_changed_signalfocus_not_in_changed_server (v
 	_tmp23_ = _tmp22_;
 	_tmp24_ = prompt_box_get_id (_tmp23_);
 	_tmp25_ = _tmp24_;
-	_vala_assert (g_strcmp0 (_tmp25_, "*remote_login*http://rdpdefaultusername2.com") == 0, "list.selected_entry.id == \"*remote_login*http://rdpdefaultusername2.com\"");
+	_vala_assert (g_strcmp0 (_tmp25_, "*remote_login*http://rdpdefaultusername2.com*lwola") == 0, "list.selected_entry.id == \"*remote_login*http://rdpdefaultusername2.com*lwola\"");
 	_tmp26_ = _data6_->list;
 	test_wait_for_scrolling_end (_tmp26_);
 	while (TRUE) {
@@ -2117,7 +2120,7 @@ void test_remote_login_authentication (void) {
 	_tmp23_ = _tmp22_;
 	_tmp24_ = prompt_box_get_id (_tmp23_);
 	_tmp25_ = _tmp24_;
-	_vala_assert (g_strcmp0 (_tmp25_, "*remote_login*http://rdpdefaultusername2.com") == 0, "list.selected_entry.id == \"*remote_login*http://rdpdefaultusername2.com\"");
+	_vala_assert (g_strcmp0 (_tmp25_, "*remote_login*http://rdpdefaultusername2.com*lwola") == 0, "list.selected_entry.id == \"*remote_login*http://rdpdefaultusername2.com*lwola\"");
 	test_wait_for_scrolling_end (list);
 	_tmp26_ = unity_greeter_singleton;
 	_tmp26_->session_started = FALSE;
@@ -2230,7 +2233,7 @@ void test_remote_login_cancel_authentication (void) {
 	_tmp23_ = _tmp22_;
 	_tmp24_ = prompt_box_get_id (_tmp23_);
 	_tmp25_ = _tmp24_;
-	_vala_assert (g_strcmp0 (_tmp25_, "*remote_login*http://rdpdefaultusername2.com") == 0, "list.selected_entry.id == \"*remote_login*http://rdpdefaultusername2.com\"");
+	_vala_assert (g_strcmp0 (_tmp25_, "*remote_login*http://rdpdefaultusername2.com*lwola") == 0, "list.selected_entry.id == \"*remote_login*http://rdpdefaultusername2.com*lwola\"");
 	test_wait_for_scrolling_end (list);
 	_tmp26_ = unity_greeter_singleton;
 	_tmp26_->session_started = FALSE;
@@ -2260,6 +2263,276 @@ void test_remote_login_cancel_authentication (void) {
 	_tmp40_ = _tmp39_;
 	_vala_assert (!_tmp40_, "!pwd.did_respond");
 	gtk_widget_hide ((GtkWidget*) mw);
+	_g_object_unref0 (pwd);
+	_g_object_unref0 (email);
+	_g_object_unref0 (list);
+	_g_object_unref0 (mw);
+}
+
+
+void test_remote_login_duplicate_entries (void) {
+	MainWindow* _tmp0_ = NULL;
+	MainWindow* mw;
+	MainWindow* _tmp1_;
+	ListStack* _tmp2_;
+	GreeterList* _tmp3_ = NULL;
+	TestList* list;
+	TestList* _tmp4_;
+	TestList* _tmp5_;
+	PromptBox* _tmp6_;
+	PromptBox* _tmp7_;
+	const gchar* _tmp8_;
+	const gchar* _tmp9_;
+	TestList* _tmp10_;
+	PromptBox* _tmp11_;
+	PromptBox* _tmp12_;
+	gboolean _tmp13_;
+	gboolean _tmp14_;
+	TestList* _tmp15_;
+	PromptBox* _tmp16_;
+	PromptBox* _tmp17_;
+	gchar** _tmp18_ = NULL;
+	gchar** _tmp19_;
+	gint _tmp19__length1;
+	TestList* _tmp20_;
+	PromptBox* _tmp21_;
+	PromptBox* _tmp22_;
+	gboolean _tmp23_;
+	gboolean _tmp24_;
+	TestList* _tmp25_;
+	TestList* _tmp26_;
+	TestList* _tmp27_;
+	PromptBox* _tmp28_;
+	PromptBox* _tmp29_;
+	gboolean _tmp30_;
+	gboolean _tmp31_;
+	TestList* _tmp32_;
+	DashEntry* _tmp33_ = NULL;
+	DashEntry* email;
+	TestList* _tmp34_;
+	DashEntry* _tmp35_ = NULL;
+	DashEntry* pwd;
+	DashEntry* _tmp36_;
+	DashEntry* _tmp37_;
+	TestList* _tmp38_;
+	PromptBox* _tmp39_;
+	PromptBox* _tmp40_;
+	gchar** _tmp41_ = NULL;
+	gchar** _tmp42_;
+	gint _tmp42__length1;
+	TestList* _tmp43_;
+	PromptBox* _tmp44_;
+	PromptBox* _tmp45_;
+	gboolean _tmp46_;
+	gboolean _tmp47_;
+	TestList* _tmp48_;
+	PromptBox* _tmp49_;
+	PromptBox* _tmp50_;
+	const gchar* _tmp51_;
+	const gchar* _tmp52_;
+	TestList* _tmp53_;
+	DashEntry* _tmp54_ = NULL;
+	DashEntry* username;
+	TestList* _tmp55_;
+	DashEntry* _tmp56_ = NULL;
+	DashEntry* domain;
+	TestList* _tmp57_;
+	DashEntry* _tmp58_ = NULL;
+	DashEntry* password;
+	gboolean _tmp59_ = FALSE;
+	gboolean _tmp60_ = FALSE;
+	DashEntry* _tmp61_;
+	const gchar* _tmp62_;
+	const gchar* _tmp63_;
+	gboolean _tmp67_;
+	gboolean _tmp71_;
+	TestList* _tmp72_;
+	TestList* _tmp73_;
+	PromptBox* _tmp74_;
+	PromptBox* _tmp75_;
+	const gchar* _tmp76_;
+	const gchar* _tmp77_;
+	TestList* _tmp78_;
+	DashEntry* _tmp79_ = NULL;
+	TestList* _tmp80_;
+	DashEntry* _tmp81_ = NULL;
+	TestList* _tmp82_;
+	DashEntry* _tmp83_ = NULL;
+	gboolean _tmp84_ = FALSE;
+	gboolean _tmp85_ = FALSE;
+	DashEntry* _tmp86_;
+	const gchar* _tmp87_;
+	const gchar* _tmp88_;
+	gboolean _tmp92_;
+	gboolean _tmp96_;
+	TestList* _tmp97_;
+	MainWindow* _tmp98_;
+	_tmp0_ = test_setup ();
+	mw = _tmp0_;
+	_tmp1_ = mw;
+	_tmp2_ = _tmp1_->stack;
+	_tmp3_ = list_stack_top (_tmp2_);
+	list = G_TYPE_CHECK_INSTANCE_TYPE (_tmp3_, TYPE_TEST_LIST) ? ((TestList*) _tmp3_) : NULL;
+	_tmp4_ = list;
+	test_scroll_to_remote_login (_tmp4_);
+	_tmp5_ = list;
+	_tmp6_ = greeter_list_get_selected_entry ((GreeterList*) _tmp5_);
+	_tmp7_ = _tmp6_;
+	_tmp8_ = prompt_box_get_id (_tmp7_);
+	_tmp9_ = _tmp8_;
+	_vala_assert (g_strcmp0 (_tmp9_, "*remote_directory*http://crazyurl.com") == 0, "list.selected_entry.id == \"*remote_directory*http://crazyurl.com\"");
+	_tmp10_ = list;
+	_tmp11_ = greeter_list_get_selected_entry ((GreeterList*) _tmp10_);
+	_tmp12_ = _tmp11_;
+	_tmp13_ = prompt_box_get_has_errors (_tmp12_);
+	_tmp14_ = _tmp13_;
+	_vala_assert (!_tmp14_, "!list.selected_entry.has_errors");
+	_tmp15_ = list;
+	_tmp16_ = greeter_list_get_selected_entry ((GreeterList*) _tmp15_);
+	_tmp17_ = _tmp16_;
+	_tmp18_ = g_new0 (gchar*, 0 + 1);
+	_tmp19_ = _tmp18_;
+	_tmp19__length1 = 0;
+	g_signal_emit_by_name (_tmp17_, "respond", _tmp19_, 0);
+	_tmp19_ = (_vala_array_free (_tmp19_, _tmp19__length1, (GDestroyNotify) g_free), NULL);
+	_tmp20_ = list;
+	_tmp21_ = greeter_list_get_selected_entry ((GreeterList*) _tmp20_);
+	_tmp22_ = _tmp21_;
+	_tmp23_ = prompt_box_get_has_errors (_tmp22_);
+	_tmp24_ = _tmp23_;
+	_vala_assert (_tmp24_, "list.selected_entry.has_errors");
+	_tmp25_ = list;
+	test_do_scroll (_tmp25_, GREETER_LIST_SCROLL_TARGET_START);
+	_tmp26_ = list;
+	test_do_scroll (_tmp26_, GREETER_LIST_SCROLL_TARGET_END);
+	_tmp27_ = list;
+	_tmp28_ = greeter_list_get_selected_entry ((GreeterList*) _tmp27_);
+	_tmp29_ = _tmp28_;
+	_tmp30_ = prompt_box_get_has_errors (_tmp29_);
+	_tmp31_ = _tmp30_;
+	_vala_assert (!_tmp31_, "!list.selected_entry.has_errors");
+	_tmp32_ = list;
+	_tmp33_ = test_remote_directory_entry_email_field (_tmp32_);
+	email = _tmp33_;
+	_tmp34_ = list;
+	_tmp35_ = test_remote_directory_entry_password_field (_tmp34_);
+	pwd = _tmp35_;
+	_tmp36_ = email;
+	gtk_entry_set_text ((GtkEntry*) _tmp36_, "a@canonical.com");
+	_tmp37_ = pwd;
+	gtk_entry_set_text ((GtkEntry*) _tmp37_, "duplicate");
+	_tmp38_ = list;
+	_tmp39_ = greeter_list_get_selected_entry ((GreeterList*) _tmp38_);
+	_tmp40_ = _tmp39_;
+	_tmp41_ = g_new0 (gchar*, 0 + 1);
+	_tmp42_ = _tmp41_;
+	_tmp42__length1 = 0;
+	g_signal_emit_by_name (_tmp40_, "respond", _tmp42_, 0);
+	_tmp42_ = (_vala_array_free (_tmp42_, _tmp42__length1, (GDestroyNotify) g_free), NULL);
+	_tmp43_ = list;
+	_tmp44_ = greeter_list_get_selected_entry ((GreeterList*) _tmp43_);
+	_tmp45_ = _tmp44_;
+	_tmp46_ = prompt_box_get_has_errors (_tmp45_);
+	_tmp47_ = _tmp46_;
+	_vala_assert (!_tmp47_, "!list.selected_entry.has_errors");
+	_tmp48_ = list;
+	_tmp49_ = greeter_list_get_selected_entry ((GreeterList*) _tmp48_);
+	_tmp50_ = _tmp49_;
+	_tmp51_ = prompt_box_get_id (_tmp50_);
+	_tmp52_ = _tmp51_;
+	_vala_assert (g_strcmp0 (_tmp52_, "*remote_login*http://rdpdefaultusername.com*alowl2") == 0, "list.selected_entry.id == \"*remote_login*http://rdpdefaultusername.com*alowl2\"");
+	_tmp53_ = list;
+	_tmp54_ = test_remote_login_entry_username_field (_tmp53_);
+	username = _tmp54_;
+	_tmp55_ = list;
+	_tmp56_ = test_remote_login_entry_domain_field (_tmp55_);
+	domain = _tmp56_;
+	_tmp57_ = list;
+	_tmp58_ = test_remote_login_entry_password_field (_tmp57_);
+	password = _tmp58_;
+	_tmp61_ = username;
+	_tmp62_ = gtk_entry_get_text ((GtkEntry*) _tmp61_);
+	_tmp63_ = _tmp62_;
+	if (g_strcmp0 (_tmp63_, "alowl2") == 0) {
+		DashEntry* _tmp64_;
+		const gchar* _tmp65_;
+		const gchar* _tmp66_;
+		_tmp64_ = domain;
+		_tmp65_ = gtk_entry_get_text ((GtkEntry*) _tmp64_);
+		_tmp66_ = _tmp65_;
+		_tmp60_ = g_strcmp0 (_tmp66_, "PRINTERS") == 0;
+	} else {
+		_tmp60_ = FALSE;
+	}
+	_tmp67_ = _tmp60_;
+	if (_tmp67_) {
+		DashEntry* _tmp68_;
+		const gchar* _tmp69_;
+		const gchar* _tmp70_;
+		_tmp68_ = password;
+		_tmp69_ = gtk_entry_get_text ((GtkEntry*) _tmp68_);
+		_tmp70_ = _tmp69_;
+		_tmp59_ = g_strcmp0 (_tmp70_, "duplicate2") == 0;
+	} else {
+		_tmp59_ = FALSE;
+	}
+	_tmp71_ = _tmp59_;
+	_vala_assert (_tmp71_, "username.text == \"alowl2\" && domain.text == \"PRINTERS\" && password.text == \"duplicate2\"");
+	_tmp72_ = list;
+	test_do_scroll (_tmp72_, GREETER_LIST_SCROLL_TARGET_DOWN);
+	_tmp73_ = list;
+	_tmp74_ = greeter_list_get_selected_entry ((GreeterList*) _tmp73_);
+	_tmp75_ = _tmp74_;
+	_tmp76_ = prompt_box_get_id (_tmp75_);
+	_tmp77_ = _tmp76_;
+	_vala_assert (g_strcmp0 (_tmp77_, "*remote_login*http://rdpdefaultusername.com*alowl1") == 0, "list.selected_entry.id == \"*remote_login*http://rdpdefaultusername.com*alowl1\"");
+	_tmp78_ = list;
+	_tmp79_ = test_remote_login_entry_username_field (_tmp78_);
+	_g_object_unref0 (username);
+	username = _tmp79_;
+	_tmp80_ = list;
+	_tmp81_ = test_remote_login_entry_domain_field (_tmp80_);
+	_g_object_unref0 (domain);
+	domain = _tmp81_;
+	_tmp82_ = list;
+	_tmp83_ = test_remote_login_entry_password_field (_tmp82_);
+	_g_object_unref0 (password);
+	password = _tmp83_;
+	_tmp86_ = username;
+	_tmp87_ = gtk_entry_get_text ((GtkEntry*) _tmp86_);
+	_tmp88_ = _tmp87_;
+	if (g_strcmp0 (_tmp88_, "alowl1") == 0) {
+		DashEntry* _tmp89_;
+		const gchar* _tmp90_;
+		const gchar* _tmp91_;
+		_tmp89_ = domain;
+		_tmp90_ = gtk_entry_get_text ((GtkEntry*) _tmp89_);
+		_tmp91_ = _tmp90_;
+		_tmp85_ = g_strcmp0 (_tmp91_, "SCANNERS") == 0;
+	} else {
+		_tmp85_ = FALSE;
+	}
+	_tmp92_ = _tmp85_;
+	if (_tmp92_) {
+		DashEntry* _tmp93_;
+		const gchar* _tmp94_;
+		const gchar* _tmp95_;
+		_tmp93_ = password;
+		_tmp94_ = gtk_entry_get_text ((GtkEntry*) _tmp93_);
+		_tmp95_ = _tmp94_;
+		_tmp84_ = g_strcmp0 (_tmp95_, "duplicate1") == 0;
+	} else {
+		_tmp84_ = FALSE;
+	}
+	_tmp96_ = _tmp84_;
+	_vala_assert (_tmp96_, "username.text == \"alowl1\" && domain.text == \"SCANNERS\" && password.text == \"duplicate1\"");
+	_tmp97_ = list;
+	test_wait_for_scrolling_end (_tmp97_);
+	_tmp98_ = mw;
+	gtk_widget_hide ((GtkWidget*) _tmp98_);
+	_g_object_unref0 (password);
+	_g_object_unref0 (domain);
+	_g_object_unref0 (username);
 	_g_object_unref0 (pwd);
 	_g_object_unref0 (email);
 	_g_object_unref0 (list);
@@ -2458,7 +2731,7 @@ void test_greeter_communcation (void) {
 		_tmp19_ = _tmp18_;
 		_tmp20_ = prompt_box_get_id (_tmp19_);
 		_tmp21_ = _tmp20_;
-		if (!(g_strcmp0 (_tmp21_, "*remote_login*http://coolrdpserver.com") != 0)) {
+		if (!(g_strcmp0 (_tmp21_, "*remote_login*http://coolrdpserver.com*") != 0)) {
 			break;
 		}
 		_tmp22_ = list;
@@ -2590,7 +2863,7 @@ void test_unsupported_server_type (void) {
 		_tmp19_ = _tmp18_;
 		_tmp20_ = prompt_box_get_id (_tmp19_);
 		_tmp21_ = _tmp20_;
-		if (!(g_strcmp0 (_tmp21_, "*remote_login*http://notsupportedserver.com") != 0)) {
+		if (!(g_strcmp0 (_tmp21_, "*remote_login*http://notsupportedserver.com*") != 0)) {
 			break;
 		}
 		_tmp22_ = list;
@@ -2698,7 +2971,7 @@ static void test_setup_gsettings (void) {
 		if (_tmp22_) {
 			const gchar* _tmp23_;
 			_tmp23_ = schema_dir;
-			g_warning ("test.vala:654: Could not copy schema to %s", _tmp23_);
+			g_warning ("test.vala:697: Could not copy schema to %s", _tmp23_);
 		}
 		_tmp24_ = schema_dir;
 		_tmp25_ = g_strdup_printf ("glib-compile-schemas %s", _tmp24_);
@@ -2709,7 +2982,7 @@ static void test_setup_gsettings (void) {
 		if (_tmp28_) {
 			const gchar* _tmp29_;
 			_tmp29_ = schema_dir;
-			g_warning ("test.vala:657: Could not compile schemas in %s", _tmp29_);
+			g_warning ("test.vala:700: Could not compile schemas in %s", _tmp29_);
 		}
 		g_setenv ("GSETTINGS_BACKEND", "memory", TRUE);
 		_g_free0 (top_srcdir);
@@ -2727,7 +3000,7 @@ static void test_setup_gsettings (void) {
 		_inner_error_ = NULL;
 		_tmp30_ = e;
 		_tmp31_ = _tmp30_->message;
-		g_debug ("test.vala:663: Error setting up gsettings: %s", _tmp31_);
+		g_debug ("test.vala:706: Error setting up gsettings: %s", _tmp31_);
 		_g_error_free0 (e);
 	}
 	__finally0:
@@ -2746,6 +3019,11 @@ static void _test_simple_navigation_gtest_func (void) {
 
 static void _test_remote_login_gtest_func (void) {
 	test_remote_login ();
+}
+
+
+static void _test_remote_login_duplicate_entries_gtest_func (void) {
+	test_remote_login_duplicate_entries ();
 }
 
 
@@ -2818,6 +3096,7 @@ gint test_main (gchar** args, int args_length1) {
 	_tmp1_->test_mode = TRUE;
 	g_test_add_func ("/Simple Navigation", _test_simple_navigation_gtest_func);
 	g_test_add_func ("/Remote Login", _test_remote_login_gtest_func);
+	g_test_add_func ("/Remote Login duplicate entries", _test_remote_login_duplicate_entries_gtest_func);
 	g_test_add_func ("/Remote Login with Servers Updated signal", _test_remote_login_servers_updated_signal_gtest_func);
 	g_test_add_func ("/Remote Login with Servers Updated signal and not in remote server", _test_remote_login_servers_updated_signal_focus_not_in_remote_server_gtest_func);
 	g_test_add_func ("/Remote Login with Login Servers Updated signal", _test_remote_login_login_servers_updated_signal_gtest_func);

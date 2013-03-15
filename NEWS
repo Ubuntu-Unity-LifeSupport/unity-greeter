@@ -1,3 +1,13 @@
+Overview of changes in unity-greeter 13.04.2
+
+    - Spawn gnome-settings-daemon directly, not via DBus, as newer versions
+      dropped the DBus interface.
+    - Fix duplicate entries showing for multiple users on the same remote login
+      service.
+    - Allow administrators to specify which indicators to load via gsettings.
+    - Allow custom indicators to switch which user is selected via a session
+      DBus interface.
+
 Overview of changes in unity-greeter 13.04.1
 
     - Update logo for 13.04

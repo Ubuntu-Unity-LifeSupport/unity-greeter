@@ -31,6 +31,7 @@
 #include <math.h>
 #include <pango/pango.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
+#include "config.h"
 #include <atk/atk.h>
 #include <glib/gi18n-lib.h>
 #include <gdk/gdk.h>
@@ -531,15 +532,15 @@ static GtkGrid* prompt_box_real_create_name_grid (PromptBox* self) {
 		_g_free0 (_tmp17_);
 		_tmp20_ = _tmp19_;
 		if (_inner_error_ != NULL) {
-			goto __catch14_g_error;
+			goto __catch17_g_error;
 		}
 		_tmp21_ = self->priv->message_image;
 		_tmp22_ = _tmp20_;
 		g_object_set ((GtkImage*) _tmp21_, "pixbuf", _tmp22_, NULL);
 		_g_object_unref0 (_tmp22_);
 	}
-	goto __finally14;
-	__catch14_g_error:
+	goto __finally17;
+	__catch17_g_error:
 	{
 		GError* e = NULL;
 		GError* _tmp23_;
@@ -551,7 +552,7 @@ static GtkGrid* prompt_box_real_create_name_grid (PromptBox* self) {
 		g_debug ("prompt-box.vala:193: Error loading message image: %s", _tmp24_);
 		_g_error_free0 (e);
 	}
-	__finally14:
+	__finally17:
 	if (_inner_error_ != NULL) {
 		_g_object_unref0 (name_grid);
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
@@ -608,15 +609,15 @@ static GtkGrid* prompt_box_real_create_name_grid (PromptBox* self) {
 		gtk_css_provider_load_from_data (style, "* {padding: 2px;}", (gssize) (-1), &_inner_error_);
 		if (_inner_error_ != NULL) {
 			_g_object_unref0 (style);
-			goto __catch15_g_error;
+			goto __catch18_g_error;
 		}
 		_tmp44_ = self->option_button;
 		_tmp45_ = gtk_widget_get_style_context ((GtkWidget*) _tmp44_);
 		gtk_style_context_add_provider (_tmp45_, (GtkStyleProvider*) style, (guint) GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 		_g_object_unref0 (style);
 	}
-	goto __finally15;
-	__catch15_g_error:
+	goto __finally18;
+	__catch18_g_error:
 	{
 		GError* e = NULL;
 		GError* _tmp46_;
@@ -628,7 +629,7 @@ static GtkGrid* prompt_box_real_create_name_grid (PromptBox* self) {
 		g_debug ("prompt-box.vala:223: Internal error loading session chooser style: %s", _tmp47_);
 		_g_error_free0 (e);
 	}
-	__finally15:
+	__finally18:
 	if (_inner_error_ != NULL) {
 		_g_object_unref0 (align);
 		_g_object_unref0 (name_grid);
@@ -2600,14 +2601,14 @@ static GObject * active_indicator_constructor (GType type, guint n_construct_pro
 		_tmp2_ = gdk_pixbuf_new_from_file (_tmp1_, &_inner_error_);
 		_tmp3_ = _tmp2_;
 		if (_inner_error_ != NULL) {
-			goto __catch16_g_error;
+			goto __catch19_g_error;
 		}
 		_tmp4_ = _tmp3_;
 		g_object_set ((GtkImage*) self, "pixbuf", _tmp4_, NULL);
 		_g_object_unref0 (_tmp4_);
 	}
-	goto __finally16;
-	__catch16_g_error:
+	goto __finally19;
+	__catch19_g_error:
 	{
 		GError* e = NULL;
 		GError* _tmp5_;
@@ -2619,7 +2620,7 @@ static GObject * active_indicator_constructor (GType type, guint n_construct_pro
 		g_debug ("prompt-box.vala:639: Could not load active image: %s", _tmp6_);
 		_g_error_free0 (e);
 	}
-	__finally16:
+	__finally19:
 	if (_inner_error_ != NULL) {
 		_g_free0 (filename);
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);

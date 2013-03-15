@@ -172,14 +172,34 @@ public class UserList : GreeterList
         return "*remote_directory*" + remote_server.url;
     }
 
+    private string username_from_remote_server_fields(RemoteServer remote_server)
+    {
+        var username = "";
+        foreach (var f in remote_server.fields)
+        {
+            if (f.type == "username" && f.default_value != null)
+            {
+                username = f.default_value.get_string ();
+                break;
+            }
+        }
+        return username;
+     }
+
     private string user_list_name_for_remote_login_server (RemoteServer remote_server)
     {
-        return "*remote_login*" + remote_server.url;
+        var username = username_from_remote_server_fields (remote_server);
+        return "*remote_login*" + remote_server.url + "*" + username;
     }
 
     private string url_from_remote_loding_server_list_name (string remote_server_list_name)
     {
         return remote_server_list_name.split ("*")[2];
+    }
+    
+    private string username_from_remote_loding_server_list_name (string remote_server_list_name)
+    {
+        return remote_server_list_name.split ("*")[3];
     }
 
     private void set_remote_directory_servers (RemoteServer[] server_list)
@@ -398,6 +418,11 @@ public class UserList : GreeterList
                         login_success = true;
                         Timeout.add (5000, () => { remote_login_changed (currently_browsing_server_url, currently_browsing_server_email); return false; });
                     }
+                    else if (password_field.text == "duplicate")
+                    {
+                        test_fill_remote_login_servers_duplicate_entries (out server_list);
+                        login_success = true;                        
+                    }
                 }
                 else
                 {
@@ -589,9 +614,12 @@ public class UserList : GreeterList
     {
         current_remote_fields = new HashTable<string, Gtk.Widget> (str_hash, str_equal);
         var url = url_from_remote_loding_server_list_name (selected_entry.id);
+        var username = username_from_remote_loding_server_list_name (selected_entry.id);
+        
         foreach (var remote_server in server_list)
         {
-            if (remote_server.url == url)
+            var remote_username = username_from_remote_server_fields (remote_server);
+            if (remote_server.url == url && (username == null || username == remote_username))
             {
                 if (selected_entry.id.has_prefix ("*remote_login"))
                 {
@@ -1236,6 +1264,50 @@ public class UserList : GreeterList
         server_list[3] = remote_server4;
     }
 
+    private void test_fill_remote_login_servers_duplicate_entries (out RemoteServer[] server_list)
+    {
+        /* Create two remote servers with same url but different username and domain. */
+        server_list = {};
+
+        RemoteServer remote_server2 = RemoteServer ();
+        remote_server2.type = "rdp";
+        remote_server2.name = "RDP server with default username, and editable domain";
+        remote_server2.url = "http://rdpdefaultusername.com";
+        remote_server2.last_used_server = false;
+        remote_server2.fields = {};
+        RemoteServerField field21 = RemoteServerField ();
+        field21.type = "username";
+        field21.default_value = new Variant.string ("alowl1");
+        RemoteServerField field22 = RemoteServerField ();
+        field22.type = "password";
+        field22.default_value = new Variant.string ("duplicate1");
+        RemoteServerField field23 = RemoteServerField ();
+        field23.type = "domain";
+        field23.default_value = new Variant.string ("SCANNERS");
+        remote_server2.fields = {field21, field22, field23};
+
+        RemoteServer remote_server5 = RemoteServer ();
+        remote_server5.type = "rdp";
+        remote_server5.name = "RDP server with default username, and editable domain";
+        remote_server5.url = "http://rdpdefaultusername.com";
+        remote_server5.last_used_server = false;
+        remote_server5.fields = {};
+        RemoteServerField field51 = RemoteServerField ();
+        field51.type = "username";
+        field51.default_value = new Variant.string ("alowl2");
+        RemoteServerField field52 = RemoteServerField ();
+        field52.type = "password";
+        field52.default_value = new Variant.string ("duplicate2");
+        RemoteServerField field53 = RemoteServerField ();
+        field53.type = "domain";
+        field53.default_value = new Variant.string ("PRINTERS");
+        remote_server5.fields = {field51, field52, field53};
+
+        server_list.resize (2);
+        server_list[0] = remote_server2;
+        server_list[1] = remote_server5;
+    }
+    
     private bool test_key_press_cb (Gdk.EventKey event)
     {
         if ((event.state & Gdk.CONTROL_MASK) == 0)

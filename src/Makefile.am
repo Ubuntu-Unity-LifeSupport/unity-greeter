@@ -54,7 +54,8 @@ unity_greeter_VALAFLAGS = \
 	--target-glib 2.32
 
 unity_greeter_LDADD = \
-	$(UNITY_GREETER_LIBS)
+	$(UNITY_GREETER_LIBS) \
+	-lm
 
 unity_greeter_vala.stamp: $(top_srcdir)/config.h
 

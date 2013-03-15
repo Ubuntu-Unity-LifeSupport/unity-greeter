@@ -2,7 +2,7 @@
 
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT(unity-greeter, 13.04.1)
+AC_INIT(unity-greeter, 13.04.2)
 AC_CONFIG_MACRO_DIR(m4)
 AM_INIT_AUTOMAKE
 AM_PROG_CC_C_O
@@ -25,10 +25,17 @@ PKG_CHECK_MODULES(UNITY_GREETER, [
     freetype2
     cairo-ft
     libcanberra
+    x11
 ])
 
 INDICATORDIR=`$PKG_CONFIG --variable=indicatordir indicator3-0.4`
 AC_SUBST(INDICATORDIR)
+
+GSD_BINARY=`$PKG_CONFIG --variable=binary gnome-settings-daemon`
+if test -z "$GSD_BINARY"; then
+    AC_MSG_ERROR([Could not find path to gnome-settings-daemon binary])
+fi
+AC_DEFINE_UNQUOTED([GSD_BINARY], ["$GSD_BINARY"], [Path to g-s-d])
 
 dnl ###########################################################################
 dnl Internationalization

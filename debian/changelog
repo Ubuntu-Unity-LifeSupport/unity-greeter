@@ -1,3 +1,22 @@
+unity-greeter (13.04.2-0ubuntu1) raring; urgency=low
+
+  * New upstream release.
+    - Fix duplicate entries showing for multiple users on the same remote
+      login service.
+    - Add custom indicator support for system administrators (LP: #1155157)
+  * debian/control:
+    - Switch Vcs-Bzr to point at Unity Greeter trunk, since we are inlining
+      the packaging
+    - Use debhelper 9
+  * debian/rules:
+    - Use upstream ./autogen.sh for autoreconf
+  * debian/patches/do-not-read-password.patch,
+    debian/patches/move-nm-applet.patch,
+    debian/patches/spawn-gsd-directly.patch:
+    - Drop, included upstream
+
+ -- Michael Terry <mterry@ubuntu.com>  Fri, 15 Mar 2013 14:04:08 -0400
+
 unity-greeter (13.04.1-0ubuntu2) raring; urgency=low
 
   * debian/patches/spawn-gsd-directly.patch:

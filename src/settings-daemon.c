@@ -25,6 +25,7 @@
 #include <gio/gio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "config.h"
 
 
 #define TYPE_SETTINGS_DAEMON (settings_daemon_get_type ())
@@ -42,7 +43,6 @@ typedef struct _SettingsDaemonStartData SettingsDaemonStartData;
 #define _g_free0(var) (var = (g_free (var), NULL))
 #define __vala_GSettingsSchema_free0(var) ((var == NULL) ? NULL : (var = (_vala_GSettingsSchema_free (var), NULL)))
 #define __vala_GSettingsSchemaSource_free0(var) ((var == NULL) ? NULL : (var = (_vala_GSettingsSchemaSource_free (var), NULL)))
-#define _g_variant_unref0(var) ((var == NULL) ? NULL : (var = (g_variant_unref (var), NULL)))
 #define _g_error_free0(var) ((var == NULL) ? NULL : (var = (g_error_free (var), NULL)))
 typedef struct _SettingsDaemonRunData SettingsDaemonRunData;
 
@@ -69,14 +69,9 @@ struct _SettingsDaemonRunData {
 	GAsyncResult* _res_;
 	GSimpleAsyncResult* _async_result;
 	SettingsDaemon* self;
-	GDBusProxy* _tmp0_;
-	GDBusProxy* proxy;
-	GDBusProxy* _tmp1_;
-	GVariant* _tmp2_;
-	GVariant* _tmp3_;
 	GError* e;
-	GError* _tmp4_;
-	const gchar* _tmp5_;
+	GError* _tmp0_;
+	const gchar* _tmp1_;
 	GError * _inner_error_;
 };
 
@@ -101,7 +96,6 @@ static void _vala_GSettingsSchema_free (GSettingsSchema* self);
 static void _vala_GSettingsSchemaSource_free (GSettingsSchemaSource* self);
 static void settings_daemon_run_data_free (gpointer _data);
 static gboolean settings_daemon_run_co (SettingsDaemonRunData* _data_);
-static void settings_daemon_run_ready (GObject* source_object, GAsyncResult* _res_, gpointer _user_data_);
 SettingsDaemon* settings_daemon_new (void);
 SettingsDaemon* settings_daemon_construct (GType object_type);
 static void _vala_array_destroy (gpointer array, gint array_length, GDestroyNotify destroy_func);
@@ -393,58 +387,36 @@ static void settings_daemon_run_finish (SettingsDaemon* self, GAsyncResult* _res
 }
 
 
-static void settings_daemon_run_ready (GObject* source_object, GAsyncResult* _res_, gpointer _user_data_) {
-	SettingsDaemonRunData* _data_;
-	_data_ = _user_data_;
-	_data_->_source_object_ = source_object;
-	_data_->_res_ = _res_;
-	settings_daemon_run_co (_data_);
-}
-
-
 static gboolean settings_daemon_run_co (SettingsDaemonRunData* _data_) {
 	switch (_data_->_state_) {
 		case 0:
 		goto _state_0;
-		case 1:
-		goto _state_1;
 		default:
 		g_assert_not_reached ();
 	}
 	_state_0:
 	{
-		_data_->_tmp0_ = g_dbus_proxy_new_for_bus_sync (G_BUS_TYPE_SESSION, G_DBUS_PROXY_FLAGS_NONE, NULL, "org.gnome.SettingsDaemon", "/org/gnome/SettingsDaemon", "org.gnome.SettingsDaemon", NULL, &_data_->_inner_error_);
-		_data_->proxy = _data_->_tmp0_;
+		g_spawn_command_line_async (GSD_BINARY, &_data_->_inner_error_);
 		if (_data_->_inner_error_ != NULL) {
-			goto __catch18_g_error;
+			if (_data_->_inner_error_->domain == G_SPAWN_ERROR) {
+				goto __catch21_g_spawn_error;
+			}
+			g_critical ("file %s: line %d: unexpected error: %s (%s, %d)", __FILE__, __LINE__, _data_->_inner_error_->message, g_quark_to_string (_data_->_inner_error_->domain), _data_->_inner_error_->code);
+			g_clear_error (&_data_->_inner_error_);
+			return FALSE;
 		}
-		_data_->_tmp1_ = _data_->proxy;
-		_data_->_state_ = 1;
-		g_dbus_proxy_call (_data_->_tmp1_, "Awake", NULL, G_DBUS_CALL_FLAGS_NONE, -1, NULL, settings_daemon_run_ready, _data_);
-		return FALSE;
-		_state_1:
-		_data_->_tmp2_ = NULL;
-		_data_->_tmp2_ = g_dbus_proxy_call_finish (_data_->_tmp1_, _data_->_res_, &_data_->_inner_error_);
-		_data_->_tmp3_ = _data_->_tmp2_;
-		_g_variant_unref0 (_data_->_tmp3_);
-		if (_data_->_inner_error_ != NULL) {
-			_g_object_unref0 (_data_->proxy);
-			goto __catch18_g_error;
-		}
-		_g_object_unref0 (_data_->proxy);
 	}
-	goto __finally18;
-	__catch18_g_error:
+	goto __finally21;
+	__catch21_g_spawn_error:
 	{
 		_data_->e = _data_->_inner_error_;
 		_data_->_inner_error_ = NULL;
-		_data_->_tmp4_ = _data_->e;
-		_data_->_tmp5_ = _data_->_tmp4_->message;
-		g_debug ("settings-daemon.vala:97: Could not start gnome-settings-daemon over DB" \
-"us: %s", _data_->_tmp5_);
+		_data_->_tmp0_ = _data_->e;
+		_data_->_tmp1_ = _data_->_tmp0_->message;
+		g_debug ("settings-daemon.vala:88: Could not start gnome-settings-daemon: %s", _data_->_tmp1_);
 		_g_error_free0 (_data_->e);
 	}
-	__finally18:
+	__finally21:
 	if (_data_->_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _data_->_inner_error_->message, g_quark_to_string (_data_->_inner_error_->domain), _data_->_inner_error_->code);
 		g_clear_error (&_data_->_inner_error_);

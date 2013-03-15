@@ -34,6 +34,7 @@
 #include <gio/gio.h>
 #include <glib/gi18n-lib.h>
 #include <gdk/gdk.h>
+#include "config.h"
 
 
 #define TYPE_REMOTE_SERVER_FIELD (remote_server_field_get_type ())
@@ -396,6 +397,7 @@ struct _UnityGreeter {
 	volatile int ref_count;
 	UnityGreeterPrivate * priv;
 	gboolean test_mode;
+	gboolean orca_needs_kick;
 };
 
 struct _UnityGreeterClass {
@@ -486,65 +488,70 @@ struct _UserListRemoteDirectoryRespondCbData {
 	const gchar* _tmp62_;
 	RemoteServer* _tmp63_;
 	gint _tmp64_;
+	DashEntry* _tmp65_;
+	const gchar* _tmp66_;
+	const gchar* _tmp67_;
+	RemoteServer* _tmp68_;
+	gint _tmp69_;
 	gchar* data_type;
 	gboolean allowcache;
-	gboolean _tmp65_;
-	gboolean _tmp66_;
-	PromptBox* _tmp67_;
-	PromptBox* _tmp68_;
-	gboolean _tmp69_;
 	gboolean _tmp70_;
-	const gchar* _tmp71_;
-	const gchar* _tmp72_;
-	gboolean _tmp73_;
-	const gchar* _tmp74_;
-	const gchar* _tmp75_;
-	gboolean _tmp76_;
-	RemoteLoginService* _tmp77_;
-	const gchar* _tmp78_;
+	gboolean _tmp71_;
+	PromptBox* _tmp72_;
+	PromptBox* _tmp73_;
+	gboolean _tmp74_;
+	gboolean _tmp75_;
+	const gchar* _tmp76_;
+	const gchar* _tmp77_;
+	gboolean _tmp78_;
 	const gchar* _tmp79_;
-	DashEntry* _tmp80_;
-	const gchar* _tmp81_;
-	const gchar* _tmp82_;
-	gboolean _tmp83_;
-	gboolean _tmp84_;
-	gchar* _tmp85_;
-	RemoteServer* _tmp86_;
-	gint _tmp87_;
-	const gchar* _tmp88_;
-	gchar* _tmp89_;
-	const gchar* _tmp90_;
-	gchar* _tmp91_;
-	GError* _vala1_e;
-	GError* _tmp92_;
+	const gchar* _tmp80_;
+	gboolean _tmp81_;
+	RemoteLoginService* _tmp82_;
+	const gchar* _tmp83_;
+	const gchar* _tmp84_;
+	DashEntry* _tmp85_;
+	const gchar* _tmp86_;
+	const gchar* _tmp87_;
+	gboolean _tmp88_;
+	gboolean _tmp89_;
+	gchar* _tmp90_;
+	RemoteServer* _tmp91_;
+	gint _tmp92_;
 	const gchar* _tmp93_;
-	gboolean _tmp94_;
-	DashEntry* _tmp95_;
-	RemoteServer* _tmp96_;
-	gint _tmp96__length1;
-	gchar* _tmp97_;
+	gchar* _tmp94_;
+	const gchar* _tmp95_;
+	gchar* _tmp96_;
+	GError* _vala1_e;
+	GError* _tmp97_;
+	const gchar* _tmp98_;
+	gboolean _tmp99_;
+	DashEntry* _tmp100_;
+	RemoteServer* _tmp101_;
+	gint _tmp101__length1;
+	gchar* _tmp102_;
 	gchar* last_used_server_list_name;
-	RemoteServer* _tmp98_;
-	gint _tmp98__length1;
+	RemoteServer* _tmp103_;
+	gint _tmp103__length1;
 	RemoteServer* remote_server_collection;
 	gint remote_server_collection_length1;
 	gint _remote_server_collection_size_;
 	gint remote_server_it;
-	RemoteServer _tmp99_;
+	RemoteServer _tmp104_;
 	RemoteServer remote_server;
-	RemoteServer _tmp100_;
-	PromptBox* _tmp101_;
+	RemoteServer _tmp105_;
+	PromptBox* _tmp106_;
 	PromptBox* _vala2_e;
-	RemoteServer _tmp102_;
-	gboolean _tmp103_;
-	PromptBox* _tmp104_;
-	const gchar* _tmp105_;
-	const gchar* _tmp106_;
-	gchar* _tmp107_;
-	const gchar* _tmp108_;
-	const gchar* _tmp109_;
+	RemoteServer _tmp107_;
+	gboolean _tmp108_;
+	PromptBox* _tmp109_;
 	const gchar* _tmp110_;
-	GList* _tmp111_;
+	const gchar* _tmp111_;
+	gchar* _tmp112_;
+	const gchar* _tmp113_;
+	const gchar* _tmp114_;
+	const gchar* _tmp115_;
+	GList* _tmp116_;
 	GError * _inner_error_;
 };
 
@@ -611,265 +618,282 @@ struct _UserListCreateRemoteFieldsForCurrentItemData {
 	const gchar* _tmp6_;
 	gchar* _tmp7_;
 	gchar* url;
-	GList* _tmp8_;
+	PromptBox* _tmp8_;
+	PromptBox* _tmp9_;
+	const gchar* _tmp10_;
+	const gchar* _tmp11_;
+	gchar* _tmp12_;
+	gchar* username;
+	GList* _tmp13_;
 	GList* remote_server_collection;
 	GList* remote_server_it;
-	RemoteServer* _tmp9_;
+	RemoteServer* _tmp14_;
 	RemoteServer* remote_server;
-	RemoteServer* _tmp10_;
-	const gchar* _tmp11_;
-	const gchar* _tmp12_;
-	PromptBox* _tmp13_;
-	PromptBox* _tmp14_;
-	const gchar* _tmp15_;
-	const gchar* _tmp16_;
-	gboolean _tmp17_;
-	RemoteServer* _tmp18_;
-	const gchar* _tmp19_;
-	gboolean _tmp20_;
+	RemoteServer* _tmp15_;
+	RemoteServer _tmp16_;
+	gchar* _tmp17_;
+	gchar* remote_username;
+	gboolean _tmp18_;
+	RemoteServer* _tmp19_;
+	const gchar* _tmp20_;
 	const gchar* _tmp21_;
+	gboolean _tmp22_;
+	const gchar* _tmp23_;
+	const gchar* _tmp24_;
+	const gchar* _tmp25_;
+	gboolean _tmp26_;
+	gboolean _tmp27_;
+	PromptBox* _tmp28_;
+	PromptBox* _tmp29_;
+	const gchar* _tmp30_;
+	const gchar* _tmp31_;
+	gboolean _tmp32_;
+	RemoteServer* _tmp33_;
+	const gchar* _tmp34_;
+	gboolean _tmp35_;
+	const gchar* _tmp36_;
 	GList* fields;
-	RemoteServer* _tmp22_;
-	RemoteServerField* _tmp23_;
-	gint _tmp23__length1;
+	RemoteServer* _tmp37_;
+	RemoteServerField* _tmp38_;
+	gint _tmp38__length1;
 	RemoteServerField* field_collection;
 	gint field_collection_length1;
 	gint _field_collection_size_;
 	gint field_it;
-	RemoteServerField _tmp24_;
+	RemoteServerField _tmp39_;
 	RemoteServerField field;
-	RemoteServerField _tmp25_;
-	RemoteServerField _tmp26_;
-	RemoteServerField* _tmp27_;
-	GList* _tmp28_;
+	RemoteServerField _tmp40_;
+	RemoteServerField _tmp41_;
+	RemoteServerField* _tmp42_;
+	GList* _tmp43_;
 	GList* _vala1_field_collection;
 	GList* _vala1_field_it;
-	RemoteServerField* _tmp29_;
+	RemoteServerField* _tmp44_;
 	RemoteServerField* _vala1_field;
 	GtkWidget* widget;
-	gchar* _tmp30_;
+	gchar* _tmp45_;
 	gchar* default_value;
-	gboolean _tmp31_;
-	RemoteServerField* _tmp32_;
-	GVariant* _tmp33_;
-	RemoteServerField* _tmp34_;
-	GVariant* _tmp35_;
-	const GVariantType* _tmp36_;
-	gboolean _tmp37_;
-	gboolean _tmp38_;
-	RemoteServerField* _tmp39_;
-	GVariant* _tmp40_;
-	const gchar* _tmp41_;
-	gchar* _tmp42_;
-	RemoteServerField* _tmp43_;
-	const gchar* _tmp44_;
-	const gchar* _tmp45_;
-	DashEntry* _tmp46_;
-	DashEntry* entry;
-	DashEntry* _tmp47_;
-	const gchar* _tmp48_;
-	DashEntry* _tmp49_;
-	GtkWidget* _tmp50_;
-	RemoteServerField* _tmp51_;
-	const gchar* _tmp52_;
-	const gchar* _tmp53_;
-	DashEntry* _tmp54_;
-	DashEntry* _vala1_entry;
-	DashEntry* _tmp55_;
+	gboolean _tmp46_;
+	RemoteServerField* _tmp47_;
+	GVariant* _tmp48_;
+	RemoteServerField* _tmp49_;
+	GVariant* _tmp50_;
+	const GVariantType* _tmp51_;
+	gboolean _tmp52_;
+	gboolean _tmp53_;
+	RemoteServerField* _tmp54_;
+	GVariant* _tmp55_;
 	const gchar* _tmp56_;
-	DashEntry* _tmp57_;
-	GtkWidget* _tmp58_;
-	RemoteServerField* _tmp59_;
+	gchar* _tmp57_;
+	RemoteServerField* _tmp58_;
+	const gchar* _tmp59_;
 	const gchar* _tmp60_;
-	gchar** _tmp61_;
+	DashEntry* _tmp61_;
+	DashEntry* entry;
+	DashEntry* _tmp62_;
+	const gchar* _tmp63_;
+	DashEntry* _tmp64_;
+	GtkWidget* _tmp65_;
+	RemoteServerField* _tmp66_;
+	const gchar* _tmp67_;
+	const gchar* _tmp68_;
+	DashEntry* _tmp69_;
+	DashEntry* _vala1_entry;
+	DashEntry* _tmp70_;
+	const gchar* _tmp71_;
+	DashEntry* _tmp72_;
+	GtkWidget* _tmp73_;
+	RemoteServerField* _tmp74_;
+	const gchar* _tmp75_;
+	gchar** _tmp76_;
 	gchar** domainsArray;
 	gint domainsArray_length1;
 	gint _domainsArray_size_;
-	gboolean _tmp62_;
-	gboolean _tmp63_;
-	RemoteServerField* _tmp64_;
-	GHashTable* _tmp65_;
-	RemoteServerField* _tmp66_;
-	GHashTable* _tmp67_;
-	gboolean _tmp68_;
-	gboolean _tmp69_;
-	RemoteServerField* _tmp70_;
-	GHashTable* _tmp71_;
-	gconstpointer _tmp72_;
-	const GVariantType* _tmp73_;
-	gboolean _tmp74_;
-	gboolean _tmp75_;
-	RemoteServerField* _tmp76_;
-	GHashTable* _tmp77_;
-	gconstpointer _tmp78_;
-	size_t _tmp79_;
-	gchar** _tmp80_;
-	GPtrArray* _tmp81_;
+	gboolean _tmp77_;
+	gboolean _tmp78_;
+	RemoteServerField* _tmp79_;
+	GHashTable* _tmp80_;
+	RemoteServerField* _tmp81_;
+	GHashTable* _tmp82_;
+	gboolean _tmp83_;
+	gboolean _tmp84_;
+	RemoteServerField* _tmp85_;
+	GHashTable* _tmp86_;
+	gconstpointer _tmp87_;
+	const GVariantType* _tmp88_;
+	gboolean _tmp89_;
+	gboolean _tmp90_;
+	RemoteServerField* _tmp91_;
+	GHashTable* _tmp92_;
+	gconstpointer _tmp93_;
+	size_t _tmp94_;
+	gchar** _tmp95_;
+	GPtrArray* _tmp96_;
 	GPtrArray* domains;
 	gint i;
-	gboolean _tmp82_;
-	gboolean _tmp83_;
-	gint _tmp84_;
-	gint _tmp85_;
-	gchar** _tmp86_;
-	gint _tmp86__length1;
-	GPtrArray* _tmp87_;
-	gchar** _tmp88_;
-	gint _tmp88__length1;
-	gint _tmp89_;
-	const gchar* _tmp90_;
-	gchar* _tmp91_;
-	gboolean _tmp92_;
-	gboolean _tmp93_;
-	gboolean _tmp94_;
-	RemoteServerField* _tmp95_;
-	GHashTable* _tmp96_;
-	RemoteServerField* _tmp97_;
-	GHashTable* _tmp98_;
-	gboolean _tmp99_;
-	gboolean _tmp100_;
-	RemoteServerField* _tmp101_;
-	GHashTable* _tmp102_;
-	gconstpointer _tmp103_;
-	const GVariantType* _tmp104_;
-	gboolean _tmp105_;
-	gboolean _tmp106_;
-	RemoteServerField* _tmp107_;
-	GHashTable* _tmp108_;
-	gconstpointer _tmp109_;
-	gboolean _tmp110_;
-	gboolean _tmp111_;
-	gboolean read_only;
-	gboolean _tmp112_;
-	GPtrArray* _tmp113_;
-	gint _tmp114_;
-	gint _tmp115_;
-	gboolean _tmp116_;
-	GPtrArray* _tmp117_;
-	gint _tmp118_;
-	gint _tmp119_;
+	gboolean _tmp97_;
+	gboolean _tmp98_;
+	gint _tmp99_;
+	gint _tmp100_;
+	gchar** _tmp101_;
+	gint _tmp101__length1;
+	GPtrArray* _tmp102_;
+	gchar** _tmp103_;
+	gint _tmp103__length1;
+	gint _tmp104_;
+	const gchar* _tmp105_;
+	gchar* _tmp106_;
+	gboolean _tmp107_;
+	gboolean _tmp108_;
+	gboolean _tmp109_;
+	RemoteServerField* _tmp110_;
+	GHashTable* _tmp111_;
+	RemoteServerField* _tmp112_;
+	GHashTable* _tmp113_;
+	gboolean _tmp114_;
+	gboolean _tmp115_;
+	RemoteServerField* _tmp116_;
+	GHashTable* _tmp117_;
+	gconstpointer _tmp118_;
+	const GVariantType* _tmp119_;
 	gboolean _tmp120_;
-	GPtrArray* _tmp121_;
-	gconstpointer _tmp122_;
-	const gchar* _tmp123_;
-	const gchar* _tmp124_;
-	gint _tmp125_;
-	gint _tmp126_;
+	gboolean _tmp121_;
+	RemoteServerField* _tmp122_;
+	GHashTable* _tmp123_;
+	gconstpointer _tmp124_;
+	gboolean _tmp125_;
+	gboolean _tmp126_;
+	gboolean read_only;
 	gboolean _tmp127_;
-	gboolean _tmp128_;
-	gboolean _tmp129_;
-	const gchar* _tmp130_;
-	DashEntry* _tmp131_;
-	DashEntry* prompt;
-	const gchar* _tmp132_;
-	GPtrArray* _tmp133_;
+	GPtrArray* _tmp128_;
+	gint _tmp129_;
+	gint _tmp130_;
+	gboolean _tmp131_;
+	GPtrArray* _tmp132_;
+	gint _tmp133_;
 	gint _tmp134_;
-	gint _tmp135_;
+	gboolean _tmp135_;
 	GPtrArray* _tmp136_;
 	gconstpointer _tmp137_;
 	const gchar* _tmp138_;
-	DashEntry* _tmp139_;
-	const gchar* _tmp140_;
-	DashEntry* _tmp141_;
+	const gchar* _tmp139_;
+	gint _tmp140_;
+	gint _tmp141_;
 	gboolean _tmp142_;
-	DashEntry* _tmp143_;
-	GtkWidget* _tmp144_;
+	gboolean _tmp143_;
+	gboolean _tmp144_;
 	const gchar* _tmp145_;
-	gint _tmp146_;
-	gint _tmp147_;
+	DashEntry* _tmp146_;
+	DashEntry* prompt;
+	const gchar* _tmp147_;
+	GPtrArray* _tmp148_;
+	gint _tmp149_;
+	gint _tmp150_;
+	GPtrArray* _tmp151_;
+	gconstpointer _tmp152_;
+	const gchar* _tmp153_;
+	DashEntry* _tmp154_;
+	const gchar* _tmp155_;
+	DashEntry* _tmp156_;
+	gboolean _tmp157_;
+	DashEntry* _tmp158_;
+	GtkWidget* _tmp159_;
+	const gchar* _tmp160_;
+	gint _tmp161_;
+	gint _tmp162_;
 	gboolean found;
 	gint _vala1_i;
-	gboolean _tmp148_;
-	gboolean _tmp149_;
-	gint _tmp150_;
-	gboolean _tmp151_;
-	gboolean _tmp152_;
-	gint _tmp153_;
-	GPtrArray* _tmp154_;
-	gint _tmp155_;
-	gint _tmp156_;
-	gboolean _tmp157_;
-	const gchar* _tmp158_;
-	GPtrArray* _tmp159_;
-	gint _tmp160_;
-	gconstpointer _tmp161_;
-	gboolean _tmp162_;
-	GPtrArray* _tmp163_;
-	const gchar* _tmp164_;
-	gchar* _tmp165_;
-	GPtrArray* _tmp166_;
-	GCompareFunc _tmp167_;
-	GPtrArray* _tmp168_;
-	gboolean _tmp169_;
-	GtkComboBox* _tmp170_;
-	GtkComboBox* combo;
-	const gchar* _tmp171_;
-	gint _tmp172_;
-	gint _tmp173_;
-	gboolean _tmp174_;
-	gint _vala2_i;
-	gboolean _tmp175_;
-	gboolean _tmp176_;
-	gint _tmp177_;
-	gint _tmp178_;
-	GPtrArray* _tmp179_;
-	gint _tmp180_;
-	gint _tmp181_;
-	const gchar* _tmp182_;
+	gboolean _tmp163_;
+	gboolean _tmp164_;
+	gint _tmp165_;
+	gboolean _tmp166_;
+	gboolean _tmp167_;
+	gint _tmp168_;
+	GPtrArray* _tmp169_;
+	gint _tmp170_;
+	gint _tmp171_;
+	gboolean _tmp172_;
+	const gchar* _tmp173_;
+	GPtrArray* _tmp174_;
+	gint _tmp175_;
+	gconstpointer _tmp176_;
+	gboolean _tmp177_;
+	GPtrArray* _tmp178_;
+	const gchar* _tmp179_;
+	gchar* _tmp180_;
+	GPtrArray* _tmp181_;
+	GCompareFunc _tmp182_;
 	GPtrArray* _tmp183_;
-	gint _tmp184_;
-	gconstpointer _tmp185_;
-	GtkComboBox* _tmp186_;
+	gboolean _tmp184_;
+	GtkComboBox* _tmp185_;
+	GtkComboBox* combo;
+	const gchar* _tmp186_;
 	gint _tmp187_;
-	GtkComboBox* _tmp188_;
-	GtkWidget* _tmp189_;
-	GtkEntry* _tmp190_;
+	gint _tmp188_;
+	gboolean _tmp189_;
+	gint _vala2_i;
+	gboolean _tmp190_;
+	gboolean _tmp191_;
+	gint _tmp192_;
+	gint _tmp193_;
+	GPtrArray* _tmp194_;
+	gint _tmp195_;
+	gint _tmp196_;
+	const gchar* _tmp197_;
+	GPtrArray* _tmp198_;
+	gint _tmp199_;
+	gconstpointer _tmp200_;
+	GtkComboBox* _tmp201_;
+	gint _tmp202_;
+	GtkComboBox* _tmp203_;
+	GtkWidget* _tmp204_;
+	GtkEntry* _tmp205_;
 	GtkEntry* _vala2_entry;
-	GtkEntry* _tmp191_;
-	const gchar* _tmp192_;
-	GtkComboBox* _tmp193_;
-	GtkWidget* _tmp194_;
-	RemoteServerField* _tmp195_;
-	const gchar* _tmp196_;
+	GtkEntry* _tmp206_;
+	const gchar* _tmp207_;
+	GtkComboBox* _tmp208_;
+	GtkWidget* _tmp209_;
+	RemoteServerField* _tmp210_;
+	const gchar* _tmp211_;
 	gchar** email_domains;
 	gint email_domains_length1;
 	gint _email_domains_size_;
-	UnityGreeter* _tmp197_;
-	gboolean _tmp198_;
-	gchar* _tmp199_;
-	gchar* _tmp200_;
-	gchar* _tmp201_;
-	gchar* _tmp202_;
-	gchar** _tmp203_;
-	RemoteLoginService* _tmp204_;
-	const gchar* _tmp205_;
-	gchar** _tmp206_;
-	gint _tmp207_;
+	UnityGreeter* _tmp212_;
+	gboolean _tmp213_;
+	gchar* _tmp214_;
+	gchar* _tmp215_;
+	gchar* _tmp216_;
+	gchar* _tmp217_;
+	gchar** _tmp218_;
+	RemoteLoginService* _tmp219_;
+	const gchar* _tmp220_;
+	gchar** _tmp221_;
+	gint _tmp222_;
 	GError* e;
-	gint _tmp208_;
-	GError* _tmp209_;
-	const gchar* _tmp210_;
-	const gchar* _tmp211_;
-	DashEntry* _tmp212_;
-	DashEntry* _vala3_entry;
-	DashEntry* _tmp213_;
-	const gchar* _tmp214_;
-	DashEntry* _tmp215_;
-	GtkWidget* _tmp216_;
-	gchar** _tmp217_;
-	gint _tmp217__length1;
-	DashEntry* _tmp218_;
-	gchar** _tmp219_;
-	gint _tmp219__length1;
-	EmailAutocompleter* _tmp220_;
-	RemoteServerField* _tmp221_;
-	const gchar* _tmp222_;
-	GHashTable* _tmp223_;
-	RemoteServerField* _tmp224_;
+	gint _tmp223_;
+	GError* _tmp224_;
 	const gchar* _tmp225_;
-	gchar* _tmp226_;
-	GtkWidget* _tmp227_;
-	GtkWidget* _tmp228_;
+	const gchar* _tmp226_;
+	DashEntry* _tmp227_;
+	DashEntry* _vala3_entry;
+	DashEntry* _tmp228_;
+	const gchar* _tmp229_;
+	DashEntry* _tmp230_;
+	GtkWidget* _tmp231_;
+	gchar** _tmp232_;
+	gint _tmp232__length1;
+	DashEntry* _tmp233_;
+	gchar** _tmp234_;
+	gint _tmp234__length1;
+	EmailAutocompleter* _tmp235_;
+	RemoteServerField* _tmp236_;
+	const gchar* _tmp237_;
+	GHashTable* _tmp238_;
+	RemoteServerField* _tmp239_;
+	const gchar* _tmp240_;
+	gchar* _tmp241_;
+	GtkWidget* _tmp242_;
+	GtkWidget* _tmp243_;
 	GError * _inner_error_;
 };
 
@@ -944,8 +968,10 @@ static void user_list_query_directory_servers_ready (GObject* source_object, GAs
 static void _vala_RemoteServer_array_free (RemoteServer* array, gint array_length);
 static void user_list_set_remote_directory_servers (UserList* self, RemoteServer* server_list, int server_list_length1);
 static gchar* user_list_user_list_name_for_remote_directory_server (UserList* self, RemoteServer* remote_server);
+static gchar* user_list_username_from_remote_server_fields (UserList* self, RemoteServer* remote_server);
 static gchar* user_list_user_list_name_for_remote_login_server (UserList* self, RemoteServer* remote_server);
 static gchar* user_list_url_from_remote_loding_server_list_name (UserList* self, const gchar* remote_server_list_name);
+static gchar* user_list_username_from_remote_loding_server_list_name (UserList* self, const gchar* remote_server_list_name);
 PromptBox* greeter_list_find_entry (GreeterList* self, const gchar* id);
 PromptBox* prompt_box_new (const gchar* id);
 PromptBox* prompt_box_construct (GType object_type, const gchar* id);
@@ -995,6 +1021,7 @@ static void user_list_test_call_remote_login_servers_updated (UserList* self);
 static gboolean _________lambda19__gsource_func (gpointer self);
 static gboolean _________lambda22_ (UserList* self);
 static gboolean __________lambda22__gsource_func (gpointer self);
+static void user_list_test_fill_remote_login_servers_duplicate_entries (UserList* self, RemoteServer** server_list, int* server_list_length1);
 gboolean prompt_box_get_has_errors (PromptBox* self);
 void remote_login_service_get_servers_for_login (RemoteLoginService* self, const gchar* url, const gchar* emailAddress, const gchar* password, gboolean allowCache, GAsyncReadyCallback _callback_, gpointer _user_data_);
 void remote_login_service_get_servers_for_login_finish (RemoteLoginService* self, GAsyncResult* _res_, gboolean* loginSuccess, gchar** dataType, RemoteServer** serverList, int* serverList_length1, GError** error);
@@ -1380,7 +1407,7 @@ static gboolean user_list_query_directory_servers_co (UserListQueryDirectoryServ
 		if (_data_->_inner_error_ != NULL) {
 			_data_->server_list = (_vala_RemoteServer_array_free (_data_->server_list, _data_->server_list_length1), NULL);
 			if (_data_->_inner_error_->domain == G_IO_ERROR) {
-				goto __catch28_g_io_error;
+				goto __catch31_g_io_error;
 			}
 			_data_->server_list = (_vala_RemoteServer_array_free (_data_->server_list, _data_->server_list_length1), NULL);
 			g_critical ("file %s: line %d: unexpected error: %s (%s, %d)", __FILE__, __LINE__, _data_->_inner_error_->message, g_quark_to_string (_data_->_inner_error_->domain), _data_->_inner_error_->code);
@@ -1390,8 +1417,8 @@ static gboolean user_list_query_directory_servers_co (UserListQueryDirectoryServ
 		user_list_set_remote_directory_servers (_data_->self, _data_->server_list, _data_->server_list_length1);
 		_data_->server_list = (_vala_RemoteServer_array_free (_data_->server_list, _data_->server_list_length1), NULL);
 	}
-	goto __finally28;
-	__catch28_g_io_error:
+	goto __finally31;
+	__catch31_g_io_error:
 	{
 		_data_->e = _data_->_inner_error_;
 		_data_->_inner_error_ = NULL;
@@ -1402,7 +1429,7 @@ static gboolean user_list_query_directory_servers_co (UserListQueryDirectoryServ
 		user_list_remove_remote_servers (_data_->self);
 		_g_error_free0 (_data_->e);
 	}
-	__finally28:
+	__finally31:
 	if (_data_->_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _data_->_inner_error_->message, g_quark_to_string (_data_->_inner_error_->domain), _data_->_inner_error_->code);
 		g_clear_error (&_data_->_inner_error_);
@@ -1433,17 +1460,102 @@ static gchar* user_list_user_list_name_for_remote_directory_server (UserList* se
 }
 
 
+static gchar* user_list_username_from_remote_server_fields (UserList* self, RemoteServer* remote_server) {
+	gchar* result = NULL;
+	gchar* _tmp0_;
+	gchar* username;
+	RemoteServer _tmp1_;
+	RemoteServerField* _tmp2_;
+	gint _tmp2__length1;
+	g_return_val_if_fail (self != NULL, NULL);
+	g_return_val_if_fail (remote_server != NULL, NULL);
+	_tmp0_ = g_strdup ("");
+	username = _tmp0_;
+	_tmp1_ = *remote_server;
+	_tmp2_ = _tmp1_.fields;
+	_tmp2__length1 = _tmp1_.fields_length1;
+	{
+		RemoteServerField* f_collection = NULL;
+		gint f_collection_length1 = 0;
+		gint _f_collection_size_ = 0;
+		gint f_it = 0;
+		f_collection = _tmp2_;
+		f_collection_length1 = _tmp2__length1;
+		for (f_it = 0; f_it < _tmp2__length1; f_it = f_it + 1) {
+			RemoteServerField _tmp3_ = {0};
+			RemoteServerField f = {0};
+			remote_server_field_copy (&f_collection[f_it], &_tmp3_);
+			f = _tmp3_;
+			{
+				gboolean _tmp4_ = FALSE;
+				RemoteServerField _tmp5_;
+				const gchar* _tmp6_;
+				gboolean _tmp9_;
+				_tmp5_ = f;
+				_tmp6_ = _tmp5_.type;
+				if (g_strcmp0 (_tmp6_, "username") == 0) {
+					RemoteServerField _tmp7_;
+					GVariant* _tmp8_;
+					_tmp7_ = f;
+					_tmp8_ = _tmp7_.default_value;
+					_tmp4_ = _tmp8_ != NULL;
+				} else {
+					_tmp4_ = FALSE;
+				}
+				_tmp9_ = _tmp4_;
+				if (_tmp9_) {
+					RemoteServerField _tmp10_;
+					GVariant* _tmp11_;
+					const gchar* _tmp12_ = NULL;
+					gchar* _tmp13_;
+					_tmp10_ = f;
+					_tmp11_ = _tmp10_.default_value;
+					_tmp12_ = g_variant_get_string (_tmp11_, NULL);
+					_tmp13_ = g_strdup (_tmp12_);
+					_g_free0 (username);
+					username = _tmp13_;
+					remote_server_field_destroy (&f);
+					break;
+				}
+				remote_server_field_destroy (&f);
+			}
+		}
+	}
+	result = username;
+	return result;
+}
+
+
 static gchar* user_list_user_list_name_for_remote_login_server (UserList* self, RemoteServer* remote_server) {
 	gchar* result = NULL;
 	RemoteServer _tmp0_;
-	const gchar* _tmp1_;
-	gchar* _tmp2_;
+	gchar* _tmp1_ = NULL;
+	gchar* username;
+	RemoteServer _tmp2_;
+	const gchar* _tmp3_;
+	gchar* _tmp4_;
+	gchar* _tmp5_;
+	gchar* _tmp6_;
+	gchar* _tmp7_;
+	gchar* _tmp8_;
+	gchar* _tmp9_;
 	g_return_val_if_fail (self != NULL, NULL);
 	g_return_val_if_fail (remote_server != NULL, NULL);
 	_tmp0_ = *remote_server;
-	_tmp1_ = _tmp0_.url;
-	_tmp2_ = g_strconcat ("*remote_login*", _tmp1_, NULL);
-	result = _tmp2_;
+	_tmp1_ = user_list_username_from_remote_server_fields (self, &_tmp0_);
+	username = _tmp1_;
+	_tmp2_ = *remote_server;
+	_tmp3_ = _tmp2_.url;
+	_tmp4_ = g_strconcat ("*remote_login*", _tmp3_, NULL);
+	_tmp5_ = _tmp4_;
+	_tmp6_ = g_strconcat (_tmp5_, "*", NULL);
+	_tmp7_ = _tmp6_;
+	_tmp8_ = g_strconcat (_tmp7_, username, NULL);
+	_tmp9_ = _tmp8_;
+	_g_free0 (_tmp7_);
+	_g_free0 (_tmp5_);
+	result = _tmp9_;
+	_g_free0 (username);
 	return result;
 }
 
@@ -1465,6 +1577,31 @@ static gchar* user_list_url_from_remote_loding_server_list_name (UserList* self,
 	_tmp3_ = _tmp2_;
 	_tmp3__length1 = _vala_array_length (_tmp1_);
 	_tmp4_ = _tmp3_[2];
+	_tmp5_ = g_strdup (_tmp4_);
+	_tmp6_ = _tmp5_;
+	_tmp3_ = (_vala_array_free (_tmp3_, _tmp3__length1, (GDestroyNotify) g_free), NULL);
+	result = _tmp6_;
+	return result;
+}
+
+
+static gchar* user_list_username_from_remote_loding_server_list_name (UserList* self, const gchar* remote_server_list_name) {
+	gchar* result = NULL;
+	const gchar* _tmp0_;
+	gchar** _tmp1_;
+	gchar** _tmp2_ = NULL;
+	gchar** _tmp3_;
+	gint _tmp3__length1;
+	const gchar* _tmp4_;
+	gchar* _tmp5_;
+	gchar* _tmp6_;
+	g_return_val_if_fail (self != NULL, NULL);
+	g_return_val_if_fail (remote_server_list_name != NULL, NULL);
+	_tmp0_ = remote_server_list_name;
+	_tmp2_ = _tmp1_ = g_strsplit (_tmp0_, "*", 0);
+	_tmp3_ = _tmp2_;
+	_tmp3__length1 = _vala_array_length (_tmp1_);
+	_tmp4_ = _tmp3_[3];
 	_tmp5_ = g_strdup (_tmp4_);
 	_tmp6_ = _tmp5_;
 	_tmp3_ = (_vala_array_free (_tmp3_, _tmp3__length1, (GDestroyNotify) g_free), NULL);
@@ -1981,7 +2118,7 @@ static void __lambda24_ (UserList* self, GObject* obj, GAsyncResult* res) {
 		_tmp3_ = (RemoteLoginService*) _tmp2_;
 		if (_inner_error_ != NULL) {
 			if (_inner_error_->domain == G_IO_ERROR) {
-				goto __catch29_g_io_error;
+				goto __catch32_g_io_error;
 			}
 			g_critical ("file %s: line %d: unexpected error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 			g_clear_error (&_inner_error_);
@@ -1997,8 +2134,8 @@ static void __lambda24_ (UserList* self, GObject* obj, GAsyncResult* res) {
 		g_signal_connect_object (_tmp6_, "login-changed", (GCallback) _user_list_remote_login_changed_remote_login_service_login_changed, self, 0);
 		user_list_query_directory_servers (self, NULL, NULL);
 	}
-	goto __finally29;
-	__catch29_g_io_error:
+	goto __finally32;
+	__catch32_g_io_error:
 	{
 		GError* e = NULL;
 		GError* _tmp7_;
@@ -2007,14 +2144,14 @@ static void __lambda24_ (UserList* self, GObject* obj, GAsyncResult* res) {
 		_inner_error_ = NULL;
 		_tmp7_ = e;
 		_tmp8_ = _tmp7_->message;
-		g_debug ("user-list.vala:312: Getting the com.canonical.RemoteLogin dbus service" \
+		g_debug ("user-list.vala:332: Getting the com.canonical.RemoteLogin dbus service" \
 " failed. Error: %s", _tmp8_);
 		user_list_remove_remote_servers (self);
 		_g_object_unref0 (self->priv->remote_login_service);
 		self->priv->remote_login_service = NULL;
 		_g_error_free0 (e);
 	}
-	__finally29:
+	__finally32:
 	if (_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
@@ -2161,7 +2298,7 @@ static gboolean user_list_remote_directory_respond_cb_co (UserListRemoteDirector
 	_data_->email_field = _data_->_tmp7_;
 	_data_->_tmp8_ = _data_->password_field;
 	if (_data_->_tmp8_ == NULL) {
-		g_debug ("user-list.vala:336: Something wrong happened in remote_directory_respo" \
+		g_debug ("user-list.vala:356: Something wrong happened in remote_directory_respo" \
 "nd_cb. There was no password field");
 		_g_object_unref0 (_data_->email_field);
 		_g_object_unref0 (_data_->password_field);
@@ -2175,7 +2312,7 @@ static gboolean user_list_remote_directory_respond_cb_co (UserListRemoteDirector
 	}
 	_data_->_tmp9_ = _data_->email_field;
 	if (_data_->_tmp9_ == NULL) {
-		g_debug ("user-list.vala:341: Something wrong happened in remote_directory_respo" \
+		g_debug ("user-list.vala:361: Something wrong happened in remote_directory_respo" \
 "nd_cb. There was no email field");
 		_g_object_unref0 (_data_->email_field);
 		_g_object_unref0 (_data_->password_field);
@@ -2204,7 +2341,7 @@ static gboolean user_list_remote_directory_respond_cb_co (UserListRemoteDirector
 		_data_->re = _data_->_tmp15_;
 		if (_data_->_inner_error_ != NULL) {
 			if (_data_->_inner_error_->domain == G_REGEX_ERROR) {
-				goto __catch30_g_regex_error;
+				goto __catch33_g_regex_error;
 			}
 			_g_free0 (_data_->email);
 			_data_->server_list = (_vala_RemoteServer_array_free (_data_->server_list, _data_->server_list_length1), NULL);
@@ -2248,17 +2385,17 @@ static gboolean user_list_remote_directory_respond_cb_co (UserListRemoteDirector
 		_g_match_info_free0 (_data_->info);
 		_g_regex_unref0 (_data_->re);
 	}
-	goto __finally30;
-	__catch30_g_regex_error:
+	goto __finally33;
+	__catch33_g_regex_error:
 	{
 		_data_->e = _data_->_inner_error_;
 		_data_->_inner_error_ = NULL;
 		_data_->_tmp31_ = _data_->e;
 		_data_->_tmp32_ = _data_->_tmp31_->message;
-		g_debug ("user-list.vala:360: Calling email regex match failed. Error: %s", _data_->_tmp32_);
+		g_debug ("user-list.vala:380: Calling email regex match failed. Error: %s", _data_->_tmp32_);
 		_g_error_free0 (_data_->e);
 	}
-	__finally30:
+	__finally33:
 	if (_data_->_inner_error_ != NULL) {
 		_g_free0 (_data_->email);
 		_data_->server_list = (_vala_RemoteServer_array_free (_data_->server_list, _data_->server_list_length1), NULL);
@@ -2346,63 +2483,77 @@ static gboolean user_list_remote_directory_respond_cb_co (UserListRemoteDirector
 								_data_->_server_list_size_ = _data_->server_list_length1;
 								_data_->login_success = TRUE;
 								g_timeout_add_full (G_PRIORITY_DEFAULT, (guint) 5000, __________lambda22__gsource_func, g_object_ref (_data_->self), g_object_unref);
+							} else {
+								_data_->_tmp65_ = _data_->password_field;
+								_data_->_tmp66_ = gtk_entry_get_text ((GtkEntry*) _data_->_tmp65_);
+								_data_->_tmp67_ = _data_->_tmp66_;
+								if (g_strcmp0 (_data_->_tmp67_, "duplicate") == 0) {
+									_data_->_tmp68_ = NULL;
+									_data_->_tmp69_ = 0;
+									user_list_test_fill_remote_login_servers_duplicate_entries (_data_->self, &_data_->_tmp68_, &_data_->_tmp69_);
+									_data_->server_list = (_vala_RemoteServer_array_free (_data_->server_list, _data_->server_list_length1), NULL);
+									_data_->server_list = _data_->_tmp68_;
+									_data_->server_list_length1 = _data_->_tmp69_;
+									_data_->_server_list_size_ = _data_->server_list_length1;
+									_data_->login_success = TRUE;
+								}
 							}
 						}
 					}
 				}
 			} else {
 				_data_->allowcache = TRUE;
-				_data_->_tmp67_ = greeter_list_get_selected_entry ((GreeterList*) _data_->self);
-				_data_->_tmp68_ = _data_->_tmp67_;
-				_data_->_tmp69_ = prompt_box_get_has_errors (_data_->_tmp68_);
-				_data_->_tmp70_ = _data_->_tmp69_;
-				if (_data_->_tmp70_) {
-					_data_->_tmp71_ = _data_->self->priv->currently_browsing_server_email;
-					_data_->_tmp72_ = _data_->email;
-					_data_->_tmp66_ = g_strcmp0 (_data_->_tmp71_, _data_->_tmp72_) == 0;
+				_data_->_tmp72_ = greeter_list_get_selected_entry ((GreeterList*) _data_->self);
+				_data_->_tmp73_ = _data_->_tmp72_;
+				_data_->_tmp74_ = prompt_box_get_has_errors (_data_->_tmp73_);
+				_data_->_tmp75_ = _data_->_tmp74_;
+				if (_data_->_tmp75_) {
+					_data_->_tmp76_ = _data_->self->priv->currently_browsing_server_email;
+					_data_->_tmp77_ = _data_->email;
+					_data_->_tmp71_ = g_strcmp0 (_data_->_tmp76_, _data_->_tmp77_) == 0;
 				} else {
-					_data_->_tmp66_ = FALSE;
+					_data_->_tmp71_ = FALSE;
 				}
-				_data_->_tmp73_ = _data_->_tmp66_;
-				if (_data_->_tmp73_) {
-					_data_->_tmp74_ = _data_->self->priv->currently_browsing_server_url;
-					_data_->_tmp75_ = _data_->url;
-					_data_->_tmp65_ = g_strcmp0 (_data_->_tmp74_, _data_->_tmp75_) == 0;
+				_data_->_tmp78_ = _data_->_tmp71_;
+				if (_data_->_tmp78_) {
+					_data_->_tmp79_ = _data_->self->priv->currently_browsing_server_url;
+					_data_->_tmp80_ = _data_->url;
+					_data_->_tmp70_ = g_strcmp0 (_data_->_tmp79_, _data_->_tmp80_) == 0;
 				} else {
-					_data_->_tmp65_ = FALSE;
+					_data_->_tmp70_ = FALSE;
 				}
-				_data_->_tmp76_ = _data_->_tmp65_;
-				if (_data_->_tmp76_) {
+				_data_->_tmp81_ = _data_->_tmp70_;
+				if (_data_->_tmp81_) {
 					_data_->allowcache = FALSE;
 				}
-				_data_->_tmp77_ = _data_->self->priv->remote_login_service;
-				_data_->_tmp78_ = _data_->url;
-				_data_->_tmp79_ = _data_->email;
-				_data_->_tmp80_ = _data_->password_field;
-				_data_->_tmp81_ = gtk_entry_get_text ((GtkEntry*) _data_->_tmp80_);
-				_data_->_tmp82_ = _data_->_tmp81_;
-				_data_->_tmp83_ = _data_->allowcache;
-				_data_->_tmp84_ = FALSE;
-				_data_->_tmp85_ = NULL;
-				_data_->_tmp86_ = NULL;
-				_data_->_tmp87_ = 0;
+				_data_->_tmp82_ = _data_->self->priv->remote_login_service;
+				_data_->_tmp83_ = _data_->url;
+				_data_->_tmp84_ = _data_->email;
+				_data_->_tmp85_ = _data_->password_field;
+				_data_->_tmp86_ = gtk_entry_get_text ((GtkEntry*) _data_->_tmp85_);
+				_data_->_tmp87_ = _data_->_tmp86_;
+				_data_->_tmp88_ = _data_->allowcache;
+				_data_->_tmp89_ = FALSE;
+				_data_->_tmp90_ = NULL;
+				_data_->_tmp91_ = NULL;
+				_data_->_tmp92_ = 0;
 				_data_->_state_ = 1;
-				remote_login_service_get_servers_for_login (_data_->_tmp77_, _data_->_tmp78_, _data_->_tmp79_, _data_->_tmp82_, _data_->_tmp83_, user_list_remote_directory_respond_cb_ready, _data_);
+				remote_login_service_get_servers_for_login (_data_->_tmp82_, _data_->_tmp83_, _data_->_tmp84_, _data_->_tmp87_, _data_->_tmp88_, user_list_remote_directory_respond_cb_ready, _data_);
 				return FALSE;
 				_state_1:
-				remote_login_service_get_servers_for_login_finish (_data_->_tmp77_, _data_->_res_, &_data_->_tmp84_, &_data_->_tmp85_, &_data_->_tmp86_, &_data_->_tmp87_, &_data_->_inner_error_);
-				_data_->login_success = _data_->_tmp84_;
+				remote_login_service_get_servers_for_login_finish (_data_->_tmp82_, _data_->_res_, &_data_->_tmp89_, &_data_->_tmp90_, &_data_->_tmp91_, &_data_->_tmp92_, &_data_->_inner_error_);
+				_data_->login_success = _data_->_tmp89_;
 				_g_free0 (_data_->data_type);
-				_data_->data_type = _data_->_tmp85_;
+				_data_->data_type = _data_->_tmp90_;
 				_data_->server_list = (_vala_RemoteServer_array_free (_data_->server_list, _data_->server_list_length1), NULL);
-				_data_->server_list = _data_->_tmp86_;
-				_data_->server_list_length1 = _data_->_tmp87_;
+				_data_->server_list = _data_->_tmp91_;
+				_data_->server_list_length1 = _data_->_tmp92_;
 				_data_->_server_list_size_ = _data_->server_list_length1;
 				if (_data_->_inner_error_ != NULL) {
 					_g_free0 (_data_->data_type);
 					_g_free0 (_data_->url);
 					if (_data_->_inner_error_->domain == G_IO_ERROR) {
-						goto __catch31_g_io_error;
+						goto __catch34_g_io_error;
 					}
 					_g_free0 (_data_->data_type);
 					_g_free0 (_data_->url);
@@ -2416,28 +2567,28 @@ static gboolean user_list_remote_directory_respond_cb_co (UserListRemoteDirector
 				}
 				_g_free0 (_data_->data_type);
 			}
-			_data_->_tmp88_ = _data_->url;
-			_data_->_tmp89_ = g_strdup (_data_->_tmp88_);
+			_data_->_tmp93_ = _data_->url;
+			_data_->_tmp94_ = g_strdup (_data_->_tmp93_);
 			_g_free0 (_data_->self->priv->currently_browsing_server_url);
-			_data_->self->priv->currently_browsing_server_url = _data_->_tmp89_;
-			_data_->_tmp90_ = _data_->email;
-			_data_->_tmp91_ = g_strdup (_data_->_tmp90_);
+			_data_->self->priv->currently_browsing_server_url = _data_->_tmp94_;
+			_data_->_tmp95_ = _data_->email;
+			_data_->_tmp96_ = g_strdup (_data_->_tmp95_);
 			_g_free0 (_data_->self->priv->currently_browsing_server_email);
-			_data_->self->priv->currently_browsing_server_email = _data_->_tmp91_;
+			_data_->self->priv->currently_browsing_server_email = _data_->_tmp96_;
 			_g_free0 (_data_->url);
 		}
-		goto __finally31;
-		__catch31_g_io_error:
+		goto __finally34;
+		__catch34_g_io_error:
 		{
 			_data_->_vala1_e = _data_->_inner_error_;
 			_data_->_inner_error_ = NULL;
-			_data_->_tmp92_ = _data_->_vala1_e;
-			_data_->_tmp93_ = _data_->_tmp92_->message;
-			g_debug ("user-list.vala:416: Calling get_servers in com.canonical.RemoteLogin d" \
-"bus service failed. Error: %s", _data_->_tmp93_);
+			_data_->_tmp97_ = _data_->_vala1_e;
+			_data_->_tmp98_ = _data_->_tmp97_->message;
+			g_debug ("user-list.vala:441: Calling get_servers in com.canonical.RemoteLogin d" \
+"bus service failed. Error: %s", _data_->_tmp98_);
 			_g_error_free0 (_data_->_vala1_e);
 		}
-		__finally31:
+		__finally34:
 		if (_data_->_inner_error_ != NULL) {
 			_g_free0 (_data_->email);
 			_data_->server_list = (_vala_RemoteServer_array_free (_data_->server_list, _data_->server_list_length1), NULL);
@@ -2447,52 +2598,52 @@ static gboolean user_list_remote_directory_respond_cb_co (UserListRemoteDirector
 			g_clear_error (&_data_->_inner_error_);
 			return FALSE;
 		}
-		_data_->_tmp94_ = _data_->login_success;
-		if (_data_->_tmp94_) {
-			_data_->_tmp95_ = _data_->password_field;
-			dash_entry_set_did_respond (_data_->_tmp95_, FALSE);
-			_data_->_tmp96_ = _data_->server_list;
-			_data_->_tmp96__length1 = _data_->server_list_length1;
-			if (_data_->_tmp96__length1 == 0) {
+		_data_->_tmp99_ = _data_->login_success;
+		if (_data_->_tmp99_) {
+			_data_->_tmp100_ = _data_->password_field;
+			dash_entry_set_did_respond (_data_->_tmp100_, FALSE);
+			_data_->_tmp101_ = _data_->server_list;
+			_data_->_tmp101__length1 = _data_->server_list_length1;
+			if (_data_->_tmp101__length1 == 0) {
 				user_list_show_remote_account_dialog (_data_->self);
 			} else {
-				_data_->_tmp97_ = g_strdup ("");
-				_data_->last_used_server_list_name = _data_->_tmp97_;
-				_data_->_tmp98_ = _data_->server_list;
-				_data_->_tmp98__length1 = _data_->server_list_length1;
+				_data_->_tmp102_ = g_strdup ("");
+				_data_->last_used_server_list_name = _data_->_tmp102_;
+				_data_->_tmp103_ = _data_->server_list;
+				_data_->_tmp103__length1 = _data_->server_list_length1;
 				{
 					_data_->remote_server_collection_length1 = 0;
 					_data_->_remote_server_collection_size_ = 0;
-					_data_->remote_server_collection = _data_->_tmp98_;
-					_data_->remote_server_collection_length1 = _data_->_tmp98__length1;
-					for (_data_->remote_server_it = 0; _data_->remote_server_it < _data_->_tmp98__length1; _data_->remote_server_it = _data_->remote_server_it + 1) {
-						memset (&_data_->_tmp99_, 0, sizeof (RemoteServer));
-						remote_server_copy (&_data_->remote_server_collection[_data_->remote_server_it], &_data_->_tmp99_);
-						_data_->remote_server = _data_->_tmp99_;
+					_data_->remote_server_collection = _data_->_tmp103_;
+					_data_->remote_server_collection_length1 = _data_->_tmp103__length1;
+					for (_data_->remote_server_it = 0; _data_->remote_server_it < _data_->_tmp103__length1; _data_->remote_server_it = _data_->remote_server_it + 1) {
+						memset (&_data_->_tmp104_, 0, sizeof (RemoteServer));
+						remote_server_copy (&_data_->remote_server_collection[_data_->remote_server_it], &_data_->_tmp104_);
+						_data_->remote_server = _data_->_tmp104_;
 						{
-							_data_->_tmp100_ = _data_->remote_server;
-							_data_->_tmp101_ = NULL;
-							_data_->_tmp101_ = user_list_create_prompt_for_login_server (_data_->self, &_data_->_tmp100_);
-							_data_->_vala2_e = _data_->_tmp101_;
-							_data_->_tmp102_ = _data_->remote_server;
-							_data_->_tmp103_ = _data_->_tmp102_.last_used_server;
-							if (_data_->_tmp103_) {
-								_data_->_tmp104_ = _data_->_vala2_e;
-								_data_->_tmp105_ = prompt_box_get_id (_data_->_tmp104_);
-								_data_->_tmp106_ = _data_->_tmp105_;
-								_data_->_tmp107_ = g_strdup (_data_->_tmp106_);
+							_data_->_tmp105_ = _data_->remote_server;
+							_data_->_tmp106_ = NULL;
+							_data_->_tmp106_ = user_list_create_prompt_for_login_server (_data_->self, &_data_->_tmp105_);
+							_data_->_vala2_e = _data_->_tmp106_;
+							_data_->_tmp107_ = _data_->remote_server;
+							_data_->_tmp108_ = _data_->_tmp107_.last_used_server;
+							if (_data_->_tmp108_) {
+								_data_->_tmp109_ = _data_->_vala2_e;
+								_data_->_tmp110_ = prompt_box_get_id (_data_->_tmp109_);
+								_data_->_tmp111_ = _data_->_tmp110_;
+								_data_->_tmp112_ = g_strdup (_data_->_tmp111_);
 								_g_free0 (_data_->last_used_server_list_name);
-								_data_->last_used_server_list_name = _data_->_tmp107_;
+								_data_->last_used_server_list_name = _data_->_tmp112_;
 							}
 							_g_object_unref0 (_data_->_vala2_e);
 							remote_server_destroy (&_data_->remote_server);
 						}
 					}
 				}
-				_data_->_tmp108_ = _data_->last_used_server_list_name;
-				if (g_strcmp0 (_data_->_tmp108_, "") != 0) {
-					_data_->_tmp109_ = _data_->last_used_server_list_name;
-					greeter_list_set_active_entry ((GreeterList*) _data_->self, _data_->_tmp109_);
+				_data_->_tmp113_ = _data_->last_used_server_list_name;
+				if (g_strcmp0 (_data_->_tmp113_, "") != 0) {
+					_data_->_tmp114_ = _data_->last_used_server_list_name;
+					greeter_list_set_active_entry ((GreeterList*) _data_->self, _data_->_tmp114_);
 				} else {
 					greeter_list_set_active_first_entry_with_prefix ((GreeterList*) _data_->self, "*remote_login");
 				}
@@ -2500,11 +2651,11 @@ static gboolean user_list_remote_directory_respond_cb_co (UserListRemoteDirector
 			}
 		} else {
 			((GreeterList*) _data_->self)->will_clear = TRUE;
-			_data_->_tmp110_ = NULL;
-			_data_->_tmp110_ = _ ("Incorrect e-mail address or password");
-			greeter_list_show_message ((GreeterList*) _data_->self, _data_->_tmp110_, TRUE);
-			_data_->_tmp111_ = _data_->self->priv->remote_directory_server_list;
-			user_list_create_remote_fields_for_current_item (_data_->self, _data_->_tmp111_, NULL, NULL);
+			_data_->_tmp115_ = NULL;
+			_data_->_tmp115_ = _ ("Incorrect e-mail address or password");
+			greeter_list_show_message ((GreeterList*) _data_->self, _data_->_tmp115_, TRUE);
+			_data_->_tmp116_ = _data_->self->priv->remote_directory_server_list;
+			user_list_create_remote_fields_for_current_item (_data_->self, _data_->_tmp116_, NULL, NULL);
 		}
 	}
 	_g_free0 (_data_->email);
@@ -3214,458 +3365,487 @@ static gboolean user_list_create_remote_fields_for_current_item_co (UserListCrea
 	_data_->_tmp7_ = NULL;
 	_data_->_tmp7_ = user_list_url_from_remote_loding_server_list_name (_data_->self, _data_->_tmp6_);
 	_data_->url = _data_->_tmp7_;
-	_data_->_tmp8_ = _data_->server_list;
+	_data_->_tmp8_ = greeter_list_get_selected_entry ((GreeterList*) _data_->self);
+	_data_->_tmp9_ = _data_->_tmp8_;
+	_data_->_tmp10_ = prompt_box_get_id (_data_->_tmp9_);
+	_data_->_tmp11_ = _data_->_tmp10_;
+	_data_->_tmp12_ = NULL;
+	_data_->_tmp12_ = user_list_username_from_remote_loding_server_list_name (_data_->self, _data_->_tmp11_);
+	_data_->username = _data_->_tmp12_;
+	_data_->_tmp13_ = _data_->server_list;
 	{
-		_data_->remote_server_collection = _data_->_tmp8_;
+		_data_->remote_server_collection = _data_->_tmp13_;
 		for (_data_->remote_server_it = _data_->remote_server_collection; _data_->remote_server_it != NULL; _data_->remote_server_it = _data_->remote_server_it->next) {
-			_data_->_tmp9_ = _remote_server_dup0 ((RemoteServer*) _data_->remote_server_it->data);
-			_data_->remote_server = _data_->_tmp9_;
+			_data_->_tmp14_ = _remote_server_dup0 ((RemoteServer*) _data_->remote_server_it->data);
+			_data_->remote_server = _data_->_tmp14_;
 			{
-				_data_->_tmp10_ = _data_->remote_server;
-				_data_->_tmp11_ = (*_data_->_tmp10_).url;
-				_data_->_tmp12_ = _data_->url;
-				if (g_strcmp0 (_data_->_tmp11_, _data_->_tmp12_) == 0) {
-					_data_->_tmp13_ = greeter_list_get_selected_entry ((GreeterList*) _data_->self);
-					_data_->_tmp14_ = _data_->_tmp13_;
-					_data_->_tmp15_ = prompt_box_get_id (_data_->_tmp14_);
-					_data_->_tmp16_ = _data_->_tmp15_;
-					_data_->_tmp17_ = FALSE;
-					_data_->_tmp17_ = g_str_has_prefix (_data_->_tmp16_, "*remote_login");
-					if (_data_->_tmp17_) {
-						_data_->_tmp18_ = _data_->remote_server;
-						_data_->_tmp19_ = (*_data_->_tmp18_).type;
-						_data_->_tmp20_ = FALSE;
-						_data_->_tmp20_ = user_list_is_supported_remote_session (_data_->self, _data_->_tmp19_);
-						if (!_data_->_tmp20_) {
-							_data_->_tmp21_ = NULL;
-							_data_->_tmp21_ = _ ("Server type not supported.");
-							greeter_list_show_message ((GreeterList*) _data_->self, _data_->_tmp21_, TRUE);
+				_data_->_tmp15_ = _data_->remote_server;
+				_data_->_tmp16_ = *_data_->_tmp15_;
+				_data_->_tmp17_ = NULL;
+				_data_->_tmp17_ = user_list_username_from_remote_server_fields (_data_->self, &_data_->_tmp16_);
+				_data_->remote_username = _data_->_tmp17_;
+				_data_->_tmp19_ = _data_->remote_server;
+				_data_->_tmp20_ = (*_data_->_tmp19_).url;
+				_data_->_tmp21_ = _data_->url;
+				if (g_strcmp0 (_data_->_tmp20_, _data_->_tmp21_) == 0) {
+					_data_->_tmp23_ = _data_->username;
+					if (_data_->_tmp23_ == NULL) {
+						_data_->_tmp22_ = TRUE;
+					} else {
+						_data_->_tmp24_ = _data_->username;
+						_data_->_tmp25_ = _data_->remote_username;
+						_data_->_tmp22_ = g_strcmp0 (_data_->_tmp24_, _data_->_tmp25_) == 0;
+					}
+					_data_->_tmp26_ = _data_->_tmp22_;
+					_data_->_tmp18_ = _data_->_tmp26_;
+				} else {
+					_data_->_tmp18_ = FALSE;
+				}
+				_data_->_tmp27_ = _data_->_tmp18_;
+				if (_data_->_tmp27_) {
+					_data_->_tmp28_ = greeter_list_get_selected_entry ((GreeterList*) _data_->self);
+					_data_->_tmp29_ = _data_->_tmp28_;
+					_data_->_tmp30_ = prompt_box_get_id (_data_->_tmp29_);
+					_data_->_tmp31_ = _data_->_tmp30_;
+					_data_->_tmp32_ = FALSE;
+					_data_->_tmp32_ = g_str_has_prefix (_data_->_tmp31_, "*remote_login");
+					if (_data_->_tmp32_) {
+						_data_->_tmp33_ = _data_->remote_server;
+						_data_->_tmp34_ = (*_data_->_tmp33_).type;
+						_data_->_tmp35_ = FALSE;
+						_data_->_tmp35_ = user_list_is_supported_remote_session (_data_->self, _data_->_tmp34_);
+						if (!_data_->_tmp35_) {
+							_data_->_tmp36_ = NULL;
+							_data_->_tmp36_ = _ ("Server type not supported.");
+							greeter_list_show_message ((GreeterList*) _data_->self, _data_->_tmp36_, TRUE);
 						}
 					}
 					_data_->fields = NULL;
-					_data_->_tmp22_ = _data_->remote_server;
-					_data_->_tmp23_ = (*_data_->_tmp22_).fields;
-					_data_->_tmp23__length1 = (*_data_->_tmp22_).fields_length1;
+					_data_->_tmp37_ = _data_->remote_server;
+					_data_->_tmp38_ = (*_data_->_tmp37_).fields;
+					_data_->_tmp38__length1 = (*_data_->_tmp37_).fields_length1;
 					{
 						_data_->field_collection_length1 = 0;
 						_data_->_field_collection_size_ = 0;
-						_data_->field_collection = _data_->_tmp23_;
-						_data_->field_collection_length1 = _data_->_tmp23__length1;
-						for (_data_->field_it = 0; _data_->field_it < _data_->_tmp23__length1; _data_->field_it = _data_->field_it + 1) {
-							memset (&_data_->_tmp24_, 0, sizeof (RemoteServerField));
-							remote_server_field_copy (&_data_->field_collection[_data_->field_it], &_data_->_tmp24_);
-							_data_->field = _data_->_tmp24_;
+						_data_->field_collection = _data_->_tmp38_;
+						_data_->field_collection_length1 = _data_->_tmp38__length1;
+						for (_data_->field_it = 0; _data_->field_it < _data_->_tmp38__length1; _data_->field_it = _data_->field_it + 1) {
+							memset (&_data_->_tmp39_, 0, sizeof (RemoteServerField));
+							remote_server_field_copy (&_data_->field_collection[_data_->field_it], &_data_->_tmp39_);
+							_data_->field = _data_->_tmp39_;
 							{
-								_data_->_tmp25_ = _data_->field;
-								_data_->_tmp26_ = _data_->_tmp25_;
-								_data_->_tmp27_ = _remote_server_field_dup0 (&_data_->_tmp26_);
-								_data_->fields = g_list_append (_data_->fields, _data_->_tmp27_);
+								_data_->_tmp40_ = _data_->field;
+								_data_->_tmp41_ = _data_->_tmp40_;
+								_data_->_tmp42_ = _remote_server_field_dup0 (&_data_->_tmp41_);
+								_data_->fields = g_list_append (_data_->fields, _data_->_tmp42_);
 								remote_server_field_destroy (&_data_->field);
 							}
 						}
 					}
 					_data_->fields = g_list_sort (_data_->fields, _remote_server_field_sort_function_gcompare_func);
-					_data_->_tmp28_ = _data_->fields;
+					_data_->_tmp43_ = _data_->fields;
 					{
-						_data_->_vala1_field_collection = _data_->_tmp28_;
+						_data_->_vala1_field_collection = _data_->_tmp43_;
 						for (_data_->_vala1_field_it = _data_->_vala1_field_collection; _data_->_vala1_field_it != NULL; _data_->_vala1_field_it = _data_->_vala1_field_it->next) {
-							_data_->_tmp29_ = _remote_server_field_dup0 ((RemoteServerField*) _data_->_vala1_field_it->data);
-							_data_->_vala1_field = _data_->_tmp29_;
+							_data_->_tmp44_ = _remote_server_field_dup0 ((RemoteServerField*) _data_->_vala1_field_it->data);
+							_data_->_vala1_field = _data_->_tmp44_;
 							{
 								_data_->widget = NULL;
-								_data_->_tmp30_ = g_strdup ("");
-								_data_->default_value = _data_->_tmp30_;
-								_data_->_tmp32_ = _data_->_vala1_field;
-								_data_->_tmp33_ = (*_data_->_tmp32_).default_value;
-								if (_data_->_tmp33_ != NULL) {
-									_data_->_tmp34_ = _data_->_vala1_field;
-									_data_->_tmp35_ = (*_data_->_tmp34_).default_value;
-									_data_->_tmp36_ = G_VARIANT_TYPE_STRING;
-									_data_->_tmp37_ = FALSE;
-									_data_->_tmp37_ = g_variant_is_of_type (_data_->_tmp35_, _data_->_tmp36_);
-									_data_->_tmp31_ = _data_->_tmp37_;
+								_data_->_tmp45_ = g_strdup ("");
+								_data_->default_value = _data_->_tmp45_;
+								_data_->_tmp47_ = _data_->_vala1_field;
+								_data_->_tmp48_ = (*_data_->_tmp47_).default_value;
+								if (_data_->_tmp48_ != NULL) {
+									_data_->_tmp49_ = _data_->_vala1_field;
+									_data_->_tmp50_ = (*_data_->_tmp49_).default_value;
+									_data_->_tmp51_ = G_VARIANT_TYPE_STRING;
+									_data_->_tmp52_ = FALSE;
+									_data_->_tmp52_ = g_variant_is_of_type (_data_->_tmp50_, _data_->_tmp51_);
+									_data_->_tmp46_ = _data_->_tmp52_;
 								} else {
-									_data_->_tmp31_ = FALSE;
+									_data_->_tmp46_ = FALSE;
 								}
-								_data_->_tmp38_ = _data_->_tmp31_;
-								if (_data_->_tmp38_) {
-									_data_->_tmp39_ = _data_->_vala1_field;
-									_data_->_tmp40_ = (*_data_->_tmp39_).default_value;
-									_data_->_tmp41_ = NULL;
-									_data_->_tmp41_ = g_variant_get_string (_data_->_tmp40_, NULL);
-									_data_->_tmp42_ = g_strdup (_data_->_tmp41_);
+								_data_->_tmp53_ = _data_->_tmp46_;
+								if (_data_->_tmp53_) {
+									_data_->_tmp54_ = _data_->_vala1_field;
+									_data_->_tmp55_ = (*_data_->_tmp54_).default_value;
+									_data_->_tmp56_ = NULL;
+									_data_->_tmp56_ = g_variant_get_string (_data_->_tmp55_, NULL);
+									_data_->_tmp57_ = g_strdup (_data_->_tmp56_);
 									_g_free0 (_data_->default_value);
-									_data_->default_value = _data_->_tmp42_;
+									_data_->default_value = _data_->_tmp57_;
 								}
-								_data_->_tmp43_ = _data_->_vala1_field;
-								_data_->_tmp44_ = (*_data_->_tmp43_).type;
-								if (g_strcmp0 (_data_->_tmp44_, "username") == 0) {
-									_data_->_tmp45_ = NULL;
-									_data_->_tmp45_ = _ ("Username:");
-									_data_->_tmp46_ = NULL;
-									_data_->_tmp46_ = greeter_list_add_prompt ((GreeterList*) _data_->self, _data_->_tmp45_, FALSE);
-									_data_->entry = _data_->_tmp46_;
-									_data_->_tmp47_ = _data_->entry;
-									_data_->_tmp48_ = _data_->default_value;
-									gtk_entry_set_text ((GtkEntry*) _data_->_tmp47_, _data_->_tmp48_);
-									_data_->_tmp49_ = _data_->entry;
-									_data_->_tmp50_ = _g_object_ref0 ((GtkWidget*) _data_->_tmp49_);
+								_data_->_tmp58_ = _data_->_vala1_field;
+								_data_->_tmp59_ = (*_data_->_tmp58_).type;
+								if (g_strcmp0 (_data_->_tmp59_, "username") == 0) {
+									_data_->_tmp60_ = NULL;
+									_data_->_tmp60_ = _ ("Username:");
+									_data_->_tmp61_ = NULL;
+									_data_->_tmp61_ = greeter_list_add_prompt ((GreeterList*) _data_->self, _data_->_tmp60_, FALSE);
+									_data_->entry = _data_->_tmp61_;
+									_data_->_tmp62_ = _data_->entry;
+									_data_->_tmp63_ = _data_->default_value;
+									gtk_entry_set_text ((GtkEntry*) _data_->_tmp62_, _data_->_tmp63_);
+									_data_->_tmp64_ = _data_->entry;
+									_data_->_tmp65_ = _g_object_ref0 ((GtkWidget*) _data_->_tmp64_);
 									_g_object_unref0 (_data_->widget);
-									_data_->widget = _data_->_tmp50_;
+									_data_->widget = _data_->_tmp65_;
 									_g_object_unref0 (_data_->entry);
 								} else {
-									_data_->_tmp51_ = _data_->_vala1_field;
-									_data_->_tmp52_ = (*_data_->_tmp51_).type;
-									if (g_strcmp0 (_data_->_tmp52_, "password") == 0) {
-										_data_->_tmp53_ = NULL;
-										_data_->_tmp53_ = _ ("Password:");
-										_data_->_tmp54_ = NULL;
-										_data_->_tmp54_ = greeter_list_add_prompt ((GreeterList*) _data_->self, _data_->_tmp53_, TRUE);
-										_data_->_vala1_entry = _data_->_tmp54_;
-										_data_->_tmp55_ = _data_->_vala1_entry;
-										_data_->_tmp56_ = _data_->default_value;
-										gtk_entry_set_text ((GtkEntry*) _data_->_tmp55_, _data_->_tmp56_);
-										_data_->_tmp57_ = _data_->_vala1_entry;
-										_data_->_tmp58_ = _g_object_ref0 ((GtkWidget*) _data_->_tmp57_);
+									_data_->_tmp66_ = _data_->_vala1_field;
+									_data_->_tmp67_ = (*_data_->_tmp66_).type;
+									if (g_strcmp0 (_data_->_tmp67_, "password") == 0) {
+										_data_->_tmp68_ = NULL;
+										_data_->_tmp68_ = _ ("Password:");
+										_data_->_tmp69_ = NULL;
+										_data_->_tmp69_ = greeter_list_add_prompt ((GreeterList*) _data_->self, _data_->_tmp68_, TRUE);
+										_data_->_vala1_entry = _data_->_tmp69_;
+										_data_->_tmp70_ = _data_->_vala1_entry;
+										_data_->_tmp71_ = _data_->default_value;
+										gtk_entry_set_text ((GtkEntry*) _data_->_tmp70_, _data_->_tmp71_);
+										_data_->_tmp72_ = _data_->_vala1_entry;
+										_data_->_tmp73_ = _g_object_ref0 ((GtkWidget*) _data_->_tmp72_);
 										_g_object_unref0 (_data_->widget);
-										_data_->widget = _data_->_tmp58_;
+										_data_->widget = _data_->_tmp73_;
 										_g_object_unref0 (_data_->_vala1_entry);
 									} else {
-										_data_->_tmp59_ = _data_->_vala1_field;
-										_data_->_tmp60_ = (*_data_->_tmp59_).type;
-										if (g_strcmp0 (_data_->_tmp60_, "domain") == 0) {
-											_data_->_tmp61_ = NULL;
-											_data_->_tmp61_ = g_new0 (gchar*, 0 + 1);
-											_data_->domainsArray = _data_->_tmp61_;
+										_data_->_tmp74_ = _data_->_vala1_field;
+										_data_->_tmp75_ = (*_data_->_tmp74_).type;
+										if (g_strcmp0 (_data_->_tmp75_, "domain") == 0) {
+											_data_->_tmp76_ = NULL;
+											_data_->_tmp76_ = g_new0 (gchar*, 0 + 1);
+											_data_->domainsArray = _data_->_tmp76_;
 											_data_->domainsArray_length1 = 0;
 											_data_->_domainsArray_size_ = _data_->domainsArray_length1;
-											_data_->_tmp64_ = _data_->_vala1_field;
-											_data_->_tmp65_ = (*_data_->_tmp64_).properties;
-											if (_data_->_tmp65_ != NULL) {
-												_data_->_tmp66_ = _data_->_vala1_field;
-												_data_->_tmp67_ = (*_data_->_tmp66_).properties;
-												_data_->_tmp68_ = FALSE;
-												_data_->_tmp68_ = g_hash_table_contains (_data_->_tmp67_, "domains");
-												_data_->_tmp63_ = _data_->_tmp68_;
+											_data_->_tmp79_ = _data_->_vala1_field;
+											_data_->_tmp80_ = (*_data_->_tmp79_).properties;
+											if (_data_->_tmp80_ != NULL) {
+												_data_->_tmp81_ = _data_->_vala1_field;
+												_data_->_tmp82_ = (*_data_->_tmp81_).properties;
+												_data_->_tmp83_ = FALSE;
+												_data_->_tmp83_ = g_hash_table_contains (_data_->_tmp82_, "domains");
+												_data_->_tmp78_ = _data_->_tmp83_;
 											} else {
-												_data_->_tmp63_ = FALSE;
+												_data_->_tmp78_ = FALSE;
 											}
-											_data_->_tmp69_ = _data_->_tmp63_;
-											if (_data_->_tmp69_) {
-												_data_->_tmp70_ = _data_->_vala1_field;
-												_data_->_tmp71_ = (*_data_->_tmp70_).properties;
-												_data_->_tmp72_ = NULL;
-												_data_->_tmp72_ = g_hash_table_lookup (_data_->_tmp71_, "domains");
-												_data_->_tmp73_ = G_VARIANT_TYPE_ARRAY;
-												_data_->_tmp74_ = FALSE;
-												_data_->_tmp74_ = g_variant_is_of_type ((GVariant*) _data_->_tmp72_, _data_->_tmp73_);
-												_data_->_tmp62_ = _data_->_tmp74_;
+											_data_->_tmp84_ = _data_->_tmp78_;
+											if (_data_->_tmp84_) {
+												_data_->_tmp85_ = _data_->_vala1_field;
+												_data_->_tmp86_ = (*_data_->_tmp85_).properties;
+												_data_->_tmp87_ = NULL;
+												_data_->_tmp87_ = g_hash_table_lookup (_data_->_tmp86_, "domains");
+												_data_->_tmp88_ = G_VARIANT_TYPE_ARRAY;
+												_data_->_tmp89_ = FALSE;
+												_data_->_tmp89_ = g_variant_is_of_type ((GVariant*) _data_->_tmp87_, _data_->_tmp88_);
+												_data_->_tmp77_ = _data_->_tmp89_;
 											} else {
-												_data_->_tmp62_ = FALSE;
+												_data_->_tmp77_ = FALSE;
 											}
-											_data_->_tmp75_ = _data_->_tmp62_;
-											if (_data_->_tmp75_) {
-												_data_->_tmp76_ = _data_->_vala1_field;
-												_data_->_tmp77_ = (*_data_->_tmp76_).properties;
-												_data_->_tmp78_ = NULL;
-												_data_->_tmp78_ = g_hash_table_lookup (_data_->_tmp77_, "domains");
-												memset (&_data_->_tmp79_, 0, sizeof (size_t));
-												_data_->_tmp80_ = NULL;
-												_data_->_tmp80_ = g_variant_dup_strv ((GVariant*) _data_->_tmp78_, &_data_->_tmp79_);
+											_data_->_tmp90_ = _data_->_tmp77_;
+											if (_data_->_tmp90_) {
+												_data_->_tmp91_ = _data_->_vala1_field;
+												_data_->_tmp92_ = (*_data_->_tmp91_).properties;
+												_data_->_tmp93_ = NULL;
+												_data_->_tmp93_ = g_hash_table_lookup (_data_->_tmp92_, "domains");
+												memset (&_data_->_tmp94_, 0, sizeof (size_t));
+												_data_->_tmp95_ = NULL;
+												_data_->_tmp95_ = g_variant_dup_strv ((GVariant*) _data_->_tmp93_, &_data_->_tmp94_);
 												_data_->domainsArray = (_vala_array_free (_data_->domainsArray, _data_->domainsArray_length1, (GDestroyNotify) g_free), NULL);
-												_data_->domainsArray = _data_->_tmp80_;
-												_data_->domainsArray_length1 = _data_->_tmp79_;
+												_data_->domainsArray = _data_->_tmp95_;
+												_data_->domainsArray_length1 = _data_->_tmp94_;
 												_data_->_domainsArray_size_ = _data_->domainsArray_length1;
 											}
-											_data_->_tmp81_ = g_ptr_array_new_with_free_func (_g_free0_);
-											_data_->domains = _data_->_tmp81_;
+											_data_->_tmp96_ = g_ptr_array_new_with_free_func (_g_free0_);
+											_data_->domains = _data_->_tmp96_;
 											{
 												_data_->i = 0;
 												{
-													_data_->_tmp82_ = TRUE;
+													_data_->_tmp97_ = TRUE;
 													while (TRUE) {
-														_data_->_tmp83_ = _data_->_tmp82_;
-														if (!_data_->_tmp83_) {
-															_data_->_tmp84_ = _data_->i;
-															_data_->i = _data_->_tmp84_ + 1;
+														_data_->_tmp98_ = _data_->_tmp97_;
+														if (!_data_->_tmp98_) {
+															_data_->_tmp99_ = _data_->i;
+															_data_->i = _data_->_tmp99_ + 1;
 														}
-														_data_->_tmp82_ = FALSE;
-														_data_->_tmp85_ = _data_->i;
-														_data_->_tmp86_ = _data_->domainsArray;
-														_data_->_tmp86__length1 = _data_->domainsArray_length1;
-														if (!(_data_->_tmp85_ < _data_->_tmp86__length1)) {
+														_data_->_tmp97_ = FALSE;
+														_data_->_tmp100_ = _data_->i;
+														_data_->_tmp101_ = _data_->domainsArray;
+														_data_->_tmp101__length1 = _data_->domainsArray_length1;
+														if (!(_data_->_tmp100_ < _data_->_tmp101__length1)) {
 															break;
 														}
-														_data_->_tmp87_ = _data_->domains;
-														_data_->_tmp88_ = _data_->domainsArray;
-														_data_->_tmp88__length1 = _data_->domainsArray_length1;
-														_data_->_tmp89_ = _data_->i;
-														_data_->_tmp90_ = _data_->_tmp88_[_data_->_tmp89_];
-														_data_->_tmp91_ = g_strdup (_data_->_tmp90_);
-														g_ptr_array_add (_data_->_tmp87_, _data_->_tmp91_);
+														_data_->_tmp102_ = _data_->domains;
+														_data_->_tmp103_ = _data_->domainsArray;
+														_data_->_tmp103__length1 = _data_->domainsArray_length1;
+														_data_->_tmp104_ = _data_->i;
+														_data_->_tmp105_ = _data_->_tmp103_[_data_->_tmp104_];
+														_data_->_tmp106_ = g_strdup (_data_->_tmp105_);
+														g_ptr_array_add (_data_->_tmp102_, _data_->_tmp106_);
 													}
 												}
 											}
-											_data_->_tmp95_ = _data_->_vala1_field;
-											_data_->_tmp96_ = (*_data_->_tmp95_).properties;
-											if (_data_->_tmp96_ != NULL) {
-												_data_->_tmp97_ = _data_->_vala1_field;
-												_data_->_tmp98_ = (*_data_->_tmp97_).properties;
-												_data_->_tmp99_ = FALSE;
-												_data_->_tmp99_ = g_hash_table_contains (_data_->_tmp98_, "read-only");
-												_data_->_tmp94_ = _data_->_tmp99_;
+											_data_->_tmp110_ = _data_->_vala1_field;
+											_data_->_tmp111_ = (*_data_->_tmp110_).properties;
+											if (_data_->_tmp111_ != NULL) {
+												_data_->_tmp112_ = _data_->_vala1_field;
+												_data_->_tmp113_ = (*_data_->_tmp112_).properties;
+												_data_->_tmp114_ = FALSE;
+												_data_->_tmp114_ = g_hash_table_contains (_data_->_tmp113_, "read-only");
+												_data_->_tmp109_ = _data_->_tmp114_;
 											} else {
-												_data_->_tmp94_ = FALSE;
+												_data_->_tmp109_ = FALSE;
 											}
-											_data_->_tmp100_ = _data_->_tmp94_;
-											if (_data_->_tmp100_) {
-												_data_->_tmp101_ = _data_->_vala1_field;
-												_data_->_tmp102_ = (*_data_->_tmp101_).properties;
-												_data_->_tmp103_ = NULL;
-												_data_->_tmp103_ = g_hash_table_lookup (_data_->_tmp102_, "read-only");
-												_data_->_tmp104_ = G_VARIANT_TYPE_BOOLEAN;
-												_data_->_tmp105_ = FALSE;
-												_data_->_tmp105_ = g_variant_is_of_type ((GVariant*) _data_->_tmp103_, _data_->_tmp104_);
-												_data_->_tmp93_ = _data_->_tmp105_;
+											_data_->_tmp115_ = _data_->_tmp109_;
+											if (_data_->_tmp115_) {
+												_data_->_tmp116_ = _data_->_vala1_field;
+												_data_->_tmp117_ = (*_data_->_tmp116_).properties;
+												_data_->_tmp118_ = NULL;
+												_data_->_tmp118_ = g_hash_table_lookup (_data_->_tmp117_, "read-only");
+												_data_->_tmp119_ = G_VARIANT_TYPE_BOOLEAN;
+												_data_->_tmp120_ = FALSE;
+												_data_->_tmp120_ = g_variant_is_of_type ((GVariant*) _data_->_tmp118_, _data_->_tmp119_);
+												_data_->_tmp108_ = _data_->_tmp120_;
 											} else {
-												_data_->_tmp93_ = FALSE;
+												_data_->_tmp108_ = FALSE;
 											}
-											_data_->_tmp106_ = _data_->_tmp93_;
-											if (_data_->_tmp106_) {
-												_data_->_tmp107_ = _data_->_vala1_field;
-												_data_->_tmp108_ = (*_data_->_tmp107_).properties;
-												_data_->_tmp109_ = NULL;
-												_data_->_tmp109_ = g_hash_table_lookup (_data_->_tmp108_, "read-only");
-												_data_->_tmp110_ = FALSE;
-												_data_->_tmp110_ = g_variant_get_boolean ((GVariant*) _data_->_tmp109_);
-												_data_->_tmp92_ = _data_->_tmp110_;
+											_data_->_tmp121_ = _data_->_tmp108_;
+											if (_data_->_tmp121_) {
+												_data_->_tmp122_ = _data_->_vala1_field;
+												_data_->_tmp123_ = (*_data_->_tmp122_).properties;
+												_data_->_tmp124_ = NULL;
+												_data_->_tmp124_ = g_hash_table_lookup (_data_->_tmp123_, "read-only");
+												_data_->_tmp125_ = FALSE;
+												_data_->_tmp125_ = g_variant_get_boolean ((GVariant*) _data_->_tmp124_);
+												_data_->_tmp107_ = _data_->_tmp125_;
 											} else {
-												_data_->_tmp92_ = FALSE;
+												_data_->_tmp107_ = FALSE;
 											}
-											_data_->_tmp111_ = _data_->_tmp92_;
-											_data_->read_only = _data_->_tmp111_;
-											_data_->_tmp113_ = _data_->domains;
-											_data_->_tmp114_ = g_ptr_array_get_length (_data_->_tmp113_);
-											_data_->_tmp115_ = _data_->_tmp114_;
-											if (_data_->_tmp115_ == 0) {
-												_data_->_tmp112_ = TRUE;
+											_data_->_tmp126_ = _data_->_tmp107_;
+											_data_->read_only = _data_->_tmp126_;
+											_data_->_tmp128_ = _data_->domains;
+											_data_->_tmp129_ = g_ptr_array_get_length (_data_->_tmp128_);
+											_data_->_tmp130_ = _data_->_tmp129_;
+											if (_data_->_tmp130_ == 0) {
+												_data_->_tmp127_ = TRUE;
 											} else {
-												_data_->_tmp117_ = _data_->domains;
-												_data_->_tmp118_ = g_ptr_array_get_length (_data_->_tmp117_);
-												_data_->_tmp119_ = _data_->_tmp118_;
-												if (_data_->_tmp119_ == 1) {
-													_data_->_tmp121_ = _data_->domains;
-													_data_->_tmp122_ = NULL;
-													_data_->_tmp122_ = g_ptr_array_index (_data_->_tmp121_, (guint) 0);
-													_data_->_tmp123_ = _data_->default_value;
-													if (g_strcmp0 ((const gchar*) _data_->_tmp122_, _data_->_tmp123_) == 0) {
-														_data_->_tmp120_ = TRUE;
-													} else {
-														_data_->_tmp124_ = _data_->default_value;
-														_data_->_tmp125_ = strlen (_data_->_tmp124_);
-														_data_->_tmp126_ = _data_->_tmp125_;
-														_data_->_tmp120_ = _data_->_tmp126_ == 0;
-													}
-													_data_->_tmp127_ = _data_->_tmp120_;
-													_data_->_tmp116_ = _data_->_tmp127_;
-												} else {
-													_data_->_tmp116_ = FALSE;
-												}
-												_data_->_tmp128_ = _data_->_tmp116_;
-												_data_->_tmp112_ = _data_->_tmp128_;
-											}
-											_data_->_tmp129_ = _data_->_tmp112_;
-											if (_data_->_tmp129_) {
-												_data_->_tmp130_ = NULL;
-												_data_->_tmp130_ = _ ("Domain:");
-												_data_->_tmp131_ = NULL;
-												_data_->_tmp131_ = greeter_list_add_prompt ((GreeterList*) _data_->self, _data_->_tmp130_, FALSE);
-												_data_->prompt = _data_->_tmp131_;
-												_data_->_tmp133_ = _data_->domains;
-												_data_->_tmp134_ = g_ptr_array_get_length (_data_->_tmp133_);
-												_data_->_tmp135_ = _data_->_tmp134_;
-												if (_data_->_tmp135_ == 1) {
+												_data_->_tmp132_ = _data_->domains;
+												_data_->_tmp133_ = g_ptr_array_get_length (_data_->_tmp132_);
+												_data_->_tmp134_ = _data_->_tmp133_;
+												if (_data_->_tmp134_ == 1) {
 													_data_->_tmp136_ = _data_->domains;
 													_data_->_tmp137_ = NULL;
 													_data_->_tmp137_ = g_ptr_array_index (_data_->_tmp136_, (guint) 0);
-													_data_->_tmp132_ = (const gchar*) _data_->_tmp137_;
-												} else {
 													_data_->_tmp138_ = _data_->default_value;
-													_data_->_tmp132_ = _data_->_tmp138_;
+													if (g_strcmp0 ((const gchar*) _data_->_tmp137_, _data_->_tmp138_) == 0) {
+														_data_->_tmp135_ = TRUE;
+													} else {
+														_data_->_tmp139_ = _data_->default_value;
+														_data_->_tmp140_ = strlen (_data_->_tmp139_);
+														_data_->_tmp141_ = _data_->_tmp140_;
+														_data_->_tmp135_ = _data_->_tmp141_ == 0;
+													}
+													_data_->_tmp142_ = _data_->_tmp135_;
+													_data_->_tmp131_ = _data_->_tmp142_;
+												} else {
+													_data_->_tmp131_ = FALSE;
 												}
-												_data_->_tmp139_ = _data_->prompt;
-												_data_->_tmp140_ = _data_->_tmp132_;
-												gtk_entry_set_text ((GtkEntry*) _data_->_tmp139_, _data_->_tmp140_);
-												_data_->_tmp141_ = _data_->prompt;
-												_data_->_tmp142_ = _data_->read_only;
-												gtk_widget_set_sensitive ((GtkWidget*) _data_->_tmp141_, !_data_->_tmp142_);
-												_data_->_tmp143_ = _data_->prompt;
-												_data_->_tmp144_ = _g_object_ref0 ((GtkWidget*) _data_->_tmp143_);
+												_data_->_tmp143_ = _data_->_tmp131_;
+												_data_->_tmp127_ = _data_->_tmp143_;
+											}
+											_data_->_tmp144_ = _data_->_tmp127_;
+											if (_data_->_tmp144_) {
+												_data_->_tmp145_ = NULL;
+												_data_->_tmp145_ = _ ("Domain:");
+												_data_->_tmp146_ = NULL;
+												_data_->_tmp146_ = greeter_list_add_prompt ((GreeterList*) _data_->self, _data_->_tmp145_, FALSE);
+												_data_->prompt = _data_->_tmp146_;
+												_data_->_tmp148_ = _data_->domains;
+												_data_->_tmp149_ = g_ptr_array_get_length (_data_->_tmp148_);
+												_data_->_tmp150_ = _data_->_tmp149_;
+												if (_data_->_tmp150_ == 1) {
+													_data_->_tmp151_ = _data_->domains;
+													_data_->_tmp152_ = NULL;
+													_data_->_tmp152_ = g_ptr_array_index (_data_->_tmp151_, (guint) 0);
+													_data_->_tmp147_ = (const gchar*) _data_->_tmp152_;
+												} else {
+													_data_->_tmp153_ = _data_->default_value;
+													_data_->_tmp147_ = _data_->_tmp153_;
+												}
+												_data_->_tmp154_ = _data_->prompt;
+												_data_->_tmp155_ = _data_->_tmp147_;
+												gtk_entry_set_text ((GtkEntry*) _data_->_tmp154_, _data_->_tmp155_);
+												_data_->_tmp156_ = _data_->prompt;
+												_data_->_tmp157_ = _data_->read_only;
+												gtk_widget_set_sensitive ((GtkWidget*) _data_->_tmp156_, !_data_->_tmp157_);
+												_data_->_tmp158_ = _data_->prompt;
+												_data_->_tmp159_ = _g_object_ref0 ((GtkWidget*) _data_->_tmp158_);
 												_g_object_unref0 (_data_->widget);
-												_data_->widget = _data_->_tmp144_;
+												_data_->widget = _data_->_tmp159_;
 												_g_object_unref0 (_data_->prompt);
 											} else {
-												_data_->_tmp145_ = _data_->default_value;
-												_data_->_tmp146_ = strlen (_data_->_tmp145_);
-												_data_->_tmp147_ = _data_->_tmp146_;
-												if (_data_->_tmp147_ > 0) {
+												_data_->_tmp160_ = _data_->default_value;
+												_data_->_tmp161_ = strlen (_data_->_tmp160_);
+												_data_->_tmp162_ = _data_->_tmp161_;
+												if (_data_->_tmp162_ > 0) {
 													_data_->found = FALSE;
 													{
 														_data_->_vala1_i = 0;
 														{
-															_data_->_tmp148_ = TRUE;
+															_data_->_tmp163_ = TRUE;
 															while (TRUE) {
-																_data_->_tmp149_ = _data_->_tmp148_;
-																if (!_data_->_tmp149_) {
-																	_data_->_tmp150_ = _data_->_vala1_i;
-																	_data_->_vala1_i = _data_->_tmp150_ + 1;
+																_data_->_tmp164_ = _data_->_tmp163_;
+																if (!_data_->_tmp164_) {
+																	_data_->_tmp165_ = _data_->_vala1_i;
+																	_data_->_vala1_i = _data_->_tmp165_ + 1;
 																}
-																_data_->_tmp148_ = FALSE;
-																_data_->_tmp152_ = _data_->found;
-																if (!_data_->_tmp152_) {
-																	_data_->_tmp153_ = _data_->_vala1_i;
-																	_data_->_tmp154_ = _data_->domains;
-																	_data_->_tmp155_ = g_ptr_array_get_length (_data_->_tmp154_);
-																	_data_->_tmp156_ = _data_->_tmp155_;
-																	_data_->_tmp151_ = _data_->_tmp153_ < _data_->_tmp156_;
+																_data_->_tmp163_ = FALSE;
+																_data_->_tmp167_ = _data_->found;
+																if (!_data_->_tmp167_) {
+																	_data_->_tmp168_ = _data_->_vala1_i;
+																	_data_->_tmp169_ = _data_->domains;
+																	_data_->_tmp170_ = g_ptr_array_get_length (_data_->_tmp169_);
+																	_data_->_tmp171_ = _data_->_tmp170_;
+																	_data_->_tmp166_ = _data_->_tmp168_ < _data_->_tmp171_;
 																} else {
-																	_data_->_tmp151_ = FALSE;
+																	_data_->_tmp166_ = FALSE;
 																}
-																_data_->_tmp157_ = _data_->_tmp151_;
-																if (!_data_->_tmp157_) {
+																_data_->_tmp172_ = _data_->_tmp166_;
+																if (!_data_->_tmp172_) {
 																	break;
 																}
-																_data_->_tmp158_ = _data_->default_value;
-																_data_->_tmp159_ = _data_->domains;
-																_data_->_tmp160_ = _data_->_vala1_i;
-																_data_->_tmp161_ = NULL;
-																_data_->_tmp161_ = g_ptr_array_index (_data_->_tmp159_, (guint) _data_->_tmp160_);
-																_data_->found = g_strcmp0 (_data_->_tmp158_, (const gchar*) _data_->_tmp161_) == 0;
+																_data_->_tmp173_ = _data_->default_value;
+																_data_->_tmp174_ = _data_->domains;
+																_data_->_tmp175_ = _data_->_vala1_i;
+																_data_->_tmp176_ = NULL;
+																_data_->_tmp176_ = g_ptr_array_index (_data_->_tmp174_, (guint) _data_->_tmp175_);
+																_data_->found = g_strcmp0 (_data_->_tmp173_, (const gchar*) _data_->_tmp176_) == 0;
 															}
 														}
 													}
-													_data_->_tmp162_ = _data_->found;
-													if (!_data_->_tmp162_) {
-														_data_->_tmp163_ = _data_->domains;
-														_data_->_tmp164_ = _data_->default_value;
-														_data_->_tmp165_ = g_strdup (_data_->_tmp164_);
-														g_ptr_array_add (_data_->_tmp163_, _data_->_tmp165_);
+													_data_->_tmp177_ = _data_->found;
+													if (!_data_->_tmp177_) {
+														_data_->_tmp178_ = _data_->domains;
+														_data_->_tmp179_ = _data_->default_value;
+														_data_->_tmp180_ = g_strdup (_data_->_tmp179_);
+														g_ptr_array_add (_data_->_tmp178_, _data_->_tmp180_);
 													}
 												}
-												_data_->_tmp166_ = _data_->domains;
-												_data_->_tmp167_ = g_strcmp0;
-												vala_g_ptr_array_sort (_data_->_tmp166_, _data_->_tmp167_);
-												_data_->_tmp168_ = _data_->domains;
-												_data_->_tmp169_ = _data_->read_only;
-												_data_->_tmp170_ = NULL;
-												_data_->_tmp170_ = greeter_list_add_combo ((GreeterList*) _data_->self, _data_->_tmp168_, _data_->_tmp169_);
-												_data_->combo = _data_->_tmp170_;
-												_data_->_tmp171_ = _data_->default_value;
-												_data_->_tmp172_ = strlen (_data_->_tmp171_);
-												_data_->_tmp173_ = _data_->_tmp172_;
-												if (_data_->_tmp173_ > 0) {
-													_data_->_tmp174_ = _data_->read_only;
-													if (_data_->_tmp174_) {
+												_data_->_tmp181_ = _data_->domains;
+												_data_->_tmp182_ = g_strcmp0;
+												vala_g_ptr_array_sort (_data_->_tmp181_, _data_->_tmp182_);
+												_data_->_tmp183_ = _data_->domains;
+												_data_->_tmp184_ = _data_->read_only;
+												_data_->_tmp185_ = NULL;
+												_data_->_tmp185_ = greeter_list_add_combo ((GreeterList*) _data_->self, _data_->_tmp183_, _data_->_tmp184_);
+												_data_->combo = _data_->_tmp185_;
+												_data_->_tmp186_ = _data_->default_value;
+												_data_->_tmp187_ = strlen (_data_->_tmp186_);
+												_data_->_tmp188_ = _data_->_tmp187_;
+												if (_data_->_tmp188_ > 0) {
+													_data_->_tmp189_ = _data_->read_only;
+													if (_data_->_tmp189_) {
 														{
 															_data_->_vala2_i = 0;
 															{
-																_data_->_tmp175_ = TRUE;
+																_data_->_tmp190_ = TRUE;
 																while (TRUE) {
-																	_data_->_tmp176_ = _data_->_tmp175_;
-																	if (!_data_->_tmp176_) {
-																		_data_->_tmp177_ = _data_->_vala2_i;
-																		_data_->_vala2_i = _data_->_tmp177_ + 1;
+																	_data_->_tmp191_ = _data_->_tmp190_;
+																	if (!_data_->_tmp191_) {
+																		_data_->_tmp192_ = _data_->_vala2_i;
+																		_data_->_vala2_i = _data_->_tmp192_ + 1;
 																	}
-																	_data_->_tmp175_ = FALSE;
-																	_data_->_tmp178_ = _data_->_vala2_i;
-																	_data_->_tmp179_ = _data_->domains;
-																	_data_->_tmp180_ = g_ptr_array_get_length (_data_->_tmp179_);
-																	_data_->_tmp181_ = _data_->_tmp180_;
-																	if (!(_data_->_tmp178_ < _data_->_tmp181_)) {
+																	_data_->_tmp190_ = FALSE;
+																	_data_->_tmp193_ = _data_->_vala2_i;
+																	_data_->_tmp194_ = _data_->domains;
+																	_data_->_tmp195_ = g_ptr_array_get_length (_data_->_tmp194_);
+																	_data_->_tmp196_ = _data_->_tmp195_;
+																	if (!(_data_->_tmp193_ < _data_->_tmp196_)) {
 																		break;
 																	}
-																	_data_->_tmp182_ = _data_->default_value;
-																	_data_->_tmp183_ = _data_->domains;
-																	_data_->_tmp184_ = _data_->_vala2_i;
-																	_data_->_tmp185_ = NULL;
-																	_data_->_tmp185_ = g_ptr_array_index (_data_->_tmp183_, (guint) _data_->_tmp184_);
-																	if (g_strcmp0 (_data_->_tmp182_, (const gchar*) _data_->_tmp185_) == 0) {
-																		_data_->_tmp186_ = _data_->combo;
-																		_data_->_tmp187_ = _data_->_vala2_i;
-																		gtk_combo_box_set_active (_data_->_tmp186_, _data_->_tmp187_);
+																	_data_->_tmp197_ = _data_->default_value;
+																	_data_->_tmp198_ = _data_->domains;
+																	_data_->_tmp199_ = _data_->_vala2_i;
+																	_data_->_tmp200_ = NULL;
+																	_data_->_tmp200_ = g_ptr_array_index (_data_->_tmp198_, (guint) _data_->_tmp199_);
+																	if (g_strcmp0 (_data_->_tmp197_, (const gchar*) _data_->_tmp200_) == 0) {
+																		_data_->_tmp201_ = _data_->combo;
+																		_data_->_tmp202_ = _data_->_vala2_i;
+																		gtk_combo_box_set_active (_data_->_tmp201_, _data_->_tmp202_);
 																		break;
 																	}
 																}
 															}
 														}
 													} else {
-														_data_->_tmp188_ = _data_->combo;
-														_data_->_tmp189_ = NULL;
-														_data_->_tmp189_ = gtk_bin_get_child ((GtkBin*) _data_->_tmp188_);
-														_data_->_tmp190_ = _g_object_ref0 (G_TYPE_CHECK_INSTANCE_TYPE (_data_->_tmp189_, GTK_TYPE_ENTRY) ? ((GtkEntry*) _data_->_tmp189_) : NULL);
-														_data_->_vala2_entry = _data_->_tmp190_;
-														_data_->_tmp191_ = _data_->_vala2_entry;
-														_data_->_tmp192_ = _data_->default_value;
-														gtk_entry_set_text (_data_->_tmp191_, _data_->_tmp192_);
+														_data_->_tmp203_ = _data_->combo;
+														_data_->_tmp204_ = NULL;
+														_data_->_tmp204_ = gtk_bin_get_child ((GtkBin*) _data_->_tmp203_);
+														_data_->_tmp205_ = _g_object_ref0 (G_TYPE_CHECK_INSTANCE_TYPE (_data_->_tmp204_, GTK_TYPE_ENTRY) ? ((GtkEntry*) _data_->_tmp204_) : NULL);
+														_data_->_vala2_entry = _data_->_tmp205_;
+														_data_->_tmp206_ = _data_->_vala2_entry;
+														_data_->_tmp207_ = _data_->default_value;
+														gtk_entry_set_text (_data_->_tmp206_, _data_->_tmp207_);
 														_g_object_unref0 (_data_->_vala2_entry);
 													}
 												}
-												_data_->_tmp193_ = _data_->combo;
-												_data_->_tmp194_ = _g_object_ref0 ((GtkWidget*) _data_->_tmp193_);
+												_data_->_tmp208_ = _data_->combo;
+												_data_->_tmp209_ = _g_object_ref0 ((GtkWidget*) _data_->_tmp208_);
 												_g_object_unref0 (_data_->widget);
-												_data_->widget = _data_->_tmp194_;
+												_data_->widget = _data_->_tmp209_;
 												_g_object_unref0 (_data_->combo);
 											}
 											_g_ptr_array_unref0 (_data_->domains);
 											_data_->domainsArray = (_vala_array_free (_data_->domainsArray, _data_->domainsArray_length1, (GDestroyNotify) g_free), NULL);
 										} else {
-											_data_->_tmp195_ = _data_->_vala1_field;
-											_data_->_tmp196_ = (*_data_->_tmp195_).type;
-											if (g_strcmp0 (_data_->_tmp196_, "email") == 0) {
+											_data_->_tmp210_ = _data_->_vala1_field;
+											_data_->_tmp211_ = (*_data_->_tmp210_).type;
+											if (g_strcmp0 (_data_->_tmp211_, "email") == 0) {
 												_data_->email_domains_length1 = 0;
 												_data_->_email_domains_size_ = 0;
 												{
-													_data_->_tmp197_ = unity_greeter_singleton;
-													_data_->_tmp198_ = _data_->_tmp197_->test_mode;
-													if (_data_->_tmp198_) {
-														_data_->_tmp199_ = g_strdup ("canonical.com");
-														_data_->_tmp200_ = g_strdup ("ubuntu.org");
-														_data_->_tmp201_ = g_strdup ("candy.com");
-														_data_->_tmp202_ = g_strdup ("urban.net");
-														_data_->_tmp203_ = NULL;
-														_data_->_tmp203_ = g_new0 (gchar*, 4 + 1);
-														_data_->_tmp203_[0] = _data_->_tmp199_;
-														_data_->_tmp203_[1] = _data_->_tmp200_;
-														_data_->_tmp203_[2] = _data_->_tmp201_;
-														_data_->_tmp203_[3] = _data_->_tmp202_;
+													_data_->_tmp212_ = unity_greeter_singleton;
+													_data_->_tmp213_ = _data_->_tmp212_->test_mode;
+													if (_data_->_tmp213_) {
+														_data_->_tmp214_ = g_strdup ("canonical.com");
+														_data_->_tmp215_ = g_strdup ("ubuntu.org");
+														_data_->_tmp216_ = g_strdup ("candy.com");
+														_data_->_tmp217_ = g_strdup ("urban.net");
+														_data_->_tmp218_ = NULL;
+														_data_->_tmp218_ = g_new0 (gchar*, 4 + 1);
+														_data_->_tmp218_[0] = _data_->_tmp214_;
+														_data_->_tmp218_[1] = _data_->_tmp215_;
+														_data_->_tmp218_[2] = _data_->_tmp216_;
+														_data_->_tmp218_[3] = _data_->_tmp217_;
 														_data_->email_domains = (_vala_array_free (_data_->email_domains, _data_->email_domains_length1, (GDestroyNotify) g_free), NULL);
-														_data_->email_domains = _data_->_tmp203_;
+														_data_->email_domains = _data_->_tmp218_;
 														_data_->email_domains_length1 = 4;
 														_data_->_email_domains_size_ = _data_->email_domains_length1;
 													} else {
-														_data_->_tmp204_ = _data_->self->priv->remote_login_service;
-														_data_->_tmp205_ = _data_->url;
-														_data_->_tmp206_ = NULL;
-														_data_->_tmp207_ = 0;
+														_data_->_tmp219_ = _data_->self->priv->remote_login_service;
+														_data_->_tmp220_ = _data_->url;
+														_data_->_tmp221_ = NULL;
+														_data_->_tmp222_ = 0;
 														_data_->_state_ = 1;
-														remote_login_service_get_cached_domains_for_server (_data_->_tmp204_, _data_->_tmp205_, user_list_create_remote_fields_for_current_item_ready, _data_);
+														remote_login_service_get_cached_domains_for_server (_data_->_tmp219_, _data_->_tmp220_, user_list_create_remote_fields_for_current_item_ready, _data_);
 														return FALSE;
 														_state_1:
-														remote_login_service_get_cached_domains_for_server_finish (_data_->_tmp204_, _data_->_res_, &_data_->_tmp206_, &_data_->_tmp207_, &_data_->_inner_error_);
+														remote_login_service_get_cached_domains_for_server_finish (_data_->_tmp219_, _data_->_res_, &_data_->_tmp221_, &_data_->_tmp222_, &_data_->_inner_error_);
 														_data_->email_domains = (_vala_array_free (_data_->email_domains, _data_->email_domains_length1, (GDestroyNotify) g_free), NULL);
-														_data_->email_domains = _data_->_tmp206_;
-														_data_->email_domains_length1 = _data_->_tmp207_;
+														_data_->email_domains = _data_->_tmp221_;
+														_data_->email_domains_length1 = _data_->_tmp222_;
 														_data_->_email_domains_size_ = _data_->email_domains_length1;
 														if (_data_->_inner_error_ != NULL) {
 															if (_data_->_inner_error_->domain == G_IO_ERROR) {
-																goto __catch32_g_io_error;
+																goto __catch35_g_io_error;
 															}
 															_data_->email_domains = (_vala_array_free (_data_->email_domains, _data_->email_domains_length1, (GDestroyNotify) g_free), NULL);
 															_g_free0 (_data_->default_value);
 															_g_object_unref0 (_data_->widget);
 															_remote_server_field_free0 (_data_->_vala1_field);
 															__g_list_free__remote_server_field_free0_0 (_data_->fields);
+															_g_free0 (_data_->remote_username);
 															_remote_server_free0 (_data_->remote_server);
+															_g_free0 (_data_->username);
 															_g_free0 (_data_->url);
 															g_critical ("file %s: line %d: unexpected error: %s (%s, %d)", __FILE__, __LINE__, _data_->_inner_error_->message, g_quark_to_string (_data_->_inner_error_->domain), _data_->_inner_error_->code);
 															g_clear_error (&_data_->_inner_error_);
@@ -3673,65 +3853,67 @@ static gboolean user_list_create_remote_fields_for_current_item_co (UserListCrea
 														}
 													}
 												}
-												goto __finally32;
-												__catch32_g_io_error:
+												goto __finally35;
+												__catch35_g_io_error:
 												{
 													_data_->e = _data_->_inner_error_;
 													_data_->_inner_error_ = NULL;
-													_data_->_tmp208_ = 0;
-													_data_->_tmp208_ = 0;
+													_data_->_tmp223_ = 0;
+													_data_->_tmp223_ = 0;
 													_data_->email_domains = g_renew (gchar*, _data_->email_domains, 0);
-													(_data_->_tmp208_ > _data_->email_domains_length1) ? memset (_data_->email_domains + _data_->email_domains_length1, 0, sizeof (gchar*) * (_data_->_tmp208_ - _data_->email_domains_length1)) : NULL;
-													_data_->email_domains_length1 = _data_->_tmp208_;
-													_data_->_email_domains_size_ = _data_->_tmp208_;
-													_data_->_tmp209_ = _data_->e;
-													_data_->_tmp210_ = _data_->_tmp209_->message;
-													g_debug ("user-list.vala:699: Calling get_cached_domains_for_server in com.canon" \
-"ical.RemoteLogin dbus service failed. Error: %s", _data_->_tmp210_);
+													(_data_->_tmp223_ > _data_->email_domains_length1) ? memset (_data_->email_domains + _data_->email_domains_length1, 0, sizeof (gchar*) * (_data_->_tmp223_ - _data_->email_domains_length1)) : NULL;
+													_data_->email_domains_length1 = _data_->_tmp223_;
+													_data_->_email_domains_size_ = _data_->_tmp223_;
+													_data_->_tmp224_ = _data_->e;
+													_data_->_tmp225_ = _data_->_tmp224_->message;
+													g_debug ("user-list.vala:727: Calling get_cached_domains_for_server in com.canon" \
+"ical.RemoteLogin dbus service failed. Error: %s", _data_->_tmp225_);
 													_g_error_free0 (_data_->e);
 												}
-												__finally32:
+												__finally35:
 												if (_data_->_inner_error_ != NULL) {
 													_data_->email_domains = (_vala_array_free (_data_->email_domains, _data_->email_domains_length1, (GDestroyNotify) g_free), NULL);
 													_g_free0 (_data_->default_value);
 													_g_object_unref0 (_data_->widget);
 													_remote_server_field_free0 (_data_->_vala1_field);
 													__g_list_free__remote_server_field_free0_0 (_data_->fields);
+													_g_free0 (_data_->remote_username);
 													_remote_server_free0 (_data_->remote_server);
+													_g_free0 (_data_->username);
 													_g_free0 (_data_->url);
 													g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _data_->_inner_error_->message, g_quark_to_string (_data_->_inner_error_->domain), _data_->_inner_error_->code);
 													g_clear_error (&_data_->_inner_error_);
 													return FALSE;
 												}
-												_data_->_tmp211_ = NULL;
-												_data_->_tmp211_ = _ ("Email address:");
-												_data_->_tmp212_ = NULL;
-												_data_->_tmp212_ = greeter_list_add_prompt ((GreeterList*) _data_->self, _data_->_tmp211_, FALSE);
-												_data_->_vala3_entry = _data_->_tmp212_;
-												_data_->_tmp213_ = _data_->_vala3_entry;
-												_data_->_tmp214_ = _data_->default_value;
-												gtk_entry_set_text ((GtkEntry*) _data_->_tmp213_, _data_->_tmp214_);
-												_data_->_tmp215_ = _data_->_vala3_entry;
-												_data_->_tmp216_ = _g_object_ref0 ((GtkWidget*) _data_->_tmp215_);
+												_data_->_tmp226_ = NULL;
+												_data_->_tmp226_ = _ ("Email address:");
+												_data_->_tmp227_ = NULL;
+												_data_->_tmp227_ = greeter_list_add_prompt ((GreeterList*) _data_->self, _data_->_tmp226_, FALSE);
+												_data_->_vala3_entry = _data_->_tmp227_;
+												_data_->_tmp228_ = _data_->_vala3_entry;
+												_data_->_tmp229_ = _data_->default_value;
+												gtk_entry_set_text ((GtkEntry*) _data_->_tmp228_, _data_->_tmp229_);
+												_data_->_tmp230_ = _data_->_vala3_entry;
+												_data_->_tmp231_ = _g_object_ref0 ((GtkWidget*) _data_->_tmp230_);
 												_g_object_unref0 (_data_->widget);
-												_data_->widget = _data_->_tmp216_;
-												_data_->_tmp217_ = _data_->email_domains;
-												_data_->_tmp217__length1 = _data_->email_domains_length1;
-												if (_data_->_tmp217__length1 > 0) {
-													_data_->_tmp218_ = _data_->_vala3_entry;
-													_data_->_tmp219_ = _data_->email_domains;
-													_data_->_tmp219__length1 = _data_->email_domains_length1;
-													_data_->_tmp220_ = email_autocompleter_new ((GtkEntry*) _data_->_tmp218_, _data_->_tmp219_, _data_->_tmp219__length1);
+												_data_->widget = _data_->_tmp231_;
+												_data_->_tmp232_ = _data_->email_domains;
+												_data_->_tmp232__length1 = _data_->email_domains_length1;
+												if (_data_->_tmp232__length1 > 0) {
+													_data_->_tmp233_ = _data_->_vala3_entry;
+													_data_->_tmp234_ = _data_->email_domains;
+													_data_->_tmp234__length1 = _data_->email_domains_length1;
+													_data_->_tmp235_ = email_autocompleter_new ((GtkEntry*) _data_->_tmp233_, _data_->_tmp234_, _data_->_tmp234__length1);
 													_email_autocompleter_unref0 (_data_->self->priv->remote_server_email_field_autocompleter);
-													_data_->self->priv->remote_server_email_field_autocompleter = _data_->_tmp220_;
+													_data_->self->priv->remote_server_email_field_autocompleter = _data_->_tmp235_;
 												}
 												_g_object_unref0 (_data_->_vala3_entry);
 												_data_->email_domains = (_vala_array_free (_data_->email_domains, _data_->email_domains_length1, (GDestroyNotify) g_free), NULL);
 											} else {
-												_data_->_tmp221_ = _data_->_vala1_field;
-												_data_->_tmp222_ = (*_data_->_tmp221_).type;
-												g_debug ("user-list.vala:710: Found field of type %s, don't know what to do with" \
-" it", _data_->_tmp222_);
+												_data_->_tmp236_ = _data_->_vala1_field;
+												_data_->_tmp237_ = (*_data_->_tmp236_).type;
+												g_debug ("user-list.vala:738: Found field of type %s, don't know what to do with" \
+" it", _data_->_tmp237_);
 												_g_free0 (_data_->default_value);
 												_g_object_unref0 (_data_->widget);
 												_remote_server_field_free0 (_data_->_vala1_field);
@@ -3740,13 +3922,13 @@ static gboolean user_list_create_remote_fields_for_current_item_co (UserListCrea
 										}
 									}
 								}
-								_data_->_tmp223_ = _data_->self->priv->current_remote_fields;
-								_data_->_tmp224_ = _data_->_vala1_field;
-								_data_->_tmp225_ = (*_data_->_tmp224_).type;
-								_data_->_tmp226_ = g_strdup (_data_->_tmp225_);
-								_data_->_tmp227_ = _data_->widget;
-								_data_->_tmp228_ = _g_object_ref0 (_data_->_tmp227_);
-								g_hash_table_insert (_data_->_tmp223_, _data_->_tmp226_, _data_->_tmp228_);
+								_data_->_tmp238_ = _data_->self->priv->current_remote_fields;
+								_data_->_tmp239_ = _data_->_vala1_field;
+								_data_->_tmp240_ = (*_data_->_tmp239_).type;
+								_data_->_tmp241_ = g_strdup (_data_->_tmp240_);
+								_data_->_tmp242_ = _data_->widget;
+								_data_->_tmp243_ = _g_object_ref0 (_data_->_tmp242_);
+								g_hash_table_insert (_data_->_tmp238_, _data_->_tmp241_, _data_->_tmp243_);
 								_g_free0 (_data_->default_value);
 								_g_object_unref0 (_data_->widget);
 								_remote_server_field_free0 (_data_->_vala1_field);
@@ -3754,13 +3936,16 @@ static gboolean user_list_create_remote_fields_for_current_item_co (UserListCrea
 						}
 					}
 					__g_list_free__remote_server_field_free0_0 (_data_->fields);
+					_g_free0 (_data_->remote_username);
 					_remote_server_free0 (_data_->remote_server);
 					break;
 				}
+				_g_free0 (_data_->remote_username);
 				_remote_server_free0 (_data_->remote_server);
 			}
 		}
 	}
+	_g_free0 (_data_->username);
 	_g_free0 (_data_->url);
 	if (_data_->_state_ == 0) {
 		g_simple_async_result_complete_in_idle (_data_->_async_result);
@@ -4123,7 +4308,7 @@ static void user_list_prompt_box_login_cb (UserList* self) {
 	_tmp1_ = _tmp0_;
 	_tmp2_ = prompt_box_get_id (_tmp1_);
 	_tmp3_ = _tmp2_;
-	g_debug ("user-list.vala:811: Start session for %s", _tmp3_);
+	g_debug ("user-list.vala:839: Start session for %s", _tmp3_);
 	is_authenticated = FALSE;
 	_tmp4_ = unity_greeter_singleton;
 	_tmp5_ = _tmp4_->test_mode;
@@ -4543,7 +4728,7 @@ static void user_list_fill_list (UserList* self) {
 		_tmp18_ = unity_greeter_singleton;
 		_tmp19_ = unity_greeter_has_guest_account_hint (_tmp18_);
 		if (_tmp19_) {
-			g_debug ("user-list.vala:932: Adding guest account entry");
+			g_debug ("user-list.vala:960: Adding guest account entry");
 			user_list_set_offer_guest (self, TRUE);
 		}
 		_tmp21_ = greeter_list_have_entries ((GreeterList*) self);
@@ -4635,7 +4820,7 @@ static void user_list_user_added_cb (UserList* self, LightDMUser* user) {
 	_tmp3_ = user;
 	_tmp4_ = lightdm_user_get_real_name (_tmp3_);
 	_tmp5_ = _tmp4_;
-	g_debug ("user-list.vala:950: Adding/updating user %s (%s)", _tmp2_, _tmp5_);
+	g_debug ("user-list.vala:978: Adding/updating user %s (%s)", _tmp2_, _tmp5_);
 	_tmp6_ = user;
 	_tmp7_ = lightdm_user_get_real_name (_tmp6_);
 	_tmp8_ = _tmp7_;
@@ -4727,7 +4912,7 @@ static void user_list_user_removed_cb (UserList* self, LightDMUser* user) {
 	_tmp0_ = user;
 	_tmp1_ = lightdm_user_get_name (_tmp0_);
 	_tmp2_ = _tmp1_;
-	g_debug ("user-list.vala:969: Removing user %s", _tmp2_);
+	g_debug ("user-list.vala:997: Removing user %s", _tmp2_);
 	_tmp3_ = user;
 	_tmp4_ = lightdm_user_get_name (_tmp3_);
 	_tmp5_ = _tmp4_;
@@ -5032,7 +5217,7 @@ static void user_list_test_fill_list (UserList* self) {
 		dir = _tmp0_;
 		if (_inner_error_ != NULL) {
 			if (_inner_error_->domain == G_FILE_ERROR) {
-				goto __catch33_g_file_error;
+				goto __catch36_g_file_error;
 			}
 			g_critical ("file %s: line %d: unexpected error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 			g_clear_error (&_inner_error_);
@@ -5062,15 +5247,15 @@ static void user_list_test_fill_list (UserList* self) {
 		}
 		_g_dir_close0 (dir);
 	}
-	goto __finally33;
-	__catch33_g_file_error:
+	goto __finally36;
+	__catch36_g_file_error:
 	{
 		GError* e = NULL;
 		e = _inner_error_;
 		_inner_error_ = NULL;
 		_g_error_free0 (e);
 	}
-	__finally33:
+	__finally36:
 	if (_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
@@ -5763,6 +5948,201 @@ static void user_list_test_fill_remote_login_servers (UserList* self, RemoteServ
 }
 
 
+static void user_list_test_fill_remote_login_servers_duplicate_entries (UserList* self, RemoteServer** server_list, int* server_list_length1) {
+	RemoteServer* _vala_server_list = NULL;
+	int _vala_server_list_length1 = 0;
+	RemoteServer* _tmp0_ = NULL;
+	RemoteServer remote_server2 = {0};
+	gchar* _tmp1_;
+	gchar* _tmp2_;
+	gchar* _tmp3_;
+	RemoteServerField* _tmp4_ = NULL;
+	RemoteServerField field21 = {0};
+	gchar* _tmp5_;
+	GVariant* _tmp6_;
+	RemoteServerField field22 = {0};
+	gchar* _tmp7_;
+	GVariant* _tmp8_;
+	RemoteServerField field23 = {0};
+	gchar* _tmp9_;
+	GVariant* _tmp10_;
+	RemoteServerField _tmp11_;
+	RemoteServerField _tmp12_ = {0};
+	RemoteServerField _tmp13_;
+	RemoteServerField _tmp14_ = {0};
+	RemoteServerField _tmp15_;
+	RemoteServerField _tmp16_ = {0};
+	RemoteServerField* _tmp17_ = NULL;
+	RemoteServer remote_server5 = {0};
+	gchar* _tmp18_;
+	gchar* _tmp19_;
+	gchar* _tmp20_;
+	RemoteServerField* _tmp21_ = NULL;
+	RemoteServerField field51 = {0};
+	gchar* _tmp22_;
+	GVariant* _tmp23_;
+	RemoteServerField field52 = {0};
+	gchar* _tmp24_;
+	GVariant* _tmp25_;
+	RemoteServerField field53 = {0};
+	gchar* _tmp26_;
+	GVariant* _tmp27_;
+	RemoteServerField _tmp28_;
+	RemoteServerField _tmp29_ = {0};
+	RemoteServerField _tmp30_;
+	RemoteServerField _tmp31_ = {0};
+	RemoteServerField _tmp32_;
+	RemoteServerField _tmp33_ = {0};
+	RemoteServerField* _tmp34_ = NULL;
+	gint _tmp35_ = 0;
+	RemoteServer _tmp36_;
+	RemoteServer _tmp37_ = {0};
+	RemoteServer _tmp38_;
+	RemoteServer _tmp39_;
+	RemoteServer _tmp40_ = {0};
+	RemoteServer _tmp41_;
+	g_return_if_fail (self != NULL);
+	_tmp0_ = g_new0 (RemoteServer, 0);
+	_vala_server_list = (_vala_RemoteServer_array_free (_vala_server_list, _vala_server_list_length1), NULL);
+	_vala_server_list = _tmp0_;
+	_vala_server_list_length1 = 0;
+	memset (&remote_server2, 0, sizeof (RemoteServer));
+	_tmp1_ = g_strdup ("rdp");
+	_g_free0 (remote_server2.type);
+	remote_server2.type = _tmp1_;
+	_tmp2_ = g_strdup ("RDP server with default username, and editable domain");
+	_g_free0 (remote_server2.name);
+	remote_server2.name = _tmp2_;
+	_tmp3_ = g_strdup ("http://rdpdefaultusername.com");
+	_g_free0 (remote_server2.url);
+	remote_server2.url = _tmp3_;
+	remote_server2.last_used_server = FALSE;
+	_tmp4_ = g_new0 (RemoteServerField, 0);
+	remote_server2.fields = (_vala_RemoteServerField_array_free (remote_server2.fields, remote_server2.fields_length1), NULL);
+	remote_server2.fields = _tmp4_;
+	remote_server2.fields_length1 = 0;
+	memset (&field21, 0, sizeof (RemoteServerField));
+	_tmp5_ = g_strdup ("username");
+	_g_free0 (field21.type);
+	field21.type = _tmp5_;
+	_tmp6_ = g_variant_new_string ("alowl1");
+	g_variant_ref_sink (_tmp6_);
+	_g_variant_unref0 (field21.default_value);
+	field21.default_value = _tmp6_;
+	memset (&field22, 0, sizeof (RemoteServerField));
+	_tmp7_ = g_strdup ("password");
+	_g_free0 (field22.type);
+	field22.type = _tmp7_;
+	_tmp8_ = g_variant_new_string ("duplicate1");
+	g_variant_ref_sink (_tmp8_);
+	_g_variant_unref0 (field22.default_value);
+	field22.default_value = _tmp8_;
+	memset (&field23, 0, sizeof (RemoteServerField));
+	_tmp9_ = g_strdup ("domain");
+	_g_free0 (field23.type);
+	field23.type = _tmp9_;
+	_tmp10_ = g_variant_new_string ("SCANNERS");
+	g_variant_ref_sink (_tmp10_);
+	_g_variant_unref0 (field23.default_value);
+	field23.default_value = _tmp10_;
+	_tmp11_ = field21;
+	remote_server_field_copy (&_tmp11_, &_tmp12_);
+	_tmp13_ = field22;
+	remote_server_field_copy (&_tmp13_, &_tmp14_);
+	_tmp15_ = field23;
+	remote_server_field_copy (&_tmp15_, &_tmp16_);
+	_tmp17_ = g_new0 (RemoteServerField, 3);
+	_tmp17_[0] = _tmp12_;
+	_tmp17_[1] = _tmp14_;
+	_tmp17_[2] = _tmp16_;
+	remote_server2.fields = (_vala_RemoteServerField_array_free (remote_server2.fields, remote_server2.fields_length1), NULL);
+	remote_server2.fields = _tmp17_;
+	remote_server2.fields_length1 = 3;
+	memset (&remote_server5, 0, sizeof (RemoteServer));
+	_tmp18_ = g_strdup ("rdp");
+	_g_free0 (remote_server5.type);
+	remote_server5.type = _tmp18_;
+	_tmp19_ = g_strdup ("RDP server with default username, and editable domain");
+	_g_free0 (remote_server5.name);
+	remote_server5.name = _tmp19_;
+	_tmp20_ = g_strdup ("http://rdpdefaultusername.com");
+	_g_free0 (remote_server5.url);
+	remote_server5.url = _tmp20_;
+	remote_server5.last_used_server = FALSE;
+	_tmp21_ = g_new0 (RemoteServerField, 0);
+	remote_server5.fields = (_vala_RemoteServerField_array_free (remote_server5.fields, remote_server5.fields_length1), NULL);
+	remote_server5.fields = _tmp21_;
+	remote_server5.fields_length1 = 0;
+	memset (&field51, 0, sizeof (RemoteServerField));
+	_tmp22_ = g_strdup ("username");
+	_g_free0 (field51.type);
+	field51.type = _tmp22_;
+	_tmp23_ = g_variant_new_string ("alowl2");
+	g_variant_ref_sink (_tmp23_);
+	_g_variant_unref0 (field51.default_value);
+	field51.default_value = _tmp23_;
+	memset (&field52, 0, sizeof (RemoteServerField));
+	_tmp24_ = g_strdup ("password");
+	_g_free0 (field52.type);
+	field52.type = _tmp24_;
+	_tmp25_ = g_variant_new_string ("duplicate2");
+	g_variant_ref_sink (_tmp25_);
+	_g_variant_unref0 (field52.default_value);
+	field52.default_value = _tmp25_;
+	memset (&field53, 0, sizeof (RemoteServerField));
+	_tmp26_ = g_strdup ("domain");
+	_g_free0 (field53.type);
+	field53.type = _tmp26_;
+	_tmp27_ = g_variant_new_string ("PRINTERS");
+	g_variant_ref_sink (_tmp27_);
+	_g_variant_unref0 (field53.default_value);
+	field53.default_value = _tmp27_;
+	_tmp28_ = field51;
+	remote_server_field_copy (&_tmp28_, &_tmp29_);
+	_tmp30_ = field52;
+	remote_server_field_copy (&_tmp30_, &_tmp31_);
+	_tmp32_ = field53;
+	remote_server_field_copy (&_tmp32_, &_tmp33_);
+	_tmp34_ = g_new0 (RemoteServerField, 3);
+	_tmp34_[0] = _tmp29_;
+	_tmp34_[1] = _tmp31_;
+	_tmp34_[2] = _tmp33_;
+	remote_server5.fields = (_vala_RemoteServerField_array_free (remote_server5.fields, remote_server5.fields_length1), NULL);
+	remote_server5.fields = _tmp34_;
+	remote_server5.fields_length1 = 3;
+	_tmp35_ = 2;
+	_vala_server_list = g_renew (RemoteServer, _vala_server_list, 2);
+	(_tmp35_ > _vala_server_list_length1) ? memset (_vala_server_list + _vala_server_list_length1, 0, sizeof (RemoteServer) * (_tmp35_ - _vala_server_list_length1)) : NULL;
+	_vala_server_list_length1 = _tmp35_;
+	_tmp36_ = remote_server2;
+	remote_server_copy (&_tmp36_, &_tmp37_);
+	remote_server_destroy (&_vala_server_list[0]);
+	_vala_server_list[0] = _tmp37_;
+	_tmp38_ = _vala_server_list[0];
+	_tmp39_ = remote_server5;
+	remote_server_copy (&_tmp39_, &_tmp40_);
+	remote_server_destroy (&_vala_server_list[1]);
+	_vala_server_list[1] = _tmp40_;
+	_tmp41_ = _vala_server_list[1];
+	remote_server_field_destroy (&field53);
+	remote_server_field_destroy (&field52);
+	remote_server_field_destroy (&field51);
+	remote_server_destroy (&remote_server5);
+	remote_server_field_destroy (&field23);
+	remote_server_field_destroy (&field22);
+	remote_server_field_destroy (&field21);
+	remote_server_destroy (&remote_server2);
+	if (server_list) {
+		*server_list = _vala_server_list;
+	} else {
+		_vala_server_list = (_vala_RemoteServer_array_free (_vala_server_list, _vala_server_list_length1), NULL);
+	}
+	if (server_list_length1) {
+		*server_list_length1 = _vala_server_list_length1;
+	}
+}
+
+
 static gboolean user_list_test_key_press_cb (UserList* self, GdkEventKey* event) {
 	gboolean result = FALSE;
 	GdkEventKey _tmp0_;
@@ -6075,7 +6455,7 @@ static void user_list_test_respond (UserList* self, const gchar* text) {
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (text != NULL);
 	_tmp0_ = text;
-	g_debug ("user-list.vala:1332: response %s", _tmp0_);
+	g_debug ("user-list.vala:1404: response %s", _tmp0_);
 	_tmp1_ = greeter_list_get_selected_id ((GreeterList*) self);
 	_tmp2_ = _tmp1_;
 	_tmp4_ = (NULL == _tmp2_) ? 0 : g_quark_from_string (_tmp2_);
@@ -6092,7 +6472,7 @@ static void user_list_test_respond (UserList* self, const gchar* text) {
 					gchar* _tmp8_;
 					const gchar* _tmp9_ = NULL;
 					_tmp6_ = text;
-					g_debug ("user-list.vala:1338: username=%s", _tmp6_);
+					g_debug ("user-list.vala:1410: username=%s", _tmp6_);
 					_tmp7_ = text;
 					_tmp8_ = g_strdup (_tmp7_);
 					_g_free0 (((GreeterList*) self)->test_username);
@@ -6118,7 +6498,7 @@ static void user_list_test_respond (UserList* self, const gchar* text) {
 					const gchar* _tmp12_;
 					_tmp12_ = text;
 					if (g_strcmp0 (_tmp12_, "password") == 0) {
-						g_debug ("user-list.vala:1353: prompt otp");
+						g_debug ("user-list.vala:1425: prompt otp");
 						self->priv->test_prompted_sso = TRUE;
 						greeter_list_show_prompt_cb ((GreeterList*) self, "OTP:", LIGHTDM_PROMPT_TYPE_QUESTION);
 					} else {
@@ -6624,13 +7004,13 @@ static GObject * user_list_constructor (GType type, guint n_construct_properties
 		_g_free0 (_tmp3_);
 		_tmp6_ = _tmp5_;
 		if (_inner_error_ != NULL) {
-			goto __catch34_g_error;
+			goto __catch37_g_error;
 		}
 		_g_object_unref0 (self->priv->message_pixbuf);
 		self->priv->message_pixbuf = _tmp6_;
 	}
-	goto __finally34;
-	__catch34_g_error:
+	goto __finally37;
+	__catch37_g_error:
 	{
 		GError* e = NULL;
 		GError* _tmp7_;
@@ -6642,7 +7022,7 @@ static GObject * user_list_constructor (GType type, guint n_construct_properties
 		g_debug ("user-list.vala:122: Error loading message image: %s", _tmp8_);
 		_g_error_free0 (e);
 	}
-	__finally34:
+	__finally37:
 	if (_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);

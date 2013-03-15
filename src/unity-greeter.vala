@@ -37,6 +37,7 @@ public class UnityGreeter
 
     private SettingsDaemon settings_daemon;
 
+    public bool orca_needs_kick;
     private MainWindow main_window;
 
     private LightDM.Greeter greeter;
@@ -481,21 +482,6 @@ public class UnityGreeter
         if (do_test_mode)
             debug ("Running in test mode");
 
-        if (!do_test_mode)
-        {
-            /* Make nm-applet hide items the user does not have permissions to interact with */
-            Environment.set_variable ("NM_APPLET_HIDE_POLICY_ITEMS", "1", true);
-
-            try
-            {
-                Process.spawn_command_line_async ("nm-applet");
-            }
-            catch (Error e)
-            {
-                warning ("Error starting nm-applet: %s", e.message);
-            }
-        }
-
         /* Set GTK+ settings */
         debug ("Setting GTK+ settings");
         var settings = Gtk.Settings.get_default ();
@@ -525,6 +511,21 @@ public class UnityGreeter
 
         debug ("Showing greeter");
         greeter.show ();
+
+        if (!do_test_mode)
+        {
+            /* Make nm-applet hide items the user does not have permissions to interact with */
+            Environment.set_variable ("NM_APPLET_HIDE_POLICY_ITEMS", "1", true);
+
+            try
+            {
+                Process.spawn_command_line_async ("nm-applet");
+            }
+            catch (Error e)
+            {
+                warning ("Error starting nm-applet: %s", e.message);
+            }
+        }
 
         debug ("Starting main loop");
         Gtk.main ();

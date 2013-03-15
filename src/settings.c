@@ -90,12 +90,14 @@ enum  {
 #define UG_SETTINGS_KEY_HIGH_CONTRAST "high-contrast"
 #define UG_SETTINGS_KEY_SCREEN_READER "screen-reader"
 #define UG_SETTINGS_KEY_PLAY_READY_SOUND "play-ready-sound"
+#define UG_SETTINGS_KEY_INDICATORS "indicators"
 #define UG_SETTINGS_SCHEMA "com.canonical.unity-greeter"
 gboolean ug_settings_get_boolean (const gchar* key);
 gboolean ug_settings_safe_get_boolean (const gchar* key, gboolean _default_);
 gdouble ug_settings_get_double (const gchar* key);
 gchar* ug_settings_get_string (const gchar* key);
 gboolean ug_settings_set_boolean (const gchar* key, gboolean value);
+gchar** ug_settings_get_strv (const gchar* key, int* result_length1);
 UGSettings* ug_settings_new (void);
 UGSettings* ug_settings_construct (GType object_type);
 static void ug_settings_finalize (UGSettings* obj);
@@ -234,6 +236,31 @@ gboolean ug_settings_set_boolean (const gchar* key, gboolean value) {
 	_tmp2_ = value;
 	_tmp3_ = g_settings_set_boolean (gsettings, _tmp1_, _tmp2_);
 	result = _tmp3_;
+	_g_object_unref0 (gsettings);
+	return result;
+}
+
+
+gchar** ug_settings_get_strv (const gchar* key, int* result_length1) {
+	gchar** result = NULL;
+	GSettings* _tmp0_;
+	GSettings* gsettings;
+	const gchar* _tmp1_;
+	gchar** _tmp2_;
+	gchar** _tmp3_ = NULL;
+	gchar** _tmp4_;
+	gint _tmp4__length1;
+	g_return_val_if_fail (key != NULL, NULL);
+	_tmp0_ = g_settings_new (UG_SETTINGS_SCHEMA);
+	gsettings = _tmp0_;
+	_tmp1_ = key;
+	_tmp3_ = _tmp2_ = g_settings_get_strv (gsettings, _tmp1_);
+	_tmp4_ = _tmp3_;
+	_tmp4__length1 = _vala_array_length (_tmp2_);
+	if (result_length1) {
+		*result_length1 = _tmp4__length1;
+	}
+	result = _tmp4_;
 	_g_object_unref0 (gsettings);
 	return result;
 }

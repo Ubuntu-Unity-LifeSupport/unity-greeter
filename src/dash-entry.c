@@ -33,6 +33,7 @@
 #include <math.h>
 #include <pango/pango.h>
 #include <pango/pangocairo.h>
+#include "config.h"
 
 
 #define TYPE_FADABLE (fadable_get_type ())
@@ -66,6 +67,17 @@ typedef struct _DashEntryPrivate DashEntryPrivate;
 #define _g_free0(var) (var = (g_free (var), NULL))
 #define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
 #define __vala_PangoFontDescription_free0(var) ((var == NULL) ? NULL : (var = (_vala_PangoFontDescription_free (var), NULL)))
+
+#define TYPE_UNITY_GREETER (unity_greeter_get_type ())
+#define UNITY_GREETER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_UNITY_GREETER, UnityGreeter))
+#define UNITY_GREETER_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_UNITY_GREETER, UnityGreeterClass))
+#define IS_UNITY_GREETER(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_UNITY_GREETER))
+#define IS_UNITY_GREETER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_UNITY_GREETER))
+#define UNITY_GREETER_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_UNITY_GREETER, UnityGreeterClass))
+
+typedef struct _UnityGreeter UnityGreeter;
+typedef struct _UnityGreeterClass UnityGreeterClass;
+typedef struct _UnityGreeterPrivate UnityGreeterPrivate;
 #define _g_error_free0(var) ((var == NULL) ? NULL : (var = (g_error_free (var), NULL)))
 
 struct _FadableIface {
@@ -91,12 +103,26 @@ struct _DashEntryPrivate {
 	GdkWindow* arrow_win;
 };
 
+struct _UnityGreeter {
+	GTypeInstance parent_instance;
+	volatile int ref_count;
+	UnityGreeterPrivate * priv;
+	gboolean test_mode;
+	gboolean orca_needs_kick;
+};
+
+struct _UnityGreeterClass {
+	GTypeClass parent_class;
+	void (*finalize) (UnityGreeter *self);
+};
+
 
 static gpointer dash_entry_parent_class = NULL;
 extern gchar* dash_entry_font;
 gchar* dash_entry_font = NULL;
 static GdkPixbuf* dash_entry_arrow_pixbuf;
 static GdkPixbuf* dash_entry_arrow_pixbuf = NULL;
+extern UnityGreeter* unity_greeter_singleton;
 static FadableIface* dash_entry_fadable_parent_iface = NULL;
 
 gboolean gtk_style_context_lookup_color (GtkStyleContext* ctx, const gchar* color_name, GdkRGBA* color);
@@ -132,6 +158,14 @@ static void dash_entry_real_realize (GtkWidget* base);
 static void dash_entry_real_unrealize (GtkWidget* base);
 static void dash_entry_real_map (GtkWidget* base);
 static void dash_entry_real_unmap (GtkWidget* base);
+static gboolean dash_entry_real_key_press_event (GtkWidget* base, GdkEventKey* event);
+gpointer unity_greeter_ref (gpointer instance);
+void unity_greeter_unref (gpointer instance);
+GParamSpec* param_spec_unity_greeter (const gchar* name, const gchar* nick, const gchar* blurb, GType object_type, GParamFlags flags);
+void value_set_unity_greeter (GValue* value, gpointer v_object);
+void value_take_unity_greeter (GValue* value, gpointer v_object);
+gpointer value_get_unity_greeter (const GValue* value);
+GType unity_greeter_get_type (void) G_GNUC_CONST;
 DashEntry* dash_entry_new (void);
 DashEntry* dash_entry_construct (GType object_type);
 void dash_entry_set_constant_placeholder_text (DashEntry* self, const gchar* value);
@@ -642,6 +676,32 @@ static void dash_entry_real_unmap (GtkWidget* base) {
 }
 
 
+static gboolean dash_entry_real_key_press_event (GtkWidget* base, GdkEventKey* event) {
+	DashEntry * self;
+	gboolean result = FALSE;
+	UnityGreeter* _tmp0_;
+	gboolean _tmp1_;
+	GdkEventKey _tmp4_;
+	gboolean _tmp5_ = FALSE;
+	self = (DashEntry*) base;
+	g_return_val_if_fail (event != NULL, FALSE);
+	_tmp0_ = unity_greeter_singleton;
+	_tmp1_ = _tmp0_->orca_needs_kick;
+	if (_tmp1_) {
+		AtkObject* _tmp2_ = NULL;
+		UnityGreeter* _tmp3_;
+		_tmp2_ = gtk_widget_get_accessible ((GtkWidget*) self);
+		g_signal_emit_by_name (_tmp2_, "focus-event", TRUE, NULL);
+		_tmp3_ = unity_greeter_singleton;
+		_tmp3_->orca_needs_kick = FALSE;
+	}
+	_tmp4_ = *event;
+	_tmp5_ = GTK_WIDGET_CLASS (dash_entry_parent_class)->key_press_event ((GtkWidget*) G_TYPE_CHECK_INSTANCE_CAST (self, GTK_TYPE_ENTRY, GtkEntry), &_tmp4_);
+	result = _tmp5_;
+	return result;
+}
+
+
 DashEntry* dash_entry_construct (GType object_type) {
 	DashEntry * self = NULL;
 	self = (DashEntry*) g_object_new (object_type, NULL);
@@ -945,6 +1005,7 @@ static void dash_entry_class_init (DashEntryClass * klass) {
 	GTK_WIDGET_CLASS (klass)->unrealize = dash_entry_real_unrealize;
 	GTK_WIDGET_CLASS (klass)->map = dash_entry_real_map;
 	GTK_WIDGET_CLASS (klass)->unmap = dash_entry_real_unmap;
+	GTK_WIDGET_CLASS (klass)->key_press_event = dash_entry_real_key_press_event;
 	G_OBJECT_CLASS (klass)->get_property = _vala_dash_entry_get_property;
 	G_OBJECT_CLASS (klass)->set_property = _vala_dash_entry_set_property;
 	G_OBJECT_CLASS (klass)->constructor = dash_entry_constructor;

@@ -322,6 +322,42 @@ public class MenuBar : Gtk.MenuBar
         return keyboard_item;
     }
 
+    private void load_indicator (string indicator_name)
+    {
+        if (indicator_name == "ug-keyboard")
+        {
+            var keyboard_item = make_keyboard_indicator ();
+            insert (keyboard_item, (int) get_children ().length () - 1);
+        }
+        else if (indicator_name == "ug-accessibility")
+        {
+            var a11y_item = make_a11y_indicator ();
+            insert (a11y_item, (int) get_children ().length () - 1);
+        }
+        else
+        {
+            // Find file, if it exists
+            string[] names_to_try = {"lib" + indicator_name + ".so",
+                                     indicator_name + ".so",
+                                     indicator_name};
+            foreach (var filename in names_to_try)
+            {
+                var full_path = Path.build_filename (Config.INDICATORDIR, filename);
+                var io = new Indicator.Object.from_file (full_path);
+                if (io == null)
+                    continue;
+
+                indicator_objects.append (io);
+                io.entry_added.connect (indicator_added_cb);
+                io.entry_removed.connect (indicator_removed_cb);
+                foreach (var entry in io.get_entries ())
+                    indicator_added_cb (io, entry);
+
+                break;
+            }
+        }
+    }
+
     private void setup_indicators ()
     {
         /* Set indicators to run with reduced functionality */
@@ -334,30 +370,23 @@ public class MenuBar : Gtk.MenuBar
         /* Hint to have gnome-settings-daemon run in greeter mode */
         greeter_set_env ("RUNNING_UNDER_GDM", "1");
 
-        var keyboard_item = make_keyboard_indicator ();
-        insert (keyboard_item, (int) get_children ().length () - 1);
-
-        var a11y_item = make_a11y_indicator ();
-        insert (a11y_item, (int) get_children ().length () - 1);
+        /* Let indicators know about our unique dbus name */
+        try
+        {
+            var conn = Bus.get_sync (BusType.SESSION);
+            greeter_set_env ("UNITY_GREETER_DBUS_NAME", conn.get_unique_name ());
+        }
+        catch (IOError e)
+        {
+            debug ("Could not set DBUS_NAME: %s", e.message);
+        }
 
         debug ("LANG=%s LANGUAGE=%s", Environment.get_variable ("LANG"), Environment.get_variable ("LANGUAGE"));
-        string[] filenames = { Path.build_filename (Config.INDICATORDIR, "libsession.so"),
-                               Path.build_filename (Config.INDICATORDIR, "libdatetime.so"),
-                               Path.build_filename (Config.INDICATORDIR, "libpower.so"),
-                               Path.build_filename (Config.INDICATORDIR, "libsoundmenu.so"),
-                               Path.build_filename (Config.INDICATORDIR, "libapplication.so") };
-        foreach (var filename in filenames)
-        {
-            var io = new Indicator.Object.from_file (filename);
-            if (io == null)
-                continue;
 
-            indicator_objects.append (io);
-            io.entry_added.connect (indicator_added_cb);
-            io.entry_removed.connect (indicator_removed_cb);
-            foreach (var entry in io.get_entries ())
-                indicator_added_cb (io, entry);
-        }
+        var indicator_list = UGSettings.get_strv(UGSettings.KEY_INDICATORS);
+        foreach (var indicator in indicator_list)
+            load_indicator(indicator);
+
         debug ("LANG=%s LANGUAGE=%s", Environment.get_variable ("LANG"), Environment.get_variable ("LANGUAGE"));
     }
 
@@ -488,6 +517,23 @@ public class MenuBar : Gtk.MenuBar
                                      SpawnFlags.SEARCH_PATH,
                                      null,
                                      out reader_pid);
+                // This is a workaroud for bug https://launchpad.net/bugs/944159
+                // The problem is that orca seems to not notice that it's in a
+                // password field on startup.  We just need to kick orca in the
+                // pants.  We do this two ways:  a racy way and a non-racy way.
+                // We kick it after a second which is ideal if we win the race,
+                // because the user gets to hear what widget they are in, and
+                // the first character will be masked.  Otherwise, if we lose
+                // that race, the first time the user types (see
+                // DashEntry.key_press_event), we will kick orca again.  While
+                // this is not racy with orca startup, it is racy with whether
+                // orca will read the first character or not out loud.  Hence
+                // why we do both.  Ideally this would be fixed in orca itself.
+                UnityGreeter.singleton.orca_needs_kick = true;
+                Timeout.add_seconds (1, () => {
+                    Signal.emit_by_name ((get_toplevel () as Gtk.Window).get_focus ().get_accessible (), "focus-event", true);
+                    return false;
+                });
             }
             catch (Error e)
             {

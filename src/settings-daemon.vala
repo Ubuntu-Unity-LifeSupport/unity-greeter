@@ -79,22 +79,13 @@ public class SettingsDaemon : Object
 
     private async void run ()
     {
-        /* Activate g-s-d over dbus */
         try
         {
-            var proxy = new GLib.DBusProxy.for_bus_sync (GLib.BusType.SESSION,
-                                                         GLib.DBusProxyFlags.NONE, null,
-                                                         "org.gnome.SettingsDaemon",
-                                                         "/org/gnome/SettingsDaemon",
-                                                         "org.gnome.SettingsDaemon",
-                                                         null);
-
-            /* This tells g-s-d to activate its plugins */
-            yield proxy.call ("Awake", null, GLib.DBusCallFlags.NONE, -1, null);
+            Process.spawn_command_line_async (Config.GSD_BINARY);
         }
-        catch (Error e)
+        catch (SpawnError e)
         {
-            debug ("Could not start gnome-settings-daemon over DBus: %s", e.message);
+            debug ("Could not start gnome-settings-daemon: %s", e.message);
         }
     }
 }

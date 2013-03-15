@@ -80,6 +80,7 @@ struct _UnityGreeter {
 	gboolean test_mode;
 	gboolean session_started;
 	gchar* last_respond_response;
+	gboolean orca_needs_kick;
 };
 
 struct _UnityGreeterClass {

@@ -25,6 +25,7 @@
 #include <gtk/gtk.h>
 #include <stdlib.h>
 #include <string.h>
+#include "config.h"
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <cairo.h>
 #include <float.h>

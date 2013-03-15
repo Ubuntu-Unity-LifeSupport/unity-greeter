@@ -1,4 +1,4 @@
-[CCode (cprefix = "", lower_case_cprefix = "")]
+[CCode (cprefix = "", lower_case_cprefix = "", cheader_filename = "config.h")]
 namespace Config
 {
   public const string GETTEXT_PACKAGE;
@@ -7,4 +7,5 @@ namespace Config
   public const string CONFIG_FILE;
   public const string PKGDATADIR;
   public const string INDICATORDIR;
+  public const string GSD_BINARY;
 }

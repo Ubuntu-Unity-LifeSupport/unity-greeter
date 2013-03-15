@@ -24,6 +24,22 @@ private int get_grid_offset (int size)
     return (int) (size % grid_size) / 2;
 }
 
+[DBus (name="com.canonical.UnityGreeter.List")]
+public class ListDBusInterface : Object
+{
+    private GreeterList list;
+
+    public ListDBusInterface (GreeterList list)
+    {
+        this.list = list;
+    }
+
+    public void set_active_entry (string entry_name)
+    {
+        list.set_active_entry (entry_name);
+    }
+}
+
 public abstract class GreeterList : FadableBox
 {
     public Background background { get; construct; }
@@ -49,6 +65,7 @@ public abstract class GreeterList : FadableBox
 
     protected List<PromptBox> entries = null;
 
+    private ListDBusInterface dbus_object;
 
     private double scroll_target_location;
     private double scroll_start_location;
@@ -152,6 +169,29 @@ public abstract class GreeterList : FadableBox
 
         scroll_timer = new AnimateTimer (AnimateTimer.ease_out_quint, AnimateTimer.FAST);
         scroll_timer.animate.connect (animate_scrolling);
+
+        try
+        {
+            Bus.get.begin (BusType.SESSION, null, on_bus_acquired);
+        }
+        catch (IOError e)
+        {
+            debug ("Error getting session bus: %s", e.message);
+        }
+    }
+
+    private void on_bus_acquired (Object? obj, AsyncResult res)
+    {
+        try
+        {
+            var conn = Bus.get.end (res);
+            this.dbus_object = new ListDBusInterface (this);
+            conn.register_object ("/list", this.dbus_object);
+        }
+        catch (IOError e)
+        {
+            debug ("Error registering user list dbus object: %s", e.message);
+        }
     }
 
     public enum ScrollTarget
@@ -354,7 +394,15 @@ public abstract class GreeterList : FadableBox
     {
         var e = find_entry (name);
         if (e != null)
-            select_entry (e, 1.0);
+        {
+            var direction = 1.0;
+            if (selected_entry != null &&
+                entries.index (selected_entry) > entries.index (e))
+            {
+                direction = -1.0;
+            }
+            select_entry (e, direction);
+        }
     }
 
     public void set_active_first_entry_with_prefix (string prefix)
