@@ -1,0 +1,197 @@
+# Tajik translation for unity-greeter
+# Copyright (c) 2013 Rosetta Contributors and Canonical Ltd 2013
+# This file is distributed under the same license as the unity-greeter package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2013.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: unity-greeter\n"
+"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2013-06-18 06:26+0000\n"
+"PO-Revision-Date: 2013-04-15 09:13+0000\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: Tajik <tg@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2013-06-19 05:41+0000\n"
+"X-Generator: Launchpad (build 16673)\n"
+
+#: ../src/greeter-list.vala:285
+#, c-format
+msgid "Enter password for %s"
+msgstr "Паролро барои %s ворид кунед"
+
+#: ../src/greeter-list.vala:783 ../src/user-list.vala:650
+#: ../src/user-list.vala:1412 ../src/user-list.vala:1506
+#: ../src/user-list.vala:1529 ../src/user-list.vala:1533
+#: ../src/user-list.vala:1537 ../src/user-list.vala:1543
+#: ../src/user-list.vala:1547 ../src/user-list.vala:1550
+msgid "Password:"
+msgstr "Парол:"
+
+#: ../src/greeter-list.vala:785 ../src/user-list.vala:644
+#: ../src/user-list.vala:1509
+msgid "Username:"
+msgstr "Номи корбар:"
+
+#: ../src/greeter-list.vala:837
+msgid "Invalid password, please try again"
+msgstr "Пароли беэътибор, лутфан, амалро такрор кунед"
+
+#: ../src/greeter-list.vala:848
+msgid "Failed to authenticate"
+msgstr "Санҷиши эътибор ба анҷом нарасид"
+
+#: ../src/greeter-list.vala:903
+msgid "Logging in..."
+msgstr "Воридшавӣ рафта истодааст..."
+
+#: ../src/main-window.vala:47
+msgid "Login Screen"
+msgstr "Экрани воридшавӣ"
+
+#: ../src/menubar.vala:236
+msgid "Onscreen keyboard"
+msgstr "Клавиатураи экранӣ"
+
+#: ../src/menubar.vala:241
+msgid "High Contrast"
+msgstr "Контрасти баланд"
+
+#: ../src/menubar.vala:247
+msgid "Screen Reader"
+msgstr "Хонандаи экран"
+
+#: ../src/prompt-box.vala:211
+msgid "Session Options"
+msgstr "Имконоти ҷаласа"
+
+#: ../src/session-list.vala:34
+msgid "Select desktop environment"
+msgstr "Муҳити мизи кориро интихоб кунед"
+
+#. Translators: %s is a session name like KDE or Ubuntu
+#: ../src/toggle-box.vala:93
+#, c-format
+msgid "%s (Default)"
+msgstr "%s (Пешфарз)"
+
+#. Help string for command line --version flag
+#: ../src/unity-greeter.vala:451
+msgid "Show release version"
+msgstr "Намоиш додани ҷаласаи релиз"
+
+#. Help string for command line --test-mode flag
+#: ../src/unity-greeter.vala:454
+msgid "Run in test mode"
+msgstr "Иҷро кардан дар ҳолати санҷишӣ"
+
+#. Arguments and description for --help text
+#: ../src/unity-greeter.vala:460
+msgid "- Unity Greeter"
+msgstr "- Unity Greeter"
+
+#. Text printed out when an unknown command-line argument provided
+#: ../src/unity-greeter.vala:471
+#, c-format
+msgid "Run '%s --help' to see a full list of available command line options."
+msgstr ""
+"Барои дидани рӯйхати пурраи имконоти дастрасӣ сатри фармон, фармони \"%s --"
+"help\"-ро иҷро кунед."
+
+#: ../src/user-list.vala:45
+msgid "Guest Session"
+msgstr "Ҷаласаи меҳмон"
+
+#: ../src/user-list.vala:387
+msgid "Please enter a complete e-mail address"
+msgstr "Лутфан, суроғаи пурраи почтаи электрониро ворид кунед"
+
+#: ../src/user-list.vala:467
+msgid "Incorrect e-mail address or password"
+msgstr "Суроғаи почтаи электронӣ ё пароли нодуруст"
+
+#: ../src/user-list.vala:498
+msgid ""
+"If you have an account on an RDP or Citrix server, Remote Login lets you run "
+"applications from that server."
+msgstr ""
+"Агар шумо дар сервери RDP ё Citrix ҳисоб дошта бошед, Воридшавии дурдаст ба "
+"шумо имконият медиҳад, ки барномаҳоро аз он сервер иҷро кунед."
+
+#. For 12.10 we still don't support Citrix
+#: ../src/user-list.vala:500
+msgid ""
+"If you have an account on an RDP server, Remote Login lets you run "
+"applications from that server."
+msgstr ""
+"Агар шумо дар сервери RDP ҳисоб дошта бошед, Воридшавии дурдаст ба шумо "
+"имконият медиҳад, ки барномаҳоро аз он сервер иҷро кунед."
+
+#: ../src/user-list.vala:503
+msgid "Cancel"
+msgstr "Бекор кардан"
+
+#: ../src/user-list.vala:504
+msgid "Set Up…"
+msgstr "Танзим кардан..."
+
+#: ../src/user-list.vala:506
+msgid ""
+"You need an Ubuntu Remote Login account to use this service. Would you like "
+"to set up an account now?"
+msgstr ""
+"Барои истифодаи ин хидмат ба шумо ҳисоби Воридшавии дурдасти Ubuntu лозим "
+"аст. Шумо мехоҳед, ки ҳисобро ҳозир танзим кунед?"
+
+#: ../src/user-list.vala:510
+msgid "OK"
+msgstr "OK"
+
+#: ../src/user-list.vala:511
+msgid ""
+"You need an Ubuntu Remote Login account to use this service. Visit "
+"uccs.canonical.com to set up an account."
+msgstr ""
+"Барои истифодаи ин хидмат ба шумо ҳисоби Воридшавии дурдасти Ubuntu лозим "
+"аст. Барои танзим кардани ҳисоб, ба uccs.canonical.com ташриф оред."
+
+#: ../src/user-list.vala:628
+msgid "Server type not supported."
+msgstr "Намуди сервер дастгирӣ намешавад."
+
+#: ../src/user-list.vala:669
+msgid "Domain:"
+msgstr "Домен:"
+
+#: ../src/user-list.vala:730
+msgid "Email address:"
+msgstr "Суроғаи почтаи электронӣ:"
+
+#. 'Log In' here is the button for logging in.
+#: ../src/user-list.vala:774
+msgid "Log In"
+msgstr "Ворид шудан"
+
+#: ../src/user-list.vala:775
+#, c-format
+msgid "Login as %s"
+msgstr "Ворид шудан ҳамчун %s"
+
+#: ../src/user-list.vala:779
+msgid "Retry"
+msgstr "Такрор кардан"
+
+#: ../src/user-list.vala:780
+#, c-format
+msgid "Retry as %s"
+msgstr "Такрор кардан ҳамчун %s"
+
+#: ../src/user-list.vala:819
+msgid "Login"
+msgstr "Ворид шудан"
+
+#: ../src/user-list.vala:1546
+msgid "Favorite Color (blue):"
+msgstr "Ранги дӯстдошта (кабуд):"

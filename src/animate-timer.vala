@@ -115,6 +115,8 @@ private class AnimateTimer : Object
        time is not normalized yet! */
     private double calculate_progress (TimeSpan time)
     {
+        if (length == 0)
+            return 1.0;
         var x = normalize_time (time);
         var y = easing_func (x);
         return y.clamp (0.0, 1.0);

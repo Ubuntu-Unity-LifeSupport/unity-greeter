@@ -7,20 +7,20 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2013-03-14 05:17+0000\n"
+"POT-Creation-Date: 2013-06-18 06:26+0000\n"
 "PO-Revision-Date: 2012-01-24 16:14+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: Hindi <hi@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-03-15 06:14+0000\n"
-"X-Generator: Launchpad (build 16532)\n"
+"X-Launchpad-Export-Date: 2013-06-19 05:41+0000\n"
+"X-Generator: Launchpad (build 16673)\n"
 
 #: ../src/greeter-list.vala:285
 #, c-format
 msgid "Enter password for %s"
-msgstr ""
+msgstr "%s के लिये पासवर्ड डालें"
 
 #: ../src/greeter-list.vala:783 ../src/user-list.vala:650
 #: ../src/user-list.vala:1412 ../src/user-list.vala:1506
@@ -61,7 +61,7 @@ msgstr ""
 
 #: ../src/menubar.vala:247
 msgid "Screen Reader"
-msgstr ""
+msgstr "स्क्रीन वाचक"
 
 #: ../src/prompt-box.vala:211
 msgid "Session Options"
@@ -129,7 +129,7 @@ msgstr ""
 
 #: ../src/user-list.vala:503
 msgid "Cancel"
-msgstr ""
+msgstr "रद्द करें"
 
 #: ../src/user-list.vala:504
 msgid "Set Up…"
@@ -145,7 +145,7 @@ msgstr ""
 
 #: ../src/user-list.vala:510
 msgid "OK"
-msgstr ""
+msgstr "ठीक है"
 
 #: ../src/user-list.vala:511
 msgid ""
@@ -161,11 +161,11 @@ msgstr "सर्वर प्रकार समर्थित नहीं �
 
 #: ../src/user-list.vala:669
 msgid "Domain:"
-msgstr ""
+msgstr "डोमेन:"
 
 #: ../src/user-list.vala:730
 msgid "Email address:"
-msgstr ""
+msgstr "ई-मेल पताः"
 
 #. 'Log In' here is the button for logging in.
 #: ../src/user-list.vala:774
@@ -184,7 +184,7 @@ msgstr "पुन: प्रयास करें"
 #: ../src/user-list.vala:780
 #, c-format
 msgid "Retry as %s"
-msgstr ""
+msgstr "%s के रूप में पुन: प्रयास करें"
 
 #: ../src/user-list.vala:819
 msgid "Login"
@@ -192,7 +192,7 @@ msgstr ""
 
 #: ../src/user-list.vala:1546
 msgid "Favorite Color (blue):"
-msgstr ""
+msgstr "पसंदीदा रंग (नीला):"
 
 #~ msgid "_Back"
 #~ msgstr "पीछे (_B)"

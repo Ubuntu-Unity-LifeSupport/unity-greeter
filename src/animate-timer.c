@@ -209,26 +209,36 @@ static gdouble animate_timer_normalize_time (AnimateTimer* self, GTimeSpan now) 
 static gdouble animate_timer_calculate_progress (AnimateTimer* self, GTimeSpan time) {
 	gdouble result = 0.0;
 	GTimeSpan _tmp0_;
-	gdouble _tmp1_ = 0.0;
+	GTimeSpan _tmp1_;
+	gdouble _tmp2_ = 0.0;
 	gdouble x;
-	AnimateTimerEasingFunc _tmp2_;
-	void* _tmp2__target;
 	AnimateTimerEasingFunc _tmp3_;
 	void* _tmp3__target;
-	gdouble _tmp4_ = 0.0;
+	AnimateTimerEasingFunc _tmp4_;
+	void* _tmp4__target;
+	gdouble _tmp5_;
+	gdouble _tmp6_ = 0.0;
 	gdouble y;
-	gdouble _tmp5_ = 0.0;
+	gdouble _tmp7_;
+	gdouble _tmp8_ = 0.0;
 	g_return_val_if_fail (self != NULL, 0.0);
-	_tmp0_ = time;
-	_tmp1_ = animate_timer_normalize_time (self, _tmp0_);
-	x = _tmp1_;
-	_tmp2_ = animate_timer_get_easing_func (self, &_tmp2__target);
-	_tmp3_ = _tmp2_;
-	_tmp3__target = _tmp2__target;
-	_tmp4_ = _tmp3_ (x, _tmp3__target);
-	y = _tmp4_;
-	_tmp5_ = CLAMP (y, 0.0, 1.0);
-	result = _tmp5_;
+	_tmp0_ = self->priv->length;
+	if (_tmp0_ == ((GTimeSpan) 0)) {
+		result = 1.0;
+		return result;
+	}
+	_tmp1_ = time;
+	_tmp2_ = animate_timer_normalize_time (self, _tmp1_);
+	x = _tmp2_;
+	_tmp3_ = animate_timer_get_easing_func (self, &_tmp3__target);
+	_tmp4_ = _tmp3_;
+	_tmp4__target = _tmp3__target;
+	_tmp5_ = x;
+	_tmp6_ = _tmp4_ (_tmp5_, _tmp4__target);
+	y = _tmp6_;
+	_tmp7_ = y;
+	_tmp8_ = CLAMP (_tmp7_, 0.0, 1.0);
+	result = _tmp8_;
 	return result;
 }
 

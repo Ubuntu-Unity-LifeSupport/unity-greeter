@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2013-03-14 05:17+0000\n"
+"POT-Creation-Date: 2013-06-18 06:26+0000\n"
 "PO-Revision-Date: 2012-08-30 08:45+0000\n"
 "Last-Translator: Rustam Akbarov <ak_roostum@yahoo.com>\n"
 "Language-Team: Uzbek <uz@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-03-15 06:15+0000\n"
-"X-Generator: Launchpad (build 16532)\n"
+"X-Launchpad-Export-Date: 2013-06-19 05:41+0000\n"
+"X-Generator: Launchpad (build 16673)\n"
 
 #: ../src/greeter-list.vala:285
 #, c-format
@@ -75,7 +75,7 @@ msgstr ""
 #: ../src/toggle-box.vala:93
 #, c-format
 msgid "%s (Default)"
-msgstr ""
+msgstr "%s (odatiy)"
 
 #. Help string for command line --version flag
 #: ../src/unity-greeter.vala:451
@@ -104,17 +104,19 @@ msgstr ""
 
 #: ../src/user-list.vala:387
 msgid "Please enter a complete e-mail address"
-msgstr ""
+msgstr "Elektron pochtangizni to‘liq kiriting"
 
 #: ../src/user-list.vala:467
 msgid "Incorrect e-mail address or password"
-msgstr ""
+msgstr "Elektron pochta manzili yoki parol noto‘g‘ri"
 
 #: ../src/user-list.vala:498
 msgid ""
 "If you have an account on an RDP or Citrix server, Remote Login lets you run "
 "applications from that server."
 msgstr ""
+"Agarda RDP yoki Citrix serverlarida sizning qaydingiz mavjud bo‘lsa, Ubuntu "
+"Remote Login sizga ushbu serverdan ishga tushirib beradi"
 
 #. For 12.10 we still don't support Citrix
 #: ../src/user-list.vala:500
@@ -125,11 +127,11 @@ msgstr ""
 
 #: ../src/user-list.vala:503
 msgid "Cancel"
-msgstr ""
+msgstr "Bekor qilish"
 
 #: ../src/user-list.vala:504
 msgid "Set Up…"
-msgstr ""
+msgstr "O‘rnatish"
 
 #: ../src/user-list.vala:506
 msgid ""
@@ -139,7 +141,7 @@ msgstr ""
 
 #: ../src/user-list.vala:510
 msgid "OK"
-msgstr ""
+msgstr "OK"
 
 #: ../src/user-list.vala:511
 msgid ""
@@ -184,7 +186,7 @@ msgstr ""
 
 #: ../src/user-list.vala:1546
 msgid "Favorite Color (blue):"
-msgstr ""
+msgstr "Танланган ранг (кўк)"
 
 #~ msgid "_Back"
 #~ msgstr "_Орқага"
