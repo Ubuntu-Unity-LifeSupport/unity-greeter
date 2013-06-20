@@ -1,3 +1,10 @@
+unity-greeter (13.10.1-0ubuntu1) saucy; urgency=low
+
+  * Fix tests to ignore warnings from libraries and such.  Only care about
+    actual test failures.  Fixes FTBFS on armhf.
+
+ -- Michael Terry <mterry@ubuntu.com>  Thu, 20 Jun 2013 14:08:32 -0400
+
 unity-greeter (13.10.0-0ubuntu1) saucy; urgency=low
 
   * New upstream release:

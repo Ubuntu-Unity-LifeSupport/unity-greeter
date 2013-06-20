@@ -3,6 +3,8 @@ public class Test
 {
     private static MainWindow setup ()
     {
+        GLib.Test.log_set_fatal_handler (ignore_warnings);
+
         TestMainWindow main_window = new TestMainWindow ();
         var list = new TestList (main_window.get_background (), main_window.menubar);
         main_window.push_list (list);
@@ -11,6 +13,14 @@ public class Test
         process_events ();
 
         return main_window;
+    }
+
+    private static bool ignore_warnings (string? log_domain,
+                                         GLib.LogLevelFlags log_level,
+                                         string message)
+    {
+        return ((log_level & (GLib.LogLevelFlags.LEVEL_CRITICAL |
+                              GLib.LogLevelFlags.LEVEL_ERROR)) != 0);
     }
 
     private static void process_events ()
@@ -694,16 +704,16 @@ public class Test
             if (top_srcdir == null || top_srcdir == "")
                 top_srcdir = "..";
             if (Posix.system("cp %s/data/com.canonical.unity-greeter.gschema.xml %s".printf(top_srcdir, schema_dir)) != 0)
-                warning("Could not copy schema to %s", schema_dir);
+                error("Could not copy schema to %s", schema_dir);
 
             if (Posix.system("glib-compile-schemas %s".printf(schema_dir)) != 0)
-                warning("Could not compile schemas in %s", schema_dir);
+                error("Could not compile schemas in %s", schema_dir);
 
             Environment.set_variable("GSETTINGS_BACKEND", "memory", true);
         }
         catch (Error e)
         {
-            debug ("Error setting up gsettings: %s", e.message);
+            error("Error setting up gsettings: %s", e.message);
         }
     }
 

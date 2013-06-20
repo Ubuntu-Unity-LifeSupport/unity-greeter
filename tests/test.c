@@ -5,10 +5,10 @@
 #include <glib.h>
 #include <glib-object.h>
 #include <gtk/gtk.h>
-#include <unistd.h>
-#include <gdk/gdk.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <gdk/gdk.h>
 #include <lightdm.h>
 #include <glib/gstdio.h>
 #include <gobject/gvaluecollector.h>
@@ -266,6 +266,8 @@ enum  {
 };
 GType main_window_get_type (void) G_GNUC_CONST;
 static MainWindow* test_setup (void);
+static gboolean test_ignore_warnings (const gchar* log_domain, GLogLevelFlags log_level, const gchar* message);
+static gboolean _test_ignore_warnings_glog_fatal_func (const gchar* log_domain, GLogLevelFlags log_levels, const gchar* message, gpointer self);
 TestMainWindow* test_main_window_new (void);
 TestMainWindow* test_main_window_construct (GType object_type);
 GType test_main_window_get_type (void) G_GNUC_CONST;
@@ -373,6 +375,13 @@ static void _vala_array_destroy (gpointer array, gint array_length, GDestroyNoti
 static void _vala_array_free (gpointer array, gint array_length, GDestroyNotify destroy_func);
 
 
+static gboolean _test_ignore_warnings_glog_fatal_func (const gchar* log_domain, GLogLevelFlags log_levels, const gchar* message, gpointer self) {
+	gboolean result;
+	result = test_ignore_warnings (log_domain, log_levels, message);
+	return result;
+}
+
+
 static MainWindow* test_setup (void) {
 	MainWindow* result = NULL;
 	TestMainWindow* _tmp0_;
@@ -383,6 +392,7 @@ static MainWindow* test_setup (void) {
 	TestList* _tmp4_;
 	TestList* _tmp5_;
 	TestList* list;
+	g_test_log_set_fatal_handler (_test_ignore_warnings_glog_fatal_func, NULL);
 	_tmp0_ = test_main_window_new ();
 	g_object_ref_sink (_tmp0_);
 	main_window = _tmp0_;
@@ -399,6 +409,16 @@ static MainWindow* test_setup (void) {
 	test_process_events ();
 	result = (MainWindow*) main_window;
 	_g_object_unref0 (list);
+	return result;
+}
+
+
+static gboolean test_ignore_warnings (const gchar* log_domain, GLogLevelFlags log_level, const gchar* message) {
+	gboolean result = FALSE;
+	GLogLevelFlags _tmp0_;
+	g_return_val_if_fail (message != NULL, FALSE);
+	_tmp0_ = log_level;
+	result = (_tmp0_ & (G_LOG_LEVEL_CRITICAL | G_LOG_LEVEL_ERROR)) != 0;
 	return result;
 }
 
@@ -2971,7 +2991,7 @@ static void test_setup_gsettings (void) {
 		if (_tmp22_) {
 			const gchar* _tmp23_;
 			_tmp23_ = schema_dir;
-			g_warning ("test.vala:697: Could not copy schema to %s", _tmp23_);
+			g_error ("test.vala:707: Could not copy schema to %s", _tmp23_);
 		}
 		_tmp24_ = schema_dir;
 		_tmp25_ = g_strdup_printf ("glib-compile-schemas %s", _tmp24_);
@@ -2982,7 +3002,7 @@ static void test_setup_gsettings (void) {
 		if (_tmp28_) {
 			const gchar* _tmp29_;
 			_tmp29_ = schema_dir;
-			g_warning ("test.vala:700: Could not compile schemas in %s", _tmp29_);
+			g_error ("test.vala:710: Could not compile schemas in %s", _tmp29_);
 		}
 		g_setenv ("GSETTINGS_BACKEND", "memory", TRUE);
 		_g_free0 (top_srcdir);
@@ -2994,13 +3014,11 @@ static void test_setup_gsettings (void) {
 	__catch0_g_error:
 	{
 		GError* e = NULL;
-		GError* _tmp30_;
-		const gchar* _tmp31_;
+		const gchar* _tmp30_;
 		e = _inner_error_;
 		_inner_error_ = NULL;
-		_tmp30_ = e;
-		_tmp31_ = _tmp30_->message;
-		g_debug ("test.vala:706: Error setting up gsettings: %s", _tmp31_);
+		_tmp30_ = e->message;
+		g_error ("test.vala:716: Error setting up gsettings: %s", _tmp30_);
 		_g_error_free0 (e);
 	}
 	__finally0:
