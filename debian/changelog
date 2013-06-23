@@ -1,3 +1,13 @@
+unity-greeter (13.10.1-0ubuntu2) saucy; urgency=low
+
+  * debian/50-unity-greeter.conf:
+  * debian/postinst:
+  * debian/postrm:
+    - Use new lightdm.conf.d file to set unity-greeter as the default greeter.
+      Deprecates lightdm-set-defaults method.
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Mon, 24 Jun 2013 10:40:00 +1200
+
 unity-greeter (13.10.1-0ubuntu1) saucy; urgency=low
 
   * Fix tests to ignore warnings from libraries and such.  Only care about
