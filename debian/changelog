@@ -1,3 +1,15 @@
+unity-greeter (13.10.2-0ubuntu1) saucy; urgency=low
+
+  [ Didier Roche ]
+  * Minor changes for daily release
+  * Automatic snapshot from revision 892 (bootstrap)
+
+  [ Michael Terry ]
+  * New upstream release
+  * Bump required valac to 0.20.0
+
+ -- Michael Terry <mterry@ubuntu.com>  Tue, 13 Aug 2013 20:22:13 -0400
+
 unity-greeter (13.10.1-0ubuntu2) saucy; urgency=low
 
   * debian/50-unity-greeter.conf:

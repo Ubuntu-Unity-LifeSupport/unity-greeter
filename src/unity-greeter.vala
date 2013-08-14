@@ -434,6 +434,7 @@ public class UnityGreeter
         }
 
         Gtk.init (ref args);
+        Ido.init ();
 
         log_timer = new Timer ();
         Log.set_default_handler (log_cb);

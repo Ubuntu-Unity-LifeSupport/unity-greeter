@@ -6,6 +6,9 @@
 /* Path to g-s-d */
 #undef GSD_BINARY
 
+/* Indicator files are searched for in this directory */
+#undef INDICATOR_FILE_DIR
+
 /* Define to 1 if your C compiler doesn't accept -c and -o together. */
 #undef NO_MINUS_C_MINUS_O
 

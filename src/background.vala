@@ -686,6 +686,7 @@ public class Background : Gtk.Fixed
                              Gdk.Atom.intern_static_string ("STRING"),
                              8,
                              Gdk.PropMode.REPLACE,
-                             rgba.data);
+                             rgba.data,
+                             rgba.data.length);
     }
 }

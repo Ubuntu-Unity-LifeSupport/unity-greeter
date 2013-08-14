@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2013-06-19 20:42+0000\n"
+"POT-Creation-Date: 2013-08-12 04:59+0000\n"
 "PO-Revision-Date: 2012-01-24 16:14+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: Khmer <km@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-06-20 05:44+0000\n"
-"X-Generator: Launchpad (build 16673)\n"
+"X-Launchpad-Export-Date: 2013-08-13 05:55+0000\n"
+"X-Generator: Launchpad (build 16723)\n"
 
 #: ../src/greeter-list.vala:285
 #, c-format
@@ -44,8 +44,8 @@ msgid "Failed to authenticate"
 msgstr "បាន​បរាជ័យ​ក្នុង​ការ​ផ្ទៀងផ្ទាត់​ភាព​ត្រឹមត្រូវ"
 
 #: ../src/greeter-list.vala:903
-msgid "Logging in..."
-msgstr "កំពុង​ចូល​..."
+msgid "Logging in…"
+msgstr ""
 
 #: ../src/main-window.vala:47
 msgid "Login Screen"
@@ -69,31 +69,31 @@ msgstr "ជម្រើស​សម័យ"
 
 #: ../src/session-list.vala:34
 msgid "Select desktop environment"
-msgstr ""
+msgstr "ជ្រើស​បរិស្ថាន​ផ្ទៃតុ"
 
 #. Translators: %s is a session name like KDE or Ubuntu
 #: ../src/toggle-box.vala:93
 #, c-format
 msgid "%s (Default)"
-msgstr ""
+msgstr "%s (លំនាំដើម)"
 
 #. Help string for command line --version flag
-#: ../src/unity-greeter.vala:451
+#: ../src/unity-greeter.vala:452
 msgid "Show release version"
 msgstr "បង្ហាញ​កំណែ​ចេញ​ផ្សាយ"
 
 #. Help string for command line --test-mode flag
-#: ../src/unity-greeter.vala:454
+#: ../src/unity-greeter.vala:455
 msgid "Run in test mode"
 msgstr "ដំណើរការ​ក្នុង​របៀប​សាកល្បង"
 
 #. Arguments and description for --help text
-#: ../src/unity-greeter.vala:460
+#: ../src/unity-greeter.vala:461
 msgid "- Unity Greeter"
 msgstr "- សារ​ស្វាគមន៍​របស់ Unity"
 
 #. Text printed out when an unknown command-line argument provided
-#: ../src/unity-greeter.vala:471
+#: ../src/unity-greeter.vala:472
 #, c-format
 msgid "Run '%s --help' to see a full list of available command line options."
 msgstr ""
@@ -105,17 +105,19 @@ msgstr "សម័យ​ភ្ញៀវ"
 
 #: ../src/user-list.vala:387
 msgid "Please enter a complete e-mail address"
-msgstr ""
+msgstr "សូម​បញ្ចូល​អាសយដ្ឋាន​អ៊ីមែល​របស់​អ្នក"
 
 #: ../src/user-list.vala:467
 msgid "Incorrect e-mail address or password"
-msgstr ""
+msgstr "ពាក្យ​សម្ងាត់ ឬ​​អាសយដ្ឋាន​អ៊ីមែល​​មិន​ត្រឹមត្រូវ"
 
 #: ../src/user-list.vala:498
 msgid ""
 "If you have an account on an RDP or Citrix server, Remote Login lets you run "
 "applications from that server."
 msgstr ""
+"ប្រសិនបើ​អ្នក​មាន​គណនី​នៅ​លើ RDP ឬ​ម៉ាស៊ីន​មេ Citrix  "
+"ចូល​ពី​ចម្ងាយ​​​អ្នក​អាច​ចូល​ដំណើរការ​កម្មវិធី​ពី​ម៉ាស៊ីន​មេ​នោះ​បាន។"
 
 #. For 12.10 we still don't support Citrix
 #: ../src/user-list.vala:500
@@ -123,42 +125,48 @@ msgid ""
 "If you have an account on an RDP server, Remote Login lets you run "
 "applications from that server."
 msgstr ""
+"ប្រសិនបើ​អ្នក​មាន​គណនី​នៅ​លើ​ម៉ាស៊ីន​មេ RDP  "
+"ចូល​ពី​ចម្ងាយ​អ្នក​អាច​ចូល​ដំណើរការ​កម្មវិធី​ពី​ម៉ាស៊ីន​មេ​នោះ​បាន។"
 
 #: ../src/user-list.vala:503
 msgid "Cancel"
-msgstr ""
+msgstr "បោះបង់"
 
 #: ../src/user-list.vala:504
 msgid "Set Up…"
-msgstr ""
+msgstr "រៀបចំ…"
 
 #: ../src/user-list.vala:506
 msgid ""
 "You need an Ubuntu Remote Login account to use this service. Would you like "
 "to set up an account now?"
 msgstr ""
+"អ្នក​ត្រូវ​ចូល​គណនី​អ៊ូប៊ុនទូ​ពី​ចម្ងាយ​ដើម្បី​ប្រើ​​ម៉ាស៊ីន​មេ​នេះ។ "
+"តើ​អ្នក​ចង់​រៀបចំ​គណនី​ឥឡូវ​នេះ​ឬ?"
 
 #: ../src/user-list.vala:510
 msgid "OK"
-msgstr ""
+msgstr "យល់ព្រម"
 
 #: ../src/user-list.vala:511
 msgid ""
 "You need an Ubuntu Remote Login account to use this service. Visit "
 "uccs.canonical.com to set up an account."
 msgstr ""
+"អ្នក​ត្រូវ​ចូល​គណនី​អ៊ូប៊ុនទូ​ពី​ចម្ងាយ​ដើម្បី​ប្រើ​ម៉ាស៊ីន​មេ​​នេះ។ មើល "
+"uccs.canonical.com ដើម្បី​រៀបចំ​គណនី។"
 
 #: ../src/user-list.vala:628
 msgid "Server type not supported."
-msgstr ""
+msgstr "ប្រភេទ​ម៉ាស៊ីន​មេ​មិន​ត្រូវ​បាន​គាំទ្រ។"
 
 #: ../src/user-list.vala:669
 msgid "Domain:"
-msgstr ""
+msgstr "ដែន ៖"
 
 #: ../src/user-list.vala:730
 msgid "Email address:"
-msgstr ""
+msgstr "អាសយដ្ឋាន​អ៊ីមែល​ ៖"
 
 #. 'Log In' here is the button for logging in.
 #: ../src/user-list.vala:774
@@ -177,7 +185,7 @@ msgstr "ព្យាយាម​ម្ដង​ទៀត"
 #: ../src/user-list.vala:780
 #, c-format
 msgid "Retry as %s"
-msgstr ""
+msgstr "ព្យាយាម​ម្ដងទៀត​ជា %s"
 
 #: ../src/user-list.vala:819
 msgid "Login"
@@ -185,7 +193,7 @@ msgstr "ចូល"
 
 #: ../src/user-list.vala:1546
 msgid "Favorite Color (blue):"
-msgstr ""
+msgstr "ពណ៌​សំណព្វ (ខៀវ)៖"
 
 #~ msgid "Other..."
 #~ msgstr "ផ្សេង​​ទៀត..."
@@ -195,6 +203,9 @@ msgstr ""
 
 #~ msgid "Enter password"
 #~ msgstr "បញ្ចូល​ពាក្យ​សម្ងាត់"
+
+#~ msgid "Logging in..."
+#~ msgstr "កំពុង​ចូល​..."
 
 #~ msgid "_Back"
 #~ msgstr "ថយ​ក្រោយ"

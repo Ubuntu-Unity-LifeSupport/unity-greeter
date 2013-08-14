@@ -124,8 +124,11 @@ public class UserList : GreeterList
 
         fill_list ();
 
-        entry_selected.connect (entry_selected_cb);
-        entry_selected_cb (selected_entry.id);
+        if (selected_entry != null)
+        {
+            entry_selected.connect (entry_selected_cb);
+            entry_selected_cb (selected_entry.id);
+        }
 
         connect_to_lightdm ();
 
@@ -150,6 +153,10 @@ public class UserList : GreeterList
     {
         remote_login_server_list = new List<RemoteServer?> ();
         remove_entries_with_prefix ("*remote_login");
+
+        /* If we have no entries at all, we should show manual */
+        if (!always_show_manual)
+            add_manual_entry ();
     }
 
     private async void query_directory_servers ()
@@ -249,6 +256,12 @@ public class UserList : GreeterList
                 it = it.next;
             }
         }
+
+        /* Remove manual option unless specified */
+        if (remote_directory_server_list.length() > 0 && !always_show_manual) {
+            debug ("removing manual login since we have a remote login entry");
+            remove_entry ("*other");
+        }
     }
 
     private PromptBox create_prompt_for_login_server (RemoteServer remote_server)
@@ -341,6 +354,12 @@ public class UserList : GreeterList
     {
         remove_remote_servers ();
         remote_login_service = null;
+
+        /* provide a fallback manual login option */
+        if (UnityGreeter.singleton.hide_users_hint ()) {
+            add_manual_entry();
+            set_active_entry ("*other");
+        }
     }
 
     private async void remote_directory_respond_cb ()
@@ -1099,31 +1118,43 @@ public class UserList : GreeterList
         {
         }
 
-        while (add_test_entry ());
-        offer_guest = true;
-        always_show_manual = true;
+        if (!UnityGreeter.singleton.hide_users_hint())
+            while (add_test_entry ());
+
+        /* add a manual entry if the list of entries is empty initially */
+        if (n_test_entries <= 0)
+        {
+            add_manual_entry();
+            set_active_entry ("*other");
+            n_test_entries++;
+        }
+
+        offer_guest = UnityGreeter.singleton.has_guest_account_hint();
+        always_show_manual = UnityGreeter.singleton.show_manual_login_hint();
 
         key_press_event.connect (test_key_press_cb);
 
-        Timeout.add (1000, () =>
-        {
-            RemoteServer[] test_server_list = {};
-            RemoteServer remote_server = RemoteServer ();
-            remote_server.type = "uccs";
-            remote_server.name = "Remote Login";
-            remote_server.url = "http://crazyurl.com";
-            remote_server.last_used_server = false;
-            remote_server.fields = {};
-            RemoteServerField field1 = RemoteServerField ();
-            field1.type = "email";
-            RemoteServerField field2 = RemoteServerField ();
-            field2.type = "password";
-            remote_server.fields = {field1, field2};
-
-            test_server_list += remote_server;
-            set_remote_directory_servers (test_server_list);
-            return false;
-        });
+        if (UnityGreeter.singleton.show_remote_login_hint())
+            Timeout.add (1000, () =>
+            {
+                RemoteServer[] test_server_list = {};
+                RemoteServer remote_server = RemoteServer ();
+                remote_server.type = "uccs";
+                remote_server.name = "Remote Login";
+                remote_server.url = "http://crazyurl.com";
+                remote_server.last_used_server = false;
+                remote_server.fields = {};
+                RemoteServerField field1 = RemoteServerField ();
+                field1.type = "email";
+                RemoteServerField field2 = RemoteServerField ();
+                field2.type = "password";
+                remote_server.fields = {field1, field2};
+                
+                test_server_list += remote_server;
+                set_remote_directory_servers (test_server_list);
+                
+                return false;
+            });
 
         var last_user = UnityGreeter.singleton.get_state ("last-user");
         if (last_user != null)

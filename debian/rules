@@ -3,10 +3,8 @@
 LDFLAGS+=-Wl,--as-needed
 
 %:
-	dh $@ --with autoreconf
+	dh $@ --with autoreconf --fail-missing
 
 override_dh_autoreconf:
 	NOCONFIGURE=1 dh_autoreconf ./autogen.sh
 
-override_dh_install:
-	dh_install --fail-missing

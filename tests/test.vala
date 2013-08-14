@@ -145,7 +145,7 @@ public class Test
         // Wait until remote login appears
         scroll_to_remote_login (list);
 
-        GLib.assert (list.num_entries() == 30);
+        GLib.assert (list.num_entries() > 0);
 
         // Make sure we are at the beginning of the list
         do_scroll (list, GreeterList.ScrollTarget.START);
@@ -688,6 +688,63 @@ public class Test
         mw.hide ();
     }
 
+    public static void remote_login_only ()
+    {
+        UnityGreeter.singleton.test_mode = true;
+        UnityGreeter.singleton.session_started = false;
+
+	/* this configuration should result in the list containing only the remote login entry,
+	   without any fallback manual entry */
+        UnityGreeter.singleton._hide_users_hint = true;
+        UnityGreeter.singleton._show_remote_login_hint = true;
+        UnityGreeter.singleton._has_guest_account_hint = false;
+        UnityGreeter.singleton._show_manual_login_hint = false;
+
+        MainWindow mw = setup ();
+        TestList list = mw.stack.top () as TestList;
+
+	/* don't go too fast, otherwise the lastest gdk3 will lose control... */
+	Posix.sleep(1);
+
+	/* Wait for Remote Login to appear */
+	bool rl_appeared = false;
+	for (int i=0; i<100 && !rl_appeared; i++)
+	{
+            do_scroll (list, GreeterList.ScrollTarget.END);
+            process_events ();
+            if (list.selected_entry.id == "*remote_directory*http://crazyurl.com")
+		rl_appeared = true;
+	}
+
+	GLib.assert (rl_appeared);
+        GLib.assert (list.num_entries() == 1);
+        GLib.assert (list.selected_entry.id == "*remote_directory*http://crazyurl.com");
+
+	mw.hide ();
+   }
+
+   public static void manual_login_fallback ()
+   {
+        UnityGreeter.singleton.test_mode = true;
+        UnityGreeter.singleton.session_started = false;
+
+	/* this configuration should result in the list containing at least a manual entry */
+        UnityGreeter.singleton._hide_users_hint = true;
+        UnityGreeter.singleton._show_remote_login_hint = false;
+        UnityGreeter.singleton._has_guest_account_hint = false;
+        UnityGreeter.singleton._show_manual_login_hint = true;
+
+        MainWindow mw = setup ();
+        TestList list = mw.stack.top () as TestList;
+
+	/* verify if the manual entry has been added as a fallback mechanism */
+        GLib.assert (list.num_entries() == 1);
+        GLib.assert (list.selected_entry.id == "*other");
+
+	mw.hide ();
+   }
+
+
     static void setup_gsettings()
     {
         try
@@ -740,6 +797,8 @@ public class Test
         GLib.Test.add_func ("/Email Autocomplete", email_autocomplete);
         GLib.Test.add_func ("/Greeter Communication", greeter_communcation);
         GLib.Test.add_func ("/Unsupported server type", unsupported_server_type);
+        GLib.Test.add_func ("/Remote Login Only", remote_login_only);
+        GLib.Test.add_func ("/Manual Login Fallback", manual_login_fallback);
 
         return GLib.Test.run();
     }

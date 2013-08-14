@@ -444,17 +444,21 @@ public abstract class GreeterList : FadableBox
         entry.destroy ();
         entries.remove (entry);
 
-        /* Show a manual login if no users */
-        if (!have_entries ())
-            add_manual_entry ();
-
-        /* Select previous entry if the selected one was removed */
+       /* Select another entry if the selected one was removed */
         if (entry == selected_entry)
         {
             if (index >= entries.length () && index > 0)
                 index--;
-            select_entry (entries.nth_data (index), -1.0);
+            else if (index < entries.length ())
+                index++;
+            
+            if (entries.nth_data (index) != null)
+                select_entry (entries.nth_data (index), -1.0);
         }
+
+        /* Show a manual login if no users and no remote login entry */
+        if (!have_entries () && !UnityGreeter.singleton.show_remote_login_hint ())
+            add_manual_entry ();
 
         queue_draw ();
     }
@@ -900,7 +904,7 @@ public abstract class GreeterList : FadableBox
         sensitive = false;
 
         selected_entry.clear ();
-        selected_entry.add_message (_("Logging in..."), false);
+        selected_entry.add_message (_("Logging in…"), false);
 
         redraw_greeter_box ();
     }

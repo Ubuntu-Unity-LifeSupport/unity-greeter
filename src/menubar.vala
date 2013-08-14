@@ -322,6 +322,53 @@ public class MenuBar : Gtk.MenuBar
         return keyboard_item;
     }
 
+    private Indicator.Object? load_indicator_file (string indicator_name)
+    {
+        string dir = Config.INDICATOR_FILE_DIR;
+        string path;
+        Indicator.Object io;
+
+        /* To stay backwards compatible, use com.canonical.indicator as the default prefix */
+        if (indicator_name.index_of_char ('.') < 0)
+            path = @"$dir/com.canonical.indicator.$indicator_name";
+        else
+            path = @"$dir/$indicator_name";
+
+        try
+        {
+            io = new Indicator.Ng.for_profile (path, "desktop_greeter");
+        }
+        catch (FileError error)
+        {
+            /* the calling code handles file-not-found; don't warn here */
+            return null;
+        }
+        catch (Error error)
+        {
+            warning ("unable to load %s: %s", indicator_name, error.message);
+            return null;
+        }
+
+        return io;
+    }
+
+    private Indicator.Object? load_indicator_library (string indicator_name)
+    {
+        // Find file, if it exists
+        string[] names_to_try = {"lib" + indicator_name + ".so",
+                                 indicator_name + ".so",
+                                 indicator_name};
+        foreach (var filename in names_to_try)
+        {
+            var full_path = Path.build_filename (Config.INDICATORDIR, filename);
+            var io = new Indicator.Object.from_file (full_path);
+            if (io != null)
+                return io;
+        }
+
+        return null;
+    }
+
     private void load_indicator (string indicator_name)
     {
         if (indicator_name == "ug-keyboard")
@@ -336,24 +383,18 @@ public class MenuBar : Gtk.MenuBar
         }
         else
         {
-            // Find file, if it exists
-            string[] names_to_try = {"lib" + indicator_name + ".so",
-                                     indicator_name + ".so",
-                                     indicator_name};
-            foreach (var filename in names_to_try)
-            {
-                var full_path = Path.build_filename (Config.INDICATORDIR, filename);
-                var io = new Indicator.Object.from_file (full_path);
-                if (io == null)
-                    continue;
+            var io = load_indicator_file (indicator_name);
 
+            if (io == null)
+                io = load_indicator_library (indicator_name);
+
+            if (io != null)
+            {
                 indicator_objects.append (io);
                 io.entry_added.connect (indicator_added_cb);
                 io.entry_removed.connect (indicator_removed_cb);
                 foreach (var entry in io.get_entries ())
                     indicator_added_cb (io, entry);
-
-                break;
             }
         }
     }
@@ -386,6 +427,18 @@ public class MenuBar : Gtk.MenuBar
         var indicator_list = UGSettings.get_strv(UGSettings.KEY_INDICATORS);
         foreach (var indicator in indicator_list)
             load_indicator(indicator);
+
+        indicator_objects.sort((a, b) => {
+            int pos_a = a.get_position ();
+            int pos_b = b.get_position ();
+
+            if (pos_a < 0)
+                pos_a = 1000;
+            if (pos_b < 0)
+                pos_b = 1000;
+
+            return pos_a - pos_b;
+        });
 
         debug ("LANG=%s LANGUAGE=%s", Environment.get_variable ("LANG"), Environment.get_variable ("LANGUAGE"));
     }

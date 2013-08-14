@@ -2,11 +2,11 @@
 
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT(unity-greeter, 13.10.1)
+AC_INIT(unity-greeter, 13.10.2)
 AC_CONFIG_MACRO_DIR(m4)
 AM_INIT_AUTOMAKE
 AM_PROG_CC_C_O
-UG_PROG_VALAC([valac-0.18 valac-0.16 valac], [0.15.1])
+AM_PROG_VALAC([0.20.0])
 AM_CONFIG_HEADER(config.h)
 AM_MAINTAINER_MODE
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES(yes)])
@@ -21,12 +21,15 @@ PKG_CHECK_MODULES(UNITY_GREETER, [
     gtk+-3.0
     gdk-x11-3.0
     indicator3-0.4
+    libido3-0.1 >= 13.10.0
     liblightdm-gobject-1 >= 1.4.0
     freetype2
     cairo-ft
     libcanberra
     x11
 ])
+
+AC_DEFINE_UNQUOTED([INDICATOR_FILE_DIR], ["${prefix}/share/unity/indicators"], [Indicator files are searched for in this directory])
 
 INDICATORDIR=`$PKG_CONFIG --variable=indicatordir indicator3-0.4`
 AC_SUBST(INDICATORDIR)

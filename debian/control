@@ -13,8 +13,9 @@ Build-Depends: appmenu-gtk3,
                libcanberra-dev,
                libgtk-3-dev,
                libindicator3-dev,
+               libido3-0.1-dev (>= 13.10.0),
                liblightdm-gobject-1-dev (>= 1.4.0),
-               valac-0.16,
+               valac (>= 0.20.0),
                xvfb,
 Homepage: https://launchpad.net/unity-greeter
 # If you aren't a member of ~unity-greeter-team but need to upload packaging

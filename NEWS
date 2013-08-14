@@ -1,3 +1,19 @@
+Overview of changes in unity-greeter 13.10.2
+
+    - Support new indicator services from /usr/share/unity/indicators
+    - Use the utf chars for ellipses
+    - Allow displaying only the remote login entry, without adding a fallback
+      manual login option, if the config files requests it
+    - Update code to work with valac 0.20
+
+Overview of changes in unity-greeter 13.10.1
+
+    - Fix test failure due to warnings from libraries
+
+Overview of changes in unity-greeter 13.10.0
+
+    - Update logo for 13.10
+
 Overview of changes in unity-greeter 13.04.2
 
     - Spawn gnome-settings-daemon directly, not via DBus, as newer versions

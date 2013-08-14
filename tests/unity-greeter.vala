@@ -73,24 +73,28 @@ public class UnityGreeter
         return "";
     }
 
+    public bool _show_manual_login_hint = true;
     public bool show_manual_login_hint ()
     {
-        return false;
+        return _show_manual_login_hint;
     }
 
+    public bool _show_remote_login_hint = true;
     public bool show_remote_login_hint ()
     {
-        return true;
+        return _show_remote_login_hint;
     }
 
+    public bool _hide_users_hint = false;
     public bool hide_users_hint ()
     {
-        return false;
+        return _hide_users_hint;
     }
 
+    public bool _has_guest_account_hint = true;
     public bool has_guest_account_hint ()
     {
-        return false;
+        return _has_guest_account_hint;
     }
 
     public void start_session (string? session, Background bg)

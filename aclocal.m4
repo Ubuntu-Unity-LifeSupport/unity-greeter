@@ -1,4 +1,4 @@
-# generated automatically by aclocal 1.13.2 -*- Autoconf -*-
+# generated automatically by aclocal 1.13.3 -*- Autoconf -*-
 
 # Copyright (C) 1996-2013 Free Software Foundation, Inc.
 
@@ -312,7 +312,7 @@ AC_DEFUN([AM_AUTOMAKE_VERSION],
 [am__api_version='1.13'
 dnl Some users find AM_AUTOMAKE_VERSION and mistake it for a way to
 dnl require some minimum version.  Point them to the right macro.
-m4_if([$1], [1.13.2], [],
+m4_if([$1], [1.13.3], [],
       [AC_FATAL([Do not call $0, use AM_INIT_AUTOMAKE([$1]).])])dnl
 ])
 
@@ -328,7 +328,7 @@ m4_define([_AM_AUTOCONF_VERSION], [])
 # Call AM_AUTOMAKE_VERSION and AM_AUTOMAKE_VERSION so they can be traced.
 # This function is AC_REQUIREd by AM_INIT_AUTOMAKE.
 AC_DEFUN([AM_SET_CURRENT_AUTOMAKE_VERSION],
-[AM_AUTOMAKE_VERSION([1.13.2])dnl
+[AM_AUTOMAKE_VERSION([1.13.3])dnl
 m4_ifndef([AC_AUTOCONF_VERSION],
   [m4_copy([m4_PACKAGE_VERSION], [AC_AUTOCONF_VERSION])])dnl
 _AM_AUTOCONF_VERSION(m4_defn([AC_AUTOCONF_VERSION]))])
@@ -1411,5 +1411,42 @@ AC_SUBST([am__tar])
 AC_SUBST([am__untar])
 ]) # _AM_PROG_TAR
 
+# Autoconf support for the Vala compiler
+
+# Copyright (C) 2008-2013 Free Software Foundation, Inc.
+#
+# This file is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
+
+# Check whether the Vala compiler exists in $PATH.  If it is found, the
+# variable VALAC is set pointing to its absolute path.  Otherwise, it is
+# simply set to 'valac'.
+# Optionally a minimum release number of the compiler can be requested.
+# If the ACTION-IF-FOUND parameter is given, it will be run if a proper
+# Vala compiler is found.
+# Similarly, if the ACTION-IF-FOUND is given, it will be run if no proper
+# Vala compiler is found.  It defaults to simply print a warning about the
+# situation, but otherwise proceeding with the configuration.
+#
+# AM_PROG_VALAC([MINIMUM-VERSION], [ACTION-IF-FOUND], [ACTION-IF-NOT-FOUND])
+# --------------------------------------------------------------------------
+AC_DEFUN([AM_PROG_VALAC],
+  [AC_PATH_PROG([VALAC], [valac], [valac])
+   AS_IF([test "$VALAC" != valac && test -n "$1"],
+      [AC_MSG_CHECKING([whether $VALAC is at least version $1])
+       am__vala_version=`$VALAC --version | sed 's/Vala  *//'`
+       AS_VERSION_COMPARE([$1], ["$am__vala_version"],
+         [AC_MSG_RESULT([yes])],
+         [AC_MSG_RESULT([yes])],
+         [AC_MSG_RESULT([no])
+          VALAC=valac])])
+    if test "$VALAC" = valac; then
+      m4_default([$3],
+        [AC_MSG_WARN([no proper vala compiler found])
+         AC_MSG_WARN([you will not be able to compile vala source files])])
+    else
+      m4_default([$2], [:])
+    fi])
+
 m4_include([m4/intltool.m4])
-m4_include([acinclude.m4])
