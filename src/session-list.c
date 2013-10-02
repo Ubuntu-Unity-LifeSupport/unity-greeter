@@ -751,6 +751,9 @@ static gchar* session_list_get_badge_name (const gchar* session) {
 	static GQuark _tmp2_label7 = 0;
 	static GQuark _tmp2_label8 = 0;
 	static GQuark _tmp2_label9 = 0;
+	static GQuark _tmp2_label10 = 0;
+	static GQuark _tmp2_label11 = 0;
+	static GQuark _tmp2_label12 = 0;
 	g_return_val_if_fail (session != NULL, NULL);
 	_tmp0_ = session;
 	_tmp1_ = _tmp0_;
@@ -765,7 +768,7 @@ static gchar* session_list_get_badge_name (const gchar* session) {
 				return result;
 			}
 		}
-	} else if ((((_tmp3_ == ((0 != _tmp2_label2) ? _tmp2_label2 : (_tmp2_label2 = g_quark_from_static_string ("gnome-classic")))) || (_tmp3_ == ((0 != _tmp2_label3) ? _tmp2_label3 : (_tmp2_label3 = g_quark_from_static_string ("gnome-fallback"))))) || (_tmp3_ == ((0 != _tmp2_label4) ? _tmp2_label4 : (_tmp2_label4 = g_quark_from_static_string ("gnome-shell"))))) || (_tmp3_ == ((0 != _tmp2_label5) ? _tmp2_label5 : (_tmp2_label5 = g_quark_from_static_string ("gnome"))))) {
+	} else if (((((((_tmp3_ == ((0 != _tmp2_label2) ? _tmp2_label2 : (_tmp2_label2 = g_quark_from_static_string ("gnome-classic")))) || (_tmp3_ == ((0 != _tmp2_label3) ? _tmp2_label3 : (_tmp2_label3 = g_quark_from_static_string ("gnome-flashback-compiz"))))) || (_tmp3_ == ((0 != _tmp2_label4) ? _tmp2_label4 : (_tmp2_label4 = g_quark_from_static_string ("gnome-flashback"))))) || (_tmp3_ == ((0 != _tmp2_label5) ? _tmp2_label5 : (_tmp2_label5 = g_quark_from_static_string ("gnome-fallback-compiz"))))) || (_tmp3_ == ((0 != _tmp2_label6) ? _tmp2_label6 : (_tmp2_label6 = g_quark_from_static_string ("gnome-fallback"))))) || (_tmp3_ == ((0 != _tmp2_label7) ? _tmp2_label7 : (_tmp2_label7 = g_quark_from_static_string ("gnome-shell"))))) || (_tmp3_ == ((0 != _tmp2_label8) ? _tmp2_label8 : (_tmp2_label8 = g_quark_from_static_string ("gnome"))))) {
 		switch (0) {
 			default:
 			{
@@ -775,7 +778,7 @@ static gchar* session_list_get_badge_name (const gchar* session) {
 				return result;
 			}
 		}
-	} else if ((_tmp3_ == ((0 != _tmp2_label6) ? _tmp2_label6 : (_tmp2_label6 = g_quark_from_static_string ("kde")))) || (_tmp3_ == ((0 != _tmp2_label7) ? _tmp2_label7 : (_tmp2_label7 = g_quark_from_static_string ("kde-plasma"))))) {
+	} else if ((_tmp3_ == ((0 != _tmp2_label9) ? _tmp2_label9 : (_tmp2_label9 = g_quark_from_static_string ("kde")))) || (_tmp3_ == ((0 != _tmp2_label10) ? _tmp2_label10 : (_tmp2_label10 = g_quark_from_static_string ("kde-plasma"))))) {
 		switch (0) {
 			default:
 			{
@@ -785,7 +788,7 @@ static gchar* session_list_get_badge_name (const gchar* session) {
 				return result;
 			}
 		}
-	} else if (_tmp3_ == ((0 != _tmp2_label8) ? _tmp2_label8 : (_tmp2_label8 = g_quark_from_static_string ("xterm")))) {
+	} else if (_tmp3_ == ((0 != _tmp2_label11) ? _tmp2_label11 : (_tmp2_label11 = g_quark_from_static_string ("xterm")))) {
 		switch (0) {
 			default:
 			{
@@ -795,7 +798,7 @@ static gchar* session_list_get_badge_name (const gchar* session) {
 				return result;
 			}
 		}
-	} else if (_tmp3_ == ((0 != _tmp2_label9) ? _tmp2_label9 : (_tmp2_label9 = g_quark_from_static_string ("remote-login")))) {
+	} else if (_tmp3_ == ((0 != _tmp2_label12) ? _tmp2_label12 : (_tmp2_label12 = g_quark_from_static_string ("remote-login")))) {
 		switch (0) {
 			default:
 			{
@@ -945,7 +948,7 @@ GdkPixbuf* session_list_get_badge (const gchar* session) {
 			_tmp32_ = name;
 			_tmp33_ = e;
 			_tmp34_ = _tmp33_->message;
-			g_debug ("session-list.vala:149: Error loading badge %s: %s", _tmp32_, _tmp34_);
+			g_debug ("session-list.vala:152: Error loading badge %s: %s", _tmp32_, _tmp34_);
 			_g_error_free0 (e);
 		}
 		__finally21:

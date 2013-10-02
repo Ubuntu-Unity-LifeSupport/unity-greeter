@@ -82,5 +82,11 @@ public class UGSettings
         return gsettings.get_strv (key);
     }
 
+    public static bool set_strv (string key, string[] value)
+    {
+        var gsettings = new Settings (SCHEMA);
+        return gsettings.set_strv (key, value);
+    }
+
     private static const string SCHEMA = "com.canonical.unity-greeter";
 }

@@ -7,44 +7,44 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2013-08-12 04:59+0000\n"
+"POT-Creation-Date: 2013-10-03 14:04+0000\n"
 "PO-Revision-Date: 2013-03-06 21:46+0000\n"
 "Last-Translator: Марко М. Костић <Unknown>\n"
 "Language-Team: Ubuntu Serbian Translators\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-08-13 05:55+0000\n"
-"X-Generator: Launchpad (build 16723)\n"
+"X-Launchpad-Export-Date: 2013-10-04 05:36+0000\n"
+"X-Generator: Launchpad (build 16791)\n"
 "Language: sr\n"
 
-#: ../src/greeter-list.vala:285
+#: ../src/greeter-list.vala:300
 #, c-format
 msgid "Enter password for %s"
 msgstr "Унесите лозинку за %s"
 
-#: ../src/greeter-list.vala:783 ../src/user-list.vala:650
-#: ../src/user-list.vala:1412 ../src/user-list.vala:1506
-#: ../src/user-list.vala:1529 ../src/user-list.vala:1533
-#: ../src/user-list.vala:1537 ../src/user-list.vala:1543
-#: ../src/user-list.vala:1547 ../src/user-list.vala:1550
+#: ../src/greeter-list.vala:802 ../src/user-list.vala:661
+#: ../src/user-list.vala:1404 ../src/user-list.vala:1498
+#: ../src/user-list.vala:1521 ../src/user-list.vala:1525
+#: ../src/user-list.vala:1529 ../src/user-list.vala:1535
+#: ../src/user-list.vala:1539 ../src/user-list.vala:1542
 msgid "Password:"
 msgstr "Лозинка:"
 
-#: ../src/greeter-list.vala:785 ../src/user-list.vala:644
-#: ../src/user-list.vala:1509
+#: ../src/greeter-list.vala:804 ../src/user-list.vala:655
+#: ../src/user-list.vala:1501
 msgid "Username:"
 msgstr "Корисничко име:"
 
-#: ../src/greeter-list.vala:837
+#: ../src/greeter-list.vala:856
 msgid "Invalid password, please try again"
 msgstr "Неисправна лозинка, унесите је поново"
 
-#: ../src/greeter-list.vala:848
+#: ../src/greeter-list.vala:867
 msgid "Failed to authenticate"
 msgstr "Неуспех при идентификацији"
 
-#: ../src/greeter-list.vala:903
+#: ../src/greeter-list.vala:922
 msgid "Logging in…"
 msgstr ""
 
@@ -52,15 +52,15 @@ msgstr ""
 msgid "Login Screen"
 msgstr "Пријавни екран"
 
-#: ../src/menubar.vala:236
+#: ../src/menubar.vala:217
 msgid "Onscreen keyboard"
 msgstr "Тастатура на екрану"
 
-#: ../src/menubar.vala:241
+#: ../src/menubar.vala:222
 msgid "High Contrast"
 msgstr "Велики контраст"
 
-#: ../src/menubar.vala:247
+#: ../src/menubar.vala:228
 msgid "Screen Reader"
 msgstr "Читач екрана"
 
@@ -79,22 +79,22 @@ msgid "%s (Default)"
 msgstr "%s (подразумевано)"
 
 #. Help string for command line --version flag
-#: ../src/unity-greeter.vala:452
+#: ../src/unity-greeter.vala:445
 msgid "Show release version"
 msgstr "Прикажи издање програма"
 
 #. Help string for command line --test-mode flag
-#: ../src/unity-greeter.vala:455
+#: ../src/unity-greeter.vala:448
 msgid "Run in test mode"
 msgstr "Покрени у пробном режиму"
 
 #. Arguments and description for --help text
-#: ../src/unity-greeter.vala:461
+#: ../src/unity-greeter.vala:454
 msgid "- Unity Greeter"
 msgstr "Јунитијев екран добродошлице"
 
 #. Text printed out when an unknown command-line argument provided
-#: ../src/unity-greeter.vala:472
+#: ../src/unity-greeter.vala:465
 #, c-format
 msgid "Run '%s --help' to see a full list of available command line options."
 msgstr ""
@@ -104,15 +104,15 @@ msgstr ""
 msgid "Guest Session"
 msgstr "Сесија за госта"
 
-#: ../src/user-list.vala:387
+#: ../src/user-list.vala:398
 msgid "Please enter a complete e-mail address"
 msgstr "Унесите потпуну е-адресу"
 
-#: ../src/user-list.vala:467
+#: ../src/user-list.vala:478
 msgid "Incorrect e-mail address or password"
 msgstr "Нетачна е-адреса или лозинка"
 
-#: ../src/user-list.vala:498
+#: ../src/user-list.vala:509
 msgid ""
 "If you have an account on an RDP or Citrix server, Remote Login lets you run "
 "applications from that server."
@@ -121,7 +121,7 @@ msgstr ""
 "омогућава да покрећете програме са тог сервера."
 
 #. For 12.10 we still don't support Citrix
-#: ../src/user-list.vala:500
+#: ../src/user-list.vala:511
 msgid ""
 "If you have an account on an RDP server, Remote Login lets you run "
 "applications from that server."
@@ -129,15 +129,15 @@ msgstr ""
 "Уколико имате налог на РДП серверу, удаљена пријава вам омогућује да "
 "покрећете програме са тог сервера."
 
-#: ../src/user-list.vala:503
+#: ../src/user-list.vala:514
 msgid "Cancel"
 msgstr "Откажи"
 
-#: ../src/user-list.vala:504
+#: ../src/user-list.vala:515
 msgid "Set Up…"
 msgstr "Подеси..."
 
-#: ../src/user-list.vala:506
+#: ../src/user-list.vala:517
 msgid ""
 "You need an Ubuntu Remote Login account to use this service. Would you like "
 "to set up an account now?"
@@ -145,11 +145,11 @@ msgstr ""
 "Потребан вам је налог за коришћење Убунтуове удаљене пријаве. Да ли желите "
 "да направите налог?"
 
-#: ../src/user-list.vala:510
+#: ../src/user-list.vala:521
 msgid "OK"
 msgstr "У реду"
 
-#: ../src/user-list.vala:511
+#: ../src/user-list.vala:522
 msgid ""
 "You need an Ubuntu Remote Login account to use this service. Visit "
 "uccs.canonical.com to set up an account."
@@ -157,42 +157,42 @@ msgstr ""
 "Потребан вам је налог за коришћење Убунтуове удаљене пријаве. Посетите "
 "uccs.canonical.com да бисте направили налог."
 
-#: ../src/user-list.vala:628
+#: ../src/user-list.vala:639
 msgid "Server type not supported."
 msgstr "Тип сервера није подржан."
 
-#: ../src/user-list.vala:669
+#: ../src/user-list.vala:680
 msgid "Domain:"
 msgstr "Домен:"
 
-#: ../src/user-list.vala:730
+#: ../src/user-list.vala:741
 msgid "Email address:"
 msgstr "Е-адреса:"
 
 #. 'Log In' here is the button for logging in.
-#: ../src/user-list.vala:774
+#: ../src/user-list.vala:785
 msgid "Log In"
 msgstr "Пријави ме"
 
-#: ../src/user-list.vala:775
+#: ../src/user-list.vala:786
 #, c-format
 msgid "Login as %s"
 msgstr "Пријави ме као %s"
 
-#: ../src/user-list.vala:779
+#: ../src/user-list.vala:790
 msgid "Retry"
 msgstr "Покушај поново"
 
-#: ../src/user-list.vala:780
+#: ../src/user-list.vala:791
 #, c-format
 msgid "Retry as %s"
 msgstr "Покушај поново као %s"
 
-#: ../src/user-list.vala:819
+#: ../src/user-list.vala:829
 msgid "Login"
 msgstr "Пријава"
 
-#: ../src/user-list.vala:1546
+#: ../src/user-list.vala:1538
 msgid "Favorite Color (blue):"
 msgstr "Омиљена боја (плава):"
 

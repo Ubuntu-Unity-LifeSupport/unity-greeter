@@ -133,7 +133,6 @@ void unity_greeter_push_list (UnityGreeter* self, GreeterList* widget);
 void unity_greeter_pop_list (UnityGreeter* self);
 gchar* unity_greeter_get_state (UnityGreeter* self, const gchar* key);
 void unity_greeter_set_state (UnityGreeter* self, const gchar* key, const gchar* value);
-LightDMLayout* unity_greeter_get_layout_by_name (const gchar* name);
 void unity_greeter_add_style_class (GtkWidget* widget);
 UnityGreeter* unity_greeter_new (void);
 UnityGreeter* unity_greeter_construct (GType object_type);
@@ -287,43 +286,6 @@ void unity_greeter_set_state (UnityGreeter* self, const gchar* key, const gchar*
 
 static gpointer _g_object_ref0 (gpointer self) {
 	return self ? g_object_ref (self) : NULL;
-}
-
-
-LightDMLayout* unity_greeter_get_layout_by_name (const gchar* name) {
-	LightDMLayout* result = NULL;
-	GList* _tmp0_ = NULL;
-	g_return_val_if_fail (name != NULL, NULL);
-	_tmp0_ = lightdm_get_layouts ();
-	{
-		GList* layout_collection = NULL;
-		GList* layout_it = NULL;
-		layout_collection = _tmp0_;
-		for (layout_it = layout_collection; layout_it != NULL; layout_it = layout_it->next) {
-			LightDMLayout* layout = NULL;
-			layout = (LightDMLayout*) layout_it->data;
-			{
-				LightDMLayout* _tmp1_;
-				const gchar* _tmp2_;
-				const gchar* _tmp3_;
-				const gchar* _tmp4_;
-				_tmp1_ = layout;
-				_tmp2_ = lightdm_layout_get_name (_tmp1_);
-				_tmp3_ = _tmp2_;
-				_tmp4_ = name;
-				if (g_strcmp0 (_tmp3_, _tmp4_) == 0) {
-					LightDMLayout* _tmp5_;
-					LightDMLayout* _tmp6_;
-					_tmp5_ = layout;
-					_tmp6_ = _g_object_ref0 (_tmp5_);
-					result = _tmp6_;
-					return result;
-				}
-			}
-		}
-	}
-	result = NULL;
-	return result;
 }
 
 

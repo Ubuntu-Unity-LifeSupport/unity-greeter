@@ -80,8 +80,11 @@ public class UnityGreeter
 
         var state_dir = Path.build_filename (Environment.get_user_cache_dir (), "unity-greeter");
         DirUtils.create_with_parents (state_dir, 0775);
+        
+        var xdg_seat = GLib.Environment.get_variable("XDG_SEAT");
+        var state_file_name = xdg_seat != null && xdg_seat != "seat0" ? xdg_seat + "-state" : "state";
 
-        state_file = Path.build_filename (state_dir, "state");
+        state_file = Path.build_filename (state_dir, state_file_name);
         state = new KeyFile ();
         try
         {
@@ -140,16 +143,6 @@ public class UnityGreeter
         /* Add style context class lightdm-user-list */
         var ctx = widget.get_style_context ();
         ctx.add_class ("lightdm");
-    }
-
-    public static LightDM.Layout? get_layout_by_name (string name)
-    {
-        foreach (var layout in LightDM.get_layouts ())
-        {
-            if (layout.name == name)
-                return layout;
-        }
-        return null;
     }
 
     public void start_session (string? session, Background bg)

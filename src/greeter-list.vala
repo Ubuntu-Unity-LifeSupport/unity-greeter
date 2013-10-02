@@ -32,12 +32,27 @@ public class ListDBusInterface : Object
     public ListDBusInterface (GreeterList list)
     {
         this.list = list;
+        this.list.entry_selected.connect ((name) => {
+            entry_selected (name);
+        });
+    }
+
+    public string get_active_entry ()
+    {
+        string entry = "";
+
+        if (list.selected_entry != null && list.selected_entry.id != null)
+            entry = list.selected_entry.id;
+
+        return entry;
     }
 
     public void set_active_entry (string entry_name)
     {
         list.set_active_entry (entry_name);
     }
+
+    public signal void entry_selected (string entry_name);
 }
 
 public abstract class GreeterList : FadableBox

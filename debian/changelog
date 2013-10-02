@@ -1,3 +1,18 @@
+unity-greeter (13.10.3-0ubuntu1) saucy; urgency=low
+
+  [ William Hua ]
+  * Replace old ug-keyboard indicator with indicator-keyboard (LP: #1226760,
+    LP #1233945).  FFe bug LP: #1228207
+
+  [ Alberts Muktupāvels ]
+  * Remember last logged in user for each seat (LP: #1201122)
+  * Show gnome badge for all gnome fallback/flashback sessions (LP: #1201122)
+
+  [ Michael Terry ]
+  * Have sound indicator appear again, after the indicator file changed names
+
+ -- Michael Terry <mterry@ubuntu.com>  Wed, 02 Oct 2013 15:55:02 -0400
+
 unity-greeter (13.10.2-0ubuntu1) saucy; urgency=low
 
   [ Didier Roche ]

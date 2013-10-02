@@ -100,6 +100,9 @@ public class SessionList : GreeterList
         case "ubuntu-2d":
             return "ubuntu_badge.png";
         case "gnome-classic":
+        case "gnome-flashback-compiz":
+        case "gnome-flashback":
+        case "gnome-fallback-compiz":
         case "gnome-fallback":
         case "gnome-shell":
         case "gnome":

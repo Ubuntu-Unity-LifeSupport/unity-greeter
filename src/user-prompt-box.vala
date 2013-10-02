@@ -23,9 +23,6 @@ public class UserPromptBox : PromptBox
     /* Background for this user */
     public string background;
 
-    /* Keyboard layouts to use for this user by default */
-    public List <LightDM.Layout> keyboard_layouts;
-
     /* Default session for this user */
     public string session;
 

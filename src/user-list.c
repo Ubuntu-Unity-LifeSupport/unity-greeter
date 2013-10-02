@@ -232,7 +232,6 @@ typedef struct _Block6Data Block6Data;
 #define _remote_server_field_free0(var) ((var == NULL) ? NULL : (var = (remote_server_field_free (var), NULL)))
 #define __g_list_free__remote_server_field_free0_0(var) ((var == NULL) ? NULL : (var = (_g_list_free__remote_server_field_free0_ (var), NULL)))
 typedef struct _UserListCreateRemoteFieldsForCurrentItemData UserListCreateRemoteFieldsForCurrentItemData;
-#define __g_list_free__g_object_unref0_0(var) ((var == NULL) ? NULL : (var = (_g_list_free__g_object_unref0_ (var), NULL)))
 
 #define TYPE_SESSION_LIST (session_list_get_type ())
 #define SESSION_LIST(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_SESSION_LIST, SessionList))
@@ -368,7 +367,6 @@ struct _UserListTestEntry {
 	gchar* username;
 	gchar* real_name;
 	gchar* background;
-	gchar* layouts;
 	gboolean is_active;
 	gboolean has_messages;
 	gchar* session;
@@ -589,7 +587,6 @@ struct _UserPromptBox {
 	PromptBox parent_instance;
 	UserPromptBoxPrivate * priv;
 	gchar* background;
-	GList* keyboard_layouts;
 	gchar* session;
 	gboolean is_active;
 };
@@ -1095,7 +1092,7 @@ void prompt_box_add_button (PromptBox* self, const gchar* text, const gchar* acc
 const gchar* prompt_box_get_label (PromptBox* self);
 void prompt_box_show_prompts (PromptBox* self);
 void greeter_list_redraw_greeter_box (GreeterList* self);
-void user_list_add_user (UserList* self, const gchar* name, const gchar* label, const gchar* background, GList* keyboard_layouts, gboolean is_active, gboolean has_messages, const gchar* session);
+void user_list_add_user (UserList* self, const gchar* name, const gchar* label, const gchar* background, gboolean is_active, gboolean has_messages, const gchar* session);
 UserPromptBox* user_prompt_box_new (const gchar* name);
 UserPromptBox* user_prompt_box_construct (GType object_type, const gchar* name);
 void user_list_prompt_box_respond_cb (UserList* self, gchar** responses, int responses_length1);
@@ -1104,7 +1101,6 @@ static void user_list_prompt_box_login_cb (UserList* self);
 static void _user_list_prompt_box_login_cb_prompt_box_login (PromptBox* _sender, gpointer self);
 static void user_list_prompt_box_show_options_cb (UserList* self);
 static void _user_list_prompt_box_show_options_cb_prompt_box_show_options (PromptBox* _sender, gpointer self);
-static void _g_list_free__g_object_unref0_ (GList* self);
 void prompt_box_set_show_message_icon (PromptBox* self, gboolean show);
 gboolean greeter_list_have_entries (GreeterList* self);
 static void user_list_real_add_manual_entry (GreeterList* base);
@@ -1141,7 +1137,6 @@ gboolean unity_greeter_has_guest_account_hint (UnityGreeter* self);
 void user_list_set_offer_guest (UserList* self, gboolean value);
 gchar* unity_greeter_get_state (UnityGreeter* self, const gchar* key);
 gchar* unity_greeter_select_user_hint (UnityGreeter* self);
-LightDMLayout* unity_greeter_get_layout_by_name (const gchar* name);
 static void user_list_real_show_prompt_cb (GreeterList* base, const gchar* text, LightDMPromptType type);
 void greeter_list_show_prompt_cb (GreeterList* self, const gchar* text, LightDMPromptType type);
 static gboolean user_list_add_test_entry (UserList* self);
@@ -1158,7 +1153,6 @@ static GVariant* _variant_new1 (gchar** value, gint value_length1);
 static GVariant* _variant_new2 (gchar** value, gint value_length1);
 static GVariant* _variant_new3 (gboolean value);
 static gboolean user_list_remove_test_entry (UserList* self);
-static GList* user_list_test_make_layout_list (UserList* self, const gchar* names);
 void greeter_list_show_message_cb (GreeterList* self, const gchar* text, LightDMMessageType type);
 static void user_list_real_test_start_authentication (GreeterList* base);
 void prompt_box_set_options_image (PromptBox* self, GdkPixbuf* image);
@@ -1168,7 +1162,6 @@ static void __user_list___lambda26__g_object_notify (GObject* _sender, GParamSpe
 static void _user_list___lambda27_ (UserList* self);
 static void __user_list___lambda27__greeter_list_entry_displayed_start (GreeterList* _sender, gpointer self);
 static void _user_list___lambda28_ (UserList* self);
-void menu_bar_set_layouts (MenuBar* self, GList* layouts);
 static void __user_list___lambda28__greeter_list_entry_displayed_done (GreeterList* _sender, gpointer self);
 static void _user_list_entry_selected_cb_greeter_list_entry_selected (GreeterList* _sender, const gchar* name, gpointer self);
 void greeter_list_connect_to_lightdm (GreeterList* self);
@@ -1181,7 +1174,7 @@ static void _vala_array_destroy (gpointer array, gint array_length, GDestroyNoti
 static void _vala_array_free (gpointer array, gint array_length, GDestroyNotify destroy_func);
 static gint _vala_array_length (gpointer array);
 
-static const UserListTestEntry USER_LIST_test_entries[28] = {{"has-password", "Has Password", "*", "gb;us", FALSE, FALSE, NULL}, {"different-prompt", "Different Prompt", "*", "gb;us", FALSE, FALSE, NULL}, {"no-password", "No Password", "*", "gb;us", FALSE, FALSE, NULL}, {"change-password", "Change Password", "*", "gb;us", FALSE, FALSE, NULL}, {"auth-error", "Auth Error", "*", "gb;us", FALSE, FALSE, NULL}, {"two-factor", "Two Factor", "*", "gb;us", FALSE, FALSE, NULL}, {"two-prompts", "Two Prompts", "*", "gb;us", FALSE, FALSE, NULL}, {"info-prompt", "Info Prompt", "*", "gb;us", FALSE, FALSE, NULL}, {"long-info-prompt", "Long Info Prompt", "*", "gb;us", FALSE, FALSE, NULL}, {"wide-info-prompt", "Wide Info Prompt", "*", "gb;us", FALSE, FALSE, NULL}, {"multi-info-prompt", "Multi Info Prompt", "*", "gb;us", FALSE, FALSE, NULL}, {"very-very-long-name", "Long name (far far too long to fit)", "*", "gb;us", FALSE, FALSE, NULL}, {"long-name-and-messages", "Long name and messages (too long to fit)", "*", "gb;us", FALSE, TRUE, NULL}, {"active", "Active Account", "*", "gb;us", TRUE, FALSE, NULL}, {"has-messages", "Has Messages", "*", "gb;us", FALSE, TRUE, NULL}, {"gnome", "GNOME", "*", "gb;us", FALSE, FALSE, "gnome"}, {"locked", "Locked Account", "*", "gb;us", FALSE, FALSE, NULL}, {"color-background", "Color Background", "#dd4814", "gb;us", FALSE, FALSE, NULL}, {"white-background", "White Background", "#ffffff", "gb;us", FALSE, FALSE, NULL}, {"black-background", "Black Background", "#000000", "gb;us", FALSE, FALSE, NULL}, {"no-background", "No Background", NULL, "gb;us", FALSE, FALSE, NULL}, {"unicode", "가나다라마", "*", "gb;us", FALSE, FALSE, NULL}, {"system-layout", "System Layout", "*", NULL, FALSE, FALSE, NULL}, {"four-layouts", "Four Layouts", "*", "de\tdvorak;ca;gb;fr\toss", FALSE, FALSE, NULL}, {"hy-layout", "Layout Is 'hy'", "*", "am\teastern-alt", FALSE, FALSE, NULL}, {"no-response", "No Response", "*", NULL, FALSE, FALSE, NULL}, {"no-badge", "No Badge", "*", NULL, FALSE, FALSE, NULL}, {"", "", NULL, NULL, FALSE, FALSE, NULL}};
+static const UserListTestEntry USER_LIST_test_entries[25] = {{"has-password", "Has Password", "*"}, {"different-prompt", "Different Prompt", "*"}, {"no-password", "No Password", "*"}, {"change-password", "Change Password", "*"}, {"auth-error", "Auth Error", "*"}, {"two-factor", "Two Factor", "*"}, {"two-prompts", "Two Prompts", "*"}, {"info-prompt", "Info Prompt", "*"}, {"long-info-prompt", "Long Info Prompt", "*"}, {"wide-info-prompt", "Wide Info Prompt", "*"}, {"multi-info-prompt", "Multi Info Prompt", "*"}, {"very-very-long-name", "Long name (far far too long to fit)", "*"}, {"long-name-and-messages", "Long name and messages (too long to fit)", "*", FALSE, TRUE}, {"active", "Active Account", "*", TRUE}, {"has-messages", "Has Messages", "*", FALSE, TRUE}, {"gnome", "GNOME", "*", FALSE, FALSE, "gnome"}, {"locked", "Locked Account", "*"}, {"color-background", "Color Background", "#dd4814"}, {"white-background", "White Background", "#ffffff"}, {"black-background", "Black Background", "#000000"}, {"no-background", "No Background", NULL}, {"unicode", "가나다라마", "*"}, {"no-response", "No Response", "*"}, {"no-badge", "No Badge", "*"}, {""}};
 
 gint remote_server_field_sort_function (RemoteServerField* item1, RemoteServerField* item2) {
 	gint result = 0;
@@ -1433,7 +1426,7 @@ static gboolean user_list_query_directory_servers_co (UserListQueryDirectoryServ
 		_data_->_inner_error_ = NULL;
 		_data_->_tmp3_ = _data_->e;
 		_data_->_tmp4_ = _data_->_tmp3_->message;
-		g_debug ("user-list.vala:172: Calling GetServers on com.canonical.RemoteLogin db" \
+		g_debug ("user-list.vala:164: Calling GetServers on com.canonical.RemoteLogin db" \
 "us service failed. Error: %s", _data_->_tmp4_);
 		user_list_remove_remote_servers (_data_->self);
 		_g_error_free0 (_data_->e);
@@ -1846,7 +1839,7 @@ static void user_list_set_remote_directory_servers (UserList* self, RemoteServer
 	}
 	_tmp59_ = _tmp54_;
 	if (_tmp59_) {
-		g_debug ("user-list.vala:262: removing manual login since we have a remote login" \
+		g_debug ("user-list.vala:254: removing manual login since we have a remote login" \
 " entry");
 		greeter_list_remove_entry ((GreeterList*) self, "*other");
 	}
@@ -2174,7 +2167,7 @@ static void __lambda24_ (UserList* self, GObject* obj, GAsyncResult* res) {
 		_inner_error_ = NULL;
 		_tmp7_ = e;
 		_tmp8_ = _tmp7_->message;
-		g_debug ("user-list.vala:345: Getting the com.canonical.RemoteLogin dbus service" \
+		g_debug ("user-list.vala:337: Getting the com.canonical.RemoteLogin dbus service" \
 " failed. Error: %s", _tmp8_);
 		user_list_remove_remote_servers (self);
 		_g_object_unref0 (self->priv->remote_login_service);
@@ -2338,7 +2331,7 @@ static gboolean user_list_remote_directory_respond_cb_co (UserListRemoteDirector
 	_data_->email_field = _data_->_tmp9_;
 	_data_->_tmp10_ = _data_->password_field;
 	if (_data_->_tmp10_ == NULL) {
-		g_debug ("user-list.vala:375: Something wrong happened in remote_directory_respo" \
+		g_debug ("user-list.vala:367: Something wrong happened in remote_directory_respo" \
 "nd_cb. There was no password field");
 		_g_object_unref0 (_data_->email_field);
 		_g_object_unref0 (_data_->password_field);
@@ -2352,7 +2345,7 @@ static gboolean user_list_remote_directory_respond_cb_co (UserListRemoteDirector
 	}
 	_data_->_tmp11_ = _data_->email_field;
 	if (_data_->_tmp11_ == NULL) {
-		g_debug ("user-list.vala:380: Something wrong happened in remote_directory_respo" \
+		g_debug ("user-list.vala:372: Something wrong happened in remote_directory_respo" \
 "nd_cb. There was no email field");
 		_g_object_unref0 (_data_->email_field);
 		_g_object_unref0 (_data_->password_field);
@@ -2432,7 +2425,7 @@ static gboolean user_list_remote_directory_respond_cb_co (UserListRemoteDirector
 		_data_->_inner_error_ = NULL;
 		_data_->_tmp33_ = _data_->e;
 		_data_->_tmp34_ = _data_->_tmp33_->message;
-		g_debug ("user-list.vala:399: Calling email regex match failed. Error: %s", _data_->_tmp34_);
+		g_debug ("user-list.vala:391: Calling email regex match failed. Error: %s", _data_->_tmp34_);
 		_g_error_free0 (_data_->e);
 	}
 	__finally34:
@@ -2624,7 +2617,7 @@ static gboolean user_list_remote_directory_respond_cb_co (UserListRemoteDirector
 			_data_->_inner_error_ = NULL;
 			_data_->_tmp99_ = _data_->_vala1_e;
 			_data_->_tmp100_ = _data_->_tmp99_->message;
-			g_debug ("user-list.vala:460: Calling get_servers in com.canonical.RemoteLogin d" \
+			g_debug ("user-list.vala:452: Calling get_servers in com.canonical.RemoteLogin d" \
 "bus service failed. Error: %s", _data_->_tmp100_);
 			_g_error_free0 (_data_->_vala1_e);
 		}
@@ -3908,7 +3901,7 @@ static gboolean user_list_create_remote_fields_for_current_item_co (UserListCrea
 													_data_->_email_domains_size_ = _data_->_tmp223_;
 													_data_->_tmp224_ = _data_->e;
 													_data_->_tmp225_ = _data_->_tmp224_->message;
-													g_debug ("user-list.vala:746: Calling get_cached_domains_for_server in com.canon" \
+													g_debug ("user-list.vala:738: Calling get_cached_domains_for_server in com.canon" \
 "ical.RemoteLogin dbus service failed. Error: %s", _data_->_tmp225_);
 													_g_error_free0 (_data_->e);
 												}
@@ -3954,7 +3947,7 @@ static gboolean user_list_create_remote_fields_for_current_item_co (UserListCrea
 											} else {
 												_data_->_tmp236_ = _data_->_vala1_field;
 												_data_->_tmp237_ = (*_data_->_tmp236_).type;
-												g_debug ("user-list.vala:757: Found field of type %s, don't know what to do with" \
+												g_debug ("user-list.vala:749: Found field of type %s, don't know what to do with" \
 " it", _data_->_tmp237_);
 												_g_free0 (_data_->default_value);
 												_g_object_unref0 (_data_->widget);
@@ -4152,13 +4145,7 @@ static void _user_list_prompt_box_show_options_cb_prompt_box_show_options (Promp
 }
 
 
-static void _g_list_free__g_object_unref0_ (GList* self) {
-	g_list_foreach (self, (GFunc) _g_object_unref0_, NULL);
-	g_list_free (self);
-}
-
-
-void user_list_add_user (UserList* self, const gchar* name, const gchar* label, const gchar* background, GList* keyboard_layouts, gboolean is_active, gboolean has_messages, const gchar* session) {
+void user_list_add_user (UserList* self, const gchar* name, const gchar* label, const gchar* background, gboolean is_active, gboolean has_messages, const gchar* session) {
 	const gchar* _tmp0_;
 	PromptBox* _tmp1_ = NULL;
 	UserPromptBox* _tmp2_;
@@ -4168,22 +4155,19 @@ void user_list_add_user (UserList* self, const gchar* name, const gchar* label, 
 	const gchar* _tmp13_;
 	gchar* _tmp14_;
 	UserPromptBox* _tmp15_;
-	GList* _tmp16_;
-	GList* _tmp17_ = NULL;
-	UserPromptBox* _tmp18_;
-	gboolean _tmp19_;
+	gboolean _tmp16_;
+	UserPromptBox* _tmp17_;
+	const gchar* _tmp18_;
+	gchar* _tmp19_;
 	UserPromptBox* _tmp20_;
 	const gchar* _tmp21_;
-	gchar* _tmp22_;
-	UserPromptBox* _tmp23_;
-	const gchar* _tmp24_;
-	UserPromptBox* _tmp25_;
-	gboolean _tmp26_;
-	UserPromptBox* _tmp27_;
-	gboolean _tmp28_;
-	gboolean _tmp29_ = FALSE;
-	gboolean _tmp30_ = FALSE;
-	gboolean _tmp33_;
+	UserPromptBox* _tmp22_;
+	gboolean _tmp23_;
+	UserPromptBox* _tmp24_;
+	gboolean _tmp25_;
+	gboolean _tmp26_ = FALSE;
+	gboolean _tmp27_ = FALSE;
+	gboolean _tmp30_;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (name != NULL);
 	g_return_if_fail (label != NULL);
@@ -4227,39 +4211,34 @@ void user_list_add_user (UserList* self, const gchar* name, const gchar* label, 
 	_g_free0 (_tmp12_->background);
 	_tmp12_->background = _tmp14_;
 	_tmp15_ = e;
-	_tmp16_ = keyboard_layouts;
-	_tmp17_ = g_list_copy (_tmp16_);
-	__g_list_free__g_object_unref0_0 (_tmp15_->keyboard_layouts);
-	_tmp15_->keyboard_layouts = _tmp17_;
-	_tmp18_ = e;
-	_tmp19_ = is_active;
-	_tmp18_->is_active = _tmp19_;
+	_tmp16_ = is_active;
+	_tmp15_->is_active = _tmp16_;
+	_tmp17_ = e;
+	_tmp18_ = session;
+	_tmp19_ = g_strdup (_tmp18_);
+	_g_free0 (_tmp17_->session);
+	_tmp17_->session = _tmp19_;
 	_tmp20_ = e;
-	_tmp21_ = session;
-	_tmp22_ = g_strdup (_tmp21_);
-	_g_free0 (_tmp20_->session);
-	_tmp20_->session = _tmp22_;
-	_tmp23_ = e;
-	_tmp24_ = label;
-	prompt_box_set_label ((PromptBox*) _tmp23_, _tmp24_);
-	_tmp25_ = e;
-	_tmp26_ = has_messages;
-	prompt_box_set_show_message_icon ((PromptBox*) _tmp25_, _tmp26_);
-	_tmp27_ = e;
-	_tmp28_ = is_active;
-	prompt_box_set_is_active ((PromptBox*) _tmp27_, _tmp28_);
-	_tmp30_ = greeter_list_have_entries ((GreeterList*) self);
-	if (_tmp30_) {
-		gboolean _tmp31_;
-		gboolean _tmp32_;
-		_tmp31_ = greeter_list_get_always_show_manual ((GreeterList*) self);
-		_tmp32_ = _tmp31_;
-		_tmp29_ = !_tmp32_;
+	_tmp21_ = label;
+	prompt_box_set_label ((PromptBox*) _tmp20_, _tmp21_);
+	_tmp22_ = e;
+	_tmp23_ = has_messages;
+	prompt_box_set_show_message_icon ((PromptBox*) _tmp22_, _tmp23_);
+	_tmp24_ = e;
+	_tmp25_ = is_active;
+	prompt_box_set_is_active ((PromptBox*) _tmp24_, _tmp25_);
+	_tmp27_ = greeter_list_have_entries ((GreeterList*) self);
+	if (_tmp27_) {
+		gboolean _tmp28_;
+		gboolean _tmp29_;
+		_tmp28_ = greeter_list_get_always_show_manual ((GreeterList*) self);
+		_tmp29_ = _tmp28_;
+		_tmp26_ = !_tmp29_;
 	} else {
-		_tmp29_ = FALSE;
+		_tmp26_ = FALSE;
 	}
-	_tmp33_ = _tmp29_;
-	if (_tmp33_) {
+	_tmp30_ = _tmp26_;
+	if (_tmp30_) {
 		greeter_list_remove_entry ((GreeterList*) self, "*other");
 	}
 	_g_object_unref0 (e);
@@ -4289,7 +4268,7 @@ static void user_list_real_add_manual_entry (GreeterList* base) {
 		text = _tmp5_;
 	}
 	_tmp6_ = text;
-	user_list_add_user (self, "*other", _tmp6_, NULL, NULL, FALSE, FALSE, NULL);
+	user_list_add_user (self, "*other", _tmp6_, NULL, FALSE, FALSE, NULL);
 	_g_free0 (text);
 }
 
@@ -4355,7 +4334,7 @@ static void user_list_prompt_box_login_cb (UserList* self) {
 	_tmp1_ = _tmp0_;
 	_tmp2_ = prompt_box_get_id (_tmp1_);
 	_tmp3_ = _tmp2_;
-	g_debug ("user-list.vala:858: Start session for %s", _tmp3_);
+	g_debug ("user-list.vala:849: Start session for %s", _tmp3_);
 	is_authenticated = FALSE;
 	_tmp4_ = unity_greeter_singleton;
 	_tmp5_ = _tmp4_->test_mode;
@@ -4775,7 +4754,7 @@ static void user_list_fill_list (UserList* self) {
 		_tmp18_ = unity_greeter_singleton;
 		_tmp19_ = unity_greeter_has_guest_account_hint (_tmp18_);
 		if (_tmp19_) {
-			g_debug ("user-list.vala:979: Adding guest account entry");
+			g_debug ("user-list.vala:970: Adding guest account entry");
 			user_list_set_offer_guest (self, TRUE);
 		}
 		_tmp21_ = greeter_list_have_entries ((GreeterList*) self);
@@ -4838,27 +4817,22 @@ static void user_list_user_added_cb (UserList* self, LightDMUser* user) {
 	LightDMUser* _tmp10_;
 	const gchar* _tmp11_;
 	const gchar* _tmp12_;
-	GList* layouts;
 	LightDMUser* _tmp17_;
-	gchar** _tmp18_;
-	gchar** _tmp19_ = NULL;
-	LightDMUser* _tmp26_;
-	const gchar* _tmp27_;
-	const gchar* _tmp28_;
-	const gchar* _tmp29_;
+	const gchar* _tmp18_;
+	const gchar* _tmp19_;
+	const gchar* _tmp20_;
+	LightDMUser* _tmp21_;
+	const gchar* _tmp22_;
+	const gchar* _tmp23_;
+	LightDMUser* _tmp24_;
+	gboolean _tmp25_;
+	gboolean _tmp26_;
+	LightDMUser* _tmp27_;
+	gboolean _tmp28_;
+	gboolean _tmp29_;
 	LightDMUser* _tmp30_;
 	const gchar* _tmp31_;
 	const gchar* _tmp32_;
-	GList* _tmp33_;
-	LightDMUser* _tmp34_;
-	gboolean _tmp35_;
-	gboolean _tmp36_;
-	LightDMUser* _tmp37_;
-	gboolean _tmp38_;
-	gboolean _tmp39_;
-	LightDMUser* _tmp40_;
-	const gchar* _tmp41_;
-	const gchar* _tmp42_;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (user != NULL);
 	_tmp0_ = user;
@@ -4867,7 +4841,7 @@ static void user_list_user_added_cb (UserList* self, LightDMUser* user) {
 	_tmp3_ = user;
 	_tmp4_ = lightdm_user_get_real_name (_tmp3_);
 	_tmp5_ = _tmp4_;
-	g_debug ("user-list.vala:997: Adding/updating user %s (%s)", _tmp2_, _tmp5_);
+	g_debug ("user-list.vala:988: Adding/updating user %s (%s)", _tmp2_, _tmp5_);
 	_tmp6_ = user;
 	_tmp7_ = lightdm_user_get_real_name (_tmp6_);
 	_tmp8_ = _tmp7_;
@@ -4888,61 +4862,23 @@ static void user_list_user_added_cb (UserList* self, LightDMUser* user) {
 		_g_free0 (label);
 		label = _tmp16_;
 	}
-	layouts = NULL;
 	_tmp17_ = user;
-	_tmp19_ = _tmp18_ = lightdm_user_get_layouts (_tmp17_);
-	{
-		gchar** name_collection = NULL;
-		gint name_collection_length1 = 0;
-		gint _name_collection_size_ = 0;
-		gint name_it = 0;
-		name_collection = _tmp19_;
-		name_collection_length1 = _vala_array_length (_tmp18_);
-		for (name_it = 0; name_it < _vala_array_length (_tmp18_); name_it = name_it + 1) {
-			gchar* _tmp20_;
-			gchar* name = NULL;
-			_tmp20_ = g_strdup (name_collection[name_it]);
-			name = _tmp20_;
-			{
-				const gchar* _tmp21_;
-				LightDMLayout* _tmp22_ = NULL;
-				LightDMLayout* layout;
-				LightDMLayout* _tmp23_;
-				_tmp21_ = name;
-				_tmp22_ = unity_greeter_get_layout_by_name (_tmp21_);
-				layout = _tmp22_;
-				_tmp23_ = layout;
-				if (_tmp23_ != NULL) {
-					LightDMLayout* _tmp24_;
-					LightDMLayout* _tmp25_;
-					_tmp24_ = layout;
-					_tmp25_ = _g_object_ref0 (_tmp24_);
-					layouts = g_list_append (layouts, _tmp25_);
-				}
-				_g_object_unref0 (layout);
-				_g_free0 (name);
-			}
-		}
-	}
-	_tmp26_ = user;
-	_tmp27_ = lightdm_user_get_name (_tmp26_);
-	_tmp28_ = _tmp27_;
-	_tmp29_ = label;
+	_tmp18_ = lightdm_user_get_name (_tmp17_);
+	_tmp19_ = _tmp18_;
+	_tmp20_ = label;
+	_tmp21_ = user;
+	_tmp22_ = lightdm_user_get_background (_tmp21_);
+	_tmp23_ = _tmp22_;
+	_tmp24_ = user;
+	_tmp25_ = lightdm_user_get_logged_in (_tmp24_);
+	_tmp26_ = _tmp25_;
+	_tmp27_ = user;
+	_tmp28_ = lightdm_user_get_has_messages (_tmp27_);
+	_tmp29_ = _tmp28_;
 	_tmp30_ = user;
-	_tmp31_ = lightdm_user_get_background (_tmp30_);
+	_tmp31_ = lightdm_user_get_session (_tmp30_);
 	_tmp32_ = _tmp31_;
-	_tmp33_ = layouts;
-	_tmp34_ = user;
-	_tmp35_ = lightdm_user_get_logged_in (_tmp34_);
-	_tmp36_ = _tmp35_;
-	_tmp37_ = user;
-	_tmp38_ = lightdm_user_get_has_messages (_tmp37_);
-	_tmp39_ = _tmp38_;
-	_tmp40_ = user;
-	_tmp41_ = lightdm_user_get_session (_tmp40_);
-	_tmp42_ = _tmp41_;
-	user_list_add_user (self, _tmp28_, _tmp29_, _tmp32_, _tmp33_, _tmp36_, _tmp39_, _tmp42_);
-	__g_list_free__g_object_unref0_0 (layouts);
+	user_list_add_user (self, _tmp19_, _tmp20_, _tmp23_, _tmp26_, _tmp29_, _tmp32_);
 	_g_free0 (label);
 }
 
@@ -4959,7 +4895,7 @@ static void user_list_user_removed_cb (UserList* self, LightDMUser* user) {
 	_tmp0_ = user;
 	_tmp1_ = lightdm_user_get_name (_tmp0_);
 	_tmp2_ = _tmp1_;
-	g_debug ("user-list.vala:1016: Removing user %s", _tmp2_);
+	g_debug ("user-list.vala:999: Removing user %s", _tmp2_);
 	_tmp3_ = user;
 	_tmp4_ = lightdm_user_get_name (_tmp3_);
 	_tmp5_ = _tmp4_;
@@ -6323,16 +6259,12 @@ static gboolean user_list_add_test_entry (UserList* self) {
 	const gchar* _tmp29_;
 	const gchar* _tmp30_;
 	UserListTestEntry _tmp31_;
-	const gchar* _tmp32_;
-	GList* _tmp33_ = NULL;
-	GList* _tmp34_;
+	gboolean _tmp32_;
+	UserListTestEntry _tmp33_;
+	gboolean _tmp34_;
 	UserListTestEntry _tmp35_;
-	gboolean _tmp36_;
-	UserListTestEntry _tmp37_;
-	gboolean _tmp38_;
-	UserListTestEntry _tmp39_;
-	const gchar* _tmp40_;
-	gint _tmp41_;
+	const gchar* _tmp36_;
+	gint _tmp37_;
 	g_return_val_if_fail (self != NULL, FALSE);
 	_tmp0_ = self->priv->n_test_entries;
 	_tmp1_ = USER_LIST_test_entries[_tmp0_];
@@ -6416,19 +6348,14 @@ static gboolean user_list_add_test_entry (UserList* self) {
 	_tmp29_ = _tmp28_.real_name;
 	_tmp30_ = background;
 	_tmp31_ = e;
-	_tmp32_ = _tmp31_.layouts;
-	_tmp33_ = user_list_test_make_layout_list (self, _tmp32_);
-	_tmp34_ = _tmp33_;
+	_tmp32_ = _tmp31_.is_active;
+	_tmp33_ = e;
+	_tmp34_ = _tmp33_.has_messages;
 	_tmp35_ = e;
-	_tmp36_ = _tmp35_.is_active;
-	_tmp37_ = e;
-	_tmp38_ = _tmp37_.has_messages;
-	_tmp39_ = e;
-	_tmp40_ = _tmp39_.session;
-	user_list_add_user (self, _tmp27_, _tmp29_, _tmp30_, _tmp34_, _tmp36_, _tmp38_, _tmp40_);
-	__g_list_free__g_object_unref0_0 (_tmp34_);
-	_tmp41_ = self->priv->n_test_entries;
-	self->priv->n_test_entries = _tmp41_ + 1;
+	_tmp36_ = _tmp35_.session;
+	user_list_add_user (self, _tmp27_, _tmp29_, _tmp30_, _tmp32_, _tmp34_, _tmp36_);
+	_tmp37_ = self->priv->n_test_entries;
+	self->priv->n_test_entries = _tmp37_ + 1;
 	result = TRUE;
 	_g_free0 (background);
 	user_list_test_entry_destroy (&e);
@@ -6460,69 +6387,6 @@ static gboolean user_list_remove_test_entry (UserList* self) {
 }
 
 
-static GList* user_list_test_make_layout_list (UserList* self, const gchar* names) {
-	GList* result = NULL;
-	GList* layouts;
-	const gchar* _tmp0_;
-	g_return_val_if_fail (self != NULL, NULL);
-	layouts = NULL;
-	_tmp0_ = names;
-	if (_tmp0_ != NULL) {
-		const gchar* _tmp1_;
-		gchar** _tmp2_;
-		gchar** _tmp3_ = NULL;
-		gchar** names_split;
-		gint names_split_length1;
-		gint _names_split_size_;
-		gchar** _tmp4_;
-		gint _tmp4__length1;
-		_tmp1_ = names;
-		_tmp3_ = _tmp2_ = g_strsplit (_tmp1_, ";", 0);
-		names_split = _tmp3_;
-		names_split_length1 = _vala_array_length (_tmp2_);
-		_names_split_size_ = names_split_length1;
-		_tmp4_ = names_split;
-		_tmp4__length1 = names_split_length1;
-		{
-			gchar** name_collection = NULL;
-			gint name_collection_length1 = 0;
-			gint _name_collection_size_ = 0;
-			gint name_it = 0;
-			name_collection = _tmp4_;
-			name_collection_length1 = _tmp4__length1;
-			for (name_it = 0; name_it < _tmp4__length1; name_it = name_it + 1) {
-				gchar* _tmp5_;
-				gchar* name = NULL;
-				_tmp5_ = g_strdup (name_collection[name_it]);
-				name = _tmp5_;
-				{
-					const gchar* _tmp6_;
-					LightDMLayout* _tmp7_ = NULL;
-					LightDMLayout* layout;
-					LightDMLayout* _tmp8_;
-					_tmp6_ = name;
-					_tmp7_ = unity_greeter_get_layout_by_name (_tmp6_);
-					layout = _tmp7_;
-					_tmp8_ = layout;
-					if (_tmp8_ != NULL) {
-						LightDMLayout* _tmp9_;
-						LightDMLayout* _tmp10_;
-						_tmp9_ = layout;
-						_tmp10_ = _g_object_ref0 (_tmp9_);
-						layouts = g_list_append (layouts, _tmp10_);
-					}
-					_g_object_unref0 (layout);
-					_g_free0 (name);
-				}
-			}
-		}
-		names_split = (_vala_array_free (names_split, names_split_length1, (GDestroyNotify) g_free), NULL);
-	}
-	result = layouts;
-	return result;
-}
-
-
 static void user_list_test_respond (UserList* self, const gchar* text) {
 	const gchar* _tmp0_;
 	gchar* _tmp1_ = NULL;
@@ -6537,7 +6401,7 @@ static void user_list_test_respond (UserList* self, const gchar* text) {
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (text != NULL);
 	_tmp0_ = text;
-	g_debug ("user-list.vala:1435: response %s", _tmp0_);
+	g_debug ("user-list.vala:1396: response %s", _tmp0_);
 	_tmp1_ = greeter_list_get_selected_id ((GreeterList*) self);
 	_tmp2_ = _tmp1_;
 	_tmp4_ = (NULL == _tmp2_) ? 0 : g_quark_from_string (_tmp2_);
@@ -6554,7 +6418,7 @@ static void user_list_test_respond (UserList* self, const gchar* text) {
 					gchar* _tmp8_;
 					const gchar* _tmp9_ = NULL;
 					_tmp6_ = text;
-					g_debug ("user-list.vala:1441: username=%s", _tmp6_);
+					g_debug ("user-list.vala:1402: username=%s", _tmp6_);
 					_tmp7_ = text;
 					_tmp8_ = g_strdup (_tmp7_);
 					_g_free0 (((GreeterList*) self)->test_username);
@@ -6580,7 +6444,7 @@ static void user_list_test_respond (UserList* self, const gchar* text) {
 					const gchar* _tmp12_;
 					_tmp12_ = text;
 					if (g_strcmp0 (_tmp12_, "password") == 0) {
-						g_debug ("user-list.vala:1456: prompt otp");
+						g_debug ("user-list.vala:1417: prompt otp");
 						self->priv->test_prompted_sso = TRUE;
 						greeter_list_show_prompt_cb ((GreeterList*) self, "OTP:", LIGHTDM_PROMPT_TYPE_QUESTION);
 					} else {
@@ -6890,7 +6754,7 @@ void user_list_set_offer_guest (UserList* self, gboolean value) {
 	if (_tmp1_) {
 		const gchar* _tmp2_ = NULL;
 		_tmp2_ = _ ("Guest Session");
-		user_list_add_user (self, "*guest", _tmp2_, NULL, NULL, FALSE, FALSE, NULL);
+		user_list_add_user (self, "*guest", _tmp2_, NULL, FALSE, FALSE, NULL);
 	} else {
 		greeter_list_remove_entry ((GreeterList*) self, "*guest");
 	}
@@ -6995,38 +6859,7 @@ static void __user_list___lambda27__greeter_list_entry_displayed_start (GreeterL
 
 
 static void _user_list___lambda28_ (UserList* self) {
-	PromptBox* _tmp0_;
-	PromptBox* _tmp1_;
-	UserPromptBox* _tmp2_;
-	UserPromptBox* userbox;
-	UserPromptBox* _tmp3_;
-	_tmp0_ = greeter_list_get_selected_entry ((GreeterList*) self);
-	_tmp1_ = _tmp0_;
-	_tmp2_ = _g_object_ref0 (G_TYPE_CHECK_INSTANCE_TYPE (_tmp1_, TYPE_USER_PROMPT_BOX) ? ((UserPromptBox*) _tmp1_) : NULL);
-	userbox = _tmp2_;
-	_tmp3_ = userbox;
-	if (_tmp3_ != NULL) {
-		MenuBar* _tmp4_;
-		MenuBar* _tmp5_;
-		UserPromptBox* _tmp6_;
-		GList* _tmp7_;
-		_tmp4_ = greeter_list_get_menubar ((GreeterList*) self);
-		_tmp5_ = _tmp4_;
-		_tmp6_ = userbox;
-		_tmp7_ = _tmp6_->keyboard_layouts;
-		menu_bar_set_layouts (_tmp5_, _tmp7_);
-	} else {
-		MenuBar* _tmp8_;
-		MenuBar* _tmp9_;
-		GList* _tmp10_;
-		_tmp8_ = greeter_list_get_menubar ((GreeterList*) self);
-		_tmp9_ = _tmp8_;
-		_tmp10_ = NULL;
-		menu_bar_set_layouts (_tmp9_, _tmp10_);
-		__g_list_free__g_object_unref0_0 (_tmp10_);
-	}
 	user_list_change_background (self);
-	_g_object_unref0 (userbox);
 }
 
 
@@ -7099,7 +6932,7 @@ static GObject * user_list_constructor (GType type, guint n_construct_properties
 		_inner_error_ = NULL;
 		_tmp7_ = e;
 		_tmp8_ = _tmp7_->message;
-		g_debug ("user-list.vala:122: Error loading message image: %s", _tmp8_);
+		g_debug ("user-list.vala:114: Error loading message image: %s", _tmp8_);
 		_g_error_free0 (e);
 	}
 	__finally38:
@@ -7151,12 +6984,10 @@ static void user_list_test_entry_copy (const UserListTestEntry* self, UserListTe
 	gchar* _tmp3_;
 	const gchar* _tmp4_;
 	gchar* _tmp5_;
-	const gchar* _tmp6_;
-	gchar* _tmp7_;
-	gboolean _tmp8_;
-	gboolean _tmp9_;
-	const gchar* _tmp10_;
-	gchar* _tmp11_;
+	gboolean _tmp6_;
+	gboolean _tmp7_;
+	const gchar* _tmp8_;
+	gchar* _tmp9_;
 	_tmp0_ = (*self).username;
 	_tmp1_ = g_strdup (_tmp0_);
 	_g_free0 ((*dest).username);
@@ -7169,18 +7000,14 @@ static void user_list_test_entry_copy (const UserListTestEntry* self, UserListTe
 	_tmp5_ = g_strdup (_tmp4_);
 	_g_free0 ((*dest).background);
 	(*dest).background = _tmp5_;
-	_tmp6_ = (*self).layouts;
-	_tmp7_ = g_strdup (_tmp6_);
-	_g_free0 ((*dest).layouts);
-	(*dest).layouts = _tmp7_;
-	_tmp8_ = (*self).is_active;
-	(*dest).is_active = _tmp8_;
-	_tmp9_ = (*self).has_messages;
-	(*dest).has_messages = _tmp9_;
-	_tmp10_ = (*self).session;
-	_tmp11_ = g_strdup (_tmp10_);
+	_tmp6_ = (*self).is_active;
+	(*dest).is_active = _tmp6_;
+	_tmp7_ = (*self).has_messages;
+	(*dest).has_messages = _tmp7_;
+	_tmp8_ = (*self).session;
+	_tmp9_ = g_strdup (_tmp8_);
 	_g_free0 ((*dest).session);
-	(*dest).session = _tmp11_;
+	(*dest).session = _tmp9_;
 }
 
 
@@ -7188,7 +7015,6 @@ static void user_list_test_entry_destroy (UserListTestEntry* self) {
 	_g_free0 ((*self).username);
 	_g_free0 ((*self).real_name);
 	_g_free0 ((*self).background);
-	_g_free0 ((*self).layouts);
 	_g_free0 ((*self).session);
 }
 

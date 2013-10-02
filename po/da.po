@@ -7,59 +7,59 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2013-08-12 04:59+0000\n"
+"POT-Creation-Date: 2013-10-03 14:04+0000\n"
 "PO-Revision-Date: 2012-03-30 03:25+0000\n"
 "Last-Translator: Søren Howe Gersager <syrelyre@gmail.com>\n"
 "Language-Team: Danish <da@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-08-13 05:55+0000\n"
-"X-Generator: Launchpad (build 16723)\n"
+"X-Launchpad-Export-Date: 2013-10-04 05:35+0000\n"
+"X-Generator: Launchpad (build 16791)\n"
 
-#: ../src/greeter-list.vala:285
+#: ../src/greeter-list.vala:300
 #, c-format
 msgid "Enter password for %s"
 msgstr "Indtast adgangskode for %s"
 
-#: ../src/greeter-list.vala:783 ../src/user-list.vala:650
-#: ../src/user-list.vala:1412 ../src/user-list.vala:1506
-#: ../src/user-list.vala:1529 ../src/user-list.vala:1533
-#: ../src/user-list.vala:1537 ../src/user-list.vala:1543
-#: ../src/user-list.vala:1547 ../src/user-list.vala:1550
+#: ../src/greeter-list.vala:802 ../src/user-list.vala:661
+#: ../src/user-list.vala:1404 ../src/user-list.vala:1498
+#: ../src/user-list.vala:1521 ../src/user-list.vala:1525
+#: ../src/user-list.vala:1529 ../src/user-list.vala:1535
+#: ../src/user-list.vala:1539 ../src/user-list.vala:1542
 msgid "Password:"
 msgstr "Adgangskode:"
 
-#: ../src/greeter-list.vala:785 ../src/user-list.vala:644
-#: ../src/user-list.vala:1509
+#: ../src/greeter-list.vala:804 ../src/user-list.vala:655
+#: ../src/user-list.vala:1501
 msgid "Username:"
 msgstr "Brugernavn:"
 
-#: ../src/greeter-list.vala:837
+#: ../src/greeter-list.vala:856
 msgid "Invalid password, please try again"
 msgstr "Forkert adgangskode, prøv venligst igen"
 
-#: ../src/greeter-list.vala:848
+#: ../src/greeter-list.vala:867
 msgid "Failed to authenticate"
 msgstr "Godkendelse mislykkedes"
 
-#: ../src/greeter-list.vala:903
+#: ../src/greeter-list.vala:922
 msgid "Logging in…"
-msgstr ""
+msgstr "Logger ind ..."
 
 #: ../src/main-window.vala:47
 msgid "Login Screen"
 msgstr "Logind-skærm"
 
-#: ../src/menubar.vala:236
+#: ../src/menubar.vala:217
 msgid "Onscreen keyboard"
 msgstr "Skærmtastatur"
 
-#: ../src/menubar.vala:241
+#: ../src/menubar.vala:222
 msgid "High Contrast"
 msgstr "Høj kontrast"
 
-#: ../src/menubar.vala:247
+#: ../src/menubar.vala:228
 msgid "Screen Reader"
 msgstr "Skærmlæser"
 
@@ -78,22 +78,22 @@ msgid "%s (Default)"
 msgstr "%s (Standard)"
 
 #. Help string for command line --version flag
-#: ../src/unity-greeter.vala:452
+#: ../src/unity-greeter.vala:445
 msgid "Show release version"
 msgstr "Vis udgivelsesversion"
 
 #. Help string for command line --test-mode flag
-#: ../src/unity-greeter.vala:455
+#: ../src/unity-greeter.vala:448
 msgid "Run in test mode"
 msgstr "Kør i testtilstand"
 
 #. Arguments and description for --help text
-#: ../src/unity-greeter.vala:461
+#: ../src/unity-greeter.vala:454
 msgid "- Unity Greeter"
 msgstr "- Velkomstskærmen for Unity"
 
 #. Text printed out when an unknown command-line argument provided
-#: ../src/unity-greeter.vala:472
+#: ../src/unity-greeter.vala:465
 #, c-format
 msgid "Run '%s --help' to see a full list of available command line options."
 msgstr ""
@@ -104,15 +104,15 @@ msgstr ""
 msgid "Guest Session"
 msgstr "Gæstesession"
 
-#: ../src/user-list.vala:387
+#: ../src/user-list.vala:398
 msgid "Please enter a complete e-mail address"
 msgstr "Angiv venligst en komplet e-post-adresse"
 
-#: ../src/user-list.vala:467
+#: ../src/user-list.vala:478
 msgid "Incorrect e-mail address or password"
 msgstr "Forkert e-post-adresse eller adgangskode"
 
-#: ../src/user-list.vala:498
+#: ../src/user-list.vala:509
 msgid ""
 "If you have an account on an RDP or Citrix server, Remote Login lets you run "
 "applications from that server."
@@ -121,7 +121,7 @@ msgstr ""
 "dig køre programmer fra denne server."
 
 #. For 12.10 we still don't support Citrix
-#: ../src/user-list.vala:500
+#: ../src/user-list.vala:511
 msgid ""
 "If you have an account on an RDP server, Remote Login lets you run "
 "applications from that server."
@@ -129,15 +129,15 @@ msgstr ""
 "Hvis du har en konto på en RDP-server, vil fjernlogind lade dig køre "
 "programmer på denne server."
 
-#: ../src/user-list.vala:503
+#: ../src/user-list.vala:514
 msgid "Cancel"
 msgstr "Annullér"
 
-#: ../src/user-list.vala:504
+#: ../src/user-list.vala:515
 msgid "Set Up…"
 msgstr "Opsætning ..."
 
-#: ../src/user-list.vala:506
+#: ../src/user-list.vala:517
 msgid ""
 "You need an Ubuntu Remote Login account to use this service. Would you like "
 "to set up an account now?"
@@ -145,11 +145,11 @@ msgstr ""
 "Der kræves en konto til Ubuntu Fjernlogind for at kunne anvende denne "
 "tjeneste. Vil du gerne opsætte en konto nu?"
 
-#: ../src/user-list.vala:510
+#: ../src/user-list.vala:521
 msgid "OK"
 msgstr "O.k."
 
-#: ../src/user-list.vala:511
+#: ../src/user-list.vala:522
 msgid ""
 "You need an Ubuntu Remote Login account to use this service. Visit "
 "uccs.canonical.com to set up an account."
@@ -157,42 +157,42 @@ msgstr ""
 "Der kræves en konto til Ubuntu Fjernlogind for at kunne anvende denne "
 "tjeneste. Besøg uccs.canonical.com for at opsætte en konto."
 
-#: ../src/user-list.vala:628
+#: ../src/user-list.vala:639
 msgid "Server type not supported."
 msgstr "Servertype understøttes ikke."
 
-#: ../src/user-list.vala:669
+#: ../src/user-list.vala:680
 msgid "Domain:"
 msgstr "Domæne:"
 
-#: ../src/user-list.vala:730
+#: ../src/user-list.vala:741
 msgid "Email address:"
 msgstr "E-post-adresse:"
 
 #. 'Log In' here is the button for logging in.
-#: ../src/user-list.vala:774
+#: ../src/user-list.vala:785
 msgid "Log In"
 msgstr "Log ind"
 
-#: ../src/user-list.vala:775
+#: ../src/user-list.vala:786
 #, c-format
 msgid "Login as %s"
 msgstr "Log ind som %s"
 
-#: ../src/user-list.vala:779
+#: ../src/user-list.vala:790
 msgid "Retry"
 msgstr "Prøv igen"
 
-#: ../src/user-list.vala:780
+#: ../src/user-list.vala:791
 #, c-format
 msgid "Retry as %s"
 msgstr "Forsøg igen som %s"
 
-#: ../src/user-list.vala:819
+#: ../src/user-list.vala:829
 msgid "Login"
 msgstr "Log ind"
 
-#: ../src/user-list.vala:1546
+#: ../src/user-list.vala:1538
 msgid "Favorite Color (blue):"
 msgstr "Yndlingsfarve (blå):"
 

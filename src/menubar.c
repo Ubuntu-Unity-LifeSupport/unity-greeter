@@ -33,7 +33,6 @@
 #include <atk/atk.h>
 #include <stdlib.h>
 #include <string.h>
-#include <lightdm.h>
 #include <cairo.h>
 #include <float.h>
 #include <math.h>
@@ -90,6 +89,7 @@ typedef struct _BackgroundClass BackgroundClass;
 #define _g_variant_unref0(var) ((var == NULL) ? NULL : (var = (g_variant_unref (var), NULL)))
 #define _g_variant_builder_unref0(var) ((var == NULL) ? NULL : (var = (g_variant_builder_unref (var), NULL)))
 #define _g_error_free0(var) ((var == NULL) ? NULL : (var = (g_error_free (var), NULL)))
+#define _fclose0(var) ((var == NULL) ? NULL : (var = (fclose (var), NULL)))
 
 #define TYPE_UNITY_GREETER (unity_greeter_get_type ())
 #define UNITY_GREETER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_UNITY_GREETER, UnityGreeter))
@@ -101,7 +101,6 @@ typedef struct _BackgroundClass BackgroundClass;
 typedef struct _UnityGreeter UnityGreeter;
 typedef struct _UnityGreeterClass UnityGreeterClass;
 typedef struct _UnityGreeterPrivate UnityGreeterPrivate;
-#define _fclose0(var) ((var == NULL) ? NULL : (var = (fclose (var), NULL)))
 
 struct _IndicatorMenuItem {
 	GtkMenuItem parent_instance;
@@ -133,9 +132,7 @@ struct _MenuBarPrivate {
 	GtkAccelGroup* _accel_group;
 	gchar* default_theme_name;
 	GList* indicator_objects;
-	GtkMenuItem* keyboard_item;
 	GtkCheckMenuItem* high_contrast_item;
-	GtkLabel* keyboard_label;
 	GPid keyboard_pid;
 	GPid reader_pid;
 	GtkCheckMenuItem* onscreen_keyboard_item;
@@ -191,9 +188,6 @@ static void _g_list_free__g_object_unref0_ (GList* self);
 #define MENU_BAR_HEIGHT 24
 MenuBar* menu_bar_new (Background* bg, GtkAccelGroup* ag);
 MenuBar* menu_bar_construct (GType object_type, Background* bg, GtkAccelGroup* ag);
-void menu_bar_set_layouts (MenuBar* self, GList* layouts);
-static GtkRadioMenuItem* menu_bar_recreate_menu (MenuBar* self, GList* layouts_in);
-static void menu_bar_layout_toggled_cb (MenuBar* self, GtkCheckMenuItem* item);
 static gboolean menu_bar_real_draw (GtkWidget* base, cairo_t* c);
 Background* menu_bar_get_background (MenuBar* self);
 GType background_draw_flags_get_type (void) G_GNUC_CONST;
@@ -215,16 +209,6 @@ GtkAccelGroup* menu_bar_get_accel_group (MenuBar* self);
 static void menu_bar_screen_reader_toggled_cb (MenuBar* self, GtkCheckMenuItem* item);
 static void _menu_bar_screen_reader_toggled_cb_gtk_check_menu_item_toggled (GtkCheckMenuItem* _sender, gpointer self);
 #define UG_SETTINGS_KEY_SCREEN_READER "screen-reader"
-LightDMLayout* unity_greeter_get_layout_by_name (const gchar* name);
-gpointer unity_greeter_ref (gpointer instance);
-void unity_greeter_unref (gpointer instance);
-GParamSpec* param_spec_unity_greeter (const gchar* name, const gchar* nick, const gchar* blurb, GType object_type, GParamFlags flags);
-void value_set_unity_greeter (GValue* value, gpointer v_object);
-void value_take_unity_greeter (GValue* value, gpointer v_object);
-gpointer value_get_unity_greeter (const GValue* value);
-GType unity_greeter_get_type (void) G_GNUC_CONST;
-static gint menu_bar_cmp_layout (LightDMLayout* a, LightDMLayout* b);
-static GtkWidget* menu_bar_make_keyboard_indicator (MenuBar* self);
 static IndicatorObject* menu_bar_load_indicator_file (MenuBar* self, const gchar* indicator_name);
 static IndicatorObject* menu_bar_load_indicator_library (MenuBar* self, const gchar* indicator_name);
 static void menu_bar_load_indicator (MenuBar* self, const gchar* indicator_name);
@@ -235,15 +219,21 @@ static void _menu_bar_indicator_removed_cb_indicator_object_entry_removed (Indic
 static void menu_bar_setup_indicators (MenuBar* self);
 gchar** ug_settings_get_strv (const gchar* key, int* result_length1);
 #define UG_SETTINGS_KEY_INDICATORS "indicators"
+gboolean ug_settings_set_strv (const gchar* key, gchar** value, int value_length1);
 static gint __lambda34_ (IndicatorObject* a, IndicatorObject* b);
 static gint ___lambda34__gcompare_func (gconstpointer a, gconstpointer b);
 gboolean ug_settings_set_boolean (const gchar* key, gboolean value);
 GtkWindow* menu_bar_get_keyboard_window (MenuBar* self);
 static void menu_bar_set_keyboard_window (MenuBar* self, GtkWindow* value);
-static gint _menu_bar_cmp_layout_gcompare_func (gconstpointer a, gconstpointer b);
-static void _menu_bar_layout_toggled_cb_gtk_check_menu_item_toggled (GtkCheckMenuItem* _sender, gpointer self);
 static void menu_bar_set_high_contrast (MenuBar* self, gboolean value);
 gboolean menu_bar_get_high_contrast (MenuBar* self);
+gpointer unity_greeter_ref (gpointer instance);
+void unity_greeter_unref (gpointer instance);
+GParamSpec* param_spec_unity_greeter (const gchar* name, const gchar* nick, const gchar* blurb, GType object_type, GParamFlags flags);
+void value_set_unity_greeter (GValue* value, gpointer v_object);
+void value_take_unity_greeter (GValue* value, gpointer v_object);
+gpointer value_get_unity_greeter (const GValue* value);
+GType unity_greeter_get_type (void) G_GNUC_CONST;
 static gboolean ____lambda33_ (MenuBar* self);
 static gboolean _____lambda33__gsource_func (gpointer self);
 static guint menu_bar_get_indicator_index (MenuBar* self, IndicatorObject* object);
@@ -257,7 +247,6 @@ static void _vala_menu_bar_get_property (GObject * object, guint property_id, GV
 static void _vala_menu_bar_set_property (GObject * object, guint property_id, const GValue * value, GParamSpec * pspec);
 static void _vala_array_destroy (gpointer array, gint array_length, GDestroyNotify destroy_func);
 static void _vala_array_free (gpointer array, gint array_length, GDestroyNotify destroy_func);
-static gint _vala_array_length (gpointer array);
 
 
 static void _indicator_menu_item_visibility_changed_cb_gtk_widget_show (GtkWidget* _sender, gpointer self) {
@@ -494,51 +483,6 @@ MenuBar* menu_bar_new (Background* bg, GtkAccelGroup* ag) {
 }
 
 
-static gpointer _g_object_ref0 (gpointer self) {
-	return self ? g_object_ref (self) : NULL;
-}
-
-
-void menu_bar_set_layouts (MenuBar* self, GList* layouts) {
-	GList* _tmp0_;
-	GList* _tmp3_;
-	GtkRadioMenuItem* _tmp4_ = NULL;
-	GtkRadioMenuItem* default_item;
-	GtkRadioMenuItem* _tmp5_;
-	g_return_if_fail (self != NULL);
-	_tmp0_ = layouts;
-	if (_tmp0_ == NULL) {
-		LightDMLayout* _tmp1_ = NULL;
-		LightDMLayout* _tmp2_;
-		_tmp1_ = lightdm_get_layout ();
-		_tmp2_ = _g_object_ref0 (_tmp1_);
-		layouts = g_list_append (layouts, _tmp2_);
-	}
-	_tmp3_ = layouts;
-	_tmp4_ = menu_bar_recreate_menu (self, _tmp3_);
-	default_item = _tmp4_;
-	_tmp5_ = default_item;
-	if (_tmp5_ != NULL) {
-		GtkRadioMenuItem* _tmp6_;
-		gboolean _tmp7_;
-		gboolean _tmp8_;
-		_tmp6_ = default_item;
-		_tmp7_ = gtk_check_menu_item_get_active ((GtkCheckMenuItem*) _tmp6_);
-		_tmp8_ = _tmp7_;
-		if (_tmp8_) {
-			GtkRadioMenuItem* _tmp9_;
-			_tmp9_ = default_item;
-			menu_bar_layout_toggled_cb (self, (GtkCheckMenuItem*) _tmp9_);
-		} else {
-			GtkRadioMenuItem* _tmp10_;
-			_tmp10_ = default_item;
-			gtk_check_menu_item_set_active ((GtkCheckMenuItem*) _tmp10_, TRUE);
-		}
-	}
-	_g_object_unref0 (default_item);
-}
-
-
 static gboolean menu_bar_real_draw (GtkWidget* base, cairo_t* c) {
 	MenuBar * self;
 	gboolean result = FALSE;
@@ -721,7 +665,7 @@ static void menu_bar_greeter_set_env (MenuBar* self, const gchar* key, const gch
 		_inner_error_ = NULL;
 		_tmp14_ = e;
 		_tmp15_ = _tmp14_->message;
-		g_warning ("menubar.vala:220: Could not get set environment for indicators: %s", _tmp15_);
+		g_warning ("menubar.vala:201: Could not get set environment for indicators: %s", _tmp15_);
 		_g_error_free0 (e);
 		return;
 	}
@@ -863,284 +807,6 @@ static GtkWidget* menu_bar_make_a11y_indicator (MenuBar* self) {
 }
 
 
-static void menu_bar_layout_toggled_cb (MenuBar* self, GtkCheckMenuItem* item) {
-	GtkCheckMenuItem* _tmp0_;
-	gboolean _tmp1_;
-	gboolean _tmp2_;
-	GtkCheckMenuItem* _tmp3_;
-	gconstpointer _tmp4_ = NULL;
-	LightDMLayout* _tmp5_;
-	LightDMLayout* layout;
-	LightDMLayout* _tmp6_;
-	LightDMLayout* _tmp7_;
-	const gchar* _tmp8_;
-	const gchar* _tmp9_;
-	gchar* _tmp10_;
-	gchar* desc;
-	gboolean _tmp11_ = FALSE;
-	const gchar* _tmp12_;
-	gboolean _tmp14_;
-	GtkLabel* _tmp47_;
-	const gchar* _tmp48_;
-	UnityGreeter* _tmp49_;
-	gboolean _tmp50_;
-	g_return_if_fail (self != NULL);
-	g_return_if_fail (item != NULL);
-	_tmp0_ = item;
-	_tmp1_ = gtk_check_menu_item_get_active (_tmp0_);
-	_tmp2_ = _tmp1_;
-	if (!_tmp2_) {
-		return;
-	}
-	_tmp3_ = item;
-	_tmp4_ = g_object_get_data ((GObject*) _tmp3_, "unity-greeter-layout");
-	_tmp5_ = _g_object_ref0 ((LightDMLayout*) _tmp4_);
-	layout = _tmp5_;
-	_tmp6_ = layout;
-	if (_tmp6_ == NULL) {
-		_g_object_unref0 (layout);
-		return;
-	}
-	_tmp7_ = layout;
-	_tmp8_ = lightdm_layout_get_short_description (_tmp7_);
-	_tmp9_ = _tmp8_;
-	_tmp10_ = g_strdup (_tmp9_);
-	desc = _tmp10_;
-	_tmp12_ = desc;
-	if (_tmp12_ == NULL) {
-		_tmp11_ = TRUE;
-	} else {
-		const gchar* _tmp13_;
-		_tmp13_ = desc;
-		_tmp11_ = g_strcmp0 (_tmp13_, "") == 0;
-	}
-	_tmp14_ = _tmp11_;
-	if (_tmp14_) {
-		LightDMLayout* _tmp15_;
-		const gchar* _tmp16_;
-		const gchar* _tmp17_;
-		gchar** _tmp18_;
-		gchar** _tmp19_ = NULL;
-		gchar** parts;
-		gint parts_length1;
-		gint _parts_size_;
-		gchar** _tmp20_;
-		gint _tmp20__length1;
-		const gchar* _tmp21_;
-		LightDMLayout* _tmp22_;
-		const gchar* _tmp23_;
-		const gchar* _tmp24_;
-		_tmp15_ = layout;
-		_tmp16_ = lightdm_layout_get_name (_tmp15_);
-		_tmp17_ = _tmp16_;
-		_tmp19_ = _tmp18_ = g_strsplit (_tmp17_, "\t", 2);
-		parts = _tmp19_;
-		parts_length1 = _vala_array_length (_tmp18_);
-		_parts_size_ = parts_length1;
-		_tmp20_ = parts;
-		_tmp20__length1 = parts_length1;
-		_tmp21_ = _tmp20_[0];
-		_tmp22_ = layout;
-		_tmp23_ = lightdm_layout_get_name (_tmp22_);
-		_tmp24_ = _tmp23_;
-		if (g_strcmp0 (_tmp21_, _tmp24_) == 0) {
-			LightDMLayout* _tmp25_;
-			const gchar* _tmp26_;
-			const gchar* _tmp27_;
-			gchar* _tmp28_;
-			_tmp25_ = layout;
-			_tmp26_ = lightdm_layout_get_name (_tmp25_);
-			_tmp27_ = _tmp26_;
-			_tmp28_ = g_strdup (_tmp27_);
-			_g_free0 (desc);
-			desc = _tmp28_;
-		} else {
-			gchar** _tmp29_;
-			gint _tmp29__length1;
-			const gchar* _tmp30_;
-			LightDMLayout* _tmp31_ = NULL;
-			LightDMLayout* parent_layout;
-			gboolean _tmp32_ = FALSE;
-			LightDMLayout* _tmp33_;
-			const gchar* _tmp34_;
-			const gchar* _tmp35_;
-			gboolean _tmp39_;
-			_tmp29_ = parts;
-			_tmp29__length1 = parts_length1;
-			_tmp30_ = _tmp29_[0];
-			_tmp31_ = unity_greeter_get_layout_by_name (_tmp30_);
-			parent_layout = _tmp31_;
-			_tmp33_ = parent_layout;
-			_tmp34_ = lightdm_layout_get_short_description (_tmp33_);
-			_tmp35_ = _tmp34_;
-			if (_tmp35_ == NULL) {
-				_tmp32_ = TRUE;
-			} else {
-				LightDMLayout* _tmp36_;
-				const gchar* _tmp37_;
-				const gchar* _tmp38_;
-				_tmp36_ = parent_layout;
-				_tmp37_ = lightdm_layout_get_short_description (_tmp36_);
-				_tmp38_ = _tmp37_;
-				_tmp32_ = g_strcmp0 (_tmp38_, "") == 0;
-			}
-			_tmp39_ = _tmp32_;
-			if (_tmp39_) {
-				gchar** _tmp40_;
-				gint _tmp40__length1;
-				const gchar* _tmp41_;
-				gchar* _tmp42_;
-				_tmp40_ = parts;
-				_tmp40__length1 = parts_length1;
-				_tmp41_ = _tmp40_[0];
-				_tmp42_ = g_strdup (_tmp41_);
-				_g_free0 (desc);
-				desc = _tmp42_;
-			} else {
-				LightDMLayout* _tmp43_;
-				const gchar* _tmp44_;
-				const gchar* _tmp45_;
-				gchar* _tmp46_;
-				_tmp43_ = parent_layout;
-				_tmp44_ = lightdm_layout_get_short_description (_tmp43_);
-				_tmp45_ = _tmp44_;
-				_tmp46_ = g_strdup (_tmp45_);
-				_g_free0 (desc);
-				desc = _tmp46_;
-			}
-			_g_object_unref0 (parent_layout);
-		}
-		parts = (_vala_array_free (parts, parts_length1, (GDestroyNotify) g_free), NULL);
-	}
-	_tmp47_ = self->priv->keyboard_label;
-	_tmp48_ = desc;
-	gtk_label_set_label (_tmp47_, _tmp48_);
-	_tmp49_ = unity_greeter_singleton;
-	_tmp50_ = _tmp49_->test_mode;
-	if (_tmp50_) {
-		LightDMLayout* _tmp51_;
-		const gchar* _tmp52_;
-		const gchar* _tmp53_;
-		_tmp51_ = layout;
-		_tmp52_ = lightdm_layout_get_name (_tmp51_);
-		_tmp53_ = _tmp52_;
-		g_debug ("menubar.vala:285: Setting layout to %s", _tmp53_);
-	} else {
-		LightDMLayout* _tmp54_;
-		_tmp54_ = layout;
-		lightdm_set_layout (_tmp54_);
-	}
-	_g_free0 (desc);
-	_g_object_unref0 (layout);
-}
-
-
-static gint menu_bar_cmp_layout (LightDMLayout* a, LightDMLayout* b) {
-	gint result = 0;
-	gboolean _tmp0_ = FALSE;
-	LightDMLayout* _tmp1_;
-	gboolean _tmp3_;
-	_tmp1_ = a;
-	if (_tmp1_ == NULL) {
-		LightDMLayout* _tmp2_;
-		_tmp2_ = b;
-		_tmp0_ = _tmp2_ == NULL;
-	} else {
-		_tmp0_ = FALSE;
-	}
-	_tmp3_ = _tmp0_;
-	if (_tmp3_) {
-		result = 0;
-		return result;
-	} else {
-		LightDMLayout* _tmp4_;
-		_tmp4_ = a;
-		if (_tmp4_ == NULL) {
-			result = 1;
-			return result;
-		} else {
-			LightDMLayout* _tmp5_;
-			_tmp5_ = b;
-			if (_tmp5_ == NULL) {
-				result = -1;
-				return result;
-			} else {
-				GCompareFunc _tmp6_;
-				LightDMLayout* _tmp7_;
-				const gchar* _tmp8_;
-				const gchar* _tmp9_;
-				LightDMLayout* _tmp10_;
-				const gchar* _tmp11_;
-				const gchar* _tmp12_;
-				gint _tmp13_ = 0;
-				_tmp6_ = g_strcmp0;
-				_tmp7_ = a;
-				_tmp8_ = lightdm_layout_get_description (_tmp7_);
-				_tmp9_ = _tmp8_;
-				_tmp10_ = b;
-				_tmp11_ = lightdm_layout_get_description (_tmp10_);
-				_tmp12_ = _tmp11_;
-				_tmp13_ = _tmp6_ (_tmp9_, _tmp12_);
-				result = _tmp13_;
-				return result;
-			}
-		}
-	}
-}
-
-
-static GtkWidget* menu_bar_make_keyboard_indicator (MenuBar* self) {
-	GtkWidget* result = NULL;
-	GtkMenuItem* _tmp0_;
-	GtkBox* _tmp1_;
-	GtkBox* hbox;
-	GtkMenuItem* _tmp2_;
-	GtkImage* _tmp3_;
-	GtkImage* image;
-	GtkLabel* _tmp4_;
-	GtkLabel* _tmp5_;
-	GtkLabel* _tmp6_;
-	GtkLabel* _tmp7_;
-	GtkMenuItem* _tmp8_;
-	GtkMenuItem* _tmp9_;
-	GtkWidget* _tmp10_;
-	g_return_val_if_fail (self != NULL, NULL);
-	_tmp0_ = (GtkMenuItem*) gtk_menu_item_new ();
-	g_object_ref_sink (_tmp0_);
-	_g_object_unref0 (self->priv->keyboard_item);
-	self->priv->keyboard_item = _tmp0_;
-	_tmp1_ = (GtkBox*) gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 3);
-	g_object_ref_sink (_tmp1_);
-	hbox = _tmp1_;
-	gtk_widget_show ((GtkWidget*) hbox);
-	_tmp2_ = self->priv->keyboard_item;
-	gtk_container_add ((GtkContainer*) _tmp2_, (GtkWidget*) hbox);
-	_tmp3_ = (GtkImage*) gtk_image_new_from_icon_name ("keyboard", GTK_ICON_SIZE_LARGE_TOOLBAR);
-	g_object_ref_sink (_tmp3_);
-	image = _tmp3_;
-	gtk_widget_show ((GtkWidget*) image);
-	gtk_container_add ((GtkContainer*) hbox, (GtkWidget*) image);
-	_tmp4_ = (GtkLabel*) gtk_label_new ("");
-	g_object_ref_sink (_tmp4_);
-	_g_object_unref0 (self->priv->keyboard_label);
-	self->priv->keyboard_label = _tmp4_;
-	_tmp5_ = self->priv->keyboard_label;
-	gtk_label_set_width_chars (_tmp5_, 2);
-	_tmp6_ = self->priv->keyboard_label;
-	gtk_widget_show ((GtkWidget*) _tmp6_);
-	_tmp7_ = self->priv->keyboard_label;
-	gtk_container_add ((GtkContainer*) hbox, (GtkWidget*) _tmp7_);
-	_tmp8_ = self->priv->keyboard_item;
-	gtk_widget_show ((GtkWidget*) _tmp8_);
-	_tmp9_ = self->priv->keyboard_item;
-	_tmp10_ = _g_object_ref0 ((GtkWidget*) _tmp9_);
-	result = _tmp10_;
-	_g_object_unref0 (image);
-	_g_object_unref0 (hbox);
-	return result;
-}
-
-
 static gint string_index_of_char (const gchar* self, gunichar c, gint start_index) {
 	gint result = 0;
 	gint _tmp0_;
@@ -1257,7 +923,7 @@ static IndicatorObject* menu_bar_load_indicator_file (MenuBar* self, const gchar
 		_tmp16_ = indicator_name;
 		_tmp17_ = _error_;
 		_tmp18_ = _tmp17_->message;
-		g_warning ("menubar.vala:348: unable to load %s: %s", _tmp16_, _tmp18_);
+		g_warning ("menubar.vala:260: unable to load %s: %s", _tmp16_, _tmp18_);
 		result = NULL;
 		_g_error_free0 (_error_);
 		_g_object_unref0 (io);
@@ -1367,6 +1033,11 @@ static IndicatorObject* menu_bar_load_indicator_library (MenuBar* self, const gc
 }
 
 
+static gpointer _g_object_ref0 (gpointer self) {
+	return self ? g_object_ref (self) : NULL;
+}
+
+
 static void _menu_bar_indicator_added_cb_indicator_object_entry_added (IndicatorObject* _sender, IndicatorObjectEntry* entry, gpointer self) {
 	menu_bar_indicator_added_cb (self, _sender, entry);
 }
@@ -1382,96 +1053,76 @@ static void menu_bar_load_indicator (MenuBar* self, const gchar* indicator_name)
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (indicator_name != NULL);
 	_tmp0_ = indicator_name;
-	if (g_strcmp0 (_tmp0_, "ug-keyboard") == 0) {
+	if (g_strcmp0 (_tmp0_, "ug-accessibility") == 0) {
 		GtkWidget* _tmp1_ = NULL;
-		GtkWidget* keyboard_item;
+		GtkWidget* a11y_item;
 		GtkWidget* _tmp2_;
 		GList* _tmp3_ = NULL;
 		GList* _tmp4_;
 		guint _tmp5_ = 0U;
-		_tmp1_ = menu_bar_make_keyboard_indicator (self);
-		keyboard_item = _tmp1_;
-		_tmp2_ = keyboard_item;
+		_tmp1_ = menu_bar_make_a11y_indicator (self);
+		a11y_item = _tmp1_;
+		_tmp2_ = a11y_item;
 		_tmp3_ = gtk_container_get_children ((GtkContainer*) self);
 		_tmp4_ = _tmp3_;
 		_tmp5_ = g_list_length (_tmp4_);
 		gtk_menu_shell_insert ((GtkMenuShell*) self, _tmp2_, ((gint) _tmp5_) - 1);
 		_g_list_free0 (_tmp4_);
-		_g_object_unref0 (keyboard_item);
+		_g_object_unref0 (a11y_item);
 	} else {
 		const gchar* _tmp6_;
+		IndicatorObject* _tmp7_ = NULL;
+		IndicatorObject* io;
+		IndicatorObject* _tmp8_;
+		IndicatorObject* _tmp11_;
 		_tmp6_ = indicator_name;
-		if (g_strcmp0 (_tmp6_, "ug-accessibility") == 0) {
-			GtkWidget* _tmp7_ = NULL;
-			GtkWidget* a11y_item;
-			GtkWidget* _tmp8_;
-			GList* _tmp9_ = NULL;
-			GList* _tmp10_;
-			guint _tmp11_ = 0U;
-			_tmp7_ = menu_bar_make_a11y_indicator (self);
-			a11y_item = _tmp7_;
-			_tmp8_ = a11y_item;
-			_tmp9_ = gtk_container_get_children ((GtkContainer*) self);
-			_tmp10_ = _tmp9_;
-			_tmp11_ = g_list_length (_tmp10_);
-			gtk_menu_shell_insert ((GtkMenuShell*) self, _tmp8_, ((gint) _tmp11_) - 1);
-			_g_list_free0 (_tmp10_);
-			_g_object_unref0 (a11y_item);
-		} else {
-			const gchar* _tmp12_;
-			IndicatorObject* _tmp13_ = NULL;
-			IndicatorObject* io;
-			IndicatorObject* _tmp14_;
-			IndicatorObject* _tmp17_;
-			_tmp12_ = indicator_name;
-			_tmp13_ = menu_bar_load_indicator_file (self, _tmp12_);
-			io = _tmp13_;
-			_tmp14_ = io;
-			if (_tmp14_ == NULL) {
-				const gchar* _tmp15_;
-				IndicatorObject* _tmp16_ = NULL;
-				_tmp15_ = indicator_name;
-				_tmp16_ = menu_bar_load_indicator_library (self, _tmp15_);
-				_g_object_unref0 (io);
-				io = _tmp16_;
-			}
-			_tmp17_ = io;
-			if (_tmp17_ != NULL) {
-				IndicatorObject* _tmp18_;
-				IndicatorObject* _tmp19_;
-				IndicatorObject* _tmp20_;
-				IndicatorObject* _tmp21_;
-				IndicatorObject* _tmp22_;
-				GList* _tmp23_ = NULL;
-				_tmp18_ = io;
-				_tmp19_ = _g_object_ref0 (_tmp18_);
-				self->priv->indicator_objects = g_list_append (self->priv->indicator_objects, _tmp19_);
-				_tmp20_ = io;
-				g_signal_connect_object (_tmp20_, "entry-added", (GCallback) _menu_bar_indicator_added_cb_indicator_object_entry_added, self, 0);
-				_tmp21_ = io;
-				g_signal_connect_object (_tmp21_, "entry-removed", (GCallback) _menu_bar_indicator_removed_cb_indicator_object_entry_removed, self, 0);
-				_tmp22_ = io;
-				_tmp23_ = indicator_object_get_entries (_tmp22_);
-				{
-					GList* entry_collection = NULL;
-					GList* entry_it = NULL;
-					entry_collection = _tmp23_;
-					for (entry_it = entry_collection; entry_it != NULL; entry_it = entry_it->next) {
-						IndicatorObjectEntry* entry = NULL;
-						entry = (IndicatorObjectEntry*) entry_it->data;
-						{
-							IndicatorObject* _tmp24_;
-							IndicatorObjectEntry* _tmp25_;
-							_tmp24_ = io;
-							_tmp25_ = entry;
-							menu_bar_indicator_added_cb (self, _tmp24_, _tmp25_);
-						}
-					}
-					_g_list_free0 (entry_collection);
-				}
-			}
+		_tmp7_ = menu_bar_load_indicator_file (self, _tmp6_);
+		io = _tmp7_;
+		_tmp8_ = io;
+		if (_tmp8_ == NULL) {
+			const gchar* _tmp9_;
+			IndicatorObject* _tmp10_ = NULL;
+			_tmp9_ = indicator_name;
+			_tmp10_ = menu_bar_load_indicator_library (self, _tmp9_);
 			_g_object_unref0 (io);
+			io = _tmp10_;
 		}
+		_tmp11_ = io;
+		if (_tmp11_ != NULL) {
+			IndicatorObject* _tmp12_;
+			IndicatorObject* _tmp13_;
+			IndicatorObject* _tmp14_;
+			IndicatorObject* _tmp15_;
+			IndicatorObject* _tmp16_;
+			GList* _tmp17_ = NULL;
+			_tmp12_ = io;
+			_tmp13_ = _g_object_ref0 (_tmp12_);
+			self->priv->indicator_objects = g_list_append (self->priv->indicator_objects, _tmp13_);
+			_tmp14_ = io;
+			g_signal_connect_object (_tmp14_, "entry-added", (GCallback) _menu_bar_indicator_added_cb_indicator_object_entry_added, self, 0);
+			_tmp15_ = io;
+			g_signal_connect_object (_tmp15_, "entry-removed", (GCallback) _menu_bar_indicator_removed_cb_indicator_object_entry_removed, self, 0);
+			_tmp16_ = io;
+			_tmp17_ = indicator_object_get_entries (_tmp16_);
+			{
+				GList* entry_collection = NULL;
+				GList* entry_it = NULL;
+				entry_collection = _tmp17_;
+				for (entry_it = entry_collection; entry_it != NULL; entry_it = entry_it->next) {
+					IndicatorObjectEntry* entry = NULL;
+					entry = (IndicatorObjectEntry*) entry_it->data;
+					{
+						IndicatorObject* _tmp18_;
+						IndicatorObjectEntry* _tmp19_;
+						_tmp18_ = io;
+						_tmp19_ = entry;
+						menu_bar_indicator_added_cb (self, _tmp18_, _tmp19_);
+					}
+				}
+				_g_list_free0 (entry_collection);
+			}
+		}
+		_g_object_unref0 (io);
 	}
 }
 
@@ -1526,10 +1177,12 @@ static void menu_bar_setup_indicators (MenuBar* self) {
 	gchar** indicator_list;
 	gint indicator_list_length1;
 	gint _indicator_list_size_;
-	gchar** _tmp8_;
-	gint _tmp8__length1;
-	const gchar* _tmp11_ = NULL;
-	const gchar* _tmp12_ = NULL;
+	gboolean update_indicator_list;
+	gboolean _tmp20_;
+	gchar** _tmp22_;
+	gint _tmp22__length1;
+	const gchar* _tmp25_ = NULL;
+	const gchar* _tmp26_ = NULL;
 	GError * _inner_error_ = NULL;
 	g_return_if_fail (self != NULL);
 	menu_bar_greeter_set_env (self, "INDICATOR_GREETER_MODE", "1");
@@ -1564,7 +1217,7 @@ static void menu_bar_setup_indicators (MenuBar* self) {
 		_inner_error_ = NULL;
 		_tmp2_ = e;
 		_tmp3_ = _tmp2_->message;
-		g_debug ("menubar.vala:422: Could not set DBUS_NAME: %s", _tmp3_);
+		g_debug ("menubar.vala:329: Could not set DBUS_NAME: %s", _tmp3_);
 		_g_error_free0 (e);
 	}
 	__finally14:
@@ -1575,37 +1228,96 @@ static void menu_bar_setup_indicators (MenuBar* self) {
 	}
 	_tmp4_ = g_getenv ("LANG");
 	_tmp5_ = g_getenv ("LANGUAGE");
-	g_debug ("menubar.vala:425: LANG=%s LANGUAGE=%s", _tmp4_, _tmp5_);
+	g_debug ("menubar.vala:332: LANG=%s LANGUAGE=%s", _tmp4_, _tmp5_);
 	_tmp7_ = ug_settings_get_strv (UG_SETTINGS_KEY_INDICATORS, &_tmp6_);
 	indicator_list = _tmp7_;
 	indicator_list_length1 = _tmp6_;
 	_indicator_list_size_ = indicator_list_length1;
-	_tmp8_ = indicator_list;
-	_tmp8__length1 = indicator_list_length1;
+	update_indicator_list = FALSE;
+	{
+		gint i;
+		i = 0;
+		{
+			gboolean _tmp8_;
+			_tmp8_ = TRUE;
+			while (TRUE) {
+				gboolean _tmp9_;
+				gint _tmp11_;
+				gchar** _tmp12_;
+				gint _tmp12__length1;
+				gchar** _tmp13_;
+				gint _tmp13__length1;
+				gint _tmp14_;
+				const gchar* _tmp15_;
+				_tmp9_ = _tmp8_;
+				if (!_tmp9_) {
+					gint _tmp10_;
+					_tmp10_ = i;
+					i = _tmp10_ + 1;
+				}
+				_tmp8_ = FALSE;
+				_tmp11_ = i;
+				_tmp12_ = indicator_list;
+				_tmp12__length1 = indicator_list_length1;
+				if (!(_tmp11_ < _tmp12__length1)) {
+					break;
+				}
+				_tmp13_ = indicator_list;
+				_tmp13__length1 = indicator_list_length1;
+				_tmp14_ = i;
+				_tmp15_ = _tmp13_[_tmp14_];
+				if (g_strcmp0 (_tmp15_, "ug-keyboard") == 0) {
+					gchar** _tmp16_;
+					gint _tmp16__length1;
+					gint _tmp17_;
+					gchar* _tmp18_;
+					gchar* _tmp19_;
+					_tmp16_ = indicator_list;
+					_tmp16__length1 = indicator_list_length1;
+					_tmp17_ = i;
+					_tmp18_ = g_strdup ("com.canonical.indicator.keyboard");
+					_g_free0 (_tmp16_[_tmp17_]);
+					_tmp16_[_tmp17_] = _tmp18_;
+					_tmp19_ = _tmp16_[_tmp17_];
+					update_indicator_list = TRUE;
+				}
+			}
+		}
+	}
+	_tmp20_ = update_indicator_list;
+	if (_tmp20_) {
+		gchar** _tmp21_;
+		gint _tmp21__length1;
+		_tmp21_ = indicator_list;
+		_tmp21__length1 = indicator_list_length1;
+		ug_settings_set_strv (UG_SETTINGS_KEY_INDICATORS, _tmp21_, _tmp21__length1);
+	}
+	_tmp22_ = indicator_list;
+	_tmp22__length1 = indicator_list_length1;
 	{
 		gchar** indicator_collection = NULL;
 		gint indicator_collection_length1 = 0;
 		gint _indicator_collection_size_ = 0;
 		gint indicator_it = 0;
-		indicator_collection = _tmp8_;
-		indicator_collection_length1 = _tmp8__length1;
-		for (indicator_it = 0; indicator_it < _tmp8__length1; indicator_it = indicator_it + 1) {
-			gchar* _tmp9_;
+		indicator_collection = _tmp22_;
+		indicator_collection_length1 = _tmp22__length1;
+		for (indicator_it = 0; indicator_it < _tmp22__length1; indicator_it = indicator_it + 1) {
+			gchar* _tmp23_;
 			gchar* indicator = NULL;
-			_tmp9_ = g_strdup (indicator_collection[indicator_it]);
-			indicator = _tmp9_;
+			_tmp23_ = g_strdup (indicator_collection[indicator_it]);
+			indicator = _tmp23_;
 			{
-				const gchar* _tmp10_;
-				_tmp10_ = indicator;
-				menu_bar_load_indicator (self, _tmp10_);
+				const gchar* _tmp24_;
+				_tmp24_ = indicator;
+				menu_bar_load_indicator (self, _tmp24_);
 				_g_free0 (indicator);
 			}
 		}
 	}
 	self->priv->indicator_objects = g_list_sort (self->priv->indicator_objects, ___lambda34__gcompare_func);
-	_tmp11_ = g_getenv ("LANG");
-	_tmp12_ = g_getenv ("LANGUAGE");
-	g_debug ("menubar.vala:443: LANG=%s LANGUAGE=%s", _tmp11_, _tmp12_);
+	_tmp25_ = g_getenv ("LANG");
+	_tmp26_ = g_getenv ("LANGUAGE");
+	g_debug ("menubar.vala:364: LANG=%s LANGUAGE=%s", _tmp25_, _tmp26_);
 	indicator_list = (_vala_array_free (indicator_list, indicator_list_length1, (GDestroyNotify) g_free), NULL);
 }
 
@@ -1736,7 +1448,7 @@ static void menu_bar_keyboard_toggled_cb (MenuBar* self, GtkCheckMenuItem* item)
 			_inner_error_ = NULL;
 			_tmp17_ = e;
 			_tmp18_ = _tmp17_->message;
-			g_warning ("menubar.vala:483: Error setting up keyboard: %s", _tmp18_);
+			g_warning ("menubar.vala:404: Error setting up keyboard: %s", _tmp18_);
 			_g_error_free0 (e);
 			return;
 		}
@@ -1797,127 +1509,6 @@ static void menu_bar_keyboard_toggled_cb (MenuBar* self, GtkCheckMenuItem* item)
 	_tmp49_ = gtk_check_menu_item_get_active (_tmp48_);
 	_tmp50_ = _tmp49_;
 	gtk_widget_set_visible ((GtkWidget*) _tmp47_, _tmp50_);
-}
-
-
-static gint _menu_bar_cmp_layout_gcompare_func (gconstpointer a, gconstpointer b) {
-	gint result;
-	result = menu_bar_cmp_layout (a, b);
-	return result;
-}
-
-
-static void _menu_bar_layout_toggled_cb_gtk_check_menu_item_toggled (GtkCheckMenuItem* _sender, gpointer self) {
-	menu_bar_layout_toggled_cb (self, _sender);
-}
-
-
-static GtkRadioMenuItem* menu_bar_recreate_menu (MenuBar* self, GList* layouts_in) {
-	GtkRadioMenuItem* result = NULL;
-	GtkMenu* _tmp0_;
-	GtkMenu* submenu;
-	GtkMenuItem* _tmp1_;
-	GtkMenu* _tmp2_;
-	GList* _tmp3_;
-	GList* _tmp4_ = NULL;
-	GList* layouts;
-	GtkRadioMenuItem* default_item;
-	GtkRadioMenuItem* last_item;
-	GList* _tmp5_;
-	g_return_val_if_fail (self != NULL, NULL);
-	_tmp0_ = (GtkMenu*) gtk_menu_new ();
-	g_object_ref_sink (_tmp0_);
-	submenu = _tmp0_;
-	_tmp1_ = self->priv->keyboard_item;
-	_tmp2_ = submenu;
-	gtk_menu_item_set_submenu (_tmp1_, G_TYPE_CHECK_INSTANCE_TYPE (_tmp2_, GTK_TYPE_WIDGET) ? ((GtkWidget*) _tmp2_) : NULL);
-	_tmp3_ = layouts_in;
-	_tmp4_ = g_list_copy (_tmp3_);
-	layouts = _tmp4_;
-	layouts = g_list_sort (layouts, _menu_bar_cmp_layout_gcompare_func);
-	default_item = NULL;
-	last_item = NULL;
-	_tmp5_ = layouts;
-	{
-		GList* layout_collection = NULL;
-		GList* layout_it = NULL;
-		layout_collection = _tmp5_;
-		for (layout_it = layout_collection; layout_it != NULL; layout_it = layout_it->next) {
-			LightDMLayout* layout = NULL;
-			layout = (LightDMLayout*) layout_it->data;
-			{
-				GSList* _tmp6_ = NULL;
-				GtkRadioMenuItem* _tmp7_;
-				GSList* _tmp10_;
-				LightDMLayout* _tmp11_;
-				const gchar* _tmp12_;
-				const gchar* _tmp13_;
-				GtkRadioMenuItem* _tmp14_;
-				GtkRadioMenuItem* item;
-				GtkRadioMenuItem* _tmp15_;
-				GtkRadioMenuItem* _tmp16_;
-				GtkRadioMenuItem* _tmp17_;
-				GList* _tmp18_;
-				gconstpointer _tmp19_;
-				LightDMLayout* _tmp20_;
-				GtkRadioMenuItem* _tmp23_;
-				LightDMLayout* _tmp24_;
-				LightDMLayout* _tmp25_;
-				GtkRadioMenuItem* _tmp26_;
-				GtkMenu* _tmp27_;
-				GtkRadioMenuItem* _tmp28_;
-				_tmp7_ = last_item;
-				if (_tmp7_ == NULL) {
-					_tmp6_ = NULL;
-				} else {
-					GtkRadioMenuItem* _tmp8_;
-					GSList* _tmp9_ = NULL;
-					_tmp8_ = last_item;
-					_tmp9_ = gtk_radio_menu_item_get_group (_tmp8_);
-					_tmp6_ = _tmp9_;
-				}
-				_tmp10_ = _tmp6_;
-				_tmp11_ = layout;
-				_tmp12_ = lightdm_layout_get_description (_tmp11_);
-				_tmp13_ = _tmp12_;
-				_tmp14_ = (GtkRadioMenuItem*) gtk_radio_menu_item_new_with_label (_tmp10_, _tmp13_);
-				g_object_ref_sink (_tmp14_);
-				item = _tmp14_;
-				_tmp15_ = item;
-				_tmp16_ = _g_object_ref0 (_tmp15_);
-				_g_object_unref0 (last_item);
-				last_item = _tmp16_;
-				_tmp17_ = item;
-				gtk_widget_show ((GtkWidget*) _tmp17_);
-				_tmp18_ = layouts_in;
-				_tmp19_ = _tmp18_->data;
-				_tmp20_ = layout;
-				if (((LightDMLayout*) _tmp19_) == _tmp20_) {
-					GtkRadioMenuItem* _tmp21_;
-					GtkRadioMenuItem* _tmp22_;
-					_tmp21_ = item;
-					_tmp22_ = _g_object_ref0 (_tmp21_);
-					_g_object_unref0 (default_item);
-					default_item = _tmp22_;
-				}
-				_tmp23_ = item;
-				_tmp24_ = layout;
-				_tmp25_ = _g_object_ref0 (_tmp24_);
-				g_object_set_data_full ((GObject*) _tmp23_, "unity-greeter-layout", _tmp25_, g_object_unref);
-				_tmp26_ = item;
-				g_signal_connect_object ((GtkCheckMenuItem*) _tmp26_, "toggled", (GCallback) _menu_bar_layout_toggled_cb_gtk_check_menu_item_toggled, self, 0);
-				_tmp27_ = submenu;
-				_tmp28_ = item;
-				gtk_menu_shell_append ((GtkMenuShell*) _tmp27_, (GtkWidget*) ((GtkMenuItem*) _tmp28_));
-				_g_object_unref0 (item);
-			}
-		}
-	}
-	result = default_item;
-	_g_object_unref0 (last_item);
-	_g_list_free0 (layouts);
-	_g_object_unref0 (submenu);
-	return result;
 }
 
 
@@ -2042,7 +1633,7 @@ static void menu_bar_screen_reader_toggled_cb (MenuBar* self, GtkCheckMenuItem* 
 			_inner_error_ = NULL;
 			_tmp11_ = e;
 			_tmp12_ = _tmp11_->message;
-			g_warning ("menubar.vala:593: Failed to run Orca: %s", _tmp12_);
+			g_warning ("menubar.vala:482: Failed to run Orca: %s", _tmp12_);
 			_g_error_free0 (e);
 		}
 		__finally16:
@@ -2219,7 +1810,7 @@ static void menu_bar_indicator_added_cb (MenuBar* self, IndicatorObject* object,
 	}
 	_tmp14_ = entry;
 	_tmp15_ = pos;
-	g_debug ("menubar.vala:645: Adding indicator object %p at position %d", _tmp14_, _tmp15_);
+	g_debug ("menubar.vala:534: Adding indicator object %p at position %d", _tmp14_, _tmp15_);
 	_tmp16_ = entry;
 	_tmp17_ = indicator_menu_item_new (_tmp16_);
 	g_object_ref_sink (_tmp17_);
@@ -2238,7 +1829,7 @@ static void menu_bar_indicator_removed_cb (MenuBar* self, IndicatorObject* objec
 	g_return_if_fail (object != NULL);
 	g_return_if_fail (entry != NULL);
 	_tmp0_ = entry;
-	g_debug ("menubar.vala:653: Removing indicator object %p", _tmp0_);
+	g_debug ("menubar.vala:542: Removing indicator object %p", _tmp0_);
 	_tmp1_ = gtk_container_get_children ((GtkContainer*) self);
 	{
 		GList* child_collection = NULL;
@@ -2274,7 +1865,7 @@ static void menu_bar_indicator_removed_cb (MenuBar* self, IndicatorObject* objec
 		_g_list_free0 (child_collection);
 	}
 	_tmp8_ = entry;
-	g_warning ("menubar.vala:665: Indicator object %p not in menubar", _tmp8_);
+	g_warning ("menubar.vala:554: Indicator object %p not in menubar", _tmp8_);
 }
 
 
@@ -2460,7 +2051,7 @@ static GObject * menu_bar_constructor (GType type, guint n_construct_properties,
 		_inner_error_ = NULL;
 		_tmp22_ = e;
 		_tmp23_ = _tmp22_->message;
-		g_debug ("menubar.vala:167: Internal error loading menubar style: %s", _tmp23_);
+		g_debug ("menubar.vala:148: Internal error loading menubar style: %s", _tmp23_);
 		_g_error_free0 (e);
 	}
 	__finally17:
@@ -2500,7 +2091,6 @@ static void menu_bar_instance_init (MenuBar * self) {
 	self->priv->_background = NULL;
 	self->priv->_high_contrast = FALSE;
 	self->priv->_keyboard_window = NULL;
-	self->priv->keyboard_label = NULL;
 	self->priv->keyboard_pid = (GPid) 0;
 	self->priv->reader_pid = (GPid) 0;
 }
@@ -2514,9 +2104,7 @@ static void menu_bar_finalize (GObject* obj) {
 	_g_object_unref0 (self->priv->_accel_group);
 	_g_free0 (self->priv->default_theme_name);
 	__g_list_free__g_object_unref0_0 (self->priv->indicator_objects);
-	_g_object_unref0 (self->priv->keyboard_item);
 	_g_object_unref0 (self->priv->high_contrast_item);
-	_g_object_unref0 (self->priv->keyboard_label);
 	_g_object_unref0 (self->priv->onscreen_keyboard_item);
 	G_OBJECT_CLASS (menu_bar_parent_class)->finalize (obj);
 }
@@ -2595,18 +2183,6 @@ static void _vala_array_destroy (gpointer array, gint array_length, GDestroyNoti
 static void _vala_array_free (gpointer array, gint array_length, GDestroyNotify destroy_func) {
 	_vala_array_destroy (array, array_length, destroy_func);
 	g_free (array);
-}
-
-
-static gint _vala_array_length (gpointer array) {
-	int length;
-	length = 0;
-	if (array) {
-		while (((gpointer*) array)[length]) {
-			length++;
-		}
-	}
-	return length;
 }
 
 

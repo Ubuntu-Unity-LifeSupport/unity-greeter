@@ -119,16 +119,6 @@ public class UnityGreeter
     {
     }
 
-    public static LightDM.Layout? get_layout_by_name (string name)
-    {
-        foreach (var layout in LightDM.get_layouts ())
-        {
-            if (layout.name == name)
-                return layout;
-        }
-        return null;
-    }
-
     public static void add_style_class (Gtk.Widget widget)
     {
         /* Add style context class lightdm-user-list */

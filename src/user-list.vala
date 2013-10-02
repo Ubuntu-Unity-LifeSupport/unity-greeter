@@ -103,15 +103,7 @@ public class UserList : GreeterList
     {
         menubar.notify["high-contrast"].connect (() => { change_background (); });
         entry_displayed_start.connect (() => { change_background (); });
-        entry_displayed_done.connect (() =>
-        {
-            var userbox = (selected_entry as UserPromptBox);
-            if (userbox != null)
-                menubar.set_layouts (userbox.keyboard_layouts);
-            else
-                menubar.set_layouts (new List <LightDM.Layout> ());
-            change_background ();
-        });
+        entry_displayed_done.connect (() => { change_background (); });
 
         try
         {
@@ -806,7 +798,7 @@ public class UserList : GreeterList
         redraw_greeter_box ();
     }
 
-    public void add_user (string name, string label, string? background = null, List <LightDM.Layout>? keyboard_layouts = null, bool is_active = false, bool has_messages = false, string? session = null)
+    public void add_user (string name, string label, string? background = null, bool is_active = false, bool has_messages = false, string? session = null)
     {
         var e = find_entry (name) as UserPromptBox;
         if (e == null)
@@ -819,7 +811,6 @@ public class UserList : GreeterList
             add_entry (e);
         }
         e.background = background;
-        e.keyboard_layouts = keyboard_layouts.copy ();
         e.is_active = is_active;
         e.session = session;
         e.label = label;
@@ -1000,15 +991,7 @@ public class UserList : GreeterList
         if (user.real_name == "")
             label = user.name;
 
-        var layouts = new List <LightDM.Layout> ();
-        foreach (var name in user.get_layouts ())
-        {
-            var layout = UnityGreeter.get_layout_by_name (name);
-            if (layout != null)
-                layouts.append (layout);
-        }
-
-        add_user (user.name, label, user.background, layouts, user.logged_in, user.has_messages, user.session);
+        add_user (user.name, label, user.background, user.logged_in, user.has_messages, user.session);
     }
 
     private void user_removed_cb (LightDM.User user)
@@ -1056,7 +1039,6 @@ public class UserList : GreeterList
         string username;
         string real_name;
         string? background;
-        string? layouts;
         bool is_active;
         bool has_messages;
         string? session;
@@ -1064,34 +1046,31 @@ public class UserList : GreeterList
 
     private const TestEntry[] test_entries =
     {
-        { "has-password",       "Has Password",      "*",              "gb;us", false, false, null },
-        { "different-prompt",   "Different Prompt",  "*",              "gb;us", false, false, null },
-        { "no-password",        "No Password",       "*",              "gb;us", false, false, null },
-        { "change-password",    "Change Password",   "*",              "gb;us", false, false, null },
-        { "auth-error",         "Auth Error",        "*",              "gb;us", false, false, null },
-        { "two-factor",         "Two Factor",        "*",              "gb;us", false, false, null },
-        { "two-prompts",        "Two Prompts",       "*",              "gb;us", false, false, null },
-        { "info-prompt",        "Info Prompt",       "*",              "gb;us", false, false, null },
-        { "long-info-prompt",   "Long Info Prompt",  "*",              "gb;us", false, false, null },
-        { "wide-info-prompt",   "Wide Info Prompt",  "*",              "gb;us", false, false, null },
-        { "multi-info-prompt",  "Multi Info Prompt", "*",              "gb;us", false, false, null },
-        { "very-very-long-name",    "Long name (far far too long to fit)", "*", "gb;us", false, false, null },
-        { "long-name-and-messages", "Long name and messages (too long to fit)",          "*", "gb;us", false, true,  null },
-        { "active",             "Active Account",    "*",              "gb;us", true,  false, null },
-        { "has-messages",       "Has Messages",      "*",              "gb;us", false, true,  null },
-        { "gnome",              "GNOME",             "*",              "gb;us", false, false, "gnome" },
-        { "locked",             "Locked Account",    "*",              "gb;us", false, false, null },
-        { "color-background",   "Color Background",  "#dd4814",        "gb;us", false, false, null },
-        { "white-background",   "White Background",  "#ffffff",        "gb;us", false, false, null },
-        { "black-background",   "Black Background",  "#000000",        "gb;us", false, false, null },
-        { "no-background",      "No Background",     null,             "gb;us", false, false, null },
-        { "unicode",            "가나다라마",         "*",              "gb;us", false, false, null },
-        { "system-layout",      "System Layout",     "*",              null,    false, false, null },
-        { "four-layouts",       "Four Layouts",      "*",              "de\tdvorak;ca;gb;fr\toss", false, false, null },
-        { "hy-layout",          "Layout Is 'hy'",    "*",              "am\teastern-alt", false, false, null }, /* inherits parent layout's short_desc */
-        { "no-response",        "No Response",       "*",              null,    false, false, null },
-        { "no-badge",           "No Badge",          "*",              null,    false, false, null },
-        { "",                   "",                  null,             null,    false, false, null }
+        { "has-password",       "Has Password",      "*" },
+        { "different-prompt",   "Different Prompt",  "*" },
+        { "no-password",        "No Password",       "*" },
+        { "change-password",    "Change Password",   "*" },
+        { "auth-error",         "Auth Error",        "*" },
+        { "two-factor",         "Two Factor",        "*" },
+        { "two-prompts",        "Two Prompts",       "*" },
+        { "info-prompt",        "Info Prompt",       "*" },
+        { "long-info-prompt",   "Long Info Prompt",  "*" },
+        { "wide-info-prompt",   "Wide Info Prompt",  "*" },
+        { "multi-info-prompt",  "Multi Info Prompt", "*" },
+        { "very-very-long-name",    "Long name (far far too long to fit)", "*" },
+        { "long-name-and-messages", "Long name and messages (too long to fit)", "*", false, true },
+        { "active",             "Active Account",    "*", true },
+        { "has-messages",       "Has Messages",      "*", false, true },
+        { "gnome",              "GNOME",             "*", false, false, "gnome" },
+        { "locked",             "Locked Account",    "*" },
+        { "color-background",   "Color Background",  "#dd4814" },
+        { "white-background",   "White Background",  "#ffffff" },
+        { "black-background",   "Black Background",  "#000000" },
+        { "no-background",      "No Background",     null },
+        { "unicode",            "가나다라마",         "*" },
+        { "no-response",        "No Response",       "*" },
+        { "no-badge",           "No Badge",          "*" },
+        { "" }
     };
     private List<string> test_backgrounds;
     private int n_test_entries = 0;
@@ -1395,7 +1374,7 @@ public class UserList : GreeterList
             if (test_backgrounds.length () > 0)
                 background = test_backgrounds.nth_data (background_index % test_backgrounds.length ());
         }
-        add_user (e.username, e.real_name, background, test_make_layout_list (e.layouts), e.is_active, e.has_messages, e.session);
+        add_user (e.username, e.real_name, background, e.is_active, e.has_messages, e.session);
         n_test_entries++;
 
         return true;
@@ -1410,24 +1389,6 @@ public class UserList : GreeterList
         n_test_entries--;
 
         return true;
-    }
-
-    private List <LightDM.Layout> test_make_layout_list (string? names)
-    {
-        var layouts = new List <LightDM.Layout> ();
-
-        if (names != null)
-        {
-            var names_split = names.split (";");
-            foreach (var name in names_split)
-            {
-                var layout = UnityGreeter.get_layout_by_name (name);
-                if (layout != null)
-                    layouts.append (layout);
-            }
-        }
-
-        return layouts;
     }
 
     private void test_respond (string text)

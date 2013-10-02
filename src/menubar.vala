@@ -77,23 +77,6 @@ public class MenuBar : Gtk.MenuBar
         Object (background: bg, accel_group: ag);
     }
 
-    public void set_layouts (List <LightDM.Layout> layouts)
-    {
-        if (layouts == null)
-            layouts.append (LightDM.get_layout ()); /* default layout */
-
-        var default_item = recreate_menu (layouts);
-
-        /* Activate first item */
-        if (default_item != null)
-        {
-            if (default_item.active) /* Started active, have to manually trigger callback */
-                layout_toggled_cb (default_item);
-            else
-                default_item.active = true; /* will trigger callback to do rest of work */
-        }
-    }
-
     public override bool draw (Cairo.Context c)
     {
         if (background != null)
@@ -128,9 +111,7 @@ public class MenuBar : Gtk.MenuBar
 
     private string default_theme_name;
     private List<Indicator.Object> indicator_objects;
-    private Gtk.MenuItem keyboard_item;
     private Gtk.CheckMenuItem high_contrast_item;
-    private Gtk.Label keyboard_label = null;
     private Pid keyboard_pid = 0;
     private Pid reader_pid = 0;
     private Gtk.CheckMenuItem onscreen_keyboard_item;
@@ -253,75 +234,6 @@ public class MenuBar : Gtk.MenuBar
         return a11y_item;
     }
 
-    private void layout_toggled_cb (Gtk.CheckMenuItem item)
-    {
-        if (!item.active)
-            return;
-
-        var layout = item.get_data<LightDM.Layout> ("unity-greeter-layout");
-        if (layout == null)
-            return;
-
-        var desc = layout.short_description;
-        if (desc == null || desc == "")
-        {
-            var parts = layout.name.split ("\t", 2);
-            if (parts[0] == layout.name)
-                desc = layout.name;
-            else
-            {
-                /* Lookup parent layout, get its short_description */
-                var parent_layout = UnityGreeter.get_layout_by_name (parts[0]);
-                if (parent_layout.short_description == null ||
-                    parent_layout.short_description == "")
-                    desc = parts[0];
-                else
-                    desc = parent_layout.short_description;
-            }
-        }
-        keyboard_label.label = desc;
-
-        if (UnityGreeter.singleton.test_mode)
-            debug ("Setting layout to %s", layout.name);
-        else
-            LightDM.set_layout (layout);
-    }
-
-    private static int cmp_layout (LightDM.Layout? a, LightDM.Layout? b)
-    {
-        if (a == null && b == null)
-            return 0;
-        else if (a == null)
-            return 1;
-        else if (b == null)
-            return -1;
-        else
-        {
-            /* Use a dumb, ascii comparison for now.  If it turns out that some
-               descriptions can be in unicode, we'll have to use libicu's collation
-               algorithms. */
-            return strcmp (a.description, b.description);
-        }
-    }
-
-    private Gtk.Widget make_keyboard_indicator ()
-    {
-        keyboard_item = new Gtk.MenuItem ();
-        var hbox = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 3);
-        hbox.show ();
-        keyboard_item.add (hbox);
-        var image = new Gtk.Image.from_icon_name ("keyboard", Gtk.IconSize.LARGE_TOOLBAR);
-        image.show ();
-        hbox.add (image);
-        keyboard_label = new Gtk.Label ("");
-        keyboard_label.width_chars = 2;
-        keyboard_label.show ();
-        hbox.add (keyboard_label);
-        keyboard_item.show ();
-
-        return keyboard_item;
-    }
-
     private Indicator.Object? load_indicator_file (string indicator_name)
     {
         string dir = Config.INDICATOR_FILE_DIR;
@@ -371,12 +283,7 @@ public class MenuBar : Gtk.MenuBar
 
     private void load_indicator (string indicator_name)
     {
-        if (indicator_name == "ug-keyboard")
-        {
-            var keyboard_item = make_keyboard_indicator ();
-            insert (keyboard_item, (int) get_children ().length () - 1);
-        }
-        else if (indicator_name == "ug-accessibility")
+        if (indicator_name == "ug-accessibility")
         {
             var a11y_item = make_a11y_indicator ();
             insert (a11y_item, (int) get_children ().length () - 1);
@@ -425,6 +332,20 @@ public class MenuBar : Gtk.MenuBar
         debug ("LANG=%s LANGUAGE=%s", Environment.get_variable ("LANG"), Environment.get_variable ("LANGUAGE"));
 
         var indicator_list = UGSettings.get_strv(UGSettings.KEY_INDICATORS);
+
+        var update_indicator_list = false;
+        for (var i = 0; i < indicator_list.length; i++)
+        {
+            if (indicator_list[i] == "ug-keyboard")
+            {
+                indicator_list[i] = "com.canonical.indicator.keyboard";
+                update_indicator_list = true;
+            }
+        }
+
+        if (update_indicator_list)
+            UGSettings.set_strv(UGSettings.KEY_INDICATORS, indicator_list);
+
         foreach (var indicator in indicator_list)
             load_indicator(indicator);
 
@@ -502,38 +423,6 @@ public class MenuBar : Gtk.MenuBar
         }
 
         keyboard_window.visible = item.active;
-    }
-
-    /* Returns menuitem for first layout in list */
-    private Gtk.RadioMenuItem recreate_menu (List <LightDM.Layout> layouts_in)
-    {
-        var submenu = new Gtk.Menu ();
-        keyboard_item.set_submenu (submenu as Gtk.Widget);
-
-        var layouts = layouts_in.copy ();
-        layouts.sort (cmp_layout);
-
-        Gtk.RadioMenuItem? default_item = null;
-        Gtk.RadioMenuItem? last_item = null;
-        foreach (var layout in layouts)
-        {
-            var item = new Gtk.RadioMenuItem.with_label (last_item == null ? null : last_item.get_group (), layout.description);
-            last_item = item;
-
-            item.show ();
-
-            if (layouts_in.data == layout)
-                default_item = item;
-
-            /* LightDM does not change its layout list during its lifetime, so this is safe */
-            item.set_data ("unity-greeter-layout", layout);
-
-            item.toggled.connect (layout_toggled_cb);
-
-            submenu.append (item);
-        }
-
-        return default_item;
     }
 
     private void high_contrast_toggled_cb (Gtk.CheckMenuItem item)

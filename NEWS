@@ -1,3 +1,10 @@
+Overview of changes in unity-greeter 13.10.3
+
+    - Have sound indicator appear again, after the indicator file changed names
+    - Replace old hardcoded keyboard indicator with indicator-keyboard
+    - Remember last logged in user for each seat
+    - Show gnome badge for all gnome fallback/flashback sessions
+
 Overview of changes in unity-greeter 13.10.2
 
     - Support new indicator services from /usr/share/unity/indicators

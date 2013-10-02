@@ -27,7 +27,6 @@
 #include <cairo.h>
 #include <stdlib.h>
 #include <string.h>
-#include <lightdm.h>
 
 
 #define TYPE_FADABLE (fadable_get_type ())
@@ -101,7 +100,6 @@ typedef struct _UserPromptBox UserPromptBox;
 typedef struct _UserPromptBoxClass UserPromptBoxClass;
 typedef struct _UserPromptBoxPrivate UserPromptBoxPrivate;
 #define _g_free0(var) (var = (g_free (var), NULL))
-#define __g_list_free__g_object_unref0_0(var) ((var == NULL) ? NULL : (var = (_g_list_free__g_object_unref0_ (var), NULL)))
 
 struct _FadableIface {
 	GTypeInterface parent_iface;
@@ -145,7 +143,6 @@ struct _UserPromptBox {
 	PromptBox parent_instance;
 	UserPromptBoxPrivate * priv;
 	gchar* background;
-	GList* keyboard_layouts;
 	gchar* session;
 	gboolean is_active;
 };
@@ -167,22 +164,9 @@ GType user_prompt_box_get_type (void) G_GNUC_CONST;
 enum  {
 	USER_PROMPT_BOX_DUMMY_PROPERTY
 };
-static void _g_object_unref0_ (gpointer var);
-static void _g_list_free__g_object_unref0_ (GList* self);
 UserPromptBox* user_prompt_box_new (const gchar* name);
 UserPromptBox* user_prompt_box_construct (GType object_type, const gchar* name);
 static void user_prompt_box_finalize (GObject* obj);
-
-
-static void _g_object_unref0_ (gpointer var) {
-	(var == NULL) ? NULL : (var = (g_object_unref (var), NULL));
-}
-
-
-static void _g_list_free__g_object_unref0_ (GList* self) {
-	g_list_foreach (self, (GFunc) _g_object_unref0_, NULL);
-	g_list_free (self);
-}
 
 
 UserPromptBox* user_prompt_box_construct (GType object_type, const gchar* name) {
@@ -214,7 +198,6 @@ static void user_prompt_box_finalize (GObject* obj) {
 	UserPromptBox * self;
 	self = G_TYPE_CHECK_INSTANCE_CAST (obj, TYPE_USER_PROMPT_BOX, UserPromptBox);
 	_g_free0 (self->background);
-	__g_list_free__g_object_unref0_0 (self->keyboard_layouts);
 	_g_free0 (self->session);
 	G_OBJECT_CLASS (user_prompt_box_parent_class)->finalize (obj);
 }

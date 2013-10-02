@@ -251,7 +251,6 @@ void main_window_push_list (MainWindow* self, GreeterList* widget);
 void unity_greeter_pop_list (UnityGreeter* self);
 void main_window_pop_list (MainWindow* self);
 void unity_greeter_add_style_class (GtkWidget* widget);
-LightDMLayout* unity_greeter_get_layout_by_name (const gchar* name);
 GType background_get_type (void) G_GNUC_CONST;
 void unity_greeter_start_session (UnityGreeter* self, const gchar* session, Background* bg);
 GType background_draw_flags_get_type (void) G_GNUC_CONST;
@@ -381,9 +380,21 @@ static UnityGreeter* unity_greeter_construct (GType object_type, gboolean test_m
 	const gchar* _tmp19_ = NULL;
 	gchar* _tmp20_ = NULL;
 	gchar* state_dir;
-	gchar* _tmp21_ = NULL;
-	GKeyFile* _tmp22_;
-	MainWindow* _tmp29_;
+	const gchar* _tmp21_;
+	const gchar* _tmp22_ = NULL;
+	gchar* _tmp23_;
+	gchar* xdg_seat;
+	gchar* _tmp24_ = NULL;
+	gboolean _tmp25_ = FALSE;
+	const gchar* _tmp26_;
+	gboolean _tmp28_;
+	const gchar* _tmp32_;
+	gchar* _tmp33_;
+	gchar* state_file_name;
+	const gchar* _tmp34_;
+	gchar* _tmp35_ = NULL;
+	GKeyFile* _tmp36_;
+	MainWindow* _tmp43_;
 	GError * _inner_error_ = NULL;
 	self = (UnityGreeter*) g_type_create_instance (object_type);
 	_tmp0_ = _unity_greeter_ref0 (self);
@@ -460,19 +471,49 @@ static UnityGreeter* unity_greeter_construct (GType object_type, gboolean test_m
 	_tmp19_ = g_get_user_cache_dir ();
 	_tmp20_ = g_build_filename (_tmp19_, "unity-greeter", NULL);
 	state_dir = _tmp20_;
-	g_mkdir_with_parents (state_dir, 0775);
-	_tmp21_ = g_build_filename (state_dir, "state", NULL);
+	_tmp21_ = state_dir;
+	g_mkdir_with_parents (_tmp21_, 0775);
+	_tmp22_ = g_getenv ("XDG_SEAT");
+	_tmp23_ = g_strdup (_tmp22_);
+	xdg_seat = _tmp23_;
+	_tmp26_ = xdg_seat;
+	if (_tmp26_ != NULL) {
+		const gchar* _tmp27_;
+		_tmp27_ = xdg_seat;
+		_tmp25_ = g_strcmp0 (_tmp27_, "seat0") != 0;
+	} else {
+		_tmp25_ = FALSE;
+	}
+	_tmp28_ = _tmp25_;
+	if (_tmp28_) {
+		const gchar* _tmp29_;
+		gchar* _tmp30_;
+		_tmp29_ = xdg_seat;
+		_tmp30_ = g_strconcat (_tmp29_, "-state", NULL);
+		_g_free0 (_tmp24_);
+		_tmp24_ = _tmp30_;
+	} else {
+		gchar* _tmp31_;
+		_tmp31_ = g_strdup ("state");
+		_g_free0 (_tmp24_);
+		_tmp24_ = _tmp31_;
+	}
+	_tmp32_ = _tmp24_;
+	_tmp33_ = g_strdup (_tmp32_);
+	state_file_name = _tmp33_;
+	_tmp34_ = state_dir;
+	_tmp35_ = g_build_filename (_tmp34_, state_file_name, NULL);
 	_g_free0 (self->priv->state_file);
-	self->priv->state_file = _tmp21_;
-	_tmp22_ = g_key_file_new ();
+	self->priv->state_file = _tmp35_;
+	_tmp36_ = g_key_file_new ();
 	_g_key_file_unref0 (self->priv->state);
-	self->priv->state = _tmp22_;
+	self->priv->state = _tmp36_;
 	{
-		GKeyFile* _tmp23_;
-		const gchar* _tmp24_;
-		_tmp23_ = self->priv->state;
-		_tmp24_ = self->priv->state_file;
-		g_key_file_load_from_file (_tmp23_, _tmp24_, G_KEY_FILE_NONE, &_inner_error_);
+		GKeyFile* _tmp37_;
+		const gchar* _tmp38_;
+		_tmp37_ = self->priv->state;
+		_tmp38_ = self->priv->state_file;
+		g_key_file_load_from_file (_tmp37_, _tmp38_, G_KEY_FILE_NONE, &_inner_error_);
 		if (_inner_error_ != NULL) {
 			goto __catch25_g_error;
 		}
@@ -481,34 +522,40 @@ static UnityGreeter* unity_greeter_construct (GType object_type, gboolean test_m
 	__catch25_g_error:
 	{
 		GError* e = NULL;
-		GError* _tmp25_;
+		GError* _tmp39_;
 		e = _inner_error_;
 		_inner_error_ = NULL;
-		_tmp25_ = e;
-		if (!g_error_matches (_tmp25_, G_FILE_ERROR, G_FILE_ERROR_NOENT)) {
-			const gchar* _tmp26_;
-			GError* _tmp27_;
-			const gchar* _tmp28_;
-			_tmp26_ = self->priv->state_file;
-			_tmp27_ = e;
-			_tmp28_ = _tmp27_->message;
-			g_warning ("unity-greeter.vala:93: Failed to load state from %s: %s\n", _tmp26_, _tmp28_);
+		_tmp39_ = e;
+		if (!g_error_matches (_tmp39_, G_FILE_ERROR, G_FILE_ERROR_NOENT)) {
+			const gchar* _tmp40_;
+			GError* _tmp41_;
+			const gchar* _tmp42_;
+			_tmp40_ = self->priv->state_file;
+			_tmp41_ = e;
+			_tmp42_ = _tmp41_->message;
+			g_warning ("unity-greeter.vala:96: Failed to load state from %s: %s\n", _tmp40_, _tmp42_);
 		}
 		_g_error_free0 (e);
 	}
 	__finally25:
 	if (_inner_error_ != NULL) {
+		_g_free0 (state_file_name);
+		_g_free0 (_tmp24_);
+		_g_free0 (xdg_seat);
 		_g_free0 (state_dir);
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
 		return NULL;
 	}
-	_tmp29_ = main_window_new ();
-	g_object_ref_sink (_tmp29_);
+	_tmp43_ = main_window_new ();
+	g_object_ref_sink (_tmp43_);
 	_g_object_unref0 (self->priv->main_window);
-	self->priv->main_window = _tmp29_;
+	self->priv->main_window = _tmp43_;
 	unity_greeter_start_fake_wm (self);
 	gdk_threads_add_idle (_unity_greeter_ready_cb_gsource_func, self);
+	_g_free0 (state_file_name);
+	_g_free0 (_tmp24_);
+	_g_free0 (xdg_seat);
 	_g_free0 (state_dir);
 	return self;
 }
@@ -592,7 +639,7 @@ void unity_greeter_set_state (UnityGreeter* self, const gchar* key, const gchar*
 		_inner_error_ = NULL;
 		_tmp6_ = e;
 		_tmp7_ = _tmp6_->message;
-		g_debug ("unity-greeter.vala:124: Failed to write state: %s", _tmp7_);
+		g_debug ("unity-greeter.vala:127: Failed to write state: %s", _tmp7_);
 		_g_error_free0 (e);
 	}
 	__finally27:
@@ -645,43 +692,6 @@ void unity_greeter_add_style_class (GtkWidget* widget) {
 }
 
 
-LightDMLayout* unity_greeter_get_layout_by_name (const gchar* name) {
-	LightDMLayout* result = NULL;
-	GList* _tmp0_ = NULL;
-	g_return_val_if_fail (name != NULL, NULL);
-	_tmp0_ = lightdm_get_layouts ();
-	{
-		GList* layout_collection = NULL;
-		GList* layout_it = NULL;
-		layout_collection = _tmp0_;
-		for (layout_it = layout_collection; layout_it != NULL; layout_it = layout_it->next) {
-			LightDMLayout* layout = NULL;
-			layout = (LightDMLayout*) layout_it->data;
-			{
-				LightDMLayout* _tmp1_;
-				const gchar* _tmp2_;
-				const gchar* _tmp3_;
-				const gchar* _tmp4_;
-				_tmp1_ = layout;
-				_tmp2_ = lightdm_layout_get_name (_tmp1_);
-				_tmp3_ = _tmp2_;
-				_tmp4_ = name;
-				if (g_strcmp0 (_tmp3_, _tmp4_) == 0) {
-					LightDMLayout* _tmp5_;
-					LightDMLayout* _tmp6_;
-					_tmp5_ = layout;
-					_tmp6_ = _g_object_ref0 (_tmp5_);
-					result = _tmp6_;
-					return result;
-				}
-			}
-		}
-	}
-	result = NULL;
-	return result;
-}
-
-
 void unity_greeter_start_session (UnityGreeter* self, const gchar* session, Background* bg) {
 	cairo_surface_t* _tmp0_;
 	cairo_t* _tmp1_;
@@ -707,7 +717,7 @@ void unity_greeter_start_session (UnityGreeter* self, const gchar* session, Back
 	unity_greeter_refresh_background (_tmp4_, _tmp5_);
 	_tmp6_ = self->test_mode;
 	if (_tmp6_) {
-		g_debug ("unity-greeter.vala:165: Successfully logged in!  Quitting...");
+		g_debug ("unity-greeter.vala:158: Successfully logged in!  Quitting...");
 		gtk_main_quit ();
 	} else {
 		g_signal_emit_by_name (self, "starting-session");
@@ -731,7 +741,7 @@ void unity_greeter_start_session (UnityGreeter* self, const gchar* session, Back
 			_inner_error_ = NULL;
 			_tmp9_ = e;
 			_tmp10_ = _tmp9_->message;
-			g_warning ("unity-greeter.vala:177: Failed to start session: %s", _tmp10_);
+			g_warning ("unity-greeter.vala:170: Failed to start session: %s", _tmp10_);
 			_g_error_free0 (e);
 		}
 		__finally28:
@@ -751,7 +761,7 @@ static gboolean unity_greeter_ready_cb (UnityGreeter* self) {
 	ca_context* _tmp0_ = NULL;
 	gboolean _tmp1_ = FALSE;
 	g_return_val_if_fail (self != NULL, FALSE);
-	g_debug ("unity-greeter.vala:184: starting system-ready sound");
+	g_debug ("unity-greeter.vala:177: starting system-ready sound");
 	ca_context_create (&_tmp0_);
 	_ca_context_destroy0 (self->priv->canberra_context);
 	self->priv->canberra_context = _tmp0_;
@@ -772,7 +782,7 @@ void unity_greeter_show (UnityGreeter* self) {
 	GdkWindow* _tmp2_ = NULL;
 	MainWindow* _tmp3_;
 	g_return_if_fail (self != NULL);
-	g_debug ("unity-greeter.vala:201: Showing main window");
+	g_debug ("unity-greeter.vala:194: Showing main window");
 	_tmp0_ = self->priv->main_window;
 	gtk_widget_show ((GtkWidget*) _tmp0_);
 	_tmp1_ = self->priv->main_window;
@@ -1430,7 +1440,7 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 		_inner_error_ = NULL;
 		_tmp4_ = e;
 		_tmp5_ = _tmp4_->message;
-		g_warning ("unity-greeter.vala:433: Error starting the at-spi registry: %s", _tmp5_);
+		g_warning ("unity-greeter.vala:426: Error starting the at-spi registry: %s", _tmp5_);
 		_g_error_free0 (e);
 	}
 	__finally29:
@@ -1447,8 +1457,8 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 	g_log_set_default_handler (_unity_greeter_log_cb_glog_func, NULL);
 	_tmp7_ = getuid ();
 	_tmp8_ = g_getenv ("LANG");
-	g_debug ("unity-greeter.vala:442: Starting unity-greeter %s UID=%d LANG=%s", VERSION, (gint) _tmp7_, _tmp8_);
-	g_debug ("unity-greeter.vala:445: Setting cursor");
+	g_debug ("unity-greeter.vala:435: Starting unity-greeter %s UID=%d LANG=%s", VERSION, (gint) _tmp7_, _tmp8_);
+	g_debug ("unity-greeter.vala:438: Setting cursor");
 	_tmp9_ = gdk_get_default_root_window ();
 	_tmp10_ = gdk_cursor_new (GDK_LEFT_PTR);
 	_tmp11_ = _tmp10_;
@@ -1484,7 +1494,7 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 	options = _tmp18_;
 	options_length1 = 3;
 	_options_size_ = options_length1;
-	g_debug ("unity-greeter.vala:459: Loading command line options");
+	g_debug ("unity-greeter.vala:452: Loading command line options");
 	_tmp19_ = _ ("- Unity Greeter");
 	_tmp20_ = g_option_context_new (_tmp19_);
 	c = _tmp20_;
@@ -1556,9 +1566,9 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 	}
 	_tmp36_ = do_test_mode;
 	if (_tmp36_) {
-		g_debug ("unity-greeter.vala:484: Running in test mode");
+		g_debug ("unity-greeter.vala:477: Running in test mode");
 	}
-	g_debug ("unity-greeter.vala:487: Setting GTK+ settings");
+	g_debug ("unity-greeter.vala:480: Setting GTK+ settings");
 	_tmp37_ = gtk_settings_get_default ();
 	_tmp38_ = _g_object_ref0 (_tmp37_);
 	settings = _tmp38_;
@@ -1631,11 +1641,11 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 		_tmp65_ = value;
 		g_object_set ((GObject*) _tmp64_, "gtk-xft-rgba", _tmp65_, NULL, NULL);
 	}
-	g_debug ("unity-greeter.vala:510: Creating Unity Greeter");
+	g_debug ("unity-greeter.vala:503: Creating Unity Greeter");
 	_tmp66_ = do_test_mode;
 	_tmp67_ = unity_greeter_new (_tmp66_);
 	greeter = _tmp67_;
-	g_debug ("unity-greeter.vala:513: Showing greeter");
+	g_debug ("unity-greeter.vala:506: Showing greeter");
 	_tmp68_ = greeter;
 	unity_greeter_show (_tmp68_);
 	_tmp69_ = do_test_mode;
@@ -1657,7 +1667,7 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 			_inner_error_ = NULL;
 			_tmp70_ = e;
 			_tmp71_ = _tmp70_->message;
-			g_warning ("unity-greeter.vala:527: Error starting nm-applet: %s", _tmp71_);
+			g_warning ("unity-greeter.vala:520: Error starting nm-applet: %s", _tmp71_);
 			_g_error_free0 (e);
 		}
 		__finally31:
@@ -1672,7 +1682,7 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 			return 0;
 		}
 	}
-	g_debug ("unity-greeter.vala:531: Starting main loop");
+	g_debug ("unity-greeter.vala:524: Starting main loop");
 	gtk_main ();
 	_tmp72_ = atspi_pid;
 	if (_tmp72_ != ((GPid) 0)) {

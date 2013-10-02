@@ -98,6 +98,7 @@ gdouble ug_settings_get_double (const gchar* key);
 gchar* ug_settings_get_string (const gchar* key);
 gboolean ug_settings_set_boolean (const gchar* key, gboolean value);
 gchar** ug_settings_get_strv (const gchar* key, int* result_length1);
+gboolean ug_settings_set_strv (const gchar* key, gchar** value, int value_length1);
 UGSettings* ug_settings_new (void);
 UGSettings* ug_settings_construct (GType object_type);
 static void ug_settings_finalize (UGSettings* obj);
@@ -261,6 +262,27 @@ gchar** ug_settings_get_strv (const gchar* key, int* result_length1) {
 		*result_length1 = _tmp4__length1;
 	}
 	result = _tmp4_;
+	_g_object_unref0 (gsettings);
+	return result;
+}
+
+
+gboolean ug_settings_set_strv (const gchar* key, gchar** value, int value_length1) {
+	gboolean result = FALSE;
+	GSettings* _tmp0_;
+	GSettings* gsettings;
+	const gchar* _tmp1_;
+	gchar** _tmp2_;
+	gint _tmp2__length1;
+	gboolean _tmp3_ = FALSE;
+	g_return_val_if_fail (key != NULL, FALSE);
+	_tmp0_ = g_settings_new (UG_SETTINGS_SCHEMA);
+	gsettings = _tmp0_;
+	_tmp1_ = key;
+	_tmp2_ = value;
+	_tmp2__length1 = value_length1;
+	_tmp3_ = g_settings_set_strv (gsettings, _tmp1_, _tmp2_);
+	result = _tmp3_;
 	_g_object_unref0 (gsettings);
 	return result;
 }

@@ -22,7 +22,6 @@
 #include <glib.h>
 #include <glib-object.h>
 #include <gtk/gtk.h>
-#include <lightdm.h>
 
 
 #define TYPE_MENU_BAR (menu_bar_get_type ())
@@ -72,7 +71,6 @@ enum  {
 GType background_get_type (void) G_GNUC_CONST;
 MenuBar* menu_bar_new (Background* bg, GtkAccelGroup* ag);
 MenuBar* menu_bar_construct (GType object_type, Background* bg, GtkAccelGroup* ag);
-void menu_bar_set_layouts (MenuBar* self, GList* layouts);
 void menu_bar_set_keyboard_state (MenuBar* self);
 gboolean menu_bar_get_high_contrast (MenuBar* self);
 static void menu_bar_set_high_contrast (MenuBar* self, gboolean value);
@@ -92,11 +90,6 @@ MenuBar* menu_bar_construct (GType object_type, Background* bg, GtkAccelGroup* a
 
 MenuBar* menu_bar_new (Background* bg, GtkAccelGroup* ag) {
 	return menu_bar_construct (TYPE_MENU_BAR, bg, ag);
-}
-
-
-void menu_bar_set_layouts (MenuBar* self, GList* layouts) {
-	g_return_if_fail (self != NULL);
 }
 
 

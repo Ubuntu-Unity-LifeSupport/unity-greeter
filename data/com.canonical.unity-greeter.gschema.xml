@@ -83,7 +83,7 @@
       <summary>Whether to play sound when greeter is ready</summary>
     </key>
     <key name="indicators" type="as">
-      <default>['ug-keyboard', 'ug-accessibility', 'session', 'datetime', 'power', 'soundmenu', 'application']</default>
+      <default>['ug-accessibility', 'com.canonical.indicator.keyboard', 'com.canonical.indicator.session', 'com.canonical.indicator.datetime', 'com.canonical.indicator.power', 'com.canonical.indicator.sound', 'application']</default>
       <summary>Which indicators to load</summary>
     </key>
   </schema>

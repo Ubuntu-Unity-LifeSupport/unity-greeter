@@ -25,10 +25,6 @@ public class MenuBar : Gtk.MenuBar
     {
     }
 
-    public void set_layouts (List <LightDM.Layout> layouts)
-    {
-    }
-
     public void set_keyboard_state ()
     {
     }

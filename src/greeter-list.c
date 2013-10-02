@@ -67,6 +67,16 @@ typedef struct _FadableBoxClass FadableBoxClass;
 typedef struct _GreeterList GreeterList;
 typedef struct _GreeterListClass GreeterListClass;
 #define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
+
+#define TYPE_PROMPT_BOX (prompt_box_get_type ())
+#define PROMPT_BOX(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_PROMPT_BOX, PromptBox))
+#define PROMPT_BOX_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_PROMPT_BOX, PromptBoxClass))
+#define IS_PROMPT_BOX(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_PROMPT_BOX))
+#define IS_PROMPT_BOX_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_PROMPT_BOX))
+#define PROMPT_BOX_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_PROMPT_BOX, PromptBoxClass))
+
+typedef struct _PromptBox PromptBox;
+typedef struct _PromptBoxClass PromptBoxClass;
 #define _g_free0(var) (var = (g_free (var), NULL))
 
 #define TYPE_FADABLE (fadable_get_type ())
@@ -88,16 +98,6 @@ typedef struct _FadeTracker FadeTracker;
 typedef struct _FadeTrackerClass FadeTrackerClass;
 typedef struct _FadableBoxPrivate FadableBoxPrivate;
 typedef struct _GreeterListPrivate GreeterListPrivate;
-
-#define TYPE_PROMPT_BOX (prompt_box_get_type ())
-#define PROMPT_BOX(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_PROMPT_BOX, PromptBox))
-#define PROMPT_BOX_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_PROMPT_BOX, PromptBoxClass))
-#define IS_PROMPT_BOX(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_PROMPT_BOX))
-#define IS_PROMPT_BOX_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_PROMPT_BOX))
-#define PROMPT_BOX_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_PROMPT_BOX, PromptBoxClass))
-
-typedef struct _PromptBox PromptBox;
-typedef struct _PromptBoxClass PromptBoxClass;
 
 #define TYPE_DASH_BOX (dash_box_get_type ())
 #define DASH_BOX(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_DASH_BOX, DashBox))
@@ -288,17 +288,24 @@ enum  {
 };
 ListDBusInterface* list_dbus_interface_new (GreeterList* list);
 ListDBusInterface* list_dbus_interface_construct (GType object_type, GreeterList* list);
+static void __lambda35_ (ListDBusInterface* self, const gchar* name);
+static void ___lambda35__greeter_list_entry_selected (GreeterList* _sender, const gchar* name, gpointer self);
+gchar* list_dbus_interface_get_active_entry (ListDBusInterface* self);
+GType prompt_box_get_type (void) G_GNUC_CONST;
+PromptBox* greeter_list_get_selected_entry (GreeterList* self);
+const gchar* prompt_box_get_id (PromptBox* self);
 void list_dbus_interface_set_active_entry (ListDBusInterface* self, const gchar* entry_name);
 void greeter_list_set_active_entry (GreeterList* self, const gchar* name);
 static void list_dbus_interface_finalize (GObject* obj);
+static void _dbus_list_dbus_interface_get_active_entry (ListDBusInterface* self, GVariant* parameters, GDBusMethodInvocation* invocation);
 static void _dbus_list_dbus_interface_set_active_entry (ListDBusInterface* self, GVariant* parameters, GDBusMethodInvocation* invocation);
 static void list_dbus_interface_dbus_interface_method_call (GDBusConnection* connection, const gchar* sender, const gchar* object_path, const gchar* interface_name, const gchar* method_name, GVariant* parameters, GDBusMethodInvocation* invocation, gpointer user_data);
 static GVariant* list_dbus_interface_dbus_interface_get_property (GDBusConnection* connection, const gchar* sender, const gchar* object_path, const gchar* interface_name, const gchar* property_name, GError** error, gpointer user_data);
 static gboolean list_dbus_interface_dbus_interface_set_property (GDBusConnection* connection, const gchar* sender, const gchar* object_path, const gchar* interface_name, const gchar* property_name, GVariant* value, GError** error, gpointer user_data);
+static void _dbus_list_dbus_interface_entry_selected (GObject* _sender, const gchar* entry_name, gpointer* _data);
 static void _list_dbus_interface_unregister_object (gpointer user_data);
 GType fade_tracker_get_type (void) G_GNUC_CONST;
 GType fadable_get_type (void) G_GNUC_CONST;
-GType prompt_box_get_type (void) G_GNUC_CONST;
 GType dash_box_get_type (void) G_GNUC_CONST;
 GType greeter_list_mode_get_type (void) G_GNUC_CONST;
 GType background_get_type (void) G_GNUC_CONST;
@@ -322,8 +329,6 @@ static void _g_list_free__g_object_unref0_ (GList* self);
 #define GREETER_LIST_DEFAULT_BOX_HEIGHT 3
 gchar* greeter_list_get_selected_id (GreeterList* self);
 static gchar* greeter_list_real_get_selected_id (GreeterList* self);
-PromptBox* greeter_list_get_selected_entry (GreeterList* self);
-const gchar* prompt_box_get_id (PromptBox* self);
 GreeterList* greeter_list_construct (GType object_type, Background* bg, MenuBar* mb);
 static void greeter_list_on_bus_acquired (GreeterList* self, GObject* obj, GAsyncResult* res);
 static void greeter_list_real_get_preferred_width (GtkWidget* base, gint* min, gint* nat);
@@ -387,8 +392,8 @@ void fadable_set_alpha (Fadable* self, gdouble alpha);
 void prompt_box_set_position (PromptBox* self, gdouble value);
 void greeter_list_greeter_box_size_allocate_cb (GreeterList* self, GtkAllocation* allocation);
 static PromptBox* greeter_list_get_scrolling_entry (GreeterList* self);
-static gboolean ___lambda35_ (GreeterList* self);
-static gboolean ____lambda35__gsource_func (gpointer self);
+static gboolean ___lambda36_ (GreeterList* self);
+static gboolean ____lambda36__gsource_func (gpointer self);
 gboolean dash_box_get_has_base (DashBox* self);
 gdouble dash_box_get_base_alpha (DashBox* self);
 static void greeter_list_animate_scrolling (GreeterList* self, gdouble progress);
@@ -451,8 +456,8 @@ void prompt_box_set_options_image (PromptBox* self, GdkPixbuf* image);
 static GObject * greeter_list_constructor (GType type, guint n_construct_properties, GObjectConstructParam * construct_properties);
 DashBox* dash_box_new (Background* bg);
 DashBox* dash_box_construct (GType object_type, Background* bg);
-static void _greeter_list___lambda36_ (GreeterList* self);
-static void __greeter_list___lambda36__g_object_notify (GObject* _sender, GParamSpec* pspec, gpointer self);
+static void _greeter_list___lambda37_ (GreeterList* self);
+static void __greeter_list___lambda37__g_object_notify (GObject* _sender, GParamSpec* pspec, gpointer self);
 static void _greeter_list_greeter_box_size_allocate_cb_gtk_widget_size_allocate (GtkWidget* _sender, GtkAllocation* allocation, gpointer self);
 gdouble animate_timer_ease_out_quint (gdouble x);
 static gdouble _animate_timer_ease_out_quint_animate_timer_easing_func (gdouble x, gpointer self);
@@ -465,12 +470,19 @@ static void greeter_list_finalize (GObject* obj);
 static void _vala_greeter_list_get_property (GObject * object, guint property_id, GValue * value, GParamSpec * pspec);
 static void _vala_greeter_list_set_property (GObject * object, guint property_id, const GValue * value, GParamSpec * pspec);
 
+static const GDBusArgInfo _list_dbus_interface_dbus_arg_info_get_active_entry_result = {-1, "result", "s"};
+static const GDBusArgInfo * const _list_dbus_interface_dbus_arg_info_get_active_entry_in[] = {NULL};
+static const GDBusArgInfo * const _list_dbus_interface_dbus_arg_info_get_active_entry_out[] = {&_list_dbus_interface_dbus_arg_info_get_active_entry_result, NULL};
+static const GDBusMethodInfo _list_dbus_interface_dbus_method_info_get_active_entry = {-1, "GetActiveEntry", (GDBusArgInfo **) (&_list_dbus_interface_dbus_arg_info_get_active_entry_in), (GDBusArgInfo **) (&_list_dbus_interface_dbus_arg_info_get_active_entry_out)};
 static const GDBusArgInfo _list_dbus_interface_dbus_arg_info_set_active_entry_entry_name = {-1, "entry_name", "s"};
 static const GDBusArgInfo * const _list_dbus_interface_dbus_arg_info_set_active_entry_in[] = {&_list_dbus_interface_dbus_arg_info_set_active_entry_entry_name, NULL};
 static const GDBusArgInfo * const _list_dbus_interface_dbus_arg_info_set_active_entry_out[] = {NULL};
 static const GDBusMethodInfo _list_dbus_interface_dbus_method_info_set_active_entry = {-1, "SetActiveEntry", (GDBusArgInfo **) (&_list_dbus_interface_dbus_arg_info_set_active_entry_in), (GDBusArgInfo **) (&_list_dbus_interface_dbus_arg_info_set_active_entry_out)};
-static const GDBusMethodInfo * const _list_dbus_interface_dbus_method_info[] = {&_list_dbus_interface_dbus_method_info_set_active_entry, NULL};
-static const GDBusSignalInfo * const _list_dbus_interface_dbus_signal_info[] = {NULL};
+static const GDBusMethodInfo * const _list_dbus_interface_dbus_method_info[] = {&_list_dbus_interface_dbus_method_info_get_active_entry, &_list_dbus_interface_dbus_method_info_set_active_entry, NULL};
+static const GDBusArgInfo _list_dbus_interface_dbus_arg_info_entry_selected_entry_name = {-1, "entry_name", "s"};
+static const GDBusArgInfo * const _list_dbus_interface_dbus_arg_info_entry_selected[] = {&_list_dbus_interface_dbus_arg_info_entry_selected_entry_name, NULL};
+static const GDBusSignalInfo _list_dbus_interface_dbus_signal_info_entry_selected = {-1, "EntrySelected", (GDBusArgInfo **) (&_list_dbus_interface_dbus_arg_info_entry_selected)};
+static const GDBusSignalInfo * const _list_dbus_interface_dbus_signal_info[] = {&_list_dbus_interface_dbus_signal_info_entry_selected, NULL};
 static const GDBusPropertyInfo * const _list_dbus_interface_dbus_property_info[] = {NULL};
 static const GDBusInterfaceInfo _list_dbus_interface_dbus_interface_info = {-1, "com.canonical.UnityGreeter.List", (GDBusMethodInfo **) (&_list_dbus_interface_dbus_method_info), (GDBusSignalInfo **) (&_list_dbus_interface_dbus_signal_info), (GDBusPropertyInfo **) (&_list_dbus_interface_dbus_property_info)};
 static const GDBusInterfaceVTable _list_dbus_interface_dbus_interface_vtable = {list_dbus_interface_dbus_interface_method_call, list_dbus_interface_dbus_interface_get_property, list_dbus_interface_dbus_interface_set_property};
@@ -489,22 +501,89 @@ static gpointer _g_object_ref0 (gpointer self) {
 }
 
 
+static void __lambda35_ (ListDBusInterface* self, const gchar* name) {
+	const gchar* _tmp0_;
+	_tmp0_ = name;
+	g_signal_emit_by_name (self, "entry-selected", _tmp0_);
+}
+
+
+static void ___lambda35__greeter_list_entry_selected (GreeterList* _sender, const gchar* name, gpointer self) {
+	__lambda35_ (self, name);
+}
+
+
 ListDBusInterface* list_dbus_interface_construct (GType object_type, GreeterList* list) {
 	ListDBusInterface * self = NULL;
 	GreeterList* _tmp0_;
 	GreeterList* _tmp1_;
+	GreeterList* _tmp2_;
 	g_return_val_if_fail (list != NULL, NULL);
 	self = (ListDBusInterface*) g_object_new (object_type, NULL);
 	_tmp0_ = list;
 	_tmp1_ = _g_object_ref0 (_tmp0_);
 	_g_object_unref0 (self->priv->list);
 	self->priv->list = _tmp1_;
+	_tmp2_ = self->priv->list;
+	g_signal_connect_object (_tmp2_, "entry-selected", (GCallback) ___lambda35__greeter_list_entry_selected, self, 0);
 	return self;
 }
 
 
 ListDBusInterface* list_dbus_interface_new (GreeterList* list) {
 	return list_dbus_interface_construct (TYPE_LIST_DBUS_INTERFACE, list);
+}
+
+
+gchar* list_dbus_interface_get_active_entry (ListDBusInterface* self) {
+	gchar* result = NULL;
+	gchar* _tmp0_;
+	gchar* entry;
+	gboolean _tmp1_ = FALSE;
+	GreeterList* _tmp2_;
+	PromptBox* _tmp3_;
+	PromptBox* _tmp4_;
+	gboolean _tmp10_;
+	g_return_val_if_fail (self != NULL, NULL);
+	_tmp0_ = g_strdup ("");
+	entry = _tmp0_;
+	_tmp2_ = self->priv->list;
+	_tmp3_ = greeter_list_get_selected_entry (_tmp2_);
+	_tmp4_ = _tmp3_;
+	if (_tmp4_ != NULL) {
+		GreeterList* _tmp5_;
+		PromptBox* _tmp6_;
+		PromptBox* _tmp7_;
+		const gchar* _tmp8_;
+		const gchar* _tmp9_;
+		_tmp5_ = self->priv->list;
+		_tmp6_ = greeter_list_get_selected_entry (_tmp5_);
+		_tmp7_ = _tmp6_;
+		_tmp8_ = prompt_box_get_id (_tmp7_);
+		_tmp9_ = _tmp8_;
+		_tmp1_ = _tmp9_ != NULL;
+	} else {
+		_tmp1_ = FALSE;
+	}
+	_tmp10_ = _tmp1_;
+	if (_tmp10_) {
+		GreeterList* _tmp11_;
+		PromptBox* _tmp12_;
+		PromptBox* _tmp13_;
+		const gchar* _tmp14_;
+		const gchar* _tmp15_;
+		gchar* _tmp16_;
+		_tmp11_ = self->priv->list;
+		_tmp12_ = greeter_list_get_selected_entry (_tmp11_);
+		_tmp13_ = _tmp12_;
+		_tmp14_ = prompt_box_get_id (_tmp13_);
+		_tmp15_ = _tmp14_;
+		_tmp16_ = g_strdup (_tmp15_);
+		_g_free0 (entry);
+		entry = _tmp16_;
+	}
+	result = entry;
+	return result;
 }
 
 
@@ -523,6 +602,7 @@ static void list_dbus_interface_class_init (ListDBusInterfaceClass * klass) {
 	list_dbus_interface_parent_class = g_type_class_peek_parent (klass);
 	g_type_class_add_private (klass, sizeof (ListDBusInterfacePrivate));
 	G_OBJECT_CLASS (klass)->finalize = list_dbus_interface_finalize;
+	g_signal_new ("entry_selected", TYPE_LIST_DBUS_INTERFACE, G_SIGNAL_RUN_LAST, 0, NULL, NULL, g_cclosure_marshal_VOID__STRING, G_TYPE_NONE, 1, G_TYPE_STRING);
 }
 
 
@@ -549,6 +629,27 @@ GType list_dbus_interface_get_type (void) {
 		g_once_init_leave (&list_dbus_interface_type_id__volatile, list_dbus_interface_type_id);
 	}
 	return list_dbus_interface_type_id__volatile;
+}
+
+
+static void _dbus_list_dbus_interface_get_active_entry (ListDBusInterface* self, GVariant* parameters, GDBusMethodInvocation* invocation) {
+	GError* error = NULL;
+	GVariantIter _arguments_iter;
+	GDBusMessage* _reply_message;
+	GVariant* _reply;
+	GVariantBuilder _reply_builder;
+	gchar* result;
+	g_variant_iter_init (&_arguments_iter, parameters);
+	result = list_dbus_interface_get_active_entry (self);
+	_reply_message = g_dbus_message_new_method_reply (g_dbus_method_invocation_get_message (invocation));
+	g_variant_builder_init (&_reply_builder, G_VARIANT_TYPE_TUPLE);
+	g_variant_builder_add_value (&_reply_builder, g_variant_new_string (result));
+	_g_free0 (result);
+	_reply = g_variant_builder_end (&_reply_builder);
+	g_dbus_message_set_body (_reply_message, _reply);
+	g_dbus_connection_send_message (g_dbus_method_invocation_get_connection (invocation), _reply_message, G_DBUS_SEND_MESSAGE_FLAGS_NONE, NULL, NULL);
+	g_object_unref (invocation);
+	g_object_unref (_reply_message);
 }
 
 
@@ -581,7 +682,9 @@ static void list_dbus_interface_dbus_interface_method_call (GDBusConnection* con
 	gpointer object;
 	data = user_data;
 	object = data[0];
-	if (strcmp (method_name, "SetActiveEntry") == 0) {
+	if (strcmp (method_name, "GetActiveEntry") == 0) {
+		_dbus_list_dbus_interface_get_active_entry (object, parameters, invocation);
+	} else if (strcmp (method_name, "SetActiveEntry") == 0) {
 		_dbus_list_dbus_interface_set_active_entry (object, parameters, invocation);
 	} else {
 		g_object_unref (invocation);
@@ -607,6 +710,20 @@ static gboolean list_dbus_interface_dbus_interface_set_property (GDBusConnection
 }
 
 
+static void _dbus_list_dbus_interface_entry_selected (GObject* _sender, const gchar* entry_name, gpointer* _data) {
+	GDBusConnection * _connection;
+	const gchar * _path;
+	GVariant *_arguments;
+	GVariantBuilder _arguments_builder;
+	_connection = _data[1];
+	_path = _data[2];
+	g_variant_builder_init (&_arguments_builder, G_VARIANT_TYPE_TUPLE);
+	g_variant_builder_add_value (&_arguments_builder, g_variant_new_string (entry_name));
+	_arguments = g_variant_builder_end (&_arguments_builder);
+	g_dbus_connection_emit_signal (_connection, NULL, _path, "com.canonical.UnityGreeter.List", "EntrySelected", _arguments, NULL);
+}
+
+
 guint list_dbus_interface_register_object (gpointer object, GDBusConnection* connection, const gchar* path, GError** error) {
 	guint result;
 	gpointer *data;
@@ -618,6 +735,7 @@ guint list_dbus_interface_register_object (gpointer object, GDBusConnection* con
 	if (!result) {
 		return 0;
 	}
+	g_signal_connect (object, "entry-selected", (GCallback) _dbus_list_dbus_interface_entry_selected, data);
 	return result;
 }
 
@@ -625,6 +743,7 @@ guint list_dbus_interface_register_object (gpointer object, GDBusConnection* con
 static void _list_dbus_interface_unregister_object (gpointer user_data) {
 	gpointer* data;
 	data = user_data;
+	g_signal_handlers_disconnect_by_func (data[0], _dbus_list_dbus_interface_entry_selected, data);
 	g_object_unref (data[0]);
 	g_object_unref (data[1]);
 	g_free (data[2]);
@@ -757,7 +876,7 @@ static void greeter_list_on_bus_acquired (GreeterList* self, GObject* obj, GAsyn
 		_inner_error_ = NULL;
 		_tmp5_ = e;
 		_tmp6_ = _tmp5_->message;
-		g_debug ("greeter-list.vala:193: Error registering user list dbus object: %s", _tmp6_);
+		g_debug ("greeter-list.vala:208: Error registering user list dbus object: %s", _tmp6_);
 		_g_error_free0 (e);
 	}
 	__finally9:
@@ -1781,7 +1900,7 @@ static void greeter_list_move_entry (GreeterList* self, PromptBox* entry, gdoubl
 }
 
 
-static gboolean ___lambda35_ (GreeterList* self) {
+static gboolean ___lambda36_ (GreeterList* self) {
 	gboolean result = FALSE;
 	greeter_list_move_names (self);
 	result = FALSE;
@@ -1789,9 +1908,9 @@ static gboolean ___lambda35_ (GreeterList* self) {
 }
 
 
-static gboolean ____lambda35__gsource_func (gpointer self) {
+static gboolean ____lambda36__gsource_func (gpointer self) {
 	gboolean result;
-	result = ___lambda35_ (self);
+	result = ___lambda36_ (self);
 	return result;
 }
 
@@ -1820,7 +1939,7 @@ void greeter_list_greeter_box_size_allocate_cb (GreeterList* self, GtkAllocation
 	}
 	_tmp6_ = _tmp0_;
 	if (_tmp6_) {
-		g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, ____lambda35__gsource_func, g_object_ref (self), g_object_unref);
+		g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, ____lambda36__gsource_func, g_object_ref (self), g_object_unref);
 	}
 	_tmp7_ = *allocation;
 	_tmp8_ = _tmp7_.height;
@@ -3000,13 +3119,13 @@ static void greeter_list_set_scrolling_entry (GreeterList* self, PromptBox* valu
 }
 
 
-static void _greeter_list___lambda36_ (GreeterList* self) {
+static void _greeter_list___lambda37_ (GreeterList* self) {
 	gtk_widget_queue_draw ((GtkWidget*) self);
 }
 
 
-static void __greeter_list___lambda36__g_object_notify (GObject* _sender, GParamSpec* pspec, gpointer self) {
-	_greeter_list___lambda36_ (self);
+static void __greeter_list___lambda37__g_object_notify (GObject* _sender, GParamSpec* pspec, gpointer self) {
+	_greeter_list___lambda37_ (self);
 }
 
 
@@ -3068,7 +3187,7 @@ static GObject * greeter_list_constructor (GType type, guint n_construct_propert
 	_g_object_unref0 (self->greeter_box);
 	self->greeter_box = _tmp4_;
 	_tmp5_ = self->greeter_box;
-	g_signal_connect_object ((GObject*) _tmp5_, "notify::base-alpha", (GCallback) __greeter_list___lambda36__g_object_notify, self, 0);
+	g_signal_connect_object ((GObject*) _tmp5_, "notify::base-alpha", (GCallback) __greeter_list___lambda37__g_object_notify, self, 0);
 	_tmp6_ = self->greeter_box;
 	gtk_widget_show ((GtkWidget*) _tmp6_);
 	_tmp7_ = self->greeter_box;
@@ -3093,7 +3212,7 @@ static GObject * greeter_list_constructor (GType type, guint n_construct_propert
 		_inner_error_ = NULL;
 		_tmp11_ = e;
 		_tmp12_ = _tmp11_->message;
-		g_debug ("greeter-list.vala:179: Error getting session bus: %s", _tmp12_);
+		g_debug ("greeter-list.vala:194: Error getting session bus: %s", _tmp12_);
 		_g_error_free0 (e);
 	}
 	__finally10:
