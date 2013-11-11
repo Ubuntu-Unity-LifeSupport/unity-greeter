@@ -24,10 +24,12 @@ public class MainWindow : Gtk.Window
     public MenuBar menubar;
 
     private List<Monitor> monitors;
+    private Monitor active_monitor;
     private Background background;
     private Gtk.Box login_box;
     private Gtk.Box hbox;
     private Gtk.Button back_button;
+    private ShutdownDialog? shutdown_dialog = null;
 
     public ListStack stack;
 
@@ -245,9 +247,16 @@ public class MainWindow : Gtk.Window
 
     private void move_to_monitor (Monitor monitor)
     {
+        active_monitor = monitor;
         login_box.set_size_request (monitor.width, monitor.height);
         background.set_active_monitor (monitor);
         background.move (login_box, monitor.x, monitor.y);
+
+        if (shutdown_dialog != null)
+        {
+            shutdown_dialog.set_size_request (monitor.width, monitor.height);
+            background.move (shutdown_dialog, monitor.x, monitor.y);
+        }
     }
 
     private void add_user_list ()
@@ -266,36 +275,88 @@ public class MainWindow : Gtk.Window
         switch (event.keyval)
         {
         case Gdk.KEY_Escape:
-            top.cancel_authentication ();
-            break;
+            if (login_box.sensitive)
+                top.cancel_authentication ();
+            if (shutdown_dialog != null)
+                shutdown_dialog.cancel ();
+            return true;
         case Gdk.KEY_Page_Up:
         case Gdk.KEY_KP_Page_Up:
-            top.scroll (GreeterList.ScrollTarget.START);
-            break;
+            if (login_box.sensitive)
+                top.scroll (GreeterList.ScrollTarget.START);
+            return true;
         case Gdk.KEY_Page_Down:
         case Gdk.KEY_KP_Page_Down:
-            top.scroll (GreeterList.ScrollTarget.END);
-            break;
+            if (login_box.sensitive)
+                top.scroll (GreeterList.ScrollTarget.END);
+            return true;
         case Gdk.KEY_Up:
         case Gdk.KEY_KP_Up:
-            top.scroll (GreeterList.ScrollTarget.UP);
-            break;
+            if (login_box.sensitive)
+                top.scroll (GreeterList.ScrollTarget.UP);
+            return true;
         case Gdk.KEY_Down:
         case Gdk.KEY_KP_Down:
-            top.scroll (GreeterList.ScrollTarget.DOWN);
-            break;
+            if (login_box.sensitive)
+                top.scroll (GreeterList.ScrollTarget.DOWN);
+            return true;
+        case Gdk.KEY_Left:
+        case Gdk.KEY_KP_Left:
+            if (shutdown_dialog != null)
+                shutdown_dialog.focus_prev ();
+            return true;
+        case Gdk.KEY_Right:
+        case Gdk.KEY_KP_Right:
+            if (shutdown_dialog != null)
+                shutdown_dialog.focus_next ();
+            return true;
         case Gdk.KEY_F10:
-            menubar.select_first (false);
+            if (login_box.sensitive)
+                menubar.select_first (false);
+            return true;
+        case Gdk.KEY_PowerOff:
+            show_shutdown_dialog (ShutdownDialogType.SHUTDOWN);
+            return true;
+        case Gdk.KEY_z:
+            if (UnityGreeter.singleton.test_mode && (event.state & Gdk.ModifierType.MOD1_MASK) != 0)
+            {
+                show_shutdown_dialog (ShutdownDialogType.SHUTDOWN);
+                return true;
+            }
             break;
-        default:
-            return base.key_press_event (event);
         }
 
-        return true;
+        return base.key_press_event (event);
     }
 
     public void set_keyboard_state ()
     {
         menubar.set_keyboard_state ();
+    }
+
+    public void show_shutdown_dialog (ShutdownDialogType type)
+    {
+        if (shutdown_dialog != null)
+            shutdown_dialog.destroy ();
+
+        /* Stop input to login box */
+        login_box.sensitive = false;
+
+        shutdown_dialog = new ShutdownDialog (type);
+        shutdown_dialog.visible = true;
+        shutdown_dialog.close.connect (close_shutdown_dialog);
+        background.add (shutdown_dialog);
+        move_to_monitor (active_monitor);
+    }
+
+    public void close_shutdown_dialog ()
+    {
+        if (shutdown_dialog == null)
+            return;
+
+        shutdown_dialog.destroy ();
+        shutdown_dialog = null;
+
+        login_box.sensitive = true;
     }
 }

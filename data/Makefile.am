@@ -9,13 +9,26 @@ dist_pkgdata_DATA = \
 	arrow_left.png \
 	arrow_right.png \
 	cof.png \
+	dialog_close_highlight.png \
+	dialog_close.png \
 	gnome_badge.png \
+	hibernate_highlight.png \
+	hibernate.png \
 	kde_badge.png \
 	logo.png \
 	message.png \
 	recovery_console_badge.png \
 	remote_login_help.png \
+	restart_highlight.png \
+	restart.png \
 	shadow.png \
+	shutdown_highlight.png \
+	shutdown.png \
+	suspend_highlight.png \
+	suspend.png \
+	switcher_corner.png \
+	switcher_left.png \
+	switcher_top.png \
 	ubuntu_badge.png \
 	unknown_badge.png
 

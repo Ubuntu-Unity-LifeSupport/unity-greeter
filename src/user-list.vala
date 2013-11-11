@@ -1401,7 +1401,7 @@ public class UserList : GreeterList
             {
                 debug ("username=%s", text);
                 test_username = text;
-                show_prompt_cb (_("Password:"), LightDM.PromptType.SECRET);
+                show_prompt_cb ("Password:", LightDM.PromptType.SECRET);
             }
             else
             {
@@ -1495,10 +1495,10 @@ public class UserList : GreeterList
             {
                 test_username = authenticate_user;
                 authenticate_user = null;
-                show_prompt_cb (_("Password:"), LightDM.PromptType.SECRET);
+                show_prompt_cb ("Password:", LightDM.PromptType.SECRET);
             }
             else
-                show_prompt_cb (_("Username:"), LightDM.PromptType.QUESTION);
+                show_prompt_cb ("Username:", LightDM.PromptType.QUESTION);
             break;
         case "*guest":
             test_is_authenticated = true;
@@ -1518,28 +1518,28 @@ public class UserList : GreeterList
             break;
         case "info-prompt":
             show_message_cb ("Welcome to Unity Greeter", LightDM.MessageType.INFO);
-            show_prompt_cb (_("Password:"), LightDM.PromptType.SECRET);
+            show_prompt_cb ("Password:", LightDM.PromptType.SECRET);
             break;
         case "long-info-prompt":
             show_message_cb ("Welcome to Unity Greeter\n\nWe like to annoy you with long messages.\nLike this one\n\nThis is the last line of a multiple line message.", LightDM.MessageType.INFO);
-            show_prompt_cb (_("Password:"), LightDM.PromptType.SECRET);
+            show_prompt_cb ("Password:", LightDM.PromptType.SECRET);
             break;
         case "wide-info-prompt":
             show_message_cb ("Welcome to Unity Greeter, the greeteriest greeter that ever did appear in these fine lands", LightDM.MessageType.INFO);
-            show_prompt_cb (_("Password:"), LightDM.PromptType.SECRET);
+            show_prompt_cb ("Password:", LightDM.PromptType.SECRET);
             break;
         case "multi-info-prompt":
             show_message_cb ("Welcome to Unity Greeter", LightDM.MessageType.INFO);
             show_message_cb ("This is an error", LightDM.MessageType.ERROR);
             show_message_cb ("You should have seen three messages", LightDM.MessageType.INFO);
-            show_prompt_cb (_("Password:"), LightDM.PromptType.SECRET);
+            show_prompt_cb ("Password:", LightDM.PromptType.SECRET);
             break;
         case "two-prompts":
-            show_prompt_cb (_("Favorite Color (blue):"), LightDM.PromptType.QUESTION);
-            show_prompt_cb (_("Password:"), LightDM.PromptType.SECRET);
+            show_prompt_cb ("Favorite Color (blue):", LightDM.PromptType.QUESTION);
+            show_prompt_cb ("Password:", LightDM.PromptType.SECRET);
             break;
         default:
-            show_prompt_cb (_("Password:"), LightDM.PromptType.SECRET);
+            show_prompt_cb ("Password:", LightDM.PromptType.SECRET);
             break;
         }
     }

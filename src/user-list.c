@@ -1409,7 +1409,7 @@ static gboolean user_list_query_directory_servers_co (UserListQueryDirectoryServ
 		if (_data_->_inner_error_ != NULL) {
 			_data_->server_list = (_vala_RemoteServer_array_free (_data_->server_list, _data_->server_list_length1), NULL);
 			if (_data_->_inner_error_->domain == G_IO_ERROR) {
-				goto __catch32_g_io_error;
+				goto __catch39_g_io_error;
 			}
 			_data_->server_list = (_vala_RemoteServer_array_free (_data_->server_list, _data_->server_list_length1), NULL);
 			g_critical ("file %s: line %d: unexpected error: %s (%s, %d)", __FILE__, __LINE__, _data_->_inner_error_->message, g_quark_to_string (_data_->_inner_error_->domain), _data_->_inner_error_->code);
@@ -1419,8 +1419,8 @@ static gboolean user_list_query_directory_servers_co (UserListQueryDirectoryServ
 		user_list_set_remote_directory_servers (_data_->self, _data_->server_list, _data_->server_list_length1);
 		_data_->server_list = (_vala_RemoteServer_array_free (_data_->server_list, _data_->server_list_length1), NULL);
 	}
-	goto __finally32;
-	__catch32_g_io_error:
+	goto __finally39;
+	__catch39_g_io_error:
 	{
 		_data_->e = _data_->_inner_error_;
 		_data_->_inner_error_ = NULL;
@@ -1431,7 +1431,7 @@ static gboolean user_list_query_directory_servers_co (UserListQueryDirectoryServ
 		user_list_remove_remote_servers (_data_->self);
 		_g_error_free0 (_data_->e);
 	}
-	__finally32:
+	__finally39:
 	if (_data_->_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _data_->_inner_error_->message, g_quark_to_string (_data_->_inner_error_->domain), _data_->_inner_error_->code);
 		g_clear_error (&_data_->_inner_error_);
@@ -2141,7 +2141,7 @@ static void __lambda24_ (UserList* self, GObject* obj, GAsyncResult* res) {
 		_tmp3_ = (RemoteLoginService*) _tmp2_;
 		if (_inner_error_ != NULL) {
 			if (_inner_error_->domain == G_IO_ERROR) {
-				goto __catch33_g_io_error;
+				goto __catch40_g_io_error;
 			}
 			g_critical ("file %s: line %d: unexpected error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 			g_clear_error (&_inner_error_);
@@ -2157,8 +2157,8 @@ static void __lambda24_ (UserList* self, GObject* obj, GAsyncResult* res) {
 		g_signal_connect_object (_tmp6_, "login-changed", (GCallback) _user_list_remote_login_changed_remote_login_service_login_changed, self, 0);
 		user_list_query_directory_servers (self, NULL, NULL);
 	}
-	goto __finally33;
-	__catch33_g_io_error:
+	goto __finally40;
+	__catch40_g_io_error:
 	{
 		GError* e = NULL;
 		GError* _tmp7_;
@@ -2174,7 +2174,7 @@ static void __lambda24_ (UserList* self, GObject* obj, GAsyncResult* res) {
 		self->priv->remote_login_service = NULL;
 		_g_error_free0 (e);
 	}
-	__finally33:
+	__finally40:
 	if (_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
@@ -2374,7 +2374,7 @@ static gboolean user_list_remote_directory_respond_cb_co (UserListRemoteDirector
 		_data_->re = _data_->_tmp17_;
 		if (_data_->_inner_error_ != NULL) {
 			if (_data_->_inner_error_->domain == G_REGEX_ERROR) {
-				goto __catch34_g_regex_error;
+				goto __catch41_g_regex_error;
 			}
 			_g_free0 (_data_->email);
 			_data_->server_list = (_vala_RemoteServer_array_free (_data_->server_list, _data_->server_list_length1), NULL);
@@ -2418,8 +2418,8 @@ static gboolean user_list_remote_directory_respond_cb_co (UserListRemoteDirector
 		_g_match_info_free0 (_data_->info);
 		_g_regex_unref0 (_data_->re);
 	}
-	goto __finally34;
-	__catch34_g_regex_error:
+	goto __finally41;
+	__catch41_g_regex_error:
 	{
 		_data_->e = _data_->_inner_error_;
 		_data_->_inner_error_ = NULL;
@@ -2428,7 +2428,7 @@ static gboolean user_list_remote_directory_respond_cb_co (UserListRemoteDirector
 		g_debug ("user-list.vala:391: Calling email regex match failed. Error: %s", _data_->_tmp34_);
 		_g_error_free0 (_data_->e);
 	}
-	__finally34:
+	__finally41:
 	if (_data_->_inner_error_ != NULL) {
 		_g_free0 (_data_->email);
 		_data_->server_list = (_vala_RemoteServer_array_free (_data_->server_list, _data_->server_list_length1), NULL);
@@ -2586,7 +2586,7 @@ static gboolean user_list_remote_directory_respond_cb_co (UserListRemoteDirector
 					_g_free0 (_data_->data_type);
 					_g_free0 (_data_->url);
 					if (_data_->_inner_error_->domain == G_IO_ERROR) {
-						goto __catch35_g_io_error;
+						goto __catch42_g_io_error;
 					}
 					_g_free0 (_data_->data_type);
 					_g_free0 (_data_->url);
@@ -2610,8 +2610,8 @@ static gboolean user_list_remote_directory_respond_cb_co (UserListRemoteDirector
 			_data_->self->priv->currently_browsing_server_email = _data_->_tmp98_;
 			_g_free0 (_data_->url);
 		}
-		goto __finally35;
-		__catch35_g_io_error:
+		goto __finally42;
+		__catch42_g_io_error:
 		{
 			_data_->_vala1_e = _data_->_inner_error_;
 			_data_->_inner_error_ = NULL;
@@ -2621,7 +2621,7 @@ static gboolean user_list_remote_directory_respond_cb_co (UserListRemoteDirector
 "bus service failed. Error: %s", _data_->_tmp100_);
 			_g_error_free0 (_data_->_vala1_e);
 		}
-		__finally35:
+		__finally42:
 		if (_data_->_inner_error_ != NULL) {
 			_g_free0 (_data_->email);
 			_data_->server_list = (_vala_RemoteServer_array_free (_data_->server_list, _data_->server_list_length1), NULL);
@@ -3871,7 +3871,7 @@ static gboolean user_list_create_remote_fields_for_current_item_co (UserListCrea
 														_data_->_email_domains_size_ = _data_->email_domains_length1;
 														if (_data_->_inner_error_ != NULL) {
 															if (_data_->_inner_error_->domain == G_IO_ERROR) {
-																goto __catch36_g_io_error;
+																goto __catch43_g_io_error;
 															}
 															_data_->email_domains = (_vala_array_free (_data_->email_domains, _data_->email_domains_length1, (GDestroyNotify) g_free), NULL);
 															_g_free0 (_data_->default_value);
@@ -3888,8 +3888,8 @@ static gboolean user_list_create_remote_fields_for_current_item_co (UserListCrea
 														}
 													}
 												}
-												goto __finally36;
-												__catch36_g_io_error:
+												goto __finally43;
+												__catch43_g_io_error:
 												{
 													_data_->e = _data_->_inner_error_;
 													_data_->_inner_error_ = NULL;
@@ -3905,7 +3905,7 @@ static gboolean user_list_create_remote_fields_for_current_item_co (UserListCrea
 "ical.RemoteLogin dbus service failed. Error: %s", _data_->_tmp225_);
 													_g_error_free0 (_data_->e);
 												}
-												__finally36:
+												__finally43:
 												if (_data_->_inner_error_ != NULL) {
 													_data_->email_domains = (_vala_array_free (_data_->email_domains, _data_->email_domains_length1, (GDestroyNotify) g_free), NULL);
 													_g_free0 (_data_->default_value);
@@ -5215,7 +5215,7 @@ static void user_list_test_fill_list (UserList* self) {
 		dir = _tmp0_;
 		if (_inner_error_ != NULL) {
 			if (_inner_error_->domain == G_FILE_ERROR) {
-				goto __catch37_g_file_error;
+				goto __catch44_g_file_error;
 			}
 			g_critical ("file %s: line %d: unexpected error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 			g_clear_error (&_inner_error_);
@@ -5245,15 +5245,15 @@ static void user_list_test_fill_list (UserList* self) {
 		}
 		_g_dir_close0 (dir);
 	}
-	goto __finally37;
-	__catch37_g_file_error:
+	goto __finally44;
+	__catch44_g_file_error:
 	{
 		GError* e = NULL;
 		e = _inner_error_;
 		_inner_error_ = NULL;
 		_g_error_free0 (e);
 	}
-	__finally37:
+	__finally44:
 	if (_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
@@ -6416,19 +6416,17 @@ static void user_list_test_respond (UserList* self, const gchar* text) {
 					const gchar* _tmp6_;
 					const gchar* _tmp7_;
 					gchar* _tmp8_;
-					const gchar* _tmp9_ = NULL;
 					_tmp6_ = text;
 					g_debug ("user-list.vala:1402: username=%s", _tmp6_);
 					_tmp7_ = text;
 					_tmp8_ = g_strdup (_tmp7_);
 					_g_free0 (((GreeterList*) self)->test_username);
 					((GreeterList*) self)->test_username = _tmp8_;
-					_tmp9_ = _ ("Password:");
-					greeter_list_show_prompt_cb ((GreeterList*) self, _tmp9_, LIGHTDM_PROMPT_TYPE_SECRET);
+					greeter_list_show_prompt_cb ((GreeterList*) self, "Password:", LIGHTDM_PROMPT_TYPE_SECRET);
 				} else {
-					const gchar* _tmp10_;
-					_tmp10_ = text;
-					((GreeterList*) self)->test_is_authenticated = g_strcmp0 (_tmp10_, "password") == 0;
+					const gchar* _tmp9_;
+					_tmp9_ = text;
+					((GreeterList*) self)->test_is_authenticated = g_strcmp0 (_tmp9_, "password") == 0;
 					greeter_list_authentication_complete_cb ((GreeterList*) self);
 				}
 				break;
@@ -6438,12 +6436,12 @@ static void user_list_test_respond (UserList* self, const gchar* text) {
 		switch (0) {
 			default:
 			{
-				gboolean _tmp11_;
-				_tmp11_ = self->priv->test_prompted_sso;
-				if (!_tmp11_) {
-					const gchar* _tmp12_;
-					_tmp12_ = text;
-					if (g_strcmp0 (_tmp12_, "password") == 0) {
+				gboolean _tmp10_;
+				_tmp10_ = self->priv->test_prompted_sso;
+				if (!_tmp10_) {
+					const gchar* _tmp11_;
+					_tmp11_ = text;
+					if (g_strcmp0 (_tmp11_, "password") == 0) {
 						g_debug ("user-list.vala:1417: prompt otp");
 						self->priv->test_prompted_sso = TRUE;
 						greeter_list_show_prompt_cb ((GreeterList*) self, "OTP:", LIGHTDM_PROMPT_TYPE_QUESTION);
@@ -6452,9 +6450,9 @@ static void user_list_test_respond (UserList* self, const gchar* text) {
 						greeter_list_authentication_complete_cb ((GreeterList*) self);
 					}
 				} else {
-					const gchar* _tmp13_;
-					_tmp13_ = text;
-					((GreeterList*) self)->test_is_authenticated = g_strcmp0 (_tmp13_, "otp") == 0;
+					const gchar* _tmp12_;
+					_tmp12_ = text;
+					((GreeterList*) self)->test_is_authenticated = g_strcmp0 (_tmp12_, "otp") == 0;
 					greeter_list_authentication_complete_cb ((GreeterList*) self);
 				}
 				break;
@@ -6464,29 +6462,29 @@ static void user_list_test_respond (UserList* self, const gchar* text) {
 		switch (0) {
 			default:
 			{
-				const gchar* _tmp14_;
-				_tmp14_ = self->priv->test_two_prompts_first;
-				if (_tmp14_ == NULL) {
-					const gchar* _tmp15_;
-					gchar* _tmp16_;
-					_tmp15_ = text;
-					_tmp16_ = g_strdup (_tmp15_);
+				const gchar* _tmp13_;
+				_tmp13_ = self->priv->test_two_prompts_first;
+				if (_tmp13_ == NULL) {
+					const gchar* _tmp14_;
+					gchar* _tmp15_;
+					_tmp14_ = text;
+					_tmp15_ = g_strdup (_tmp14_);
 					_g_free0 (self->priv->test_two_prompts_first);
-					self->priv->test_two_prompts_first = _tmp16_;
+					self->priv->test_two_prompts_first = _tmp15_;
 				} else {
-					gboolean _tmp17_ = FALSE;
-					const gchar* _tmp18_;
-					gboolean _tmp20_;
-					_tmp18_ = self->priv->test_two_prompts_first;
-					if (g_strcmp0 (_tmp18_, "blue") == 0) {
-						const gchar* _tmp19_;
-						_tmp19_ = text;
-						_tmp17_ = g_strcmp0 (_tmp19_, "password") == 0;
+					gboolean _tmp16_ = FALSE;
+					const gchar* _tmp17_;
+					gboolean _tmp19_;
+					_tmp17_ = self->priv->test_two_prompts_first;
+					if (g_strcmp0 (_tmp17_, "blue") == 0) {
+						const gchar* _tmp18_;
+						_tmp18_ = text;
+						_tmp16_ = g_strcmp0 (_tmp18_, "password") == 0;
 					} else {
-						_tmp17_ = FALSE;
+						_tmp16_ = FALSE;
 					}
-					_tmp20_ = _tmp17_;
-					((GreeterList*) self)->test_is_authenticated = _tmp20_;
+					_tmp19_ = _tmp16_;
+					((GreeterList*) self)->test_is_authenticated = _tmp19_;
 					greeter_list_authentication_complete_cb ((GreeterList*) self);
 				}
 				break;
@@ -6496,30 +6494,30 @@ static void user_list_test_respond (UserList* self, const gchar* text) {
 		switch (0) {
 			default:
 			{
-				const gchar* _tmp21_;
-				_tmp21_ = self->priv->test_new_password;
-				if (_tmp21_ != NULL) {
+				const gchar* _tmp20_;
+				_tmp20_ = self->priv->test_new_password;
+				if (_tmp20_ != NULL) {
+					const gchar* _tmp21_;
 					const gchar* _tmp22_;
-					const gchar* _tmp23_;
-					_tmp22_ = text;
-					_tmp23_ = self->priv->test_new_password;
-					((GreeterList*) self)->test_is_authenticated = g_strcmp0 (_tmp22_, _tmp23_) == 0;
+					_tmp21_ = text;
+					_tmp22_ = self->priv->test_new_password;
+					((GreeterList*) self)->test_is_authenticated = g_strcmp0 (_tmp21_, _tmp22_) == 0;
 					greeter_list_authentication_complete_cb ((GreeterList*) self);
 				} else {
-					gboolean _tmp24_;
-					_tmp24_ = self->priv->test_request_new_password;
-					if (_tmp24_) {
-						const gchar* _tmp25_;
-						gchar* _tmp26_;
-						_tmp25_ = text;
-						_tmp26_ = g_strdup (_tmp25_);
+					gboolean _tmp23_;
+					_tmp23_ = self->priv->test_request_new_password;
+					if (_tmp23_) {
+						const gchar* _tmp24_;
+						gchar* _tmp25_;
+						_tmp24_ = text;
+						_tmp25_ = g_strdup (_tmp24_);
 						_g_free0 (self->priv->test_new_password);
-						self->priv->test_new_password = _tmp26_;
+						self->priv->test_new_password = _tmp25_;
 						greeter_list_show_prompt_cb ((GreeterList*) self, "Retype new UNIX password: ", LIGHTDM_PROMPT_TYPE_SECRET);
 					} else {
-						const gchar* _tmp27_;
-						_tmp27_ = text;
-						if (g_strcmp0 (_tmp27_, "password") != 0) {
+						const gchar* _tmp26_;
+						_tmp26_ = text;
+						if (g_strcmp0 (_tmp26_, "password") != 0) {
 							((GreeterList*) self)->test_is_authenticated = FALSE;
 							greeter_list_authentication_complete_cb ((GreeterList*) self);
 						} else {
@@ -6553,9 +6551,9 @@ static void user_list_test_respond (UserList* self, const gchar* text) {
 		switch (0) {
 			default:
 			{
-				const gchar* _tmp28_;
-				_tmp28_ = text;
-				((GreeterList*) self)->test_is_authenticated = g_strcmp0 (_tmp28_, "password") == 0;
+				const gchar* _tmp27_;
+				_tmp27_ = text;
+				((GreeterList*) self)->test_is_authenticated = g_strcmp0 (_tmp27_, "password") == 0;
 				greeter_list_authentication_complete_cb ((GreeterList*) self);
 				break;
 			}
@@ -6602,19 +6600,15 @@ static void user_list_real_test_start_authentication (GreeterList* base) {
 				if (_tmp4_ != NULL) {
 					const gchar* _tmp5_;
 					gchar* _tmp6_;
-					const gchar* _tmp7_ = NULL;
 					_tmp5_ = self->priv->authenticate_user;
 					_tmp6_ = g_strdup (_tmp5_);
 					_g_free0 (((GreeterList*) self)->test_username);
 					((GreeterList*) self)->test_username = _tmp6_;
 					_g_free0 (self->priv->authenticate_user);
 					self->priv->authenticate_user = NULL;
-					_tmp7_ = _ ("Password:");
-					greeter_list_show_prompt_cb ((GreeterList*) self, _tmp7_, LIGHTDM_PROMPT_TYPE_SECRET);
+					greeter_list_show_prompt_cb ((GreeterList*) self, "Password:", LIGHTDM_PROMPT_TYPE_SECRET);
 				} else {
-					const gchar* _tmp8_ = NULL;
-					_tmp8_ = _ ("Username:");
-					greeter_list_show_prompt_cb ((GreeterList*) self, _tmp8_, LIGHTDM_PROMPT_TYPE_QUESTION);
+					greeter_list_show_prompt_cb ((GreeterList*) self, "Username:", LIGHTDM_PROMPT_TYPE_QUESTION);
 				}
 				break;
 			}
@@ -6659,10 +6653,8 @@ static void user_list_real_test_start_authentication (GreeterList* base) {
 		switch (0) {
 			default:
 			{
-				const gchar* _tmp9_ = NULL;
 				greeter_list_show_message_cb ((GreeterList*) self, "Welcome to Unity Greeter", LIGHTDM_MESSAGE_TYPE_INFO);
-				_tmp9_ = _ ("Password:");
-				greeter_list_show_prompt_cb ((GreeterList*) self, _tmp9_, LIGHTDM_PROMPT_TYPE_SECRET);
+				greeter_list_show_prompt_cb ((GreeterList*) self, "Password:", LIGHTDM_PROMPT_TYPE_SECRET);
 				break;
 			}
 		}
@@ -6670,15 +6662,13 @@ static void user_list_real_test_start_authentication (GreeterList* base) {
 		switch (0) {
 			default:
 			{
-				const gchar* _tmp10_ = NULL;
 				greeter_list_show_message_cb ((GreeterList*) self, "Welcome to Unity Greeter\n" \
 "\n" \
 "We like to annoy you with long messages.\n" \
 "Like this one\n" \
 "\n" \
 "This is the last line of a multiple line message.", LIGHTDM_MESSAGE_TYPE_INFO);
-				_tmp10_ = _ ("Password:");
-				greeter_list_show_prompt_cb ((GreeterList*) self, _tmp10_, LIGHTDM_PROMPT_TYPE_SECRET);
+				greeter_list_show_prompt_cb ((GreeterList*) self, "Password:", LIGHTDM_PROMPT_TYPE_SECRET);
 				break;
 			}
 		}
@@ -6686,11 +6676,9 @@ static void user_list_real_test_start_authentication (GreeterList* base) {
 		switch (0) {
 			default:
 			{
-				const gchar* _tmp11_ = NULL;
 				greeter_list_show_message_cb ((GreeterList*) self, "Welcome to Unity Greeter, the greeteriest greeter that ever did appear" \
 " in these fine lands", LIGHTDM_MESSAGE_TYPE_INFO);
-				_tmp11_ = _ ("Password:");
-				greeter_list_show_prompt_cb ((GreeterList*) self, _tmp11_, LIGHTDM_PROMPT_TYPE_SECRET);
+				greeter_list_show_prompt_cb ((GreeterList*) self, "Password:", LIGHTDM_PROMPT_TYPE_SECRET);
 				break;
 			}
 		}
@@ -6698,12 +6686,10 @@ static void user_list_real_test_start_authentication (GreeterList* base) {
 		switch (0) {
 			default:
 			{
-				const gchar* _tmp12_ = NULL;
 				greeter_list_show_message_cb ((GreeterList*) self, "Welcome to Unity Greeter", LIGHTDM_MESSAGE_TYPE_INFO);
 				greeter_list_show_message_cb ((GreeterList*) self, "This is an error", LIGHTDM_MESSAGE_TYPE_ERROR);
 				greeter_list_show_message_cb ((GreeterList*) self, "You should have seen three messages", LIGHTDM_MESSAGE_TYPE_INFO);
-				_tmp12_ = _ ("Password:");
-				greeter_list_show_prompt_cb ((GreeterList*) self, _tmp12_, LIGHTDM_PROMPT_TYPE_SECRET);
+				greeter_list_show_prompt_cb ((GreeterList*) self, "Password:", LIGHTDM_PROMPT_TYPE_SECRET);
 				break;
 			}
 		}
@@ -6711,12 +6697,8 @@ static void user_list_real_test_start_authentication (GreeterList* base) {
 		switch (0) {
 			default:
 			{
-				const gchar* _tmp13_ = NULL;
-				const gchar* _tmp14_ = NULL;
-				_tmp13_ = _ ("Favorite Color (blue):");
-				greeter_list_show_prompt_cb ((GreeterList*) self, _tmp13_, LIGHTDM_PROMPT_TYPE_QUESTION);
-				_tmp14_ = _ ("Password:");
-				greeter_list_show_prompt_cb ((GreeterList*) self, _tmp14_, LIGHTDM_PROMPT_TYPE_SECRET);
+				greeter_list_show_prompt_cb ((GreeterList*) self, "Favorite Color (blue):", LIGHTDM_PROMPT_TYPE_QUESTION);
+				greeter_list_show_prompt_cb ((GreeterList*) self, "Password:", LIGHTDM_PROMPT_TYPE_SECRET);
 				break;
 			}
 		}
@@ -6724,9 +6706,7 @@ static void user_list_real_test_start_authentication (GreeterList* base) {
 		switch (0) {
 			default:
 			{
-				const gchar* _tmp15_ = NULL;
-				_tmp15_ = _ ("Password:");
-				greeter_list_show_prompt_cb ((GreeterList*) self, _tmp15_, LIGHTDM_PROMPT_TYPE_SECRET);
+				greeter_list_show_prompt_cb ((GreeterList*) self, "Password:", LIGHTDM_PROMPT_TYPE_SECRET);
 				break;
 			}
 		}
@@ -6917,13 +6897,13 @@ static GObject * user_list_constructor (GType type, guint n_construct_properties
 		_g_free0 (_tmp3_);
 		_tmp6_ = _tmp5_;
 		if (_inner_error_ != NULL) {
-			goto __catch38_g_error;
+			goto __catch45_g_error;
 		}
 		_g_object_unref0 (self->priv->message_pixbuf);
 		self->priv->message_pixbuf = _tmp6_;
 	}
-	goto __finally38;
-	__catch38_g_error:
+	goto __finally45;
+	__catch45_g_error:
 	{
 		GError* e = NULL;
 		GError* _tmp7_;
@@ -6935,7 +6915,7 @@ static GObject * user_list_constructor (GType type, guint n_construct_properties
 		g_debug ("user-list.vala:114: Error loading message image: %s", _tmp8_);
 		_g_error_free0 (e);
 	}
-	__finally38:
+	__finally45:
 	if (_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);

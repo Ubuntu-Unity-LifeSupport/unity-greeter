@@ -1,3 +1,11 @@
+Overview of changes in unity-greeter 14.04.0
+
+    - Use Unity style shutdown dialogs
+    - Handle hardware power button in greeter
+    - Use an Upstart process to start indicator services
+    - Fix build with Vala 0.22
+    - Clean up compile warnings
+
 Overview of changes in unity-greeter 13.10.3
 
     - Have sound indicator appear again, after the indicator file changed names

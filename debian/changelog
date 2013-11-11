@@ -1,3 +1,14 @@
+unity-greeter (14.04.0-0ubuntu1) trusty; urgency=low
+
+  * New upstream release:
+    - Use Unity style shutdown dialogs (LP: #857577)
+    - Handle hardware power button in greeter (LP: #903306)
+    - Use an Upstart process to start indicator services (LP: #1185565)
+    - Fix build with Vala 0.22
+    - Clean up compile warnings
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Mon, 11 Nov 2013 17:16:17 +1300
+
 unity-greeter (13.10.3-0ubuntu1) saucy; urgency=low
 
   [ William Hua ]

@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2013-10-03 14:04+0000\n"
+"POT-Creation-Date: 2013-11-08 18:39+0000\n"
 "PO-Revision-Date: 2012-07-05 01:39+0000\n"
 "Last-Translator: Hriostat <Unknown>\n"
 "Language-Team: Brazilian Portuguese <pt_BR@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-10-04 05:36+0000\n"
-"X-Generator: Launchpad (build 16791)\n"
+"X-Launchpad-Export-Date: 2013-11-10 06:17+0000\n"
+"X-Generator: Launchpad (build 16820)\n"
 
 #: ../src/greeter-list.vala:300
 #, c-format
@@ -23,15 +23,10 @@ msgid "Enter password for %s"
 msgstr "Informe a senha para %s"
 
 #: ../src/greeter-list.vala:802 ../src/user-list.vala:661
-#: ../src/user-list.vala:1404 ../src/user-list.vala:1498
-#: ../src/user-list.vala:1521 ../src/user-list.vala:1525
-#: ../src/user-list.vala:1529 ../src/user-list.vala:1535
-#: ../src/user-list.vala:1539 ../src/user-list.vala:1542
 msgid "Password:"
 msgstr "Senha:"
 
 #: ../src/greeter-list.vala:804 ../src/user-list.vala:655
-#: ../src/user-list.vala:1501
 msgid "Username:"
 msgstr "Nome de usuário:"
 
@@ -47,7 +42,7 @@ msgstr "Falha ao autenticar"
 msgid "Logging in…"
 msgstr "Inicializando..."
 
-#: ../src/main-window.vala:47
+#: ../src/main-window.vala:49
 msgid "Login Screen"
 msgstr "Tela de início de sessão"
 
@@ -71,6 +66,30 @@ msgstr "Opções de sessão"
 msgid "Select desktop environment"
 msgstr "Selecionar ambiente da área de trabalho"
 
+#: ../src/shutdown-dialog.vala:53 ../src/shutdown-dialog.vala:135
+msgid "Shutdown"
+msgstr ""
+
+#: ../src/shutdown-dialog.vala:61
+msgid "Goodbye. Would you like to…"
+msgstr ""
+
+#: ../src/shutdown-dialog.vala:64
+msgid "Are you sure you want to shut down the computer?"
+msgstr ""
+
+#: ../src/shutdown-dialog.vala:83
+msgid "Suspend"
+msgstr ""
+
+#: ../src/shutdown-dialog.vala:100
+msgid "Hibernate"
+msgstr ""
+
+#: ../src/shutdown-dialog.vala:118
+msgid "Restart"
+msgstr ""
+
 #. Translators: %s is a session name like KDE or Ubuntu
 #: ../src/toggle-box.vala:93
 #, c-format
@@ -78,22 +97,22 @@ msgid "%s (Default)"
 msgstr "%s (Padrão)"
 
 #. Help string for command line --version flag
-#: ../src/unity-greeter.vala:445
+#: ../src/unity-greeter.vala:480
 msgid "Show release version"
 msgstr "Mostrar versão do lançamento"
 
 #. Help string for command line --test-mode flag
-#: ../src/unity-greeter.vala:448
+#: ../src/unity-greeter.vala:483
 msgid "Run in test mode"
 msgstr "Executar em modo de teste"
 
 #. Arguments and description for --help text
-#: ../src/unity-greeter.vala:454
+#: ../src/unity-greeter.vala:489
 msgid "- Unity Greeter"
 msgstr "- Tela de boas-vindas do Unity"
 
 #. Text printed out when an unknown command-line argument provided
-#: ../src/unity-greeter.vala:465
+#: ../src/unity-greeter.vala:500
 #, c-format
 msgid "Run '%s --help' to see a full list of available command line options."
 msgstr ""
@@ -192,12 +211,11 @@ msgstr "Tentar novamente como %s"
 msgid "Login"
 msgstr "Iniciar sessão"
 
-#: ../src/user-list.vala:1538
-msgid "Favorite Color (blue):"
-msgstr "Cor favorita (azul):"
-
 #~ msgid "Logging in..."
 #~ msgstr "Iniciando a sessão..."
 
 #~ msgid "_Back"
 #~ msgstr "_Voltar"
+
+#~ msgid "Favorite Color (blue):"
+#~ msgstr "Cor favorita (azul):"

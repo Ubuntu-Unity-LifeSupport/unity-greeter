@@ -19,6 +19,8 @@
 
 public class SettingsDaemon : Object
 {
+    private int logind_inhibit_fd = -1;
+
     public async void start ()
     {
         configure ();
@@ -64,6 +66,40 @@ public class SettingsDaemon : Object
            require gnome-session and it's Presence DBus interface to be run. */
         GLib.Bus.own_name (GLib.BusType.SESSION, "org.gnome.ScreenSaver",
                            GLib.BusNameOwnerFlags.NONE);
+
+        /* The media-keys plugin inhibits the power key, but we don't want
+           all the other keys doing things. So inhibit it ourselves */
+        /* NOTE: We are using the synchronous method here since there is a bug in Vala/GLib in that
+         * g_dbus_connection_call_with_unix_fd_list_finish and g_dbus_proxy_call_with_unix_fd_list_finish
+         * don't have the GAsyncResult as the second argument.
+         * https://bugzilla.gnome.org/show_bug.cgi?id=688907
+         */
+        try
+        {
+            var b = Bus.get_sync (BusType.SYSTEM);
+            UnixFDList fd_list;
+            var result = b.call_with_unix_fd_list_sync  ("org.freedesktop.login1",
+                                                         "/org/freedesktop/login1",
+                                                         "org.freedesktop.login1.Manager",
+                                                         "Inhibit",
+                                                         new Variant ("(ssss)",
+                                                                      "handle-power-key",
+                                                                      Environment.get_user_name (),
+                                                                      "Unity Greeter handling keypresses",
+                                                                      "block"),
+                                                         new VariantType ("(h)"),
+                                                         DBusCallFlags.NONE,
+                                                         -1,
+                                                         null,
+                                                         out fd_list);
+            int32 index = -1;
+            result.get ("(h)", &index);
+            logind_inhibit_fd = fd_list.get (index);
+        }
+        catch (Error e)
+        {
+            warning ("Failed to inhibit power keys: %s", e.message);
+        }
     }
 
     private void set_plugin_enabled (string schema_name, bool enabled)

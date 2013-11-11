@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2013-10-03 14:04+0000\n"
-"PO-Revision-Date: 2013-08-27 19:17+0000\n"
+"POT-Creation-Date: 2013-11-08 18:39+0000\n"
+"PO-Revision-Date: 2013-10-09 16:12+0000\n"
 "Last-Translator: Michael Kotsarinis <mk73628@gmail.com>\n"
 "Language-Team: Greek <el@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-10-04 05:35+0000\n"
-"X-Generator: Launchpad (build 16791)\n"
+"X-Launchpad-Export-Date: 2013-11-10 06:16+0000\n"
+"X-Generator: Launchpad (build 16820)\n"
 
 #: ../src/greeter-list.vala:300
 #, c-format
@@ -23,15 +23,10 @@ msgid "Enter password for %s"
 msgstr "Εισάγετε κωδικό για %s"
 
 #: ../src/greeter-list.vala:802 ../src/user-list.vala:661
-#: ../src/user-list.vala:1404 ../src/user-list.vala:1498
-#: ../src/user-list.vala:1521 ../src/user-list.vala:1525
-#: ../src/user-list.vala:1529 ../src/user-list.vala:1535
-#: ../src/user-list.vala:1539 ../src/user-list.vala:1542
 msgid "Password:"
 msgstr "Κωδικός:"
 
 #: ../src/greeter-list.vala:804 ../src/user-list.vala:655
-#: ../src/user-list.vala:1501
 msgid "Username:"
 msgstr "Όνομα χρήστη:"
 
@@ -47,9 +42,9 @@ msgstr "Αποτυχία ταυτοποίησης"
 msgid "Logging in…"
 msgstr "Γίνεται σύνδεση..."
 
-#: ../src/main-window.vala:47
+#: ../src/main-window.vala:49
 msgid "Login Screen"
-msgstr ""
+msgstr "Οθόνη εισόδου"
 
 #: ../src/menubar.vala:217
 msgid "Onscreen keyboard"
@@ -71,6 +66,30 @@ msgstr "Επιλογές Συνεδρίας"
 msgid "Select desktop environment"
 msgstr "Επιλέξτε περιβάλλον εργασίας"
 
+#: ../src/shutdown-dialog.vala:53 ../src/shutdown-dialog.vala:135
+msgid "Shutdown"
+msgstr ""
+
+#: ../src/shutdown-dialog.vala:61
+msgid "Goodbye. Would you like to…"
+msgstr ""
+
+#: ../src/shutdown-dialog.vala:64
+msgid "Are you sure you want to shut down the computer?"
+msgstr ""
+
+#: ../src/shutdown-dialog.vala:83
+msgid "Suspend"
+msgstr ""
+
+#: ../src/shutdown-dialog.vala:100
+msgid "Hibernate"
+msgstr ""
+
+#: ../src/shutdown-dialog.vala:118
+msgid "Restart"
+msgstr ""
+
 #. Translators: %s is a session name like KDE or Ubuntu
 #: ../src/toggle-box.vala:93
 #, c-format
@@ -78,25 +97,27 @@ msgid "%s (Default)"
 msgstr "%s (Προεπιλογή)"
 
 #. Help string for command line --version flag
-#: ../src/unity-greeter.vala:445
+#: ../src/unity-greeter.vala:480
 msgid "Show release version"
 msgstr "Εμφάνιση έκδοσης κυκλοφορίας"
 
 #. Help string for command line --test-mode flag
-#: ../src/unity-greeter.vala:448
+#: ../src/unity-greeter.vala:483
 msgid "Run in test mode"
-msgstr ""
+msgstr "Εκτέλεση σε λειτουργία δοκιμής"
 
 #. Arguments and description for --help text
-#: ../src/unity-greeter.vala:454
+#: ../src/unity-greeter.vala:489
 msgid "- Unity Greeter"
 msgstr "- Unity Greeter"
 
 #. Text printed out when an unknown command-line argument provided
-#: ../src/unity-greeter.vala:465
+#: ../src/unity-greeter.vala:500
 #, c-format
 msgid "Run '%s --help' to see a full list of available command line options."
 msgstr ""
+"Εκτελέστε «%s --help» για να δείτε μια πλήρη λίστα των διαθέσιμων επιλογών "
+"της γραμμής εντολών."
 
 #: ../src/user-list.vala:45
 msgid "Guest Session"
@@ -116,7 +137,7 @@ msgid ""
 "applications from that server."
 msgstr ""
 "Αν διαθέτετε λογαριασμό σε RDP ή Citrix  διακομιστή, με την Απομακρυσμένη "
-"Σύνδεση μπορείτε να εκτελείτε εφαρμογές από αυτόν τον διακομιστή."
+"σύνδεση μπορείτε να εκτελείτε εφαρμογές από αυτόν τον εξυπηρετητή."
 
 #. For 12.10 we still don't support Citrix
 #: ../src/user-list.vala:511
@@ -140,8 +161,8 @@ msgid ""
 "You need an Ubuntu Remote Login account to use this service. Would you like "
 "to set up an account now?"
 msgstr ""
-"Χρειάζεστε ένα λογαριασμό Ubuntu Remote Login για να χρησιμοποιήσετε αυτή "
-"την υπηρεσία. Θέλετε να δημιουργήσετε ένα λογαριασμό τώρα;"
+"Χρειάζεστε ένα λογαριασμό Απομακρυσμένης σύνδεσης στο Ubuntu για να "
+"χρησιμοποιήσετε αυτή την υπηρεσία. Θέλετε να δημιουργήσετε λογαριασμό τώρα;"
 
 #: ../src/user-list.vala:521
 msgid "OK"
@@ -152,9 +173,9 @@ msgid ""
 "You need an Ubuntu Remote Login account to use this service. Visit "
 "uccs.canonical.com to set up an account."
 msgstr ""
-"Χρειάζεστε ένα λογαριασμό Ubuntu Remote Login για να χρησιμοποιήσετε αυτή "
-"την υπηρεσία. Επισκεφτείτε το uccs.canonical.com για να δημιουργήσετε ένα "
-"λογαριασμό."
+"Χρειάζεστε ένα λογαριασμό Απομακρυσμένης σύνδεσης στο Ubuntu για να "
+"χρησιμοποιήσετε αυτή την υπηρεσία. Επισκεφτείτε τον ιστότοπο "
+"uccs.canonical.com για να δημιουργήσετε λογαριασμό."
 
 #: ../src/user-list.vala:639
 msgid "Server type not supported."
@@ -166,7 +187,7 @@ msgstr "Τομέας:"
 
 #: ../src/user-list.vala:741
 msgid "Email address:"
-msgstr "Διεύθυνση ηλ. αλληλογραφίας:"
+msgstr "Διεύθυνση ηλεκτρονικού ταχυδρομείου:"
 
 #. 'Log In' here is the button for logging in.
 #: ../src/user-list.vala:785
@@ -191,9 +212,8 @@ msgstr "Επανάληψη ως %s."
 msgid "Login"
 msgstr "Σύνδεση"
 
-#: ../src/user-list.vala:1538
-msgid "Favorite Color (blue):"
-msgstr "Αγαπημένο χρώμα (μπλε):"
-
 #~ msgid "_Back"
 #~ msgstr "_Πίσω"
+
+#~ msgid "Favorite Color (blue):"
+#~ msgstr "Αγαπημένο χρώμα (μπλε):"

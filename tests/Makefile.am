@@ -34,12 +34,13 @@ unity_greeter_test_SOURCES = \
 	../src/session-list.vala \
 	../src/main-window.vala \
 	../src/list-stack.vala \
-	../src/settings.vala
+	../src/settings.vala \
+	../src/shutdown-dialog.vala
 
 
 unity_greeter_test_CFLAGS = \
 	$(UNITY_GREETER_CFLAGS) \
-	$(WARN_CFLAGS) \
+	-w \
 	-DGETTEXT_PACKAGE=\"$(GETTEXT_PACKAGE)\" \
 	-DLOCALEDIR=\""$(localedir)"\" \
 	-DVERSION=\"$(VERSION)\" \

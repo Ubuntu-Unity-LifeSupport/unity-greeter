@@ -46,6 +46,8 @@ public class UnityGreeter
 
     private static Timer log_timer;
 
+    private DialogDBusInterface dbus_object;
+
     private UnityGreeter (bool test_mode_)
     {
         singleton = this;
@@ -97,6 +99,38 @@ public class UnityGreeter
         }
 
         main_window = new MainWindow ();
+
+        dbus_object = new DialogDBusInterface ();
+        dbus_object.open_dialog.connect ((type) =>
+        {
+            ShutdownDialogType dialog_type;
+            switch (type)
+            {
+            default:
+            case 1:
+                dialog_type = ShutdownDialogType.LOGOUT;
+                break;
+            case 2:
+                dialog_type = ShutdownDialogType.RESTART;
+                break;
+            }
+            main_window.show_shutdown_dialog (dialog_type);
+        });
+        dbus_object.close_dialog.connect ((type) => { main_window.close_shutdown_dialog (); });
+        Bus.own_name (BusType.SESSION, "com.canonical.Unity", BusNameOwnerFlags.NONE,
+                      (c) =>
+                      {
+                          try
+                          {
+                              c.register_object ("/org/gnome/SessionManager/EndSessionDialog", dbus_object);
+                          }
+                          catch (Error e)
+                          {
+                              warning ("Failed to register /org/gnome/SessionManager/EndSessionDialog: %s", e.message);
+                          }
+                      },
+                      null,
+                      () => debug ("Failed to acquire name com.canonical.Unity"));
 
         start_fake_wm ();
         Gdk.threads_add_idle (ready_cb);
@@ -408,6 +442,7 @@ public class UnityGreeter
         Environment.set_variable ("GTK_MODULES", "atk-bridge", false);
 
         Pid atspi_pid = 0;
+        Pid indicator_pid = 0;
 
         try
         {
@@ -508,6 +543,24 @@ public class UnityGreeter
 
         if (!do_test_mode)
         {
+            /* Start the indicator services */
+            try
+            {
+                string[] argv;
+
+                Shell.parse_argv ("init --user --startup-event indicator-services-start", out argv);
+                Process.spawn_async (null,
+                                     argv,
+                                     null,
+                                     SpawnFlags.SEARCH_PATH,
+                                     null,
+                                     out indicator_pid);
+            }
+            catch (Error e)
+            {
+                warning ("Error starting Upstart for indicators: %s", e.message);
+            }
+
             /* Make nm-applet hide items the user does not have permissions to interact with */
             Environment.set_variable ("NM_APPLET_HIDE_POLICY_ITEMS", "1", true);
 
@@ -521,8 +574,23 @@ public class UnityGreeter
             }
         }
 
+        /* Setup a handler for TERM so we quit cleanly */
+        GLib.Unix.signal_add(GLib.ProcessSignal.TERM, () => {
+            debug("Got a SIGTERM");
+            Gtk.main_quit();
+            return false;
+        });
+
         debug ("Starting main loop");
         Gtk.main ();
+
+        if (indicator_pid != 0)
+        {
+            Posix.kill (indicator_pid, Posix.SIGTERM);
+            int status;
+            Posix.waitpid (indicator_pid, out status, 0);
+            indicator_pid = 0;
+        }
 
         if (atspi_pid != 0)
         {
@@ -533,5 +601,22 @@ public class UnityGreeter
         }
 
         return Posix.EXIT_SUCCESS;
+    }
+}
+
+[DBus (name="org.gnome.SessionManager.EndSessionDialog")]
+public class DialogDBusInterface : Object
+{
+    public signal void open_dialog (uint32 type);
+    public signal void close_dialog ();
+
+    public void open (uint32 type, uint32 timestamp, uint32 seconds_to_stay_open, ObjectPath[] inhibitor_object_paths)
+    {
+        open_dialog (type);
+    }
+
+    public void close ()
+    {
+        close_dialog ();
     }
 }

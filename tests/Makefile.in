@@ -89,8 +89,8 @@ DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am test.c \
 	../src/fading-label.c ../src/cached-image.c \
 	../src/dash-entry.c ../src/dash-button.c ../src/prompt-box.c \
 	../src/session-list.c ../src/main-window.c ../src/list-stack.c \
-	../src/settings.c $(top_srcdir)/depcomp \
-	$(srcdir)/unity_greeter_test_vala.stamp
+	../src/settings.c ../src/shutdown-dialog.c \
+	$(top_srcdir)/depcomp $(srcdir)/unity_greeter_test_vala.stamp
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/intltool.m4 \
 	$(top_srcdir)/configure.ac
@@ -125,7 +125,8 @@ am_unity_greeter_test_OBJECTS = unity_greeter_test-test.$(OBJEXT) \
 	unity_greeter_test-session-list.$(OBJEXT) \
 	unity_greeter_test-main-window.$(OBJEXT) \
 	unity_greeter_test-list-stack.$(OBJEXT) \
-	unity_greeter_test-settings.$(OBJEXT)
+	unity_greeter_test-settings.$(OBJEXT) \
+	unity_greeter_test-shutdown-dialog.$(OBJEXT)
 unity_greeter_test_OBJECTS = $(am_unity_greeter_test_OBJECTS)
 am__DEPENDENCIES_1 =
 unity_greeter_test_DEPENDENCIES = $(am__DEPENDENCIES_1)
@@ -337,11 +338,12 @@ unity_greeter_test_SOURCES = \
 	../src/session-list.vala \
 	../src/main-window.vala \
 	../src/list-stack.vala \
-	../src/settings.vala
+	../src/settings.vala \
+	../src/shutdown-dialog.vala
 
 unity_greeter_test_CFLAGS = \
 	$(UNITY_GREETER_CFLAGS) \
-	$(WARN_CFLAGS) \
+	-w \
 	-DGETTEXT_PACKAGE=\"$(GETTEXT_PACKAGE)\" \
 	-DLOCALEDIR=\""$(localedir)"\" \
 	-DVERSION=\"$(VERSION)\" \
@@ -437,6 +439,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter_test-remote-login-service.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter_test-session-list.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter_test-settings.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter_test-shutdown-dialog.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter_test-test-list.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter_test-test-main-window.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter_test-test.Po@am__quote@
@@ -822,6 +825,20 @@ unity_greeter_test-settings.obj: ../src/settings.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='../src/settings.c' object='unity_greeter_test-settings.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_test_CFLAGS) $(CFLAGS) -c -o unity_greeter_test-settings.obj `if test -f '../src/settings.c'; then $(CYGPATH_W) '../src/settings.c'; else $(CYGPATH_W) '$(srcdir)/../src/settings.c'; fi`
+
+unity_greeter_test-shutdown-dialog.o: ../src/shutdown-dialog.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_test_CFLAGS) $(CFLAGS) -MT unity_greeter_test-shutdown-dialog.o -MD -MP -MF $(DEPDIR)/unity_greeter_test-shutdown-dialog.Tpo -c -o unity_greeter_test-shutdown-dialog.o `test -f '../src/shutdown-dialog.c' || echo '$(srcdir)/'`../src/shutdown-dialog.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter_test-shutdown-dialog.Tpo $(DEPDIR)/unity_greeter_test-shutdown-dialog.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='../src/shutdown-dialog.c' object='unity_greeter_test-shutdown-dialog.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_test_CFLAGS) $(CFLAGS) -c -o unity_greeter_test-shutdown-dialog.o `test -f '../src/shutdown-dialog.c' || echo '$(srcdir)/'`../src/shutdown-dialog.c
+
+unity_greeter_test-shutdown-dialog.obj: ../src/shutdown-dialog.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_test_CFLAGS) $(CFLAGS) -MT unity_greeter_test-shutdown-dialog.obj -MD -MP -MF $(DEPDIR)/unity_greeter_test-shutdown-dialog.Tpo -c -o unity_greeter_test-shutdown-dialog.obj `if test -f '../src/shutdown-dialog.c'; then $(CYGPATH_W) '../src/shutdown-dialog.c'; else $(CYGPATH_W) '$(srcdir)/../src/shutdown-dialog.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter_test-shutdown-dialog.Tpo $(DEPDIR)/unity_greeter_test-shutdown-dialog.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='../src/shutdown-dialog.c' object='unity_greeter_test-shutdown-dialog.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_test_CFLAGS) $(CFLAGS) -c -o unity_greeter_test-shutdown-dialog.obj `if test -f '../src/shutdown-dialog.c'; then $(CYGPATH_W) '../src/shutdown-dialog.c'; else $(CYGPATH_W) '$(srcdir)/../src/shutdown-dialog.c'; fi`
 $(srcdir)/test.c: $(srcdir)/unity_greeter_test_vala.stamp
 	@if test -f $@; then :; else rm -f $(srcdir)/unity_greeter_test_vala.stamp; fi
 	@if test -f $@; then :; else \
@@ -952,9 +969,14 @@ $(srcdir)/../src/settings.c: $(srcdir)/unity_greeter_test_vala.stamp
 	@if test -f $@; then :; else \
 	  $(MAKE) $(AM_MAKEFLAGS) $(srcdir)/unity_greeter_test_vala.stamp; \
 	fi
-$(srcdir)/unity_greeter_test_vala.stamp: test.vala test-list.vala test-main-window.vala menubar.vala unity-greeter.vala ../src/flat-button.vala ../src/toggle-box.vala ../src/user-list.vala ../src/greeter-list.vala ../src/remote-login-service.vala ../src/background.vala ../src/email-autocompleter.vala ../src/config.vapi ../src/fixes.vapi ../src/animate-timer.vala ../src/indicator.vapi ../src/fadable.vala ../src/fadable-box.vala ../src/dash-box.vala ../src/user-prompt-box.vala ../src/fading-label.vala ../src/cached-image.vala ../src/dash-entry.vala ../src/dash-button.vala ../src/prompt-box.vala ../src/session-list.vala ../src/main-window.vala ../src/list-stack.vala ../src/settings.vala
+$(srcdir)/../src/shutdown-dialog.c: $(srcdir)/unity_greeter_test_vala.stamp
+	@if test -f $@; then :; else rm -f $(srcdir)/unity_greeter_test_vala.stamp; fi
+	@if test -f $@; then :; else \
+	  $(MAKE) $(AM_MAKEFLAGS) $(srcdir)/unity_greeter_test_vala.stamp; \
+	fi
+$(srcdir)/unity_greeter_test_vala.stamp: test.vala test-list.vala test-main-window.vala menubar.vala unity-greeter.vala ../src/flat-button.vala ../src/toggle-box.vala ../src/user-list.vala ../src/greeter-list.vala ../src/remote-login-service.vala ../src/background.vala ../src/email-autocompleter.vala ../src/config.vapi ../src/fixes.vapi ../src/animate-timer.vala ../src/indicator.vapi ../src/fadable.vala ../src/fadable-box.vala ../src/dash-box.vala ../src/user-prompt-box.vala ../src/fading-label.vala ../src/cached-image.vala ../src/dash-entry.vala ../src/dash-button.vala ../src/prompt-box.vala ../src/session-list.vala ../src/main-window.vala ../src/list-stack.vala ../src/settings.vala ../src/shutdown-dialog.vala
 	$(AM_V_at)rm -f $@ && echo stamp > $@-t
-	$(AM_V_VALAC)$(am__cd) $(srcdir) && $(VALAC) $(unity_greeter_test_VALAFLAGS) $(VALAFLAGS) -C test.vala test-list.vala test-main-window.vala menubar.vala unity-greeter.vala ../src/flat-button.vala ../src/toggle-box.vala ../src/user-list.vala ../src/greeter-list.vala ../src/remote-login-service.vala ../src/background.vala ../src/email-autocompleter.vala ../src/config.vapi ../src/fixes.vapi ../src/animate-timer.vala ../src/indicator.vapi ../src/fadable.vala ../src/fadable-box.vala ../src/dash-box.vala ../src/user-prompt-box.vala ../src/fading-label.vala ../src/cached-image.vala ../src/dash-entry.vala ../src/dash-button.vala ../src/prompt-box.vala ../src/session-list.vala ../src/main-window.vala ../src/list-stack.vala ../src/settings.vala
+	$(AM_V_VALAC)$(am__cd) $(srcdir) && $(VALAC) $(unity_greeter_test_VALAFLAGS) $(VALAFLAGS) -C test.vala test-list.vala test-main-window.vala menubar.vala unity-greeter.vala ../src/flat-button.vala ../src/toggle-box.vala ../src/user-list.vala ../src/greeter-list.vala ../src/remote-login-service.vala ../src/background.vala ../src/email-autocompleter.vala ../src/config.vapi ../src/fixes.vapi ../src/animate-timer.vala ../src/indicator.vapi ../src/fadable.vala ../src/fadable-box.vala ../src/dash-box.vala ../src/user-prompt-box.vala ../src/fading-label.vala ../src/cached-image.vala ../src/dash-entry.vala ../src/dash-button.vala ../src/prompt-box.vala ../src/session-list.vala ../src/main-window.vala ../src/list-stack.vala ../src/settings.vala ../src/shutdown-dialog.vala
 	$(AM_V_at)mv -f $@-t $@
 
 ID: $(am__tagged_files)
@@ -1094,6 +1116,7 @@ maintainer-clean-generic:
 	-rm -f $(srcdir)/../src/remote-login-service.c
 	-rm -f $(srcdir)/../src/session-list.c
 	-rm -f $(srcdir)/../src/settings.c
+	-rm -f $(srcdir)/../src/shutdown-dialog.c
 	-rm -f $(srcdir)/../src/toggle-box.c
 	-rm -f $(srcdir)/../src/user-list.c
 	-rm -f $(srcdir)/../src/user-prompt-box.c
@@ -1121,6 +1144,7 @@ maintainer-clean-generic:
 	-rm -f ../src/remote-login-service.c
 	-rm -f ../src/session-list.c
 	-rm -f ../src/settings.c
+	-rm -f ../src/shutdown-dialog.c
 	-rm -f ../src/toggle-box.c
 	-rm -f ../src/user-list.c
 	-rm -f ../src/user-prompt-box.c

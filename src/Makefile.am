@@ -27,6 +27,7 @@ unity_greeter_SOURCES = \
 	remote-login-service.vala \
 	settings.vala \
 	settings-daemon.vala \
+	shutdown-dialog.vala \
 	toggle-box.vala \
 	unity-greeter.vala \
 	user-list.vala \
@@ -34,7 +35,7 @@ unity_greeter_SOURCES = \
 
 unity_greeter_CFLAGS = \
 	$(UNITY_GREETER_CFLAGS) \
-	$(WARN_CFLAGS) \
+	-w \
 	-DGETTEXT_PACKAGE=\"$(GETTEXT_PACKAGE)\" \
 	-DLOCALEDIR=\""$(localedir)"\" \
 	-DVERSION=\"$(VERSION)\" \

@@ -28,8 +28,8 @@
 #include <gtk/gtk.h>
 #include <lightdm.h>
 #include <canberra.h>
-#include <gdk/gdk.h>
 #include <gio/gio.h>
+#include <gdk/gdk.h>
 #include <glib/gstdio.h>
 #include <cairo.h>
 #include <X11/Xlib.h>
@@ -46,6 +46,7 @@
 #include <unistd.h>
 #include <float.h>
 #include <math.h>
+#include <glib-unix.h>
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -82,6 +83,16 @@ typedef struct _SettingsDaemonClass SettingsDaemonClass;
 
 typedef struct _MainWindow MainWindow;
 typedef struct _MainWindowClass MainWindowClass;
+
+#define TYPE_DIALOG_DBUS_INTERFACE (dialog_dbus_interface_get_type ())
+#define DIALOG_DBUS_INTERFACE(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_DIALOG_DBUS_INTERFACE, DialogDBusInterface))
+#define DIALOG_DBUS_INTERFACE_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_DIALOG_DBUS_INTERFACE, DialogDBusInterfaceClass))
+#define IS_DIALOG_DBUS_INTERFACE(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_DIALOG_DBUS_INTERFACE))
+#define IS_DIALOG_DBUS_INTERFACE_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_DIALOG_DBUS_INTERFACE))
+#define DIALOG_DBUS_INTERFACE_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_DIALOG_DBUS_INTERFACE, DialogDBusInterfaceClass))
+
+typedef struct _DialogDBusInterface DialogDBusInterface;
+typedef struct _DialogDBusInterfaceClass DialogDBusInterfaceClass;
 #define _g_free0(var) (var = (g_free (var), NULL))
 #define _g_key_file_unref0(var) ((var == NULL) ? NULL : (var = (g_key_file_unref (var), NULL)))
 #define _cairo_surface_destroy0(var) ((var == NULL) ? NULL : (var = (cairo_surface_destroy (var), NULL)))
@@ -89,6 +100,8 @@ typedef struct _MainWindowClass MainWindowClass;
 #define _ca_context_destroy0(var) ((var == NULL) ? NULL : (var = (ca_context_destroy (var), NULL)))
 #define _unity_greeter_unref0(var) ((var == NULL) ? NULL : (var = (unity_greeter_unref (var), NULL)))
 #define _g_error_free0(var) ((var == NULL) ? NULL : (var = (g_error_free (var), NULL)))
+
+#define TYPE_SHUTDOWN_DIALOG_TYPE (shutdown_dialog_type_get_type ())
 
 #define TYPE_FADABLE_BOX (fadable_box_get_type ())
 #define FADABLE_BOX(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_FADABLE_BOX, FadableBox))
@@ -156,6 +169,7 @@ typedef struct _ListStackClass ListStackClass;
 #define _g_timer_destroy0(var) ((var == NULL) ? NULL : (var = (g_timer_destroy (var), NULL)))
 #define _g_option_context_free0(var) ((var == NULL) ? NULL : (var = (g_option_context_free (var), NULL)))
 typedef struct _ParamSpecUnityGreeter ParamSpecUnityGreeter;
+typedef struct _DialogDBusInterfacePrivate DialogDBusInterfacePrivate;
 
 struct _UnityGreeter {
 	GTypeInstance parent_instance;
@@ -178,7 +192,14 @@ struct _UnityGreeterPrivate {
 	MainWindow* main_window;
 	LightDMGreeter* greeter;
 	ca_context* canberra_context;
+	DialogDBusInterface* dbus_object;
 };
+
+typedef enum  {
+	SHUTDOWN_DIALOG_TYPE_LOGOUT,
+	SHUTDOWN_DIALOG_TYPE_SHUTDOWN,
+	SHUTDOWN_DIALOG_TYPE_RESTART
+} ShutdownDialogType;
 
 typedef enum  {
 	BACKGROUND_DRAW_FLAGS_NONE,
@@ -201,12 +222,22 @@ struct _ParamSpecUnityGreeter {
 	GParamSpec parent_instance;
 };
 
+struct _DialogDBusInterface {
+	GObject parent_instance;
+	DialogDBusInterfacePrivate * priv;
+};
+
+struct _DialogDBusInterfaceClass {
+	GObjectClass parent_class;
+};
+
 
 static gpointer unity_greeter_parent_class = NULL;
 extern UnityGreeter* unity_greeter_singleton;
 UnityGreeter* unity_greeter_singleton = NULL;
 static GTimer* unity_greeter_log_timer;
 static GTimer* unity_greeter_log_timer = NULL;
+static gpointer dialog_dbus_interface_parent_class = NULL;
 
 #define grid_size 40
 gpointer unity_greeter_ref (gpointer instance);
@@ -218,6 +249,8 @@ gpointer value_get_unity_greeter (const GValue* value);
 GType unity_greeter_get_type (void) G_GNUC_CONST;
 GType settings_daemon_get_type (void) G_GNUC_CONST;
 GType main_window_get_type (void) G_GNUC_CONST;
+GType dialog_dbus_interface_get_type (void) G_GNUC_CONST;
+guint dialog_dbus_interface_register_object (void* object, GDBusConnection* connection, const gchar* path, GError** error);
 #define UNITY_GREETER_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TYPE_UNITY_GREETER, UnityGreeterPrivate))
 enum  {
 	UNITY_GREETER_DUMMY_PROPERTY
@@ -225,20 +258,33 @@ enum  {
 static UnityGreeter* unity_greeter_new (gboolean test_mode_);
 static UnityGreeter* unity_greeter_construct (GType object_type, gboolean test_mode_);
 static cairo_surface_t* unity_greeter_create_root_surface (GdkScreen* screen);
-static void __lambda29_ (UnityGreeter* self, const gchar* text, LightDMMessageType type);
-static void ___lambda29__lightdm_greeter_show_message (LightDMGreeter* _sender, const gchar* text, LightDMMessageType type, gpointer self);
-static void __lambda30_ (UnityGreeter* self, const gchar* text, LightDMPromptType type);
-static void ___lambda30__lightdm_greeter_show_prompt (LightDMGreeter* _sender, const gchar* text, LightDMPromptType type, gpointer self);
-static void __lambda31_ (UnityGreeter* self);
-static void ___lambda31__lightdm_greeter_autologin_timer_expired (LightDMGreeter* _sender, gpointer self);
-static void __lambda32_ (UnityGreeter* self);
-static void ___lambda32__lightdm_greeter_authentication_complete (LightDMGreeter* _sender, gpointer self);
+static void __lambda34_ (UnityGreeter* self, const gchar* text, LightDMMessageType type);
+static void ___lambda34__lightdm_greeter_show_message (LightDMGreeter* _sender, const gchar* text, LightDMMessageType type, gpointer self);
+static void __lambda35_ (UnityGreeter* self, const gchar* text, LightDMPromptType type);
+static void ___lambda35__lightdm_greeter_show_prompt (LightDMGreeter* _sender, const gchar* text, LightDMPromptType type, gpointer self);
+static void __lambda36_ (UnityGreeter* self);
+static void ___lambda36__lightdm_greeter_autologin_timer_expired (LightDMGreeter* _sender, gpointer self);
+static void __lambda37_ (UnityGreeter* self);
+static void ___lambda37__lightdm_greeter_authentication_complete (LightDMGreeter* _sender, gpointer self);
 SettingsDaemon* settings_daemon_new (void);
 SettingsDaemon* settings_daemon_construct (GType object_type);
 void settings_daemon_start (SettingsDaemon* self, GAsyncReadyCallback _callback_, gpointer _user_data_);
 void settings_daemon_start_finish (SettingsDaemon* self, GAsyncResult* _res_);
 MainWindow* main_window_new (void);
 MainWindow* main_window_construct (GType object_type);
+DialogDBusInterface* dialog_dbus_interface_new (void);
+DialogDBusInterface* dialog_dbus_interface_construct (GType object_type);
+static void __lambda38_ (UnityGreeter* self, guint32 type);
+GType shutdown_dialog_type_get_type (void) G_GNUC_CONST;
+void main_window_show_shutdown_dialog (MainWindow* self, ShutdownDialogType type);
+static void ___lambda38__dialog_dbus_interface_open_dialog (DialogDBusInterface* _sender, guint32 type, gpointer self);
+static void __lambda39_ (UnityGreeter* self, DialogDBusInterface* type);
+void main_window_close_shutdown_dialog (MainWindow* self);
+static void ___lambda39__dialog_dbus_interface_close_dialog (DialogDBusInterface* _sender, gpointer self);
+static void __lambda40_ (UnityGreeter* self, GDBusConnection* c);
+static void ___lambda40__gbus_acquired_callback (GDBusConnection* connection, const gchar* name, gpointer self);
+static void __lambda41_ (UnityGreeter* self);
+static void ___lambda41__gbus_name_lost_callback (GDBusConnection* connection, const gchar* name, gpointer self);
 static void unity_greeter_start_fake_wm (UnityGreeter* self);
 static gboolean unity_greeter_ready_cb (UnityGreeter* self);
 static gboolean _unity_greeter_ready_cb_gsource_func (gpointer self);
@@ -291,18 +337,53 @@ gdouble ug_settings_get_double (const gchar* key);
 #define UG_SETTINGS_KEY_XFT_ANTIALIAS "xft-antialias"
 #define UG_SETTINGS_KEY_XFT_HINTSTYLE "xft-hintstyle"
 #define UG_SETTINGS_KEY_XFT_RGBA "xft-rgba"
+static gboolean __lambda42_ (void);
+static gboolean ___lambda42__gsource_func (gpointer self);
 static void g_cclosure_user_marshal_VOID__STRING_INT (GClosure * closure, GValue * return_value, guint n_param_values, const GValue * param_values, gpointer invocation_hint, gpointer marshal_data);
 static void unity_greeter_finalize (UnityGreeter* obj);
+enum  {
+	DIALOG_DBUS_INTERFACE_DUMMY_PROPERTY
+};
+void dialog_dbus_interface_open (DialogDBusInterface* self, guint32 type, guint32 timestamp, guint32 seconds_to_stay_open, char** inhibitor_object_paths, int inhibitor_object_paths_length1);
+void dialog_dbus_interface_close (DialogDBusInterface* self);
+static void _dbus_dialog_dbus_interface_open (DialogDBusInterface* self, GVariant* parameters, GDBusMethodInvocation* invocation);
+static void _dbus_dialog_dbus_interface_close (DialogDBusInterface* self, GVariant* parameters, GDBusMethodInvocation* invocation);
+static void dialog_dbus_interface_dbus_interface_method_call (GDBusConnection* connection, const gchar* sender, const gchar* object_path, const gchar* interface_name, const gchar* method_name, GVariant* parameters, GDBusMethodInvocation* invocation, gpointer user_data);
+static GVariant* dialog_dbus_interface_dbus_interface_get_property (GDBusConnection* connection, const gchar* sender, const gchar* object_path, const gchar* interface_name, const gchar* property_name, GError** error, gpointer user_data);
+static gboolean dialog_dbus_interface_dbus_interface_set_property (GDBusConnection* connection, const gchar* sender, const gchar* object_path, const gchar* interface_name, const gchar* property_name, GVariant* value, GError** error, gpointer user_data);
+static void _dbus_dialog_dbus_interface_open_dialog (GObject* _sender, guint32 type, gpointer* _data);
+static void _dbus_dialog_dbus_interface_close_dialog (GObject* _sender, gpointer* _data);
+static void _dialog_dbus_interface_unregister_object (gpointer user_data);
 static void _vala_array_destroy (gpointer array, gint array_length, GDestroyNotify destroy_func);
 static void _vala_array_free (gpointer array, gint array_length, GDestroyNotify destroy_func);
 
+static const GDBusArgInfo _dialog_dbus_interface_dbus_arg_info_open_type = {-1, "type", "u"};
+static const GDBusArgInfo _dialog_dbus_interface_dbus_arg_info_open_timestamp = {-1, "timestamp", "u"};
+static const GDBusArgInfo _dialog_dbus_interface_dbus_arg_info_open_seconds_to_stay_open = {-1, "seconds_to_stay_open", "u"};
+static const GDBusArgInfo _dialog_dbus_interface_dbus_arg_info_open_inhibitor_object_paths = {-1, "inhibitor_object_paths", "ao"};
+static const GDBusArgInfo * const _dialog_dbus_interface_dbus_arg_info_open_in[] = {&_dialog_dbus_interface_dbus_arg_info_open_type, &_dialog_dbus_interface_dbus_arg_info_open_timestamp, &_dialog_dbus_interface_dbus_arg_info_open_seconds_to_stay_open, &_dialog_dbus_interface_dbus_arg_info_open_inhibitor_object_paths, NULL};
+static const GDBusArgInfo * const _dialog_dbus_interface_dbus_arg_info_open_out[] = {NULL};
+static const GDBusMethodInfo _dialog_dbus_interface_dbus_method_info_open = {-1, "Open", (GDBusArgInfo **) (&_dialog_dbus_interface_dbus_arg_info_open_in), (GDBusArgInfo **) (&_dialog_dbus_interface_dbus_arg_info_open_out)};
+static const GDBusArgInfo * const _dialog_dbus_interface_dbus_arg_info_close_in[] = {NULL};
+static const GDBusArgInfo * const _dialog_dbus_interface_dbus_arg_info_close_out[] = {NULL};
+static const GDBusMethodInfo _dialog_dbus_interface_dbus_method_info_close = {-1, "Close", (GDBusArgInfo **) (&_dialog_dbus_interface_dbus_arg_info_close_in), (GDBusArgInfo **) (&_dialog_dbus_interface_dbus_arg_info_close_out)};
+static const GDBusMethodInfo * const _dialog_dbus_interface_dbus_method_info[] = {&_dialog_dbus_interface_dbus_method_info_open, &_dialog_dbus_interface_dbus_method_info_close, NULL};
+static const GDBusArgInfo _dialog_dbus_interface_dbus_arg_info_open_dialog_type = {-1, "type", "u"};
+static const GDBusArgInfo * const _dialog_dbus_interface_dbus_arg_info_open_dialog[] = {&_dialog_dbus_interface_dbus_arg_info_open_dialog_type, NULL};
+static const GDBusSignalInfo _dialog_dbus_interface_dbus_signal_info_open_dialog = {-1, "OpenDialog", (GDBusArgInfo **) (&_dialog_dbus_interface_dbus_arg_info_open_dialog)};
+static const GDBusArgInfo * const _dialog_dbus_interface_dbus_arg_info_close_dialog[] = {NULL};
+static const GDBusSignalInfo _dialog_dbus_interface_dbus_signal_info_close_dialog = {-1, "CloseDialog", (GDBusArgInfo **) (&_dialog_dbus_interface_dbus_arg_info_close_dialog)};
+static const GDBusSignalInfo * const _dialog_dbus_interface_dbus_signal_info[] = {&_dialog_dbus_interface_dbus_signal_info_open_dialog, &_dialog_dbus_interface_dbus_signal_info_close_dialog, NULL};
+static const GDBusPropertyInfo * const _dialog_dbus_interface_dbus_property_info[] = {NULL};
+static const GDBusInterfaceInfo _dialog_dbus_interface_dbus_interface_info = {-1, "org.gnome.SessionManager.EndSessionDialog", (GDBusMethodInfo **) (&_dialog_dbus_interface_dbus_method_info), (GDBusSignalInfo **) (&_dialog_dbus_interface_dbus_signal_info), (GDBusPropertyInfo **) (&_dialog_dbus_interface_dbus_property_info)};
+static const GDBusInterfaceVTable _dialog_dbus_interface_dbus_interface_vtable = {dialog_dbus_interface_dbus_interface_method_call, dialog_dbus_interface_dbus_interface_get_property, dialog_dbus_interface_dbus_interface_set_property};
 
 static gpointer _unity_greeter_ref0 (gpointer self) {
 	return self ? unity_greeter_ref (self) : NULL;
 }
 
 
-static void __lambda29_ (UnityGreeter* self, const gchar* text, LightDMMessageType type) {
+static void __lambda34_ (UnityGreeter* self, const gchar* text, LightDMMessageType type) {
 	const gchar* _tmp0_;
 	LightDMMessageType _tmp1_;
 	g_return_if_fail (text != NULL);
@@ -312,12 +393,12 @@ static void __lambda29_ (UnityGreeter* self, const gchar* text, LightDMMessageTy
 }
 
 
-static void ___lambda29__lightdm_greeter_show_message (LightDMGreeter* _sender, const gchar* text, LightDMMessageType type, gpointer self) {
-	__lambda29_ (self, text, type);
+static void ___lambda34__lightdm_greeter_show_message (LightDMGreeter* _sender, const gchar* text, LightDMMessageType type, gpointer self) {
+	__lambda34_ (self, text, type);
 }
 
 
-static void __lambda30_ (UnityGreeter* self, const gchar* text, LightDMPromptType type) {
+static void __lambda35_ (UnityGreeter* self, const gchar* text, LightDMPromptType type) {
 	const gchar* _tmp0_;
 	LightDMPromptType _tmp1_;
 	g_return_if_fail (text != NULL);
@@ -327,30 +408,124 @@ static void __lambda30_ (UnityGreeter* self, const gchar* text, LightDMPromptTyp
 }
 
 
-static void ___lambda30__lightdm_greeter_show_prompt (LightDMGreeter* _sender, const gchar* text, LightDMPromptType type, gpointer self) {
-	__lambda30_ (self, text, type);
+static void ___lambda35__lightdm_greeter_show_prompt (LightDMGreeter* _sender, const gchar* text, LightDMPromptType type, gpointer self) {
+	__lambda35_ (self, text, type);
 }
 
 
-static void __lambda31_ (UnityGreeter* self) {
+static void __lambda36_ (UnityGreeter* self) {
 	LightDMGreeter* _tmp0_;
 	_tmp0_ = self->priv->greeter;
 	lightdm_greeter_authenticate_autologin (_tmp0_);
 }
 
 
-static void ___lambda31__lightdm_greeter_autologin_timer_expired (LightDMGreeter* _sender, gpointer self) {
-	__lambda31_ (self);
+static void ___lambda36__lightdm_greeter_autologin_timer_expired (LightDMGreeter* _sender, gpointer self) {
+	__lambda36_ (self);
 }
 
 
-static void __lambda32_ (UnityGreeter* self) {
+static void __lambda37_ (UnityGreeter* self) {
 	g_signal_emit_by_name (self, "authentication-complete");
 }
 
 
-static void ___lambda32__lightdm_greeter_authentication_complete (LightDMGreeter* _sender, gpointer self) {
-	__lambda32_ (self);
+static void ___lambda37__lightdm_greeter_authentication_complete (LightDMGreeter* _sender, gpointer self) {
+	__lambda37_ (self);
+}
+
+
+static void __lambda38_ (UnityGreeter* self, guint32 type) {
+	ShutdownDialogType dialog_type = 0;
+	guint32 _tmp0_;
+	MainWindow* _tmp1_;
+	ShutdownDialogType _tmp2_;
+	_tmp0_ = type;
+	switch (_tmp0_) {
+		default:
+		case 1:
+		{
+			dialog_type = SHUTDOWN_DIALOG_TYPE_LOGOUT;
+			break;
+		}
+		case 2:
+		{
+			dialog_type = SHUTDOWN_DIALOG_TYPE_RESTART;
+			break;
+		}
+	}
+	_tmp1_ = self->priv->main_window;
+	_tmp2_ = dialog_type;
+	main_window_show_shutdown_dialog (_tmp1_, _tmp2_);
+}
+
+
+static void ___lambda38__dialog_dbus_interface_open_dialog (DialogDBusInterface* _sender, guint32 type, gpointer self) {
+	__lambda38_ (self, type);
+}
+
+
+static void __lambda39_ (UnityGreeter* self, DialogDBusInterface* type) {
+	MainWindow* _tmp0_;
+	g_return_if_fail (type != NULL);
+	_tmp0_ = self->priv->main_window;
+	main_window_close_shutdown_dialog (_tmp0_);
+}
+
+
+static void ___lambda39__dialog_dbus_interface_close_dialog (DialogDBusInterface* _sender, gpointer self) {
+	__lambda39_ (self, _sender);
+}
+
+
+static void __lambda40_ (UnityGreeter* self, GDBusConnection* c) {
+	GError * _inner_error_ = NULL;
+	g_return_if_fail (c != NULL);
+	{
+		GDBusConnection* _tmp0_;
+		DialogDBusInterface* _tmp1_;
+		_tmp0_ = c;
+		_tmp1_ = self->priv->dbus_object;
+		dialog_dbus_interface_register_object (_tmp1_, _tmp0_, "/org/gnome/SessionManager/EndSessionDialog", &_inner_error_);
+		if (_inner_error_ != NULL) {
+			goto __catch31_g_error;
+		}
+	}
+	goto __finally31;
+	__catch31_g_error:
+	{
+		GError* e = NULL;
+		GError* _tmp2_;
+		const gchar* _tmp3_;
+		e = _inner_error_;
+		_inner_error_ = NULL;
+		_tmp2_ = e;
+		_tmp3_ = _tmp2_->message;
+		g_warning ("unity-greeter.vala:129: Failed to register /org/gnome/SessionManager/E" \
+"ndSessionDialog: %s", _tmp3_);
+		_g_error_free0 (e);
+	}
+	__finally31:
+	if (_inner_error_ != NULL) {
+		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
+		g_clear_error (&_inner_error_);
+		return;
+	}
+}
+
+
+static void ___lambda40__gbus_acquired_callback (GDBusConnection* connection, const gchar* name, gpointer self) {
+	__lambda40_ (self, connection);
+}
+
+
+static void __lambda41_ (UnityGreeter* self) {
+	g_debug ("unity-greeter.vala:133: Failed to acquire name com.canonical.Unity");
+}
+
+
+static void ___lambda41__gbus_name_lost_callback (GDBusConnection* connection, const gchar* name, gpointer self) {
+	__lambda41_ (self);
 }
 
 
@@ -395,6 +570,9 @@ static UnityGreeter* unity_greeter_construct (GType object_type, gboolean test_m
 	gchar* _tmp35_ = NULL;
 	GKeyFile* _tmp36_;
 	MainWindow* _tmp43_;
+	DialogDBusInterface* _tmp44_;
+	DialogDBusInterface* _tmp45_;
+	DialogDBusInterface* _tmp46_;
 	GError * _inner_error_ = NULL;
 	self = (UnityGreeter*) g_type_create_instance (object_type);
 	_tmp0_ = _unity_greeter_ref0 (self);
@@ -402,7 +580,7 @@ static UnityGreeter* unity_greeter_construct (GType object_type, gboolean test_m
 	unity_greeter_singleton = _tmp0_;
 	_tmp1_ = test_mode_;
 	self->test_mode = _tmp1_;
-	g_debug ("unity-greeter.vala:55: Creating background surface");
+	g_debug ("unity-greeter.vala:57: Creating background surface");
 	_tmp2_ = gdk_screen_get_default ();
 	_tmp3_ = unity_greeter_create_root_surface (_tmp2_);
 	_cairo_surface_destroy0 (self->priv->background_surface);
@@ -411,13 +589,13 @@ static UnityGreeter* unity_greeter_construct (GType object_type, gboolean test_m
 	_g_object_unref0 (self->priv->greeter);
 	self->priv->greeter = _tmp4_;
 	_tmp5_ = self->priv->greeter;
-	g_signal_connect (_tmp5_, "show-message", (GCallback) ___lambda29__lightdm_greeter_show_message, self);
+	g_signal_connect (_tmp5_, "show-message", (GCallback) ___lambda34__lightdm_greeter_show_message, self);
 	_tmp6_ = self->priv->greeter;
-	g_signal_connect (_tmp6_, "show-prompt", (GCallback) ___lambda30__lightdm_greeter_show_prompt, self);
+	g_signal_connect (_tmp6_, "show-prompt", (GCallback) ___lambda35__lightdm_greeter_show_prompt, self);
 	_tmp7_ = self->priv->greeter;
-	g_signal_connect (_tmp7_, "autologin-timer-expired", (GCallback) ___lambda31__lightdm_greeter_autologin_timer_expired, self);
+	g_signal_connect (_tmp7_, "autologin-timer-expired", (GCallback) ___lambda36__lightdm_greeter_autologin_timer_expired, self);
 	_tmp8_ = self->priv->greeter;
-	g_signal_connect (_tmp8_, "authentication-complete", (GCallback) ___lambda32__lightdm_greeter_authentication_complete, self);
+	g_signal_connect (_tmp8_, "authentication-complete", (GCallback) ___lambda37__lightdm_greeter_authentication_complete, self);
 	connected = FALSE;
 	{
 		LightDMGreeter* _tmp9_;
@@ -427,20 +605,20 @@ static UnityGreeter* unity_greeter_construct (GType object_type, gboolean test_m
 		_tmp10_ = lightdm_greeter_connect_sync (_tmp9_, &_inner_error_);
 		_tmp11_ = _tmp10_;
 		if (_inner_error_ != NULL) {
-			goto __catch24_g_error;
+			goto __catch29_g_error;
 		}
 		connected = _tmp11_;
 	}
-	goto __finally24;
-	__catch24_g_error:
+	goto __finally29;
+	__catch29_g_error:
 	{
 		GError* e = NULL;
 		e = _inner_error_;
 		_inner_error_ = NULL;
-		g_warning ("unity-greeter.vala:70: Failed to connect to LightDM daemon");
+		g_warning ("unity-greeter.vala:72: Failed to connect to LightDM daemon");
 		_g_error_free0 (e);
 	}
-	__finally24:
+	__finally29:
 	if (_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
@@ -515,11 +693,11 @@ static UnityGreeter* unity_greeter_construct (GType object_type, gboolean test_m
 		_tmp38_ = self->priv->state_file;
 		g_key_file_load_from_file (_tmp37_, _tmp38_, G_KEY_FILE_NONE, &_inner_error_);
 		if (_inner_error_ != NULL) {
-			goto __catch25_g_error;
+			goto __catch30_g_error;
 		}
 	}
-	goto __finally25;
-	__catch25_g_error:
+	goto __finally30;
+	__catch30_g_error:
 	{
 		GError* e = NULL;
 		GError* _tmp39_;
@@ -533,11 +711,11 @@ static UnityGreeter* unity_greeter_construct (GType object_type, gboolean test_m
 			_tmp40_ = self->priv->state_file;
 			_tmp41_ = e;
 			_tmp42_ = _tmp41_->message;
-			g_warning ("unity-greeter.vala:96: Failed to load state from %s: %s\n", _tmp40_, _tmp42_);
+			g_warning ("unity-greeter.vala:98: Failed to load state from %s: %s\n", _tmp40_, _tmp42_);
 		}
 		_g_error_free0 (e);
 	}
-	__finally25:
+	__finally30:
 	if (_inner_error_ != NULL) {
 		_g_free0 (state_file_name);
 		_g_free0 (_tmp24_);
@@ -551,6 +729,14 @@ static UnityGreeter* unity_greeter_construct (GType object_type, gboolean test_m
 	g_object_ref_sink (_tmp43_);
 	_g_object_unref0 (self->priv->main_window);
 	self->priv->main_window = _tmp43_;
+	_tmp44_ = dialog_dbus_interface_new ();
+	_g_object_unref0 (self->priv->dbus_object);
+	self->priv->dbus_object = _tmp44_;
+	_tmp45_ = self->priv->dbus_object;
+	g_signal_connect (_tmp45_, "open-dialog", (GCallback) ___lambda38__dialog_dbus_interface_open_dialog, self);
+	_tmp46_ = self->priv->dbus_object;
+	g_signal_connect (_tmp46_, "close-dialog", (GCallback) ___lambda39__dialog_dbus_interface_close_dialog, self);
+	g_bus_own_name_with_closures (G_BUS_TYPE_SESSION, "com.canonical.Unity", G_BUS_NAME_OWNER_FLAGS_NONE, (GClosure*) ((___lambda40__gbus_acquired_callback == NULL) ? NULL : g_cclosure_new ((GCallback) ___lambda40__gbus_acquired_callback, unity_greeter_ref (self), unity_greeter_unref)), (GClosure*) ((NULL == NULL) ? NULL : g_cclosure_new ((GCallback) NULL, NULL, NULL)), (GClosure*) ((___lambda41__gbus_name_lost_callback == NULL) ? NULL : g_cclosure_new ((GCallback) ___lambda41__gbus_name_lost_callback, unity_greeter_ref (self), unity_greeter_unref)));
 	unity_greeter_start_fake_wm (self);
 	gdk_threads_add_idle (_unity_greeter_ready_cb_gsource_func, self);
 	_g_free0 (state_file_name);
@@ -581,13 +767,13 @@ gchar* unity_greeter_get_state (UnityGreeter* self, const gchar* key) {
 		_tmp2_ = g_key_file_get_value (_tmp0_, "greeter", _tmp1_, &_inner_error_);
 		_tmp3_ = _tmp2_;
 		if (_inner_error_ != NULL) {
-			goto __catch26_g_error;
+			goto __catch32_g_error;
 		}
 		result = _tmp3_;
 		return result;
 	}
-	goto __finally26;
-	__catch26_g_error:
+	goto __finally32;
+	__catch32_g_error:
 	{
 		GError* e = NULL;
 		e = _inner_error_;
@@ -596,7 +782,7 @@ gchar* unity_greeter_get_state (UnityGreeter* self, const gchar* key) {
 		_g_error_free0 (e);
 		return result;
 	}
-	__finally26:
+	__finally32:
 	g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 	g_clear_error (&_inner_error_);
 	return NULL;
@@ -626,11 +812,11 @@ void unity_greeter_set_state (UnityGreeter* self, const gchar* key, const gchar*
 		_tmp5_ = self->priv->state_file;
 		g_file_set_contents (_tmp5_, data, (gssize) (-1), &_inner_error_);
 		if (_inner_error_ != NULL) {
-			goto __catch27_g_error;
+			goto __catch33_g_error;
 		}
 	}
-	goto __finally27;
-	__catch27_g_error:
+	goto __finally33;
+	__catch33_g_error:
 	{
 		GError* e = NULL;
 		GError* _tmp6_;
@@ -639,10 +825,10 @@ void unity_greeter_set_state (UnityGreeter* self, const gchar* key, const gchar*
 		_inner_error_ = NULL;
 		_tmp6_ = e;
 		_tmp7_ = _tmp6_->message;
-		g_debug ("unity-greeter.vala:127: Failed to write state: %s", _tmp7_);
+		g_debug ("unity-greeter.vala:161: Failed to write state: %s", _tmp7_);
 		_g_error_free0 (e);
 	}
-	__finally27:
+	__finally33:
 	if (_inner_error_ != NULL) {
 		_g_free0 (data);
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
@@ -717,7 +903,7 @@ void unity_greeter_start_session (UnityGreeter* self, const gchar* session, Back
 	unity_greeter_refresh_background (_tmp4_, _tmp5_);
 	_tmp6_ = self->test_mode;
 	if (_tmp6_) {
-		g_debug ("unity-greeter.vala:158: Successfully logged in!  Quitting...");
+		g_debug ("unity-greeter.vala:192: Successfully logged in!  Quitting...");
 		gtk_main_quit ();
 	} else {
 		g_signal_emit_by_name (self, "starting-session");
@@ -728,11 +914,11 @@ void unity_greeter_start_session (UnityGreeter* self, const gchar* session, Back
 			_tmp8_ = session;
 			lightdm_greeter_start_session_sync (_tmp7_, _tmp8_, &_inner_error_);
 			if (_inner_error_ != NULL) {
-				goto __catch28_g_error;
+				goto __catch34_g_error;
 			}
 		}
-		goto __finally28;
-		__catch28_g_error:
+		goto __finally34;
+		__catch34_g_error:
 		{
 			GError* e = NULL;
 			GError* _tmp9_;
@@ -741,10 +927,10 @@ void unity_greeter_start_session (UnityGreeter* self, const gchar* session, Back
 			_inner_error_ = NULL;
 			_tmp9_ = e;
 			_tmp10_ = _tmp9_->message;
-			g_warning ("unity-greeter.vala:170: Failed to start session: %s", _tmp10_);
+			g_warning ("unity-greeter.vala:204: Failed to start session: %s", _tmp10_);
 			_g_error_free0 (e);
 		}
-		__finally28:
+		__finally34:
 		if (_inner_error_ != NULL) {
 			_cairo_destroy0 (c);
 			g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
@@ -761,7 +947,7 @@ static gboolean unity_greeter_ready_cb (UnityGreeter* self) {
 	ca_context* _tmp0_ = NULL;
 	gboolean _tmp1_ = FALSE;
 	g_return_val_if_fail (self != NULL, FALSE);
-	g_debug ("unity-greeter.vala:177: starting system-ready sound");
+	g_debug ("unity-greeter.vala:211: starting system-ready sound");
 	ca_context_create (&_tmp0_);
 	_ca_context_destroy0 (self->priv->canberra_context);
 	self->priv->canberra_context = _tmp0_;
@@ -782,7 +968,7 @@ void unity_greeter_show (UnityGreeter* self) {
 	GdkWindow* _tmp2_ = NULL;
 	MainWindow* _tmp3_;
 	g_return_if_fail (self != NULL);
-	g_debug ("unity-greeter.vala:194: Showing main window");
+	g_debug ("unity-greeter.vala:228: Showing main window");
 	_tmp0_ = self->priv->main_window;
 	gtk_widget_show ((GtkWidget*) _tmp0_);
 	_tmp1_ = self->priv->main_window;
@@ -1332,9 +1518,26 @@ static void _unity_greeter_log_cb_glog_func (const gchar* log_domain, GLogLevelF
 }
 
 
+static gboolean __lambda42_ (void) {
+	gboolean result = FALSE;
+	g_debug ("unity-greeter.vala:579: Got a SIGTERM");
+	gtk_main_quit ();
+	result = FALSE;
+	return result;
+}
+
+
+static gboolean ___lambda42__gsource_func (gpointer self) {
+	gboolean result;
+	result = __lambda42_ ();
+	return result;
+}
+
+
 gint unity_greeter_main (gchar** args, int args_length1) {
 	gint result = 0;
 	GPid atspi_pid;
+	GPid indicator_pid;
 	GTimer* _tmp6_;
 	uid_t _tmp7_ = {0};
 	const gchar* _tmp8_ = NULL;
@@ -1392,7 +1595,8 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 	UnityGreeter* greeter;
 	UnityGreeter* _tmp68_;
 	gboolean _tmp69_;
-	GPid _tmp72_;
+	GPid _tmp78_;
+	GPid _tmp82_;
 	GError * _inner_error_ = NULL;
 	mlockall (MCL_CURRENT | MCL_FUTURE);
 	g_unsetenv ("UBUNTU_MENUPROXY");
@@ -1402,6 +1606,7 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 	textdomain (GETTEXT_PACKAGE);
 	g_setenv ("GTK_MODULES", "atk-bridge", FALSE);
 	atspi_pid = (GPid) 0;
+	indicator_pid = (GPid) 0;
 	{
 		gchar** argv = NULL;
 		gint argv_length1 = 0;
@@ -1418,7 +1623,7 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 		_argv_size_ = argv_length1;
 		if (_inner_error_ != NULL) {
 			argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
-			goto __catch29_g_error;
+			goto __catch35_g_error;
 		}
 		_tmp2_ = argv;
 		_tmp2__length1 = argv_length1;
@@ -1426,12 +1631,12 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 		atspi_pid = _tmp3_;
 		if (_inner_error_ != NULL) {
 			argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
-			goto __catch29_g_error;
+			goto __catch35_g_error;
 		}
 		argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
 	}
-	goto __finally29;
-	__catch29_g_error:
+	goto __finally35;
+	__catch35_g_error:
 	{
 		GError* e = NULL;
 		GError* _tmp4_;
@@ -1440,10 +1645,10 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 		_inner_error_ = NULL;
 		_tmp4_ = e;
 		_tmp5_ = _tmp4_->message;
-		g_warning ("unity-greeter.vala:426: Error starting the at-spi registry: %s", _tmp5_);
+		g_warning ("unity-greeter.vala:461: Error starting the at-spi registry: %s", _tmp5_);
 		_g_error_free0 (e);
 	}
-	__finally29:
+	__finally35:
 	if (_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
@@ -1457,8 +1662,8 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 	g_log_set_default_handler (_unity_greeter_log_cb_glog_func, NULL);
 	_tmp7_ = getuid ();
 	_tmp8_ = g_getenv ("LANG");
-	g_debug ("unity-greeter.vala:435: Starting unity-greeter %s UID=%d LANG=%s", VERSION, (gint) _tmp7_, _tmp8_);
-	g_debug ("unity-greeter.vala:438: Setting cursor");
+	g_debug ("unity-greeter.vala:470: Starting unity-greeter %s UID=%d LANG=%s", VERSION, (gint) _tmp7_, _tmp8_);
+	g_debug ("unity-greeter.vala:473: Setting cursor");
 	_tmp9_ = gdk_get_default_root_window ();
 	_tmp10_ = gdk_cursor_new (GDK_LEFT_PTR);
 	_tmp11_ = _tmp10_;
@@ -1494,7 +1699,7 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 	options = _tmp18_;
 	options_length1 = 3;
 	_options_size_ = options_length1;
-	g_debug ("unity-greeter.vala:452: Loading command line options");
+	g_debug ("unity-greeter.vala:487: Loading command line options");
 	_tmp19_ = _ ("- Unity Greeter");
 	_tmp20_ = g_option_context_new (_tmp19_);
 	c = _tmp20_;
@@ -1510,11 +1715,11 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 		_tmp25_ = c;
 		g_option_context_parse (_tmp25_, &args_length1, &args, &_inner_error_);
 		if (_inner_error_ != NULL) {
-			goto __catch30_g_error;
+			goto __catch36_g_error;
 		}
 	}
-	goto __finally30;
-	__catch30_g_error:
+	goto __finally36;
+	__catch36_g_error:
 	{
 		GError* e = NULL;
 		FILE* _tmp26_;
@@ -1546,7 +1751,7 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 		options = (g_free (options), NULL);
 		return result;
 	}
-	__finally30:
+	__finally36:
 	if (_inner_error_ != NULL) {
 		_g_option_context_free0 (c);
 		options = (g_free (options), NULL);
@@ -1566,9 +1771,9 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 	}
 	_tmp36_ = do_test_mode;
 	if (_tmp36_) {
-		g_debug ("unity-greeter.vala:477: Running in test mode");
+		g_debug ("unity-greeter.vala:512: Running in test mode");
 	}
-	g_debug ("unity-greeter.vala:480: Setting GTK+ settings");
+	g_debug ("unity-greeter.vala:515: Setting GTK+ settings");
 	_tmp37_ = gtk_settings_get_default ();
 	_tmp38_ = _g_object_ref0 (_tmp37_);
 	settings = _tmp38_;
@@ -1641,36 +1846,88 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 		_tmp65_ = value;
 		g_object_set ((GObject*) _tmp64_, "gtk-xft-rgba", _tmp65_, NULL, NULL);
 	}
-	g_debug ("unity-greeter.vala:503: Creating Unity Greeter");
+	g_debug ("unity-greeter.vala:538: Creating Unity Greeter");
 	_tmp66_ = do_test_mode;
 	_tmp67_ = unity_greeter_new (_tmp66_);
 	greeter = _tmp67_;
-	g_debug ("unity-greeter.vala:506: Showing greeter");
+	g_debug ("unity-greeter.vala:541: Showing greeter");
 	_tmp68_ = greeter;
 	unity_greeter_show (_tmp68_);
 	_tmp69_ = do_test_mode;
 	if (!_tmp69_) {
+		{
+			gchar** argv = NULL;
+			gint argv_length1 = 0;
+			gint _argv_size_ = 0;
+			gchar** _tmp70_ = NULL;
+			gint _tmp71_ = 0;
+			gchar** _tmp72_;
+			gint _tmp72__length1;
+			GPid _tmp73_ = 0;
+			g_shell_parse_argv ("init --user --startup-event indicator-services-start", &_tmp71_, &_tmp70_, &_inner_error_);
+			argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
+			argv = _tmp70_;
+			argv_length1 = _tmp71_;
+			_argv_size_ = argv_length1;
+			if (_inner_error_ != NULL) {
+				argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
+				goto __catch37_g_error;
+			}
+			_tmp72_ = argv;
+			_tmp72__length1 = argv_length1;
+			g_spawn_async (NULL, _tmp72_, NULL, G_SPAWN_SEARCH_PATH, NULL, NULL, &_tmp73_, &_inner_error_);
+			indicator_pid = _tmp73_;
+			if (_inner_error_ != NULL) {
+				argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
+				goto __catch37_g_error;
+			}
+			argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
+		}
+		goto __finally37;
+		__catch37_g_error:
+		{
+			GError* e = NULL;
+			GError* _tmp74_;
+			const gchar* _tmp75_;
+			e = _inner_error_;
+			_inner_error_ = NULL;
+			_tmp74_ = e;
+			_tmp75_ = _tmp74_->message;
+			g_warning ("unity-greeter.vala:561: Error starting Upstart for indicators: %s", _tmp75_);
+			_g_error_free0 (e);
+		}
+		__finally37:
+		if (_inner_error_ != NULL) {
+			_unity_greeter_unref0 (greeter);
+			_g_free0 (value);
+			_g_object_unref0 (settings);
+			_g_option_context_free0 (c);
+			options = (g_free (options), NULL);
+			g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
+			g_clear_error (&_inner_error_);
+			return 0;
+		}
 		g_setenv ("NM_APPLET_HIDE_POLICY_ITEMS", "1", TRUE);
 		{
 			g_spawn_command_line_async ("nm-applet", &_inner_error_);
 			if (_inner_error_ != NULL) {
-				goto __catch31_g_error;
+				goto __catch38_g_error;
 			}
 		}
-		goto __finally31;
-		__catch31_g_error:
+		goto __finally38;
+		__catch38_g_error:
 		{
 			GError* e = NULL;
-			GError* _tmp70_;
-			const gchar* _tmp71_;
+			GError* _tmp76_;
+			const gchar* _tmp77_;
 			e = _inner_error_;
 			_inner_error_ = NULL;
-			_tmp70_ = e;
-			_tmp71_ = _tmp70_->message;
-			g_warning ("unity-greeter.vala:520: Error starting nm-applet: %s", _tmp71_);
+			_tmp76_ = e;
+			_tmp77_ = _tmp76_->message;
+			g_warning ("unity-greeter.vala:573: Error starting nm-applet: %s", _tmp77_);
 			_g_error_free0 (e);
 		}
-		__finally31:
+		__finally38:
 		if (_inner_error_ != NULL) {
 			_unity_greeter_unref0 (greeter);
 			_g_free0 (value);
@@ -1682,19 +1939,33 @@ gint unity_greeter_main (gchar** args, int args_length1) {
 			return 0;
 		}
 	}
-	g_debug ("unity-greeter.vala:524: Starting main loop");
+	g_unix_signal_add_full (G_PRIORITY_DEFAULT, (gint) SIGTERM, ___lambda42__gsource_func, NULL, NULL);
+	g_debug ("unity-greeter.vala:584: Starting main loop");
 	gtk_main ();
-	_tmp72_ = atspi_pid;
-	if (_tmp72_ != ((GPid) 0)) {
-		GPid _tmp73_;
+	_tmp78_ = indicator_pid;
+	if (_tmp78_ != ((GPid) 0)) {
+		GPid _tmp79_;
 		gint status = 0;
-		GPid _tmp74_;
-		gint _tmp75_ = 0;
-		_tmp73_ = atspi_pid;
-		kill ((pid_t) _tmp73_, SIGKILL);
-		_tmp74_ = atspi_pid;
-		waitpid ((pid_t) _tmp74_, &_tmp75_, 0);
-		status = _tmp75_;
+		GPid _tmp80_;
+		gint _tmp81_ = 0;
+		_tmp79_ = indicator_pid;
+		kill ((pid_t) _tmp79_, SIGTERM);
+		_tmp80_ = indicator_pid;
+		waitpid ((pid_t) _tmp80_, &_tmp81_, 0);
+		status = _tmp81_;
+		indicator_pid = (GPid) 0;
+	}
+	_tmp82_ = atspi_pid;
+	if (_tmp82_ != ((GPid) 0)) {
+		GPid _tmp83_;
+		gint status = 0;
+		GPid _tmp84_;
+		gint _tmp85_ = 0;
+		_tmp83_ = atspi_pid;
+		kill ((pid_t) _tmp83_, SIGKILL);
+		_tmp84_ = atspi_pid;
+		waitpid ((pid_t) _tmp84_, &_tmp85_, 0);
+		status = _tmp85_;
 		atspi_pid = (GPid) 0;
 	}
 	result = EXIT_SUCCESS;
@@ -1871,6 +2142,7 @@ static void unity_greeter_finalize (UnityGreeter* obj) {
 	_g_object_unref0 (self->priv->main_window);
 	_g_object_unref0 (self->priv->greeter);
 	_ca_context_destroy0 (self->priv->canberra_context);
+	_g_object_unref0 (self->priv->dbus_object);
 }
 
 
@@ -1903,6 +2175,224 @@ void unity_greeter_unref (gpointer instance) {
 		UNITY_GREETER_GET_CLASS (self)->finalize (self);
 		g_type_free_instance ((GTypeInstance *) self);
 	}
+}
+
+
+void dialog_dbus_interface_open (DialogDBusInterface* self, guint32 type, guint32 timestamp, guint32 seconds_to_stay_open, char** inhibitor_object_paths, int inhibitor_object_paths_length1) {
+	guint32 _tmp0_;
+	g_return_if_fail (self != NULL);
+	_tmp0_ = type;
+	g_signal_emit_by_name (self, "open-dialog", _tmp0_);
+}
+
+
+void dialog_dbus_interface_close (DialogDBusInterface* self) {
+	g_return_if_fail (self != NULL);
+	g_signal_emit_by_name (self, "close-dialog");
+}
+
+
+DialogDBusInterface* dialog_dbus_interface_construct (GType object_type) {
+	DialogDBusInterface * self = NULL;
+	self = (DialogDBusInterface*) g_object_new (object_type, NULL);
+	return self;
+}
+
+
+DialogDBusInterface* dialog_dbus_interface_new (void) {
+	return dialog_dbus_interface_construct (TYPE_DIALOG_DBUS_INTERFACE);
+}
+
+
+static void dialog_dbus_interface_class_init (DialogDBusInterfaceClass * klass) {
+	dialog_dbus_interface_parent_class = g_type_class_peek_parent (klass);
+	g_signal_new ("open_dialog", TYPE_DIALOG_DBUS_INTERFACE, G_SIGNAL_RUN_LAST, 0, NULL, NULL, g_cclosure_marshal_VOID__UINT, G_TYPE_NONE, 1, G_TYPE_UINT);
+	g_signal_new ("close_dialog", TYPE_DIALOG_DBUS_INTERFACE, G_SIGNAL_RUN_LAST, 0, NULL, NULL, g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
+}
+
+
+static void dialog_dbus_interface_instance_init (DialogDBusInterface * self) {
+}
+
+
+GType dialog_dbus_interface_get_type (void) {
+	static volatile gsize dialog_dbus_interface_type_id__volatile = 0;
+	if (g_once_init_enter (&dialog_dbus_interface_type_id__volatile)) {
+		static const GTypeInfo g_define_type_info = { sizeof (DialogDBusInterfaceClass), (GBaseInitFunc) NULL, (GBaseFinalizeFunc) NULL, (GClassInitFunc) dialog_dbus_interface_class_init, (GClassFinalizeFunc) NULL, NULL, sizeof (DialogDBusInterface), 0, (GInstanceInitFunc) dialog_dbus_interface_instance_init, NULL };
+		GType dialog_dbus_interface_type_id;
+		dialog_dbus_interface_type_id = g_type_register_static (G_TYPE_OBJECT, "DialogDBusInterface", &g_define_type_info, 0);
+		g_type_set_qdata (dialog_dbus_interface_type_id, g_quark_from_static_string ("vala-dbus-register-object"), (void*) dialog_dbus_interface_register_object);
+		g_once_init_leave (&dialog_dbus_interface_type_id__volatile, dialog_dbus_interface_type_id);
+	}
+	return dialog_dbus_interface_type_id__volatile;
+}
+
+
+static void _dbus_dialog_dbus_interface_open (DialogDBusInterface* self, GVariant* parameters, GDBusMethodInvocation* invocation) {
+	GError* error = NULL;
+	GVariantIter _arguments_iter;
+	guint32 type = 0U;
+	GVariant* _tmp214_;
+	guint32 timestamp = 0U;
+	GVariant* _tmp215_;
+	guint32 seconds_to_stay_open = 0U;
+	GVariant* _tmp216_;
+	char** inhibitor_object_paths = NULL;
+	int inhibitor_object_paths_length1 = 0;
+	GVariant* _tmp217_;
+	char** _tmp218_;
+	int _tmp218__length;
+	int _tmp218__size;
+	int _tmp218__length1;
+	GVariantIter _tmp219_;
+	GVariant* _tmp220_;
+	GDBusMessage* _reply_message;
+	GVariant* _reply;
+	GVariantBuilder _reply_builder;
+	g_variant_iter_init (&_arguments_iter, parameters);
+	_tmp214_ = g_variant_iter_next_value (&_arguments_iter);
+	type = g_variant_get_uint32 (_tmp214_);
+	g_variant_unref (_tmp214_);
+	_tmp215_ = g_variant_iter_next_value (&_arguments_iter);
+	timestamp = g_variant_get_uint32 (_tmp215_);
+	g_variant_unref (_tmp215_);
+	_tmp216_ = g_variant_iter_next_value (&_arguments_iter);
+	seconds_to_stay_open = g_variant_get_uint32 (_tmp216_);
+	g_variant_unref (_tmp216_);
+	_tmp217_ = g_variant_iter_next_value (&_arguments_iter);
+	_tmp218_ = g_new (char*, 5);
+	_tmp218__length = 0;
+	_tmp218__size = 4;
+	_tmp218__length1 = 0;
+	g_variant_iter_init (&_tmp219_, _tmp217_);
+	for (; (_tmp220_ = g_variant_iter_next_value (&_tmp219_)) != NULL; _tmp218__length1++) {
+		if (_tmp218__size == _tmp218__length) {
+			_tmp218__size = 2 * _tmp218__size;
+			_tmp218_ = g_renew (char*, _tmp218_, _tmp218__size + 1);
+		}
+		_tmp218_[_tmp218__length++] = g_variant_dup_string (_tmp220_, NULL);
+		g_variant_unref (_tmp220_);
+	}
+	inhibitor_object_paths_length1 = _tmp218__length1;
+	_tmp218_[_tmp218__length] = NULL;
+	inhibitor_object_paths = _tmp218_;
+	g_variant_unref (_tmp217_);
+	dialog_dbus_interface_open (self, type, timestamp, seconds_to_stay_open, inhibitor_object_paths, inhibitor_object_paths_length1);
+	_reply_message = g_dbus_message_new_method_reply (g_dbus_method_invocation_get_message (invocation));
+	g_variant_builder_init (&_reply_builder, G_VARIANT_TYPE_TUPLE);
+	_reply = g_variant_builder_end (&_reply_builder);
+	g_dbus_message_set_body (_reply_message, _reply);
+	inhibitor_object_paths = (_vala_array_free (inhibitor_object_paths, inhibitor_object_paths_length1, (GDestroyNotify) g_free), NULL);
+	g_dbus_connection_send_message (g_dbus_method_invocation_get_connection (invocation), _reply_message, G_DBUS_SEND_MESSAGE_FLAGS_NONE, NULL, NULL);
+	g_object_unref (invocation);
+	g_object_unref (_reply_message);
+}
+
+
+static void _dbus_dialog_dbus_interface_close (DialogDBusInterface* self, GVariant* parameters, GDBusMethodInvocation* invocation) {
+	GError* error = NULL;
+	GVariantIter _arguments_iter;
+	GDBusMessage* _reply_message;
+	GVariant* _reply;
+	GVariantBuilder _reply_builder;
+	g_variant_iter_init (&_arguments_iter, parameters);
+	dialog_dbus_interface_close (self);
+	_reply_message = g_dbus_message_new_method_reply (g_dbus_method_invocation_get_message (invocation));
+	g_variant_builder_init (&_reply_builder, G_VARIANT_TYPE_TUPLE);
+	_reply = g_variant_builder_end (&_reply_builder);
+	g_dbus_message_set_body (_reply_message, _reply);
+	g_dbus_connection_send_message (g_dbus_method_invocation_get_connection (invocation), _reply_message, G_DBUS_SEND_MESSAGE_FLAGS_NONE, NULL, NULL);
+	g_object_unref (invocation);
+	g_object_unref (_reply_message);
+}
+
+
+static void dialog_dbus_interface_dbus_interface_method_call (GDBusConnection* connection, const gchar* sender, const gchar* object_path, const gchar* interface_name, const gchar* method_name, GVariant* parameters, GDBusMethodInvocation* invocation, gpointer user_data) {
+	gpointer* data;
+	gpointer object;
+	data = user_data;
+	object = data[0];
+	if (strcmp (method_name, "Open") == 0) {
+		_dbus_dialog_dbus_interface_open (object, parameters, invocation);
+	} else if (strcmp (method_name, "Close") == 0) {
+		_dbus_dialog_dbus_interface_close (object, parameters, invocation);
+	} else {
+		g_object_unref (invocation);
+	}
+}
+
+
+static GVariant* dialog_dbus_interface_dbus_interface_get_property (GDBusConnection* connection, const gchar* sender, const gchar* object_path, const gchar* interface_name, const gchar* property_name, GError** error, gpointer user_data) {
+	gpointer* data;
+	gpointer object;
+	data = user_data;
+	object = data[0];
+	return NULL;
+}
+
+
+static gboolean dialog_dbus_interface_dbus_interface_set_property (GDBusConnection* connection, const gchar* sender, const gchar* object_path, const gchar* interface_name, const gchar* property_name, GVariant* value, GError** error, gpointer user_data) {
+	gpointer* data;
+	gpointer object;
+	data = user_data;
+	object = data[0];
+	return FALSE;
+}
+
+
+static void _dbus_dialog_dbus_interface_open_dialog (GObject* _sender, guint32 type, gpointer* _data) {
+	GDBusConnection * _connection;
+	const gchar * _path;
+	GVariant *_arguments;
+	GVariantBuilder _arguments_builder;
+	_connection = _data[1];
+	_path = _data[2];
+	g_variant_builder_init (&_arguments_builder, G_VARIANT_TYPE_TUPLE);
+	g_variant_builder_add_value (&_arguments_builder, g_variant_new_uint32 (type));
+	_arguments = g_variant_builder_end (&_arguments_builder);
+	g_dbus_connection_emit_signal (_connection, NULL, _path, "org.gnome.SessionManager.EndSessionDialog", "OpenDialog", _arguments, NULL);
+}
+
+
+static void _dbus_dialog_dbus_interface_close_dialog (GObject* _sender, gpointer* _data) {
+	GDBusConnection * _connection;
+	const gchar * _path;
+	GVariant *_arguments;
+	GVariantBuilder _arguments_builder;
+	_connection = _data[1];
+	_path = _data[2];
+	g_variant_builder_init (&_arguments_builder, G_VARIANT_TYPE_TUPLE);
+	_arguments = g_variant_builder_end (&_arguments_builder);
+	g_dbus_connection_emit_signal (_connection, NULL, _path, "org.gnome.SessionManager.EndSessionDialog", "CloseDialog", _arguments, NULL);
+}
+
+
+guint dialog_dbus_interface_register_object (gpointer object, GDBusConnection* connection, const gchar* path, GError** error) {
+	guint result;
+	gpointer *data;
+	data = g_new (gpointer, 3);
+	data[0] = g_object_ref (object);
+	data[1] = g_object_ref (connection);
+	data[2] = g_strdup (path);
+	result = g_dbus_connection_register_object (connection, path, (GDBusInterfaceInfo *) (&_dialog_dbus_interface_dbus_interface_info), &_dialog_dbus_interface_dbus_interface_vtable, data, _dialog_dbus_interface_unregister_object, error);
+	if (!result) {
+		return 0;
+	}
+	g_signal_connect (object, "open-dialog", (GCallback) _dbus_dialog_dbus_interface_open_dialog, data);
+	g_signal_connect (object, "close-dialog", (GCallback) _dbus_dialog_dbus_interface_close_dialog, data);
+	return result;
+}
+
+
+static void _dialog_dbus_interface_unregister_object (gpointer user_data) {
+	gpointer* data;
+	data = user_data;
+	g_signal_handlers_disconnect_by_func (data[0], _dbus_dialog_dbus_interface_open_dialog, data);
+	g_signal_handlers_disconnect_by_func (data[0], _dbus_dialog_dbus_interface_close_dialog, data);
+	g_object_unref (data[0]);
+	g_object_unref (data[1]);
+	g_free (data[2]);
+	g_free (data);
 }
 
 

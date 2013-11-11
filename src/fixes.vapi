@@ -1,3 +1,4 @@
+#if !VALA_0_22
 namespace Posix
 {
     [CCode (cheader_filename = "sys/mman.h")]
@@ -9,6 +10,7 @@ namespace Posix
     [CCode (cheader_filename = "sys/mman.h")]
     public int munlockall ();
 }
+#endif
 
 [CCode (cprefix = "", lower_case_cprefix = "", cheader_filename = "X11/Xlib.h")]
 namespace X
@@ -31,12 +33,16 @@ namespace Gdk
     public const int KEY_Page_Down;
     public const int KEY_Up;
     public const int KEY_Down;
+    public const int KEY_Left;
+    public const int KEY_Right;
     public const int KEY_KP_Home;
     public const int KEY_KP_End;
     public const int KEY_KP_Page_Up;
     public const int KEY_KP_Page_Down;
     public const int KEY_KP_Up;
     public const int KEY_KP_Down;
+    public const int KEY_KP_Left;
+    public const int KEY_KP_Right;
     public const int KEY_F10;
     public const int KEY_0;
     public const int KEY_g;
@@ -45,10 +51,12 @@ namespace Gdk
     public const int KEY_m;
     public const int KEY_M;
     public const int KEY_s;
+    public const int KEY_z;
     public const int KEY_plus;
     public const int KEY_minus;
     public const int KEY_equal;
     public const int CONTROL_MASK;
+    public const int KEY_PowerOff;
 }
 
 namespace Gtk

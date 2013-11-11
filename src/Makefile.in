@@ -86,9 +86,9 @@ DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	fadable.c fadable-box.c fading-label.c flat-button.c \
 	greeter-list.c list-stack.c main-window.c menu.c menubar.c \
 	prompt-box.c session-list.c remote-login-service.c settings.c \
-	settings-daemon.c toggle-box.c unity-greeter.c user-list.c \
-	user-prompt-box.c $(top_srcdir)/depcomp \
-	$(srcdir)/unity_greeter_vala.stamp
+	settings-daemon.c shutdown-dialog.c toggle-box.c \
+	unity-greeter.c user-list.c user-prompt-box.c \
+	$(top_srcdir)/depcomp $(srcdir)/unity_greeter_vala.stamp
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/intltool.m4 \
 	$(top_srcdir)/configure.ac
@@ -120,6 +120,7 @@ am_unity_greeter_OBJECTS = unity_greeter-animate-timer.$(OBJEXT) \
 	unity_greeter-remote-login-service.$(OBJEXT) \
 	unity_greeter-settings.$(OBJEXT) \
 	unity_greeter-settings-daemon.$(OBJEXT) \
+	unity_greeter-shutdown-dialog.$(OBJEXT) \
 	unity_greeter-toggle-box.$(OBJEXT) \
 	unity_greeter-unity-greeter.$(OBJEXT) \
 	unity_greeter-user-list.$(OBJEXT) \
@@ -331,6 +332,7 @@ unity_greeter_SOURCES = \
 	remote-login-service.vala \
 	settings.vala \
 	settings-daemon.vala \
+	shutdown-dialog.vala \
 	toggle-box.vala \
 	unity-greeter.vala \
 	user-list.vala \
@@ -338,7 +340,7 @@ unity_greeter_SOURCES = \
 
 unity_greeter_CFLAGS = \
 	$(UNITY_GREETER_CFLAGS) \
-	$(WARN_CFLAGS) \
+	-w \
 	-DGETTEXT_PACKAGE=\"$(GETTEXT_PACKAGE)\" \
 	-DLOCALEDIR=\""$(localedir)"\" \
 	-DVERSION=\"$(VERSION)\" \
@@ -472,6 +474,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-session-list.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-settings-daemon.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-settings.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-shutdown-dialog.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-toggle-box.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-unity-greeter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-user-list.Po@am__quote@
@@ -785,6 +788,20 @@ unity_greeter-settings-daemon.obj: settings-daemon.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-settings-daemon.obj `if test -f 'settings-daemon.c'; then $(CYGPATH_W) 'settings-daemon.c'; else $(CYGPATH_W) '$(srcdir)/settings-daemon.c'; fi`
 
+unity_greeter-shutdown-dialog.o: shutdown-dialog.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-shutdown-dialog.o -MD -MP -MF $(DEPDIR)/unity_greeter-shutdown-dialog.Tpo -c -o unity_greeter-shutdown-dialog.o `test -f 'shutdown-dialog.c' || echo '$(srcdir)/'`shutdown-dialog.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-shutdown-dialog.Tpo $(DEPDIR)/unity_greeter-shutdown-dialog.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='shutdown-dialog.c' object='unity_greeter-shutdown-dialog.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-shutdown-dialog.o `test -f 'shutdown-dialog.c' || echo '$(srcdir)/'`shutdown-dialog.c
+
+unity_greeter-shutdown-dialog.obj: shutdown-dialog.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-shutdown-dialog.obj -MD -MP -MF $(DEPDIR)/unity_greeter-shutdown-dialog.Tpo -c -o unity_greeter-shutdown-dialog.obj `if test -f 'shutdown-dialog.c'; then $(CYGPATH_W) 'shutdown-dialog.c'; else $(CYGPATH_W) '$(srcdir)/shutdown-dialog.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-shutdown-dialog.Tpo $(DEPDIR)/unity_greeter-shutdown-dialog.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='shutdown-dialog.c' object='unity_greeter-shutdown-dialog.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-shutdown-dialog.obj `if test -f 'shutdown-dialog.c'; then $(CYGPATH_W) 'shutdown-dialog.c'; else $(CYGPATH_W) '$(srcdir)/shutdown-dialog.c'; fi`
+
 unity_greeter-toggle-box.o: toggle-box.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-toggle-box.o -MD -MP -MF $(DEPDIR)/unity_greeter-toggle-box.Tpo -c -o unity_greeter-toggle-box.o `test -f 'toggle-box.c' || echo '$(srcdir)/'`toggle-box.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-toggle-box.Tpo $(DEPDIR)/unity_greeter-toggle-box.Po
@@ -945,6 +962,11 @@ $(srcdir)/settings-daemon.c: $(srcdir)/unity_greeter_vala.stamp
 	@if test -f $@; then :; else \
 	  $(MAKE) $(AM_MAKEFLAGS) $(srcdir)/unity_greeter_vala.stamp; \
 	fi
+$(srcdir)/shutdown-dialog.c: $(srcdir)/unity_greeter_vala.stamp
+	@if test -f $@; then :; else rm -f $(srcdir)/unity_greeter_vala.stamp; fi
+	@if test -f $@; then :; else \
+	  $(MAKE) $(AM_MAKEFLAGS) $(srcdir)/unity_greeter_vala.stamp; \
+	fi
 $(srcdir)/toggle-box.c: $(srcdir)/unity_greeter_vala.stamp
 	@if test -f $@; then :; else rm -f $(srcdir)/unity_greeter_vala.stamp; fi
 	@if test -f $@; then :; else \
@@ -965,9 +987,9 @@ $(srcdir)/user-prompt-box.c: $(srcdir)/unity_greeter_vala.stamp
 	@if test -f $@; then :; else \
 	  $(MAKE) $(AM_MAKEFLAGS) $(srcdir)/unity_greeter_vala.stamp; \
 	fi
-$(srcdir)/unity_greeter_vala.stamp: config.vapi fixes.vapi indicator.vapi animate-timer.vala background.vala cached-image.vala email-autocompleter.vala dash-box.vala dash-button.vala dash-entry.vala fadable.vala fadable-box.vala fading-label.vala flat-button.vala greeter-list.vala list-stack.vala main-window.vala menu.vala menubar.vala prompt-box.vala session-list.vala remote-login-service.vala settings.vala settings-daemon.vala toggle-box.vala unity-greeter.vala user-list.vala user-prompt-box.vala
+$(srcdir)/unity_greeter_vala.stamp: config.vapi fixes.vapi indicator.vapi animate-timer.vala background.vala cached-image.vala email-autocompleter.vala dash-box.vala dash-button.vala dash-entry.vala fadable.vala fadable-box.vala fading-label.vala flat-button.vala greeter-list.vala list-stack.vala main-window.vala menu.vala menubar.vala prompt-box.vala session-list.vala remote-login-service.vala settings.vala settings-daemon.vala shutdown-dialog.vala toggle-box.vala unity-greeter.vala user-list.vala user-prompt-box.vala
 	$(AM_V_at)rm -f $@ && echo stamp > $@-t
-	$(AM_V_VALAC)$(am__cd) $(srcdir) && $(VALAC) $(unity_greeter_VALAFLAGS) $(VALAFLAGS) -C config.vapi fixes.vapi indicator.vapi animate-timer.vala background.vala cached-image.vala email-autocompleter.vala dash-box.vala dash-button.vala dash-entry.vala fadable.vala fadable-box.vala fading-label.vala flat-button.vala greeter-list.vala list-stack.vala main-window.vala menu.vala menubar.vala prompt-box.vala session-list.vala remote-login-service.vala settings.vala settings-daemon.vala toggle-box.vala unity-greeter.vala user-list.vala user-prompt-box.vala
+	$(AM_V_VALAC)$(am__cd) $(srcdir) && $(VALAC) $(unity_greeter_VALAFLAGS) $(VALAFLAGS) -C config.vapi fixes.vapi indicator.vapi animate-timer.vala background.vala cached-image.vala email-autocompleter.vala dash-box.vala dash-button.vala dash-entry.vala fadable.vala fadable-box.vala fading-label.vala flat-button.vala greeter-list.vala list-stack.vala main-window.vala menu.vala menubar.vala prompt-box.vala session-list.vala remote-login-service.vala settings.vala settings-daemon.vala shutdown-dialog.vala toggle-box.vala unity-greeter.vala user-list.vala user-prompt-box.vala
 	$(AM_V_at)mv -f $@-t $@
 
 ID: $(am__tagged_files)
@@ -1111,6 +1133,7 @@ maintainer-clean-generic:
 	-rm -f $(srcdir)/session-list.c
 	-rm -f $(srcdir)/settings-daemon.c
 	-rm -f $(srcdir)/settings.c
+	-rm -f $(srcdir)/shutdown-dialog.c
 	-rm -f $(srcdir)/toggle-box.c
 	-rm -f $(srcdir)/unity-greeter.c
 	-rm -f $(srcdir)/unity_greeter_vala.stamp
@@ -1137,6 +1160,7 @@ maintainer-clean-generic:
 	-rm -f session-list.c
 	-rm -f settings-daemon.c
 	-rm -f settings.c
+	-rm -f shutdown-dialog.c
 	-rm -f toggle-box.c
 	-rm -f unity-greeter.c
 	-rm -f user-list.c

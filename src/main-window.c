@@ -114,12 +114,35 @@ typedef struct _MonitorClass MonitorClass;
 
 typedef struct _Background Background;
 typedef struct _BackgroundClass BackgroundClass;
+
+#define TYPE_SHUTDOWN_DIALOG (shutdown_dialog_get_type ())
+#define SHUTDOWN_DIALOG(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_SHUTDOWN_DIALOG, ShutdownDialog))
+#define SHUTDOWN_DIALOG_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_SHUTDOWN_DIALOG, ShutdownDialogClass))
+#define IS_SHUTDOWN_DIALOG(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_SHUTDOWN_DIALOG))
+#define IS_SHUTDOWN_DIALOG_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_SHUTDOWN_DIALOG))
+#define SHUTDOWN_DIALOG_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_SHUTDOWN_DIALOG, ShutdownDialogClass))
+
+typedef struct _ShutdownDialog ShutdownDialog;
+typedef struct _ShutdownDialogClass ShutdownDialogClass;
 #define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
 #define __g_list_free__monitor_unref0_0(var) ((var == NULL) ? NULL : (var = (_g_list_free__monitor_unref0_ (var), NULL)))
-typedef struct _MonitorPrivate MonitorPrivate;
 #define _monitor_unref0(var) ((var == NULL) ? NULL : (var = (monitor_unref (var), NULL)))
+typedef struct _MonitorPrivate MonitorPrivate;
 
 #define GREETER_LIST_TYPE_SCROLL_TARGET (greeter_list_scroll_target_get_type ())
+
+#define TYPE_SHUTDOWN_DIALOG_TYPE (shutdown_dialog_type_get_type ())
+
+#define TYPE_UNITY_GREETER (unity_greeter_get_type ())
+#define UNITY_GREETER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_UNITY_GREETER, UnityGreeter))
+#define UNITY_GREETER_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_UNITY_GREETER, UnityGreeterClass))
+#define IS_UNITY_GREETER(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_UNITY_GREETER))
+#define IS_UNITY_GREETER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_UNITY_GREETER))
+#define UNITY_GREETER_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_UNITY_GREETER, UnityGreeterClass))
+
+typedef struct _UnityGreeter UnityGreeter;
+typedef struct _UnityGreeterClass UnityGreeterClass;
+typedef struct _UnityGreeterPrivate UnityGreeterPrivate;
 #define _g_free0(var) (var = (g_free (var), NULL))
 #define _cairo_destroy0(var) ((var == NULL) ? NULL : (var = (cairo_destroy (var), NULL)))
 #define _g_error_free0(var) ((var == NULL) ? NULL : (var = (g_error_free (var), NULL)))
@@ -133,17 +156,6 @@ typedef struct _MonitorPrivate MonitorPrivate;
 
 typedef struct _FlatButton FlatButton;
 typedef struct _FlatButtonClass FlatButtonClass;
-
-#define TYPE_UNITY_GREETER (unity_greeter_get_type ())
-#define UNITY_GREETER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_UNITY_GREETER, UnityGreeter))
-#define UNITY_GREETER_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_UNITY_GREETER, UnityGreeterClass))
-#define IS_UNITY_GREETER(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_UNITY_GREETER))
-#define IS_UNITY_GREETER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_UNITY_GREETER))
-#define UNITY_GREETER_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_UNITY_GREETER, UnityGreeterClass))
-
-typedef struct _UnityGreeter UnityGreeter;
-typedef struct _UnityGreeterClass UnityGreeterClass;
-typedef struct _UnityGreeterPrivate UnityGreeterPrivate;
 
 struct _MainWindow {
 	GtkWindow parent_instance;
@@ -159,10 +171,12 @@ struct _MainWindowClass {
 
 struct _MainWindowPrivate {
 	GList* monitors;
+	Monitor* active_monitor;
 	Background* background;
 	GtkBox* login_box;
 	GtkBox* hbox;
 	GtkButton* back_button;
+	ShutdownDialog* shutdown_dialog;
 };
 
 struct _Monitor {
@@ -186,6 +200,12 @@ typedef enum  {
 	GREETER_LIST_SCROLL_TARGET_UP,
 	GREETER_LIST_SCROLL_TARGET_DOWN
 } GreeterListScrollTarget;
+
+typedef enum  {
+	SHUTDOWN_DIALOG_TYPE_LOGOUT,
+	SHUTDOWN_DIALOG_TYPE_SHUTDOWN,
+	SHUTDOWN_DIALOG_TYPE_RESTART
+} ShutdownDialogType;
 
 struct _UnityGreeter {
 	GTypeInstance parent_instance;
@@ -218,6 +238,7 @@ void value_take_monitor (GValue* value, gpointer v_object);
 gpointer value_get_monitor (const GValue* value);
 GType monitor_get_type (void) G_GNUC_CONST;
 GType background_get_type (void) G_GNUC_CONST;
+GType shutdown_dialog_get_type (void) G_GNUC_CONST;
 #define MAIN_WINDOW_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TYPE_MAIN_WINDOW, MainWindowPrivate))
 enum  {
 	MAIN_WINDOW_DUMMY_PROPERTY
@@ -248,10 +269,26 @@ void unity_greeter_add_style_class (GtkWidget* widget);
 static gboolean main_window_real_key_press_event (GtkWidget* base, GdkEventKey* event);
 GreeterList* list_stack_top (ListStack* self);
 void greeter_list_cancel_authentication (GreeterList* self);
+void shutdown_dialog_cancel (ShutdownDialog* self);
 GType greeter_list_scroll_target_get_type (void) G_GNUC_CONST;
 void greeter_list_scroll (GreeterList* self, GreeterListScrollTarget target);
+void shutdown_dialog_focus_prev (ShutdownDialog* self);
+void shutdown_dialog_focus_next (ShutdownDialog* self);
+GType shutdown_dialog_type_get_type (void) G_GNUC_CONST;
+void main_window_show_shutdown_dialog (MainWindow* self, ShutdownDialogType type);
+gpointer unity_greeter_ref (gpointer instance);
+void unity_greeter_unref (gpointer instance);
+GParamSpec* param_spec_unity_greeter (const gchar* name, const gchar* nick, const gchar* blurb, GType object_type, GParamFlags flags);
+void value_set_unity_greeter (GValue* value, gpointer v_object);
+void value_take_unity_greeter (GValue* value, gpointer v_object);
+gpointer value_get_unity_greeter (const GValue* value);
+GType unity_greeter_get_type (void) G_GNUC_CONST;
 void main_window_set_keyboard_state (MainWindow* self);
 void menu_bar_set_keyboard_state (MenuBar* self);
+ShutdownDialog* shutdown_dialog_new (ShutdownDialogType type);
+ShutdownDialog* shutdown_dialog_construct (GType object_type, ShutdownDialogType type);
+void main_window_close_shutdown_dialog (MainWindow* self);
+static void _main_window_close_shutdown_dialog_shutdown_dialog_close (ShutdownDialog* _sender, gpointer self);
 MainWindow* main_window_new (void);
 MainWindow* main_window_construct (GType object_type);
 static GObject * main_window_constructor (GType type, guint n_construct_properties, GObjectConstructParam * construct_properties);
@@ -276,13 +313,6 @@ GType flat_button_get_type (void) G_GNUC_CONST;
 static void _main_window_pop_list_gtk_button_clicked (GtkButton* _sender, gpointer self);
 ListStack* list_stack_new (void);
 ListStack* list_stack_construct (GType object_type);
-gpointer unity_greeter_ref (gpointer instance);
-void unity_greeter_unref (gpointer instance);
-GParamSpec* param_spec_unity_greeter (const gchar* name, const gchar* nick, const gchar* blurb, GType object_type, GParamFlags flags);
-void value_set_unity_greeter (GValue* value, gpointer v_object);
-void value_take_unity_greeter (GValue* value, gpointer v_object);
-gpointer value_get_unity_greeter (const GValue* value);
-GType unity_greeter_get_type (void) G_GNUC_CONST;
 static void _main_window_monitors_changed_cb_gdk_screen_monitors_changed (GdkScreen* _sender, gpointer self);
 static void main_window_finalize (GObject* obj);
 
@@ -400,7 +430,7 @@ static void main_window_monitors_changed_cb (MainWindow* self, GdkScreen* screen
 	_tmp1_ = gdk_screen_get_width (_tmp0_);
 	_tmp2_ = screen;
 	_tmp3_ = gdk_screen_get_height (_tmp2_);
-	g_debug ("main-window.vala:181: Screen is %dx%d pixels", _tmp1_, _tmp3_);
+	g_debug ("main-window.vala:183: Screen is %dx%d pixels", _tmp1_, _tmp3_);
 	__g_list_free__monitor_unref0_0 (self->priv->monitors);
 	self->priv->monitors = NULL;
 	{
@@ -456,7 +486,7 @@ static void main_window_monitors_changed_cb (MainWindow* self, GdkScreen* screen
 				_tmp19_ = _tmp18_.x;
 				_tmp20_ = geometry;
 				_tmp21_ = _tmp20_.y;
-				g_debug ("main-window.vala:187: Monitor %d is %dx%d pixels at %d,%d", _tmp13_, _tmp15_, _tmp17_, _tmp19_, _tmp21_);
+				g_debug ("main-window.vala:189: Monitor %d is %dx%d pixels at %d,%d", _tmp13_, _tmp15_, _tmp17_, _tmp19_, _tmp21_);
 				_tmp22_ = screen;
 				_tmp23_ = i;
 				_tmp24_ = main_window_monitor_is_unique_position (self, _tmp22_, _tmp23_);
@@ -734,37 +764,71 @@ static gboolean main_window_real_motion_notify_event (GtkWidget* base, GdkEventM
 
 
 static void main_window_move_to_monitor (MainWindow* self, Monitor* monitor) {
-	GtkBox* _tmp0_;
+	Monitor* _tmp0_;
 	Monitor* _tmp1_;
-	gint _tmp2_;
+	GtkBox* _tmp2_;
 	Monitor* _tmp3_;
 	gint _tmp4_;
-	Background* _tmp5_;
-	Monitor* _tmp6_;
+	Monitor* _tmp5_;
+	gint _tmp6_;
 	Background* _tmp7_;
-	GtkBox* _tmp8_;
-	Monitor* _tmp9_;
-	gint _tmp10_;
+	Monitor* _tmp8_;
+	Background* _tmp9_;
+	GtkBox* _tmp10_;
 	Monitor* _tmp11_;
 	gint _tmp12_;
+	Monitor* _tmp13_;
+	gint _tmp14_;
+	ShutdownDialog* _tmp15_;
 	g_return_if_fail (self != NULL);
 	g_return_if_fail (monitor != NULL);
-	_tmp0_ = self->priv->login_box;
-	_tmp1_ = monitor;
-	_tmp2_ = _tmp1_->width;
+	_tmp0_ = monitor;
+	_tmp1_ = _monitor_ref0 (_tmp0_);
+	_monitor_unref0 (self->priv->active_monitor);
+	self->priv->active_monitor = _tmp1_;
+	_tmp2_ = self->priv->login_box;
 	_tmp3_ = monitor;
-	_tmp4_ = _tmp3_->height;
-	gtk_widget_set_size_request ((GtkWidget*) _tmp0_, _tmp2_, _tmp4_);
-	_tmp5_ = self->priv->background;
-	_tmp6_ = monitor;
-	background_set_active_monitor (_tmp5_, _tmp6_);
+	_tmp4_ = _tmp3_->width;
+	_tmp5_ = monitor;
+	_tmp6_ = _tmp5_->height;
+	gtk_widget_set_size_request ((GtkWidget*) _tmp2_, _tmp4_, _tmp6_);
 	_tmp7_ = self->priv->background;
-	_tmp8_ = self->priv->login_box;
-	_tmp9_ = monitor;
-	_tmp10_ = _tmp9_->x;
+	_tmp8_ = monitor;
+	background_set_active_monitor (_tmp7_, _tmp8_);
+	_tmp9_ = self->priv->background;
+	_tmp10_ = self->priv->login_box;
 	_tmp11_ = monitor;
-	_tmp12_ = _tmp11_->y;
-	gtk_fixed_move ((GtkFixed*) _tmp7_, (GtkWidget*) _tmp8_, _tmp10_, _tmp12_);
+	_tmp12_ = _tmp11_->x;
+	_tmp13_ = monitor;
+	_tmp14_ = _tmp13_->y;
+	gtk_fixed_move ((GtkFixed*) _tmp9_, (GtkWidget*) _tmp10_, _tmp12_, _tmp14_);
+	_tmp15_ = self->priv->shutdown_dialog;
+	if (_tmp15_ != NULL) {
+		ShutdownDialog* _tmp16_;
+		Monitor* _tmp17_;
+		gint _tmp18_;
+		Monitor* _tmp19_;
+		gint _tmp20_;
+		Background* _tmp21_;
+		ShutdownDialog* _tmp22_;
+		Monitor* _tmp23_;
+		gint _tmp24_;
+		Monitor* _tmp25_;
+		gint _tmp26_;
+		_tmp16_ = self->priv->shutdown_dialog;
+		_tmp17_ = monitor;
+		_tmp18_ = _tmp17_->width;
+		_tmp19_ = monitor;
+		_tmp20_ = _tmp19_->height;
+		gtk_widget_set_size_request ((GtkWidget*) _tmp16_, _tmp18_, _tmp20_);
+		_tmp21_ = self->priv->background;
+		_tmp22_ = self->priv->shutdown_dialog;
+		_tmp23_ = monitor;
+		_tmp24_ = _tmp23_->x;
+		_tmp25_ = monitor;
+		_tmp26_ = _tmp25_->y;
+		gtk_fixed_move ((GtkFixed*) _tmp21_, (GtkWidget*) _tmp22_, _tmp24_, _tmp26_);
+	}
 }
 
 
@@ -795,6 +859,8 @@ static gboolean main_window_real_key_press_event (GtkWidget* base, GdkEventKey* 
 	GreeterList* top;
 	GdkEventKey _tmp2_;
 	guint _tmp3_;
+	GdkEventKey _tmp40_;
+	gboolean _tmp41_ = FALSE;
 	self = (MainWindow*) base;
 	g_return_val_if_fail (event != NULL, FALSE);
 	_tmp0_ = self->stack;
@@ -805,62 +871,184 @@ static gboolean main_window_real_key_press_event (GtkWidget* base, GdkEventKey* 
 	switch (_tmp3_) {
 		case GDK_KEY_Escape:
 		{
-			GreeterList* _tmp4_;
-			_tmp4_ = top;
-			greeter_list_cancel_authentication (_tmp4_);
-			break;
+			GtkBox* _tmp4_;
+			gboolean _tmp5_;
+			gboolean _tmp6_;
+			ShutdownDialog* _tmp8_;
+			_tmp4_ = self->priv->login_box;
+			_tmp5_ = gtk_widget_get_sensitive ((GtkWidget*) _tmp4_);
+			_tmp6_ = _tmp5_;
+			if (_tmp6_) {
+				GreeterList* _tmp7_;
+				_tmp7_ = top;
+				greeter_list_cancel_authentication (_tmp7_);
+			}
+			_tmp8_ = self->priv->shutdown_dialog;
+			if (_tmp8_ != NULL) {
+				ShutdownDialog* _tmp9_;
+				_tmp9_ = self->priv->shutdown_dialog;
+				shutdown_dialog_cancel (_tmp9_);
+			}
+			result = TRUE;
+			_g_object_unref0 (top);
+			return result;
 		}
 		case GDK_KEY_Page_Up:
 		case GDK_KEY_KP_Page_Up:
 		{
-			GreeterList* _tmp5_;
-			_tmp5_ = top;
-			greeter_list_scroll (_tmp5_, GREETER_LIST_SCROLL_TARGET_START);
-			break;
+			GtkBox* _tmp10_;
+			gboolean _tmp11_;
+			gboolean _tmp12_;
+			_tmp10_ = self->priv->login_box;
+			_tmp11_ = gtk_widget_get_sensitive ((GtkWidget*) _tmp10_);
+			_tmp12_ = _tmp11_;
+			if (_tmp12_) {
+				GreeterList* _tmp13_;
+				_tmp13_ = top;
+				greeter_list_scroll (_tmp13_, GREETER_LIST_SCROLL_TARGET_START);
+			}
+			result = TRUE;
+			_g_object_unref0 (top);
+			return result;
 		}
 		case GDK_KEY_Page_Down:
 		case GDK_KEY_KP_Page_Down:
 		{
-			GreeterList* _tmp6_;
-			_tmp6_ = top;
-			greeter_list_scroll (_tmp6_, GREETER_LIST_SCROLL_TARGET_END);
-			break;
+			GtkBox* _tmp14_;
+			gboolean _tmp15_;
+			gboolean _tmp16_;
+			_tmp14_ = self->priv->login_box;
+			_tmp15_ = gtk_widget_get_sensitive ((GtkWidget*) _tmp14_);
+			_tmp16_ = _tmp15_;
+			if (_tmp16_) {
+				GreeterList* _tmp17_;
+				_tmp17_ = top;
+				greeter_list_scroll (_tmp17_, GREETER_LIST_SCROLL_TARGET_END);
+			}
+			result = TRUE;
+			_g_object_unref0 (top);
+			return result;
 		}
 		case GDK_KEY_Up:
 		case GDK_KEY_KP_Up:
 		{
-			GreeterList* _tmp7_;
-			_tmp7_ = top;
-			greeter_list_scroll (_tmp7_, GREETER_LIST_SCROLL_TARGET_UP);
-			break;
+			GtkBox* _tmp18_;
+			gboolean _tmp19_;
+			gboolean _tmp20_;
+			_tmp18_ = self->priv->login_box;
+			_tmp19_ = gtk_widget_get_sensitive ((GtkWidget*) _tmp18_);
+			_tmp20_ = _tmp19_;
+			if (_tmp20_) {
+				GreeterList* _tmp21_;
+				_tmp21_ = top;
+				greeter_list_scroll (_tmp21_, GREETER_LIST_SCROLL_TARGET_UP);
+			}
+			result = TRUE;
+			_g_object_unref0 (top);
+			return result;
 		}
 		case GDK_KEY_Down:
 		case GDK_KEY_KP_Down:
 		{
-			GreeterList* _tmp8_;
-			_tmp8_ = top;
-			greeter_list_scroll (_tmp8_, GREETER_LIST_SCROLL_TARGET_DOWN);
-			break;
-		}
-		case GDK_KEY_F10:
-		{
-			MenuBar* _tmp9_;
-			_tmp9_ = self->menubar;
-			gtk_menu_shell_select_first ((GtkMenuShell*) _tmp9_, FALSE);
-			break;
-		}
-		default:
-		{
-			GdkEventKey _tmp10_;
-			gboolean _tmp11_ = FALSE;
-			_tmp10_ = *event;
-			_tmp11_ = GTK_WIDGET_CLASS (main_window_parent_class)->key_press_event ((GtkWidget*) G_TYPE_CHECK_INSTANCE_CAST (self, GTK_TYPE_WINDOW, GtkWindow), &_tmp10_);
-			result = _tmp11_;
+			GtkBox* _tmp22_;
+			gboolean _tmp23_;
+			gboolean _tmp24_;
+			_tmp22_ = self->priv->login_box;
+			_tmp23_ = gtk_widget_get_sensitive ((GtkWidget*) _tmp22_);
+			_tmp24_ = _tmp23_;
+			if (_tmp24_) {
+				GreeterList* _tmp25_;
+				_tmp25_ = top;
+				greeter_list_scroll (_tmp25_, GREETER_LIST_SCROLL_TARGET_DOWN);
+			}
+			result = TRUE;
 			_g_object_unref0 (top);
 			return result;
 		}
+		case GDK_KEY_Left:
+		case GDK_KEY_KP_Left:
+		{
+			ShutdownDialog* _tmp26_;
+			_tmp26_ = self->priv->shutdown_dialog;
+			if (_tmp26_ != NULL) {
+				ShutdownDialog* _tmp27_;
+				_tmp27_ = self->priv->shutdown_dialog;
+				shutdown_dialog_focus_prev (_tmp27_);
+			}
+			result = TRUE;
+			_g_object_unref0 (top);
+			return result;
+		}
+		case GDK_KEY_Right:
+		case GDK_KEY_KP_Right:
+		{
+			ShutdownDialog* _tmp28_;
+			_tmp28_ = self->priv->shutdown_dialog;
+			if (_tmp28_ != NULL) {
+				ShutdownDialog* _tmp29_;
+				_tmp29_ = self->priv->shutdown_dialog;
+				shutdown_dialog_focus_next (_tmp29_);
+			}
+			result = TRUE;
+			_g_object_unref0 (top);
+			return result;
+		}
+		case GDK_KEY_F10:
+		{
+			GtkBox* _tmp30_;
+			gboolean _tmp31_;
+			gboolean _tmp32_;
+			_tmp30_ = self->priv->login_box;
+			_tmp31_ = gtk_widget_get_sensitive ((GtkWidget*) _tmp30_);
+			_tmp32_ = _tmp31_;
+			if (_tmp32_) {
+				MenuBar* _tmp33_;
+				_tmp33_ = self->menubar;
+				gtk_menu_shell_select_first ((GtkMenuShell*) _tmp33_, FALSE);
+			}
+			result = TRUE;
+			_g_object_unref0 (top);
+			return result;
+		}
+		case GDK_KEY_PowerOff:
+		{
+			main_window_show_shutdown_dialog (self, SHUTDOWN_DIALOG_TYPE_SHUTDOWN);
+			result = TRUE;
+			_g_object_unref0 (top);
+			return result;
+		}
+		case GDK_KEY_z:
+		{
+			gboolean _tmp34_ = FALSE;
+			UnityGreeter* _tmp35_;
+			gboolean _tmp36_;
+			gboolean _tmp39_;
+			_tmp35_ = unity_greeter_singleton;
+			_tmp36_ = _tmp35_->test_mode;
+			if (_tmp36_) {
+				GdkEventKey _tmp37_;
+				GdkModifierType _tmp38_;
+				_tmp37_ = *event;
+				_tmp38_ = _tmp37_.state;
+				_tmp34_ = (_tmp38_ & GDK_MOD1_MASK) != 0;
+			} else {
+				_tmp34_ = FALSE;
+			}
+			_tmp39_ = _tmp34_;
+			if (_tmp39_) {
+				main_window_show_shutdown_dialog (self, SHUTDOWN_DIALOG_TYPE_SHUTDOWN);
+				result = TRUE;
+				_g_object_unref0 (top);
+				return result;
+			}
+			break;
+		}
+		default:
+		break;
 	}
-	result = TRUE;
+	_tmp40_ = *event;
+	_tmp41_ = GTK_WIDGET_CLASS (main_window_parent_class)->key_press_event ((GtkWidget*) G_TYPE_CHECK_INSTANCE_CAST (self, GTK_TYPE_WINDOW, GtkWindow), &_tmp40_);
+	result = _tmp41_;
 	_g_object_unref0 (top);
 	return result;
 }
@@ -871,6 +1059,65 @@ void main_window_set_keyboard_state (MainWindow* self) {
 	g_return_if_fail (self != NULL);
 	_tmp0_ = self->menubar;
 	menu_bar_set_keyboard_state (_tmp0_);
+}
+
+
+static void _main_window_close_shutdown_dialog_shutdown_dialog_close (ShutdownDialog* _sender, gpointer self) {
+	main_window_close_shutdown_dialog (self);
+}
+
+
+void main_window_show_shutdown_dialog (MainWindow* self, ShutdownDialogType type) {
+	ShutdownDialog* _tmp0_;
+	GtkBox* _tmp2_;
+	ShutdownDialogType _tmp3_;
+	ShutdownDialog* _tmp4_;
+	ShutdownDialog* _tmp5_;
+	ShutdownDialog* _tmp6_;
+	Background* _tmp7_;
+	ShutdownDialog* _tmp8_;
+	Monitor* _tmp9_;
+	g_return_if_fail (self != NULL);
+	_tmp0_ = self->priv->shutdown_dialog;
+	if (_tmp0_ != NULL) {
+		ShutdownDialog* _tmp1_;
+		_tmp1_ = self->priv->shutdown_dialog;
+		gtk_widget_destroy ((GtkWidget*) _tmp1_);
+	}
+	_tmp2_ = self->priv->login_box;
+	gtk_widget_set_sensitive ((GtkWidget*) _tmp2_, FALSE);
+	_tmp3_ = type;
+	_tmp4_ = shutdown_dialog_new (_tmp3_);
+	g_object_ref_sink (_tmp4_);
+	_g_object_unref0 (self->priv->shutdown_dialog);
+	self->priv->shutdown_dialog = _tmp4_;
+	_tmp5_ = self->priv->shutdown_dialog;
+	gtk_widget_set_visible ((GtkWidget*) _tmp5_, TRUE);
+	_tmp6_ = self->priv->shutdown_dialog;
+	g_signal_connect_object (_tmp6_, "close", (GCallback) _main_window_close_shutdown_dialog_shutdown_dialog_close, self, 0);
+	_tmp7_ = self->priv->background;
+	_tmp8_ = self->priv->shutdown_dialog;
+	gtk_container_add ((GtkContainer*) _tmp7_, (GtkWidget*) _tmp8_);
+	_tmp9_ = self->priv->active_monitor;
+	main_window_move_to_monitor (self, _tmp9_);
+}
+
+
+void main_window_close_shutdown_dialog (MainWindow* self) {
+	ShutdownDialog* _tmp0_;
+	ShutdownDialog* _tmp1_;
+	GtkBox* _tmp2_;
+	g_return_if_fail (self != NULL);
+	_tmp0_ = self->priv->shutdown_dialog;
+	if (_tmp0_ == NULL) {
+		return;
+	}
+	_tmp1_ = self->priv->shutdown_dialog;
+	gtk_widget_destroy ((GtkWidget*) _tmp1_);
+	_g_object_unref0 (self->priv->shutdown_dialog);
+	self->priv->shutdown_dialog = NULL;
+	_tmp2_ = self->priv->login_box;
+	gtk_widget_set_sensitive ((GtkWidget*) _tmp2_, TRUE);
 }
 
 
@@ -1132,7 +1379,7 @@ static GObject * main_window_constructor (GType type, guint n_construct_properti
 		_inner_error_ = NULL;
 		_tmp49_ = e;
 		_tmp50_ = _tmp49_->message;
-		g_debug ("main-window.vala:87: Internal error loading menubox style: %s", _tmp50_);
+		g_debug ("main-window.vala:89: Internal error loading menubox style: %s", _tmp50_);
 		_g_error_free0 (e);
 	}
 	__finally11:
@@ -1302,6 +1549,7 @@ static void main_window_class_init (MainWindowClass * klass) {
 
 static void main_window_instance_init (MainWindow * self) {
 	self->priv = MAIN_WINDOW_GET_PRIVATE (self);
+	self->priv->shutdown_dialog = NULL;
 }
 
 
@@ -1311,10 +1559,12 @@ static void main_window_finalize (GObject* obj) {
 	_g_object_unref0 (self->user_list);
 	_g_object_unref0 (self->menubar);
 	__g_list_free__monitor_unref0_0 (self->priv->monitors);
+	_monitor_unref0 (self->priv->active_monitor);
 	_g_object_unref0 (self->priv->background);
 	_g_object_unref0 (self->priv->login_box);
 	_g_object_unref0 (self->priv->hbox);
 	_g_object_unref0 (self->priv->back_button);
+	_g_object_unref0 (self->priv->shutdown_dialog);
 	_g_object_unref0 (self->stack);
 	G_OBJECT_CLASS (main_window_parent_class)->finalize (obj);
 }

@@ -25,6 +25,7 @@
 #include <gio/gio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <gio/gunixfdlist.h>
 #include "config.h"
 
 
@@ -41,9 +42,11 @@ typedef struct _SettingsDaemonPrivate SettingsDaemonPrivate;
 #define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
 typedef struct _SettingsDaemonStartData SettingsDaemonStartData;
 #define _g_free0(var) (var = (g_free (var), NULL))
+#define _g_variant_type_free0(var) ((var == NULL) ? NULL : (var = (g_variant_type_free (var), NULL)))
+#define _g_variant_unref0(var) ((var == NULL) ? NULL : (var = (g_variant_unref (var), NULL)))
+#define _g_error_free0(var) ((var == NULL) ? NULL : (var = (g_error_free (var), NULL)))
 #define __vala_GSettingsSchema_free0(var) ((var == NULL) ? NULL : (var = (_vala_GSettingsSchema_free (var), NULL)))
 #define __vala_GSettingsSchemaSource_free0(var) ((var == NULL) ? NULL : (var = (_vala_GSettingsSchemaSource_free (var), NULL)))
-#define _g_error_free0(var) ((var == NULL) ? NULL : (var = (g_error_free (var), NULL)))
 typedef struct _SettingsDaemonRunData SettingsDaemonRunData;
 
 struct _SettingsDaemon {
@@ -53,6 +56,10 @@ struct _SettingsDaemon {
 
 struct _SettingsDaemonClass {
 	GObjectClass parent_class;
+};
+
+struct _SettingsDaemonPrivate {
+	gint logind_inhibit_fd;
 };
 
 struct _SettingsDaemonStartData {
@@ -79,6 +86,7 @@ struct _SettingsDaemonRunData {
 static gpointer settings_daemon_parent_class = NULL;
 
 GType settings_daemon_get_type (void) G_GNUC_CONST;
+#define SETTINGS_DAEMON_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TYPE_SETTINGS_DAEMON, SettingsDaemonPrivate))
 enum  {
 	SETTINGS_DAEMON_DUMMY_PROPERTY
 };
@@ -98,6 +106,7 @@ static void settings_daemon_run_data_free (gpointer _data);
 static gboolean settings_daemon_run_co (SettingsDaemonRunData* _data_);
 SettingsDaemon* settings_daemon_new (void);
 SettingsDaemon* settings_daemon_construct (GType object_type);
+static void settings_daemon_finalize (GObject* obj);
 static void _vala_array_destroy (gpointer array, gint array_length, GDestroyNotify destroy_func);
 static void _vala_array_free (gpointer array, gint array_length, GDestroyNotify destroy_func);
 
@@ -202,6 +211,7 @@ static void settings_daemon_configure (SettingsDaemon* self) {
 	gint _tmp23__length1;
 	gchar** _tmp26_;
 	gint _tmp26__length1;
+	GError * _inner_error_ = NULL;
 	g_return_if_fail (self != NULL);
 	_tmp0_ = g_strdup ("org.gnome.settings-daemon.plugins.background");
 	_tmp1_ = g_strdup ("org.gnome.settings-daemon.plugins.clipboard");
@@ -298,6 +308,89 @@ static void settings_daemon_configure (SettingsDaemon* self) {
 		}
 	}
 	g_bus_own_name_with_closures (G_BUS_TYPE_SESSION, "org.gnome.ScreenSaver", G_BUS_NAME_OWNER_FLAGS_NONE, (GClosure*) ((NULL == NULL) ? NULL : g_cclosure_new ((GCallback) NULL, NULL, NULL)), (GClosure*) ((NULL == NULL) ? NULL : g_cclosure_new ((GCallback) NULL, NULL, NULL)), (GClosure*) ((NULL == NULL) ? NULL : g_cclosure_new ((GCallback) NULL, NULL, NULL)));
+	{
+		GDBusConnection* _tmp29_ = NULL;
+		GDBusConnection* b;
+		GUnixFDList* fd_list = NULL;
+		GDBusConnection* _tmp30_;
+		const gchar* _tmp31_ = NULL;
+		GVariant* _tmp32_;
+		GVariant* _tmp33_;
+		GVariantType* _tmp34_;
+		GVariantType* _tmp35_;
+		GUnixFDList* _tmp36_ = NULL;
+		GVariant* _tmp37_ = NULL;
+		GVariant* _tmp38_;
+		GVariant* _result_;
+		gint32 index;
+		GVariant* _tmp39_;
+		GUnixFDList* _tmp40_;
+		gint32 _tmp41_;
+		gint _tmp42_ = 0;
+		gint _tmp43_;
+		_tmp29_ = g_bus_get_sync (G_BUS_TYPE_SYSTEM, NULL, &_inner_error_);
+		b = _tmp29_;
+		if (_inner_error_ != NULL) {
+			goto __catch22_g_error;
+		}
+		_tmp30_ = b;
+		_tmp31_ = g_get_user_name ();
+		_tmp32_ = g_variant_new ("(ssss)", "handle-power-key", _tmp31_, "Unity Greeter handling keypresses", "block", NULL);
+		g_variant_ref_sink (_tmp32_);
+		_tmp33_ = _tmp32_;
+		_tmp34_ = g_variant_type_new ("(h)");
+		_tmp35_ = _tmp34_;
+		_tmp37_ = g_dbus_connection_call_with_unix_fd_list_sync (_tmp30_, "org.freedesktop.login1", "/org/freedesktop/login1", "org.freedesktop.login1.Manager", "Inhibit", _tmp33_, _tmp35_, G_DBUS_CALL_FLAGS_NONE, -1, NULL, &_tmp36_, NULL, &_inner_error_);
+		_g_object_unref0 (fd_list);
+		fd_list = _tmp36_;
+		_tmp38_ = _tmp37_;
+		_g_variant_type_free0 (_tmp35_);
+		_g_variant_unref0 (_tmp33_);
+		_result_ = _tmp38_;
+		if (_inner_error_ != NULL) {
+			_g_object_unref0 (fd_list);
+			_g_object_unref0 (b);
+			goto __catch22_g_error;
+		}
+		index = (gint32) (-1);
+		_tmp39_ = _result_;
+		g_variant_get (_tmp39_, "(h)", &index, NULL);
+		_tmp40_ = fd_list;
+		_tmp41_ = index;
+		_tmp42_ = g_unix_fd_list_get (_tmp40_, (gint) _tmp41_, &_inner_error_);
+		_tmp43_ = _tmp42_;
+		if (_inner_error_ != NULL) {
+			_g_variant_unref0 (_result_);
+			_g_object_unref0 (fd_list);
+			_g_object_unref0 (b);
+			goto __catch22_g_error;
+		}
+		self->priv->logind_inhibit_fd = _tmp43_;
+		_g_variant_unref0 (_result_);
+		_g_object_unref0 (fd_list);
+		_g_object_unref0 (b);
+	}
+	goto __finally22;
+	__catch22_g_error:
+	{
+		GError* e = NULL;
+		GError* _tmp44_;
+		const gchar* _tmp45_;
+		e = _inner_error_;
+		_inner_error_ = NULL;
+		_tmp44_ = e;
+		_tmp45_ = _tmp44_->message;
+		g_warning ("settings-daemon.vala:101: Failed to inhibit power keys: %s", _tmp45_);
+		_g_error_free0 (e);
+	}
+	__finally22:
+	if (_inner_error_ != NULL) {
+		enabled = (_vala_array_free (enabled, enabled_length1, (GDestroyNotify) g_free), NULL);
+		disabled = (_vala_array_free (disabled, disabled_length1, (GDestroyNotify) g_free), NULL);
+		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
+		g_clear_error (&_inner_error_);
+		return;
+	}
 	enabled = (_vala_array_free (enabled, enabled_length1, (GDestroyNotify) g_free), NULL);
 	disabled = (_vala_array_free (disabled, disabled_length1, (GDestroyNotify) g_free), NULL);
 }
@@ -399,24 +492,24 @@ static gboolean settings_daemon_run_co (SettingsDaemonRunData* _data_) {
 		g_spawn_command_line_async (GSD_BINARY, &_data_->_inner_error_);
 		if (_data_->_inner_error_ != NULL) {
 			if (_data_->_inner_error_->domain == G_SPAWN_ERROR) {
-				goto __catch22_g_spawn_error;
+				goto __catch23_g_spawn_error;
 			}
 			g_critical ("file %s: line %d: unexpected error: %s (%s, %d)", __FILE__, __LINE__, _data_->_inner_error_->message, g_quark_to_string (_data_->_inner_error_->domain), _data_->_inner_error_->code);
 			g_clear_error (&_data_->_inner_error_);
 			return FALSE;
 		}
 	}
-	goto __finally22;
-	__catch22_g_spawn_error:
+	goto __finally23;
+	__catch23_g_spawn_error:
 	{
 		_data_->e = _data_->_inner_error_;
 		_data_->_inner_error_ = NULL;
 		_data_->_tmp0_ = _data_->e;
 		_data_->_tmp1_ = _data_->_tmp0_->message;
-		g_debug ("settings-daemon.vala:88: Could not start gnome-settings-daemon: %s", _data_->_tmp1_);
+		g_debug ("settings-daemon.vala:124: Could not start gnome-settings-daemon: %s", _data_->_tmp1_);
 		_g_error_free0 (_data_->e);
 	}
-	__finally22:
+	__finally23:
 	if (_data_->_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _data_->_inner_error_->message, g_quark_to_string (_data_->_inner_error_->domain), _data_->_inner_error_->code);
 		g_clear_error (&_data_->_inner_error_);
@@ -446,10 +539,21 @@ SettingsDaemon* settings_daemon_new (void) {
 
 static void settings_daemon_class_init (SettingsDaemonClass * klass) {
 	settings_daemon_parent_class = g_type_class_peek_parent (klass);
+	g_type_class_add_private (klass, sizeof (SettingsDaemonPrivate));
+	G_OBJECT_CLASS (klass)->finalize = settings_daemon_finalize;
 }
 
 
 static void settings_daemon_instance_init (SettingsDaemon * self) {
+	self->priv = SETTINGS_DAEMON_GET_PRIVATE (self);
+	self->priv->logind_inhibit_fd = -1;
+}
+
+
+static void settings_daemon_finalize (GObject* obj) {
+	SettingsDaemon * self;
+	self = G_TYPE_CHECK_INSTANCE_CAST (obj, TYPE_SETTINGS_DAEMON, SettingsDaemon);
+	G_OBJECT_CLASS (settings_daemon_parent_class)->finalize (obj);
 }
 
 
