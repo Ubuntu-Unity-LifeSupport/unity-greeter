@@ -262,6 +262,7 @@ void background_set_monitors (Background* self, GList* monitors);
 static void main_window_move_to_monitor (MainWindow* self, Monitor* monitor);
 static gboolean main_window_real_motion_notify_event (GtkWidget* base, GdkEventMotion* event);
 void background_set_active_monitor (Background* self, Monitor* monitor);
+void shutdown_dialog_set_active_monitor (ShutdownDialog* self, Monitor* m);
 static void main_window_add_user_list (MainWindow* self);
 UserList* user_list_new (Background* bg, MenuBar* mb);
 UserList* user_list_construct (GType object_type, Background* bg, MenuBar* mb);
@@ -285,10 +286,10 @@ gpointer value_get_unity_greeter (const GValue* value);
 GType unity_greeter_get_type (void) G_GNUC_CONST;
 void main_window_set_keyboard_state (MainWindow* self);
 void menu_bar_set_keyboard_state (MenuBar* self);
-ShutdownDialog* shutdown_dialog_new (ShutdownDialogType type);
-ShutdownDialog* shutdown_dialog_construct (GType object_type, ShutdownDialogType type);
+ShutdownDialog* shutdown_dialog_new (ShutdownDialogType type, Background* bg);
+ShutdownDialog* shutdown_dialog_construct (GType object_type, ShutdownDialogType type, Background* bg);
 void main_window_close_shutdown_dialog (MainWindow* self);
-static void _main_window_close_shutdown_dialog_shutdown_dialog_close (ShutdownDialog* _sender, gpointer self);
+static void _main_window_close_shutdown_dialog_shutdown_dialog_closed (ShutdownDialog* _sender, gpointer self);
 MainWindow* main_window_new (void);
 MainWindow* main_window_construct (GType object_type);
 static GObject * main_window_constructor (GType type, guint n_construct_properties, GObjectConstructParam * construct_properties);
@@ -806,28 +807,22 @@ static void main_window_move_to_monitor (MainWindow* self, Monitor* monitor) {
 	if (_tmp15_ != NULL) {
 		ShutdownDialog* _tmp16_;
 		Monitor* _tmp17_;
-		gint _tmp18_;
-		Monitor* _tmp19_;
-		gint _tmp20_;
-		Background* _tmp21_;
-		ShutdownDialog* _tmp22_;
-		Monitor* _tmp23_;
-		gint _tmp24_;
-		Monitor* _tmp25_;
-		gint _tmp26_;
+		Background* _tmp18_;
+		ShutdownDialog* _tmp19_;
+		Monitor* _tmp20_;
+		gint _tmp21_;
+		Monitor* _tmp22_;
+		gint _tmp23_;
 		_tmp16_ = self->priv->shutdown_dialog;
 		_tmp17_ = monitor;
-		_tmp18_ = _tmp17_->width;
-		_tmp19_ = monitor;
-		_tmp20_ = _tmp19_->height;
-		gtk_widget_set_size_request ((GtkWidget*) _tmp16_, _tmp18_, _tmp20_);
-		_tmp21_ = self->priv->background;
-		_tmp22_ = self->priv->shutdown_dialog;
-		_tmp23_ = monitor;
-		_tmp24_ = _tmp23_->x;
-		_tmp25_ = monitor;
-		_tmp26_ = _tmp25_->y;
-		gtk_fixed_move ((GtkFixed*) _tmp21_, (GtkWidget*) _tmp22_, _tmp24_, _tmp26_);
+		shutdown_dialog_set_active_monitor (_tmp16_, _tmp17_);
+		_tmp18_ = self->priv->background;
+		_tmp19_ = self->priv->shutdown_dialog;
+		_tmp20_ = monitor;
+		_tmp21_ = _tmp20_->x;
+		_tmp22_ = monitor;
+		_tmp23_ = _tmp22_->y;
+		gtk_fixed_move ((GtkFixed*) _tmp18_, (GtkWidget*) _tmp19_, _tmp21_, _tmp23_);
 	}
 }
 
@@ -1062,7 +1057,7 @@ void main_window_set_keyboard_state (MainWindow* self) {
 }
 
 
-static void _main_window_close_shutdown_dialog_shutdown_dialog_close (ShutdownDialog* _sender, gpointer self) {
+static void _main_window_close_shutdown_dialog_shutdown_dialog_closed (ShutdownDialog* _sender, gpointer self) {
 	main_window_close_shutdown_dialog (self);
 }
 
@@ -1071,12 +1066,13 @@ void main_window_show_shutdown_dialog (MainWindow* self, ShutdownDialogType type
 	ShutdownDialog* _tmp0_;
 	GtkBox* _tmp2_;
 	ShutdownDialogType _tmp3_;
-	ShutdownDialog* _tmp4_;
+	Background* _tmp4_;
 	ShutdownDialog* _tmp5_;
 	ShutdownDialog* _tmp6_;
 	Background* _tmp7_;
 	ShutdownDialog* _tmp8_;
 	Monitor* _tmp9_;
+	ShutdownDialog* _tmp10_;
 	g_return_if_fail (self != NULL);
 	_tmp0_ = self->priv->shutdown_dialog;
 	if (_tmp0_ != NULL) {
@@ -1087,19 +1083,20 @@ void main_window_show_shutdown_dialog (MainWindow* self, ShutdownDialogType type
 	_tmp2_ = self->priv->login_box;
 	gtk_widget_set_sensitive ((GtkWidget*) _tmp2_, FALSE);
 	_tmp3_ = type;
-	_tmp4_ = shutdown_dialog_new (_tmp3_);
-	g_object_ref_sink (_tmp4_);
+	_tmp4_ = self->priv->background;
+	_tmp5_ = shutdown_dialog_new (_tmp3_, _tmp4_);
+	g_object_ref_sink (_tmp5_);
 	_g_object_unref0 (self->priv->shutdown_dialog);
-	self->priv->shutdown_dialog = _tmp4_;
-	_tmp5_ = self->priv->shutdown_dialog;
-	gtk_widget_set_visible ((GtkWidget*) _tmp5_, TRUE);
+	self->priv->shutdown_dialog = _tmp5_;
 	_tmp6_ = self->priv->shutdown_dialog;
-	g_signal_connect_object (_tmp6_, "close", (GCallback) _main_window_close_shutdown_dialog_shutdown_dialog_close, self, 0);
+	g_signal_connect_object (_tmp6_, "closed", (GCallback) _main_window_close_shutdown_dialog_shutdown_dialog_closed, self, 0);
 	_tmp7_ = self->priv->background;
 	_tmp8_ = self->priv->shutdown_dialog;
 	gtk_container_add ((GtkContainer*) _tmp7_, (GtkWidget*) _tmp8_);
 	_tmp9_ = self->priv->active_monitor;
 	main_window_move_to_monitor (self, _tmp9_);
+	_tmp10_ = self->priv->shutdown_dialog;
+	gtk_widget_set_visible ((GtkWidget*) _tmp10_, TRUE);
 }
 
 

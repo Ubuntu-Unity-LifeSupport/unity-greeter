@@ -73,6 +73,8 @@ class BackgroundLoader : Object
             var pattern = new Cairo.Pattern.rgba (color.red, color.green, color.blue, color.alpha);
             for (var i = 0; i < widths.length; i++)
                 patterns[i] = pattern;
+
+            average_color = color;
             finished = true;
             debug ("Render of background %s complete", filename);
             return true;
@@ -372,6 +374,14 @@ public class Monitor
         this.width = width;
         this.height = height;
     }
+
+    public bool equals (Monitor? other)
+    {
+        if (other != null)
+            return (x == other.x && y == other.y && width == other.width && height == other.height);
+
+        return false;
+    }
 }
 
 public class Background : Gtk.Fixed
@@ -386,6 +396,7 @@ public class Background : Gtk.Fixed
     public string? current_background { get; set; default = null; }
     public bool draw_grid { get; set; default = true; }
     public double alpha { get; private set; default = 1.0; }
+    public Gdk.RGBA average_color { get { return current.average_color; } }
 
     private Cairo.Surface target_surface;
 
@@ -571,7 +582,6 @@ public class Background : Gtk.Fixed
     private void animate_cb (double progress)
     {
         alpha = progress;
-
         queue_draw ();
 
         /* Stop when we get there */
@@ -678,6 +688,7 @@ public class Background : Gtk.Fixed
 
     void publish_average_color ()
     {
+        notify_property ("average-color");
         var rgba = current.average_color.to_string ();
         var root = get_screen ().get_root_window ();
 

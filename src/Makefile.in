@@ -81,7 +81,7 @@ POST_UNINSTALL = :
 sbin_PROGRAMS = unity-greeter$(EXEEXT)
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
-	animate-timer.c background.c cached-image.c \
+	animate-timer.c background.c cached-image.c cairo-utils.c \
 	email-autocompleter.c dash-box.c dash-button.c dash-entry.c \
 	fadable.c fadable-box.c fading-label.c flat-button.c \
 	greeter-list.c list-stack.c main-window.c menu.c menubar.c \
@@ -103,6 +103,7 @@ PROGRAMS = $(sbin_PROGRAMS)
 am_unity_greeter_OBJECTS = unity_greeter-animate-timer.$(OBJEXT) \
 	unity_greeter-background.$(OBJEXT) \
 	unity_greeter-cached-image.$(OBJEXT) \
+	unity_greeter-cairo-utils.$(OBJEXT) \
 	unity_greeter-email-autocompleter.$(OBJEXT) \
 	unity_greeter-dash-box.$(OBJEXT) \
 	unity_greeter-dash-button.$(OBJEXT) \
@@ -314,6 +315,7 @@ unity_greeter_SOURCES = \
 	animate-timer.vala \
 	background.vala \
 	cached-image.vala \
+	cairo-utils.vala \
 	email-autocompleter.vala \
 	dash-box.vala \
 	dash-button.vala \
@@ -357,6 +359,7 @@ unity_greeter_VALAFLAGS = \
 	--pkg liblightdm-gobject-1 \
 	--pkg libcanberra \
 	--pkg gio-2.0 \
+	--pkg pixman-1 \
 	--target-glib 2.32
 
 unity_greeter_LDADD = \
@@ -456,6 +459,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-animate-timer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-background.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-cached-image.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-cairo-utils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-dash-box.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-dash-button.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter-dash-entry.Po@am__quote@
@@ -535,6 +539,20 @@ unity_greeter-cached-image.obj: cached-image.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='cached-image.c' object='unity_greeter-cached-image.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-cached-image.obj `if test -f 'cached-image.c'; then $(CYGPATH_W) 'cached-image.c'; else $(CYGPATH_W) '$(srcdir)/cached-image.c'; fi`
+
+unity_greeter-cairo-utils.o: cairo-utils.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-cairo-utils.o -MD -MP -MF $(DEPDIR)/unity_greeter-cairo-utils.Tpo -c -o unity_greeter-cairo-utils.o `test -f 'cairo-utils.c' || echo '$(srcdir)/'`cairo-utils.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-cairo-utils.Tpo $(DEPDIR)/unity_greeter-cairo-utils.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='cairo-utils.c' object='unity_greeter-cairo-utils.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-cairo-utils.o `test -f 'cairo-utils.c' || echo '$(srcdir)/'`cairo-utils.c
+
+unity_greeter-cairo-utils.obj: cairo-utils.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-cairo-utils.obj -MD -MP -MF $(DEPDIR)/unity_greeter-cairo-utils.Tpo -c -o unity_greeter-cairo-utils.obj `if test -f 'cairo-utils.c'; then $(CYGPATH_W) 'cairo-utils.c'; else $(CYGPATH_W) '$(srcdir)/cairo-utils.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter-cairo-utils.Tpo $(DEPDIR)/unity_greeter-cairo-utils.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='cairo-utils.c' object='unity_greeter-cairo-utils.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -c -o unity_greeter-cairo-utils.obj `if test -f 'cairo-utils.c'; then $(CYGPATH_W) 'cairo-utils.c'; else $(CYGPATH_W) '$(srcdir)/cairo-utils.c'; fi`
 
 unity_greeter-email-autocompleter.o: email-autocompleter.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_CFLAGS) $(CFLAGS) -MT unity_greeter-email-autocompleter.o -MD -MP -MF $(DEPDIR)/unity_greeter-email-autocompleter.Tpo -c -o unity_greeter-email-autocompleter.o `test -f 'email-autocompleter.c' || echo '$(srcdir)/'`email-autocompleter.c
@@ -872,6 +890,11 @@ $(srcdir)/cached-image.c: $(srcdir)/unity_greeter_vala.stamp
 	@if test -f $@; then :; else \
 	  $(MAKE) $(AM_MAKEFLAGS) $(srcdir)/unity_greeter_vala.stamp; \
 	fi
+$(srcdir)/cairo-utils.c: $(srcdir)/unity_greeter_vala.stamp
+	@if test -f $@; then :; else rm -f $(srcdir)/unity_greeter_vala.stamp; fi
+	@if test -f $@; then :; else \
+	  $(MAKE) $(AM_MAKEFLAGS) $(srcdir)/unity_greeter_vala.stamp; \
+	fi
 $(srcdir)/email-autocompleter.c: $(srcdir)/unity_greeter_vala.stamp
 	@if test -f $@; then :; else rm -f $(srcdir)/unity_greeter_vala.stamp; fi
 	@if test -f $@; then :; else \
@@ -987,9 +1010,9 @@ $(srcdir)/user-prompt-box.c: $(srcdir)/unity_greeter_vala.stamp
 	@if test -f $@; then :; else \
 	  $(MAKE) $(AM_MAKEFLAGS) $(srcdir)/unity_greeter_vala.stamp; \
 	fi
-$(srcdir)/unity_greeter_vala.stamp: config.vapi fixes.vapi indicator.vapi animate-timer.vala background.vala cached-image.vala email-autocompleter.vala dash-box.vala dash-button.vala dash-entry.vala fadable.vala fadable-box.vala fading-label.vala flat-button.vala greeter-list.vala list-stack.vala main-window.vala menu.vala menubar.vala prompt-box.vala session-list.vala remote-login-service.vala settings.vala settings-daemon.vala shutdown-dialog.vala toggle-box.vala unity-greeter.vala user-list.vala user-prompt-box.vala
+$(srcdir)/unity_greeter_vala.stamp: config.vapi fixes.vapi indicator.vapi animate-timer.vala background.vala cached-image.vala cairo-utils.vala email-autocompleter.vala dash-box.vala dash-button.vala dash-entry.vala fadable.vala fadable-box.vala fading-label.vala flat-button.vala greeter-list.vala list-stack.vala main-window.vala menu.vala menubar.vala prompt-box.vala session-list.vala remote-login-service.vala settings.vala settings-daemon.vala shutdown-dialog.vala toggle-box.vala unity-greeter.vala user-list.vala user-prompt-box.vala
 	$(AM_V_at)rm -f $@ && echo stamp > $@-t
-	$(AM_V_VALAC)$(am__cd) $(srcdir) && $(VALAC) $(unity_greeter_VALAFLAGS) $(VALAFLAGS) -C config.vapi fixes.vapi indicator.vapi animate-timer.vala background.vala cached-image.vala email-autocompleter.vala dash-box.vala dash-button.vala dash-entry.vala fadable.vala fadable-box.vala fading-label.vala flat-button.vala greeter-list.vala list-stack.vala main-window.vala menu.vala menubar.vala prompt-box.vala session-list.vala remote-login-service.vala settings.vala settings-daemon.vala shutdown-dialog.vala toggle-box.vala unity-greeter.vala user-list.vala user-prompt-box.vala
+	$(AM_V_VALAC)$(am__cd) $(srcdir) && $(VALAC) $(unity_greeter_VALAFLAGS) $(VALAFLAGS) -C config.vapi fixes.vapi indicator.vapi animate-timer.vala background.vala cached-image.vala cairo-utils.vala email-autocompleter.vala dash-box.vala dash-button.vala dash-entry.vala fadable.vala fadable-box.vala fading-label.vala flat-button.vala greeter-list.vala list-stack.vala main-window.vala menu.vala menubar.vala prompt-box.vala session-list.vala remote-login-service.vala settings.vala settings-daemon.vala shutdown-dialog.vala toggle-box.vala unity-greeter.vala user-list.vala user-prompt-box.vala
 	$(AM_V_at)mv -f $@-t $@
 
 ID: $(am__tagged_files)
@@ -1115,6 +1138,7 @@ maintainer-clean-generic:
 	-rm -f $(srcdir)/animate-timer.c
 	-rm -f $(srcdir)/background.c
 	-rm -f $(srcdir)/cached-image.c
+	-rm -f $(srcdir)/cairo-utils.c
 	-rm -f $(srcdir)/dash-box.c
 	-rm -f $(srcdir)/dash-button.c
 	-rm -f $(srcdir)/dash-entry.c
@@ -1142,6 +1166,7 @@ maintainer-clean-generic:
 	-rm -f animate-timer.c
 	-rm -f background.c
 	-rm -f cached-image.c
+	-rm -f cairo-utils.c
 	-rm -f dash-box.c
 	-rm -f dash-button.c
 	-rm -f dash-entry.c

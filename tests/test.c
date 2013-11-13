@@ -312,33 +312,33 @@ gboolean prompt_box_get_has_errors (PromptBox* self);
 void test_remote_login_servers_updated_signal (void);
 static Block1Data* block1_data_ref (Block1Data* _data1_);
 static void block1_data_unref (void * _userdata_);
-static gboolean __lambda37_ (Block1Data* _data1_);
-static gboolean ___lambda37__gsource_func (gpointer self);
+static gboolean __lambda45_ (Block1Data* _data1_);
+static gboolean ___lambda45__gsource_func (gpointer self);
 void test_remote_login_servers_updated_signal_focus_not_in_remote_server (void);
 static Block2Data* block2_data_ref (Block2Data* _data2_);
 static void block2_data_unref (void * _userdata_);
-static gboolean __lambda38_ (Block2Data* _data2_);
-static gboolean ___lambda38__gsource_func (gpointer self);
+static gboolean __lambda46_ (Block2Data* _data2_);
+static gboolean ___lambda46__gsource_func (gpointer self);
 void test_remote_login_login_servers_updated_signal (void);
 static Block3Data* block3_data_ref (Block3Data* _data3_);
 static void block3_data_unref (void * _userdata_);
-static gboolean __lambda39_ (Block3Data* _data3_);
-static gboolean ___lambda39__gsource_func (gpointer self);
+static gboolean __lambda47_ (Block3Data* _data3_);
+static gboolean ___lambda47__gsource_func (gpointer self);
 void test_remote_login_login_servers_updated_signal_focus_not_in_removed_server (void);
 static Block4Data* block4_data_ref (Block4Data* _data4_);
 static void block4_data_unref (void * _userdata_);
-static gboolean __lambda40_ (Block4Data* _data4_);
-static gboolean ___lambda40__gsource_func (gpointer self);
+static gboolean __lambda48_ (Block4Data* _data4_);
+static gboolean ___lambda48__gsource_func (gpointer self);
 void test_remote_login_remote_login_changed_signal (void);
 static Block5Data* block5_data_ref (Block5Data* _data5_);
 static void block5_data_unref (void * _userdata_);
-static gboolean __lambda41_ (Block5Data* _data5_);
-static gboolean ___lambda41__gsource_func (gpointer self);
+static gboolean __lambda49_ (Block5Data* _data5_);
+static gboolean ___lambda49__gsource_func (gpointer self);
 void test_remote_login_remote_login_changed_signalfocus_not_in_changed_server (void);
 static Block6Data* block6_data_ref (Block6Data* _data6_);
 static void block6_data_unref (void * _userdata_);
-static gboolean __lambda42_ (Block6Data* _data6_);
-static gboolean ___lambda42__gsource_func (gpointer self);
+static gboolean __lambda50_ (Block6Data* _data6_);
+static gboolean ___lambda50__gsource_func (gpointer self);
 void test_remote_login_authentication (void);
 gpointer unity_greeter_ref (gpointer instance);
 void unity_greeter_unref (gpointer instance);
@@ -1123,7 +1123,7 @@ static void block1_data_unref (void * _userdata_) {
 }
 
 
-static gboolean __lambda37_ (Block1Data* _data1_) {
+static gboolean __lambda45_ (Block1Data* _data1_) {
 	gboolean result = FALSE;
 	TestList* _tmp0_;
 	TestList* _tmp1_;
@@ -1145,9 +1145,9 @@ static gboolean __lambda37_ (Block1Data* _data1_) {
 }
 
 
-static gboolean ___lambda37__gsource_func (gpointer self) {
+static gboolean ___lambda45__gsource_func (gpointer self) {
 	gboolean result;
-	result = __lambda37_ (self);
+	result = __lambda45_ (self);
 	return result;
 }
 
@@ -1231,7 +1231,7 @@ void test_remote_login_servers_updated_signal (void) {
 	_tmp26_ = _tmp25_;
 	_vala_assert (g_strcmp0 (_tmp26_, "*remote_login*http://rdpdefaultusername2.com*lwola") == 0, "list.selected_entry.id == \"*remote_login*http://rdpdefaultusername2.com*lwola\"");
 	_data1_->done = FALSE;
-	g_timeout_add_full (G_PRIORITY_DEFAULT, (guint) 5250, ___lambda37__gsource_func, block1_data_ref (_data1_), block1_data_unref);
+	g_timeout_add_full (G_PRIORITY_DEFAULT, (guint) 5250, ___lambda45__gsource_func, block1_data_ref (_data1_), block1_data_unref);
 	while (TRUE) {
 		gboolean _tmp27_;
 		_tmp27_ = _data1_->done;
@@ -1268,7 +1268,7 @@ static void block2_data_unref (void * _userdata_) {
 }
 
 
-static gboolean __lambda38_ (Block2Data* _data2_) {
+static gboolean __lambda46_ (Block2Data* _data2_) {
 	gboolean result = FALSE;
 	TestList* _tmp0_;
 	PromptBox* _tmp1_;
@@ -1303,9 +1303,9 @@ static gboolean __lambda38_ (Block2Data* _data2_) {
 }
 
 
-static gboolean ___lambda38__gsource_func (gpointer self) {
+static gboolean ___lambda46__gsource_func (gpointer self) {
 	gboolean result;
-	result = __lambda38_ (self);
+	result = __lambda46_ (self);
 	return result;
 }
 
@@ -1425,7 +1425,7 @@ void test_remote_login_servers_updated_signal_focus_not_in_remote_server (void) 
 	_tmp40_ = g_strdup (_tmp39_);
 	_data2_->nonRemoteEntry = _tmp40_;
 	_data2_->done = FALSE;
-	g_timeout_add_full (G_PRIORITY_DEFAULT, (guint) 5250, ___lambda38__gsource_func, block2_data_ref (_data2_), block2_data_unref);
+	g_timeout_add_full (G_PRIORITY_DEFAULT, (guint) 5250, ___lambda46__gsource_func, block2_data_ref (_data2_), block2_data_unref);
 	while (TRUE) {
 		gboolean _tmp41_;
 		_tmp41_ = _data2_->done;
@@ -1461,7 +1461,7 @@ static void block3_data_unref (void * _userdata_) {
 }
 
 
-static gboolean __lambda39_ (Block3Data* _data3_) {
+static gboolean __lambda47_ (Block3Data* _data3_) {
 	gboolean result = FALSE;
 	TestList* _tmp0_;
 	TestList* _tmp1_;
@@ -1483,9 +1483,9 @@ static gboolean __lambda39_ (Block3Data* _data3_) {
 }
 
 
-static gboolean ___lambda39__gsource_func (gpointer self) {
+static gboolean ___lambda47__gsource_func (gpointer self) {
 	gboolean result;
-	result = __lambda39_ (self);
+	result = __lambda47_ (self);
 	return result;
 }
 
@@ -1569,7 +1569,7 @@ void test_remote_login_login_servers_updated_signal (void) {
 	_tmp26_ = _tmp25_;
 	_vala_assert (g_strcmp0 (_tmp26_, "*remote_login*http://rdpdefaultusername2.com*lwola") == 0, "list.selected_entry.id == \"*remote_login*http://rdpdefaultusername2.com*lwola\"");
 	_data3_->done = FALSE;
-	g_timeout_add_full (G_PRIORITY_DEFAULT, (guint) 5250, ___lambda39__gsource_func, block3_data_ref (_data3_), block3_data_unref);
+	g_timeout_add_full (G_PRIORITY_DEFAULT, (guint) 5250, ___lambda47__gsource_func, block3_data_ref (_data3_), block3_data_unref);
 	while (TRUE) {
 		gboolean _tmp27_;
 		_tmp27_ = _data3_->done;
@@ -1605,7 +1605,7 @@ static void block4_data_unref (void * _userdata_) {
 }
 
 
-static gboolean __lambda40_ (Block4Data* _data4_) {
+static gboolean __lambda48_ (Block4Data* _data4_) {
 	gboolean result = FALSE;
 	TestList* _tmp0_;
 	TestList* _tmp1_;
@@ -1627,9 +1627,9 @@ static gboolean __lambda40_ (Block4Data* _data4_) {
 }
 
 
-static gboolean ___lambda40__gsource_func (gpointer self) {
+static gboolean ___lambda48__gsource_func (gpointer self) {
 	gboolean result;
-	result = __lambda40_ (self);
+	result = __lambda48_ (self);
 	return result;
 }
 
@@ -1731,7 +1731,7 @@ void test_remote_login_login_servers_updated_signal_focus_not_in_removed_server 
 		test_do_scroll (_tmp32_, GREETER_LIST_SCROLL_TARGET_UP);
 	}
 	_data4_->done = FALSE;
-	g_timeout_add_full (G_PRIORITY_DEFAULT, (guint) 5250, ___lambda40__gsource_func, block4_data_ref (_data4_), block4_data_unref);
+	g_timeout_add_full (G_PRIORITY_DEFAULT, (guint) 5250, ___lambda48__gsource_func, block4_data_ref (_data4_), block4_data_unref);
 	while (TRUE) {
 		gboolean _tmp33_;
 		_tmp33_ = _data4_->done;
@@ -1767,7 +1767,7 @@ static void block5_data_unref (void * _userdata_) {
 }
 
 
-static gboolean __lambda41_ (Block5Data* _data5_) {
+static gboolean __lambda49_ (Block5Data* _data5_) {
 	gboolean result = FALSE;
 	TestList* _tmp0_;
 	TestList* _tmp1_;
@@ -1803,9 +1803,9 @@ static gboolean __lambda41_ (Block5Data* _data5_) {
 }
 
 
-static gboolean ___lambda41__gsource_func (gpointer self) {
+static gboolean ___lambda49__gsource_func (gpointer self) {
 	gboolean result;
-	result = __lambda41_ (self);
+	result = __lambda49_ (self);
 	return result;
 }
 
@@ -1889,7 +1889,7 @@ void test_remote_login_remote_login_changed_signal (void) {
 	_tmp26_ = _tmp25_;
 	_vala_assert (g_strcmp0 (_tmp26_, "*remote_login*http://rdpdefaultusername2.com*lwola") == 0, "list.selected_entry.id == \"*remote_login*http://rdpdefaultusername2.com*lwola\"");
 	_data5_->done = FALSE;
-	g_timeout_add_full (G_PRIORITY_DEFAULT, (guint) 5250, ___lambda41__gsource_func, block5_data_ref (_data5_), block5_data_unref);
+	g_timeout_add_full (G_PRIORITY_DEFAULT, (guint) 5250, ___lambda49__gsource_func, block5_data_ref (_data5_), block5_data_unref);
 	while (TRUE) {
 		gboolean _tmp27_;
 		_tmp27_ = _data5_->done;
@@ -1926,7 +1926,7 @@ static void block6_data_unref (void * _userdata_) {
 }
 
 
-static gboolean __lambda42_ (Block6Data* _data6_) {
+static gboolean __lambda50_ (Block6Data* _data6_) {
 	gboolean result = FALSE;
 	TestList* _tmp0_;
 	PromptBox* _tmp1_;
@@ -1975,9 +1975,9 @@ static gboolean __lambda42_ (Block6Data* _data6_) {
 }
 
 
-static gboolean ___lambda42__gsource_func (gpointer self) {
+static gboolean ___lambda50__gsource_func (gpointer self) {
 	gboolean result;
-	result = __lambda42_ (self);
+	result = __lambda50_ (self);
 	return result;
 }
 
@@ -2097,7 +2097,7 @@ void test_remote_login_remote_login_changed_signalfocus_not_in_changed_server (v
 	_tmp40_ = g_strdup (_tmp39_);
 	_data6_->nonRemoteEntry = _tmp40_;
 	_data6_->done = FALSE;
-	g_timeout_add_full (G_PRIORITY_DEFAULT, (guint) 5250, ___lambda42__gsource_func, block6_data_ref (_data6_), block6_data_unref);
+	g_timeout_add_full (G_PRIORITY_DEFAULT, (guint) 5250, ___lambda50__gsource_func, block6_data_ref (_data6_), block6_data_unref);
 	while (TRUE) {
 		gboolean _tmp41_;
 		_tmp41_ = _data6_->done;

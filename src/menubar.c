@@ -220,8 +220,8 @@ static void menu_bar_setup_indicators (MenuBar* self);
 gchar** ug_settings_get_strv (const gchar* key, int* result_length1);
 #define UG_SETTINGS_KEY_INDICATORS "indicators"
 gboolean ug_settings_set_strv (const gchar* key, gchar** value, int value_length1);
-static gint __lambda44_ (IndicatorObject* a, IndicatorObject* b);
-static gint ___lambda44__gcompare_func (gconstpointer a, gconstpointer b);
+static gint __lambda52_ (IndicatorObject* a, IndicatorObject* b);
+static gint ___lambda52__gcompare_func (gconstpointer a, gconstpointer b);
 gboolean ug_settings_set_boolean (const gchar* key, gboolean value);
 GtkWindow* menu_bar_get_keyboard_window (MenuBar* self);
 static void menu_bar_set_keyboard_window (MenuBar* self, GtkWindow* value);
@@ -234,8 +234,8 @@ void value_set_unity_greeter (GValue* value, gpointer v_object);
 void value_take_unity_greeter (GValue* value, gpointer v_object);
 gpointer value_get_unity_greeter (const GValue* value);
 GType unity_greeter_get_type (void) G_GNUC_CONST;
-static gboolean ____lambda43_ (MenuBar* self);
-static gboolean _____lambda43__gsource_func (gpointer self);
+static gboolean ____lambda51_ (MenuBar* self);
+static gboolean _____lambda51__gsource_func (gpointer self);
 static guint menu_bar_get_indicator_index (MenuBar* self, IndicatorObject* object);
 static IndicatorObject* menu_bar_get_indicator_object_from_entry (MenuBar* self, IndicatorObjectEntry* entry);
 static void menu_bar_set_background (MenuBar* self, Background* value);
@@ -1127,7 +1127,7 @@ static void menu_bar_load_indicator (MenuBar* self, const gchar* indicator_name)
 }
 
 
-static gint __lambda44_ (IndicatorObject* a, IndicatorObject* b) {
+static gint __lambda52_ (IndicatorObject* a, IndicatorObject* b) {
 	gint result = 0;
 	IndicatorObject* _tmp0_;
 	gint _tmp1_ = 0;
@@ -1162,9 +1162,9 @@ static gint __lambda44_ (IndicatorObject* a, IndicatorObject* b) {
 }
 
 
-static gint ___lambda44__gcompare_func (gconstpointer a, gconstpointer b) {
+static gint ___lambda52__gcompare_func (gconstpointer a, gconstpointer b) {
 	gint result;
-	result = __lambda44_ (a, b);
+	result = __lambda52_ (a, b);
 	return result;
 }
 
@@ -1314,7 +1314,7 @@ static void menu_bar_setup_indicators (MenuBar* self) {
 			}
 		}
 	}
-	self->priv->indicator_objects = g_list_sort (self->priv->indicator_objects, ___lambda44__gcompare_func);
+	self->priv->indicator_objects = g_list_sort (self->priv->indicator_objects, ___lambda52__gcompare_func);
 	_tmp25_ = g_getenv ("LANG");
 	_tmp26_ = g_getenv ("LANGUAGE");
 	g_debug ("menubar.vala:364: LANG=%s LANGUAGE=%s", _tmp25_, _tmp26_);
@@ -1552,7 +1552,7 @@ static void menu_bar_high_contrast_toggled_cb (MenuBar* self, GtkCheckMenuItem* 
 }
 
 
-static gboolean ____lambda43_ (MenuBar* self) {
+static gboolean ____lambda51_ (MenuBar* self) {
 	gboolean result = FALSE;
 	GtkWidget* _tmp0_ = NULL;
 	GtkWidget* _tmp1_ = NULL;
@@ -1566,9 +1566,9 @@ static gboolean ____lambda43_ (MenuBar* self) {
 }
 
 
-static gboolean _____lambda43__gsource_func (gpointer self) {
+static gboolean _____lambda51__gsource_func (gpointer self) {
 	gboolean result;
-	result = ____lambda43_ (self);
+	result = ____lambda51_ (self);
 	return result;
 }
 
@@ -1620,7 +1620,7 @@ static void menu_bar_screen_reader_toggled_cb (MenuBar* self, GtkCheckMenuItem* 
 			}
 			_tmp10_ = unity_greeter_singleton;
 			_tmp10_->orca_needs_kick = TRUE;
-			g_timeout_add_seconds_full (G_PRIORITY_DEFAULT, (guint) 1, _____lambda43__gsource_func, g_object_ref (self), g_object_unref);
+			g_timeout_add_seconds_full (G_PRIORITY_DEFAULT, (guint) 1, _____lambda51__gsource_func, g_object_ref (self), g_object_unref);
 			argv = (_vala_array_free (argv, argv_length1, (GDestroyNotify) g_free), NULL);
 		}
 		goto __finally16;

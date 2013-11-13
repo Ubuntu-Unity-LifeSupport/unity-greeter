@@ -102,7 +102,7 @@ const gchar* toggle_box_get_starting_key (ToggleBox* self);
 const gchar* toggle_box_get_default_key (ToggleBox* self);
 static void toggle_box_select (ToggleBox* self, GtkButton* button);
 static gboolean toggle_box_real_draw (GtkWidget* base, cairo_t* c);
-void dash_box_cairo_rounded_rectangle (cairo_t* c, gdouble x, gdouble y, gdouble width, gdouble height, gdouble radius);
+void cairo_utils_rounded_rectangle (cairo_t* c, gdouble x, gdouble y, gdouble width, gdouble height, gdouble radius);
 #define grid_size 40
 void toggle_box_set_selected_key (ToggleBox* self, const gchar* value);
 FlatButton* flat_button_new (void);
@@ -235,7 +235,7 @@ static gboolean toggle_box_real_draw (GtkWidget* base, cairo_t* c) {
 	_tmp3_ = _tmp2_.width;
 	_tmp4_ = allocation;
 	_tmp5_ = _tmp4_.height;
-	dash_box_cairo_rounded_rectangle (_tmp1_, (gdouble) 0, (gdouble) 0, (gdouble) _tmp3_, (gdouble) _tmp5_, 0.1 * grid_size);
+	cairo_utils_rounded_rectangle (_tmp1_, (gdouble) 0, (gdouble) 0, (gdouble) _tmp3_, (gdouble) _tmp5_, 0.1 * grid_size);
 	_tmp6_ = c;
 	cairo_set_source_rgba (_tmp6_, 0.5, 0.5, 0.5, 0.5);
 	_tmp7_ = c;
@@ -386,15 +386,15 @@ static GtkButton* toggle_box_make_button (ToggleBox* self, const gchar* key, con
 		gtk_css_provider_load_from_data (style, "* {padding: 8px;}", (gssize) (-1), &_inner_error_);
 		if (_inner_error_ != NULL) {
 			_g_object_unref0 (style);
-			goto __catch28_g_error;
+			goto __catch29_g_error;
 		}
 		_tmp26_ = item;
 		_tmp27_ = gtk_widget_get_style_context ((GtkWidget*) _tmp26_);
 		gtk_style_context_add_provider (_tmp27_, (GtkStyleProvider*) style, (guint) GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 		_g_object_unref0 (style);
 	}
-	goto __finally28;
-	__catch28_g_error:
+	goto __finally29;
+	__catch29_g_error:
 	{
 		GError* e = NULL;
 		GError* _tmp28_;
@@ -406,7 +406,7 @@ static GtkButton* toggle_box_make_button (ToggleBox* self, const gchar* key, con
 		g_debug ("toggle-box.vala:114: Internal error loading session chooser style: %s", _tmp29_);
 		_g_error_free0 (e);
 	}
-	__finally28:
+	__finally29:
 	if (_inner_error_ != NULL) {
 		_g_object_unref0 (label);
 		_g_free0 (name);

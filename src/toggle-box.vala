@@ -54,8 +54,8 @@ public class ToggleBox : Gtk.Box
         Gtk.Allocation allocation;
         get_allocation (out allocation);
 
-        DashBox.cairo_rounded_rectangle (c, 0, 0, allocation.width,
-                                         allocation.height, 0.1 * grid_size);
+        CairoUtils.rounded_rectangle (c, 0, 0, allocation.width,
+                                      allocation.height, 0.1 * grid_size);
         c.set_source_rgba (0.5, 0.5, 0.5, 0.5);
         c.set_line_width (1);
         c.stroke ();

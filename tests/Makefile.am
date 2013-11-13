@@ -20,6 +20,7 @@ unity_greeter_test_SOURCES = \
 	../src/email-autocompleter.vala \
 	../src/config.vapi \
 	../src/fixes.vapi \
+	../src/cairo-utils.vala \
 	../src/animate-timer.vala \
 	../src/indicator.vapi \
 	../src/fadable.vala \
@@ -57,6 +58,7 @@ unity_greeter_test_VALAFLAGS = \
 	--pkg liblightdm-gobject-1 \
 	--pkg libcanberra \
 	--pkg gio-2.0 \
+	--pkg pixman-1 \
 	--target-glib 2.32
 
 unity_greeter_test_LDADD = \

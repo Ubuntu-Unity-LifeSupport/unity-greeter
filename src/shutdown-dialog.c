@@ -18,21 +18,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Authors: Robert Ancell <robert.ancell@canonical.com>
+ *          Marco Trevisan <marco.trevisan@canonical.com>
  */
 
 #include <glib.h>
 #include <glib-object.h>
 #include <gtk/gtk.h>
 #include <cairo.h>
+#include <gdk/gdk.h>
+#include <stdlib.h>
+#include <string.h>
 #include <glib/gi18n-lib.h>
 #include <pango/pango.h>
 #include <float.h>
 #include <math.h>
-#include <stdlib.h>
-#include <string.h>
 #include <lightdm.h>
 #include "config.h"
-#include <gdk/gdk.h>
 
 
 #define TYPE_SHUTDOWN_DIALOG_TYPE (shutdown_dialog_type_get_type ())
@@ -48,6 +49,26 @@ typedef struct _ShutdownDialog ShutdownDialog;
 typedef struct _ShutdownDialogClass ShutdownDialogClass;
 typedef struct _ShutdownDialogPrivate ShutdownDialogPrivate;
 
+#define TYPE_MONITOR (monitor_get_type ())
+#define MONITOR(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_MONITOR, Monitor))
+#define MONITOR_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_MONITOR, MonitorClass))
+#define IS_MONITOR(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_MONITOR))
+#define IS_MONITOR_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_MONITOR))
+#define MONITOR_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_MONITOR, MonitorClass))
+
+typedef struct _Monitor Monitor;
+typedef struct _MonitorClass MonitorClass;
+
+#define TYPE_BACKGROUND (background_get_type ())
+#define BACKGROUND(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_BACKGROUND, Background))
+#define BACKGROUND_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_BACKGROUND, BackgroundClass))
+#define IS_BACKGROUND(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_BACKGROUND))
+#define IS_BACKGROUND_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_BACKGROUND))
+#define BACKGROUND_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_BACKGROUND, BackgroundClass))
+
+typedef struct _Background Background;
+typedef struct _BackgroundClass BackgroundClass;
+
 #define TYPE_DIALOG_BUTTON (dialog_button_get_type ())
 #define DIALOG_BUTTON(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_DIALOG_BUTTON, DialogButton))
 #define DIALOG_BUTTON_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_DIALOG_BUTTON, DialogButtonClass))
@@ -57,12 +78,27 @@ typedef struct _ShutdownDialogPrivate ShutdownDialogPrivate;
 
 typedef struct _DialogButton DialogButton;
 typedef struct _DialogButtonClass DialogButtonClass;
+
+#define TYPE_ANIMATE_TIMER (animate_timer_get_type ())
+#define ANIMATE_TIMER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_ANIMATE_TIMER, AnimateTimer))
+#define ANIMATE_TIMER_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_ANIMATE_TIMER, AnimateTimerClass))
+#define IS_ANIMATE_TIMER(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_ANIMATE_TIMER))
+#define IS_ANIMATE_TIMER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_ANIMATE_TIMER))
+#define ANIMATE_TIMER_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_ANIMATE_TIMER, AnimateTimerClass))
+
+typedef struct _AnimateTimer AnimateTimer;
+typedef struct _AnimateTimerClass AnimateTimerClass;
 #define _cairo_surface_destroy0(var) ((var == NULL) ? NULL : (var = (cairo_surface_destroy (var), NULL)))
 #define _cairo_pattern_destroy0(var) ((var == NULL) ? NULL : (var = (cairo_pattern_destroy (var), NULL)))
+#define _monitor_unref0(var) ((var == NULL) ? NULL : (var = (monitor_unref (var), NULL)))
 #define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
-#define __vala_PangoFontDescription_free0(var) ((var == NULL) ? NULL : (var = (_vala_PangoFontDescription_free (var), NULL)))
 #define _g_free0(var) (var = (g_free (var), NULL))
+#define __vala_PangoFontDescription_free0(var) ((var == NULL) ? NULL : (var = (_vala_PangoFontDescription_free (var), NULL)))
 #define _g_error_free0(var) ((var == NULL) ? NULL : (var = (g_error_free (var), NULL)))
+typedef struct _Block5Data Block5Data;
+typedef struct _Block6Data Block6Data;
+typedef struct _MonitorPrivate MonitorPrivate;
+#define _cairo_destroy0(var) ((var == NULL) ? NULL : (var = (cairo_destroy (var), NULL)))
 typedef struct _DialogButtonPrivate DialogButtonPrivate;
 
 typedef enum  {
@@ -81,15 +117,50 @@ struct _ShutdownDialogClass {
 };
 
 struct _ShutdownDialogPrivate {
+	cairo_surface_t* bg_surface;
 	cairo_surface_t* corner_surface;
 	cairo_surface_t* left_surface;
 	cairo_surface_t* top_surface;
 	cairo_pattern_t* corner_pattern;
 	cairo_pattern_t* left_pattern;
 	cairo_pattern_t* top_pattern;
+	Monitor* monitor;
+	Background* background;
 	GtkBox* vbox;
 	DialogButton* close_button;
 	GtkBox* button_box;
+	GtkEventBox* monitor_events;
+	GtkEventBox* vbox_events;
+	AnimateTimer* animation;
+	gboolean closing;
+};
+
+struct _Block5Data {
+	int _ref_count_;
+	ShutdownDialog * self;
+	DialogButton* button;
+};
+
+typedef gdouble (*AnimateTimerEasingFunc) (gdouble x, void* user_data);
+struct _Block6Data {
+	int _ref_count_;
+	ShutdownDialog * self;
+	gdouble start_value;
+};
+
+struct _Monitor {
+	GTypeInstance parent_instance;
+	volatile int ref_count;
+	MonitorPrivate * priv;
+	gint x;
+	gint y;
+	gint width;
+	gint height;
+};
+
+struct _MonitorClass {
+	GTypeClass parent_class;
+	void (*finalize) (Monitor *self);
 };
 
 struct _DialogButton {
@@ -103,6 +174,7 @@ struct _DialogButtonClass {
 
 struct _DialogButtonPrivate {
 	gchar* inactive_filename;
+	gchar* focused_filename;
 	gchar* active_filename;
 	GtkImage* i;
 	GtkLabel* l;
@@ -114,46 +186,92 @@ static gpointer dialog_button_parent_class = NULL;
 
 GType shutdown_dialog_type_get_type (void) G_GNUC_CONST;
 GType shutdown_dialog_get_type (void) G_GNUC_CONST;
+gpointer monitor_ref (gpointer instance);
+void monitor_unref (gpointer instance);
+GParamSpec* param_spec_monitor (const gchar* name, const gchar* nick, const gchar* blurb, GType object_type, GParamFlags flags);
+void value_set_monitor (GValue* value, gpointer v_object);
+void value_take_monitor (GValue* value, gpointer v_object);
+gpointer value_get_monitor (const GValue* value);
+GType monitor_get_type (void) G_GNUC_CONST;
+GType background_get_type (void) G_GNUC_CONST;
 GType dialog_button_get_type (void) G_GNUC_CONST;
+GType animate_timer_get_type (void) G_GNUC_CONST;
 #define SHUTDOWN_DIALOG_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TYPE_SHUTDOWN_DIALOG, ShutdownDialogPrivate))
 enum  {
 	SHUTDOWN_DIALOG_DUMMY_PROPERTY
 };
 #define SHUTDOWN_DIALOG_BORDER_SIZE 30
+#define SHUTDOWN_DIALOG_BORDER_INTERNAL_SIZE 10
+#define SHUTDOWN_DIALOG_BORDER_EXTERNAL_SIZE (SHUTDOWN_DIALOG_BORDER_SIZE - SHUTDOWN_DIALOG_BORDER_INTERNAL_SIZE)
 #define SHUTDOWN_DIALOG_CLOSE_OFFSET 3
-ShutdownDialog* shutdown_dialog_new (ShutdownDialogType type);
-ShutdownDialog* shutdown_dialog_construct (GType object_type, ShutdownDialogType type);
+#define SHUTDOWN_DIALOG_BUTTON_TEXT_SPACE 9
+#define SHUTDOWN_DIALOG_BLUR_RADIUS 4
+ShutdownDialog* shutdown_dialog_new (ShutdownDialogType type, Background* bg);
+ShutdownDialog* shutdown_dialog_construct (GType object_type, ShutdownDialogType type, Background* bg);
+static void shutdown_dialog_rebuild_background (ShutdownDialog* self);
+static void _shutdown_dialog_rebuild_background_g_object_notify (GObject* _sender, GParamSpec* pspec, gpointer self);
+static gboolean __lambda29_ (ShutdownDialog* self);
+void shutdown_dialog_close (ShutdownDialog* self);
+static gboolean ___lambda29__gtk_widget_button_press_event (GtkWidget* _sender, GdkEventButton* event, gpointer self);
+static gboolean __lambda32_ (ShutdownDialog* self);
+static gboolean ___lambda32__gtk_widget_button_press_event (GtkWidget* _sender, GdkEventButton* event, gpointer self);
 static void _vala_PangoFontDescription_free (PangoFontDescription* self);
 static DialogButton* shutdown_dialog_add_button (ShutdownDialog* self, const gchar* text, const gchar* inactive_filename, const gchar* active_filename);
-static void ____lambda29_ (ShutdownDialog* self);
-static void _____lambda29__gtk_button_clicked (GtkButton* _sender, gpointer self);
-static void ____lambda30_ (ShutdownDialog* self);
-static void _____lambda30__gtk_button_clicked (GtkButton* _sender, gpointer self);
-static void ___lambda31_ (ShutdownDialog* self);
-static void ____lambda31__gtk_button_clicked (GtkButton* _sender, gpointer self);
-static void ___lambda32_ (ShutdownDialog* self);
-static void ____lambda32__gtk_button_clicked (GtkButton* _sender, gpointer self);
-DialogButton* dialog_button_new (const gchar* inactive_filename, const gchar* active_filename, GtkLabel* label);
-DialogButton* dialog_button_construct (GType object_type, const gchar* inactive_filename, const gchar* active_filename, GtkLabel* label);
-static void __lambda33_ (ShutdownDialog* self);
-static void ___lambda33__gtk_button_clicked (GtkButton* _sender, gpointer self);
+static void ____lambda33_ (ShutdownDialog* self);
+static void _____lambda33__gtk_button_clicked (GtkButton* _sender, gpointer self);
+static void ____lambda34_ (ShutdownDialog* self);
+static void _____lambda34__gtk_button_clicked (GtkButton* _sender, gpointer self);
+static void ___lambda35_ (ShutdownDialog* self);
+static void ____lambda35__gtk_button_clicked (GtkButton* _sender, gpointer self);
+static Block5Data* block5_data_ref (Block5Data* _data5_);
+static void block5_data_unref (void * _userdata_);
+static void ___lambda36_ (ShutdownDialog* self);
+static void ____lambda36__gtk_button_clicked (GtkButton* _sender, gpointer self);
+static void ____lambda37_ (Block5Data* _data5_);
+static void _____lambda37__gtk_widget_show (GtkWidget* _sender, gpointer self);
+DialogButton* dialog_button_new (const gchar* inactive_filename, const gchar* focused_filename, const gchar* active_filename, GtkLabel* label);
+DialogButton* dialog_button_construct (GType object_type, const gchar* inactive_filename, const gchar* focused_filename, const gchar* active_filename, GtkLabel* label);
+static void __lambda38_ (ShutdownDialog* self);
+static void ___lambda38__gtk_button_clicked (GtkButton* _sender, gpointer self);
+static gdouble __lambda39_ (ShutdownDialog* self, gdouble x);
+static gdouble ___lambda39__animate_timer_easing_func (gdouble x, gpointer self);
+#define ANIMATE_TIMER_INSTANT 150
+AnimateTimer* animate_timer_new (AnimateTimerEasingFunc func, void* func_target, gint speed);
+AnimateTimer* animate_timer_construct (GType object_type, AnimateTimerEasingFunc func, void* func_target, gint speed);
+static void __lambda40_ (ShutdownDialog* self);
+static void ___lambda40__animate_timer_animate (AnimateTimer* _sender, gdouble progress, gpointer self);
+static void __lambda41_ (ShutdownDialog* self);
+void animate_timer_reset (AnimateTimer* self, gint temp_speed);
+static void ___lambda41__gtk_widget_show (GtkWidget* _sender, gpointer self);
+static Block6Data* block6_data_ref (Block6Data* _data6_);
+static void block6_data_unref (void * _userdata_);
+gdouble animate_timer_get_progress (AnimateTimer* self);
+static gdouble __lambda30_ (Block6Data* _data6_, gdouble x);
+static gdouble ___lambda30__animate_timer_easing_func (gdouble x, gpointer self);
+static void __lambda31_ (ShutdownDialog* self, gdouble p);
+void animate_timer_stop (AnimateTimer* self);
+static void ___lambda31__animate_timer_animate (AnimateTimer* _sender, gdouble progress, gpointer self);
+void shutdown_dialog_set_active_monitor (ShutdownDialog* self, Monitor* m);
+gboolean monitor_equals (Monitor* self, Monitor* other);
 void shutdown_dialog_focus_next (ShutdownDialog* self);
 void shutdown_dialog_focus_prev (ShutdownDialog* self);
 void shutdown_dialog_cancel (ShutdownDialog* self);
 static void shutdown_dialog_real_size_allocate (GtkWidget* base, GtkAllocation* allocation);
 static gboolean shutdown_dialog_real_draw (GtkWidget* base, cairo_t* c);
-void dash_box_cairo_rounded_rectangle (cairo_t* c, gdouble x, gdouble y, gdouble width, gdouble height, gdouble radius);
-static gboolean shutdown_dialog_real_button_press_event (GtkWidget* base, GdkEventButton* event);
+gboolean animate_timer_get_is_running (AnimateTimer* self);
+void cairo_utils_exponential_blur_surface (cairo_surface_t* surface, gint radius);
+void background_get_average_color (Background* self, GdkRGBA* result);
+void cairo_utils_rounded_rectangle (cairo_t* c, gdouble x, gdouble y, gdouble width, gdouble height, gdouble radius);
 static void shutdown_dialog_finalize (GObject* obj);
 #define DIALOG_BUTTON_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TYPE_DIALOG_BUTTON, DialogButtonPrivate))
 enum  {
 	DIALOG_BUTTON_DUMMY_PROPERTY
 };
+void unity_greeter_add_style_class (GtkWidget* widget);
 static gboolean dialog_button_real_enter_notify_event (GtkWidget* base, GdkEventCrossing* event);
 static gboolean dialog_button_real_leave_notify_event (GtkWidget* base, GdkEventCrossing* event);
-static gboolean dialog_button_real_focus_in_event (GtkWidget* base, GdkEventFocus* event);
-static gboolean dialog_button_real_focus_out_event (GtkWidget* base, GdkEventFocus* event);
 static gboolean dialog_button_real_draw (GtkWidget* base, cairo_t* c);
+static void dialog_button_real_state_flags_changed (GtkWidget* base, GtkStateFlags previous_state);
 static void dialog_button_finalize (GObject* obj);
 
 
@@ -169,19 +287,53 @@ GType shutdown_dialog_type_get_type (void) {
 }
 
 
+static void _shutdown_dialog_rebuild_background_g_object_notify (GObject* _sender, GParamSpec* pspec, gpointer self) {
+	shutdown_dialog_rebuild_background (self);
+}
+
+
+static gboolean __lambda29_ (ShutdownDialog* self) {
+	gboolean result = FALSE;
+	shutdown_dialog_close (self);
+	result = TRUE;
+	return result;
+}
+
+
+static gboolean ___lambda29__gtk_widget_button_press_event (GtkWidget* _sender, GdkEventButton* event, gpointer self) {
+	gboolean result;
+	result = __lambda29_ (self);
+	return result;
+}
+
+
+static gboolean __lambda32_ (ShutdownDialog* self) {
+	gboolean result = FALSE;
+	result = TRUE;
+	return result;
+}
+
+
+static gboolean ___lambda32__gtk_widget_button_press_event (GtkWidget* _sender, GdkEventButton* event, gpointer self) {
+	gboolean result;
+	result = __lambda32_ (self);
+	return result;
+}
+
+
 static void _vala_PangoFontDescription_free (PangoFontDescription* self) {
 	g_boxed_free (pango_font_description_get_type (), self);
 }
 
 
-static void ____lambda29_ (ShutdownDialog* self) {
+static void ____lambda33_ (ShutdownDialog* self) {
 	GError * _inner_error_ = NULL;
 	{
 		lightdm_suspend (&_inner_error_);
 		if (_inner_error_ != NULL) {
 			goto __catch24_g_error;
 		}
-		g_signal_emit_by_name (self, "close");
+		shutdown_dialog_close (self);
 	}
 	goto __finally24;
 	__catch24_g_error:
@@ -193,7 +345,7 @@ static void ____lambda29_ (ShutdownDialog* self) {
 		_inner_error_ = NULL;
 		_tmp0_ = e;
 		_tmp1_ = _tmp0_->message;
-		g_warning ("shutdown-dialog.vala:93: Failed to suspend: %s", _tmp1_);
+		g_warning ("shutdown-dialog.vala:139: Failed to suspend: %s", _tmp1_);
 		_g_error_free0 (e);
 	}
 	__finally24:
@@ -205,19 +357,19 @@ static void ____lambda29_ (ShutdownDialog* self) {
 }
 
 
-static void _____lambda29__gtk_button_clicked (GtkButton* _sender, gpointer self) {
-	____lambda29_ (self);
+static void _____lambda33__gtk_button_clicked (GtkButton* _sender, gpointer self) {
+	____lambda33_ (self);
 }
 
 
-static void ____lambda30_ (ShutdownDialog* self) {
+static void ____lambda34_ (ShutdownDialog* self) {
 	GError * _inner_error_ = NULL;
 	{
 		lightdm_hibernate (&_inner_error_);
 		if (_inner_error_ != NULL) {
 			goto __catch25_g_error;
 		}
-		g_signal_emit_by_name (self, "close");
+		shutdown_dialog_close (self);
 	}
 	goto __finally25;
 	__catch25_g_error:
@@ -229,7 +381,7 @@ static void ____lambda30_ (ShutdownDialog* self) {
 		_inner_error_ = NULL;
 		_tmp0_ = e;
 		_tmp1_ = _tmp0_->message;
-		g_warning ("shutdown-dialog.vala:110: Failed to hibernate: %s", _tmp1_);
+		g_warning ("shutdown-dialog.vala:156: Failed to hibernate: %s", _tmp1_);
 		_g_error_free0 (e);
 	}
 	__finally25:
@@ -241,19 +393,19 @@ static void ____lambda30_ (ShutdownDialog* self) {
 }
 
 
-static void _____lambda30__gtk_button_clicked (GtkButton* _sender, gpointer self) {
-	____lambda30_ (self);
+static void _____lambda34__gtk_button_clicked (GtkButton* _sender, gpointer self) {
+	____lambda34_ (self);
 }
 
 
-static void ___lambda31_ (ShutdownDialog* self) {
+static void ___lambda35_ (ShutdownDialog* self) {
 	GError * _inner_error_ = NULL;
 	{
 		lightdm_restart (&_inner_error_);
 		if (_inner_error_ != NULL) {
 			goto __catch26_g_error;
 		}
-		g_signal_emit_by_name (self, "close");
+		shutdown_dialog_close (self);
 	}
 	goto __finally26;
 	__catch26_g_error:
@@ -265,7 +417,7 @@ static void ___lambda31_ (ShutdownDialog* self) {
 		_inner_error_ = NULL;
 		_tmp0_ = e;
 		_tmp1_ = _tmp0_->message;
-		g_warning ("shutdown-dialog.vala:128: Failed to restart: %s", _tmp1_);
+		g_warning ("shutdown-dialog.vala:174: Failed to restart: %s", _tmp1_);
 		_g_error_free0 (e);
 	}
 	__finally26:
@@ -277,19 +429,38 @@ static void ___lambda31_ (ShutdownDialog* self) {
 }
 
 
-static void ____lambda31__gtk_button_clicked (GtkButton* _sender, gpointer self) {
-	___lambda31_ (self);
+static void ____lambda35__gtk_button_clicked (GtkButton* _sender, gpointer self) {
+	___lambda35_ (self);
 }
 
 
-static void ___lambda32_ (ShutdownDialog* self) {
+static Block5Data* block5_data_ref (Block5Data* _data5_) {
+	g_atomic_int_inc (&_data5_->_ref_count_);
+	return _data5_;
+}
+
+
+static void block5_data_unref (void * _userdata_) {
+	Block5Data* _data5_;
+	_data5_ = (Block5Data*) _userdata_;
+	if (g_atomic_int_dec_and_test (&_data5_->_ref_count_)) {
+		ShutdownDialog * self;
+		self = _data5_->self;
+		_g_object_unref0 (_data5_->button);
+		_g_object_unref0 (self);
+		g_slice_free (Block5Data, _data5_);
+	}
+}
+
+
+static void ___lambda36_ (ShutdownDialog* self) {
 	GError * _inner_error_ = NULL;
 	{
 		lightdm_shutdown (&_inner_error_);
 		if (_inner_error_ != NULL) {
 			goto __catch27_g_error;
 		}
-		g_signal_emit_by_name (self, "close");
+		shutdown_dialog_close (self);
 	}
 	goto __finally27;
 	__catch27_g_error:
@@ -301,7 +472,7 @@ static void ___lambda32_ (ShutdownDialog* self) {
 		_inner_error_ = NULL;
 		_tmp0_ = e;
 		_tmp1_ = _tmp0_->message;
-		g_warning ("shutdown-dialog.vala:145: Failed to shutdown: %s", _tmp1_);
+		g_warning ("shutdown-dialog.vala:191: Failed to shutdown: %s", _tmp1_);
 		_g_error_free0 (e);
 	}
 	__finally27:
@@ -313,284 +484,599 @@ static void ___lambda32_ (ShutdownDialog* self) {
 }
 
 
-static void ____lambda32__gtk_button_clicked (GtkButton* _sender, gpointer self) {
-	___lambda32_ (self);
+static void ____lambda36__gtk_button_clicked (GtkButton* _sender, gpointer self) {
+	___lambda36_ (self);
 }
 
 
-static void __lambda33_ (ShutdownDialog* self) {
-	g_signal_emit_by_name (self, "close");
+static void ____lambda37_ (Block5Data* _data5_) {
+	ShutdownDialog * self;
+	DialogButton* _tmp0_;
+	self = _data5_->self;
+	_tmp0_ = _data5_->button;
+	gtk_widget_grab_focus ((GtkWidget*) _tmp0_);
 }
 
 
-static void ___lambda33__gtk_button_clicked (GtkButton* _sender, gpointer self) {
-	__lambda33_ (self);
+static void _____lambda37__gtk_widget_show (GtkWidget* _sender, gpointer self) {
+	____lambda37_ (self);
 }
 
 
-ShutdownDialog* shutdown_dialog_construct (GType object_type, ShutdownDialogType type) {
+static void __lambda38_ (ShutdownDialog* self) {
+	shutdown_dialog_close (self);
+}
+
+
+static void ___lambda38__gtk_button_clicked (GtkButton* _sender, gpointer self) {
+	__lambda38_ (self);
+}
+
+
+static gdouble __lambda39_ (ShutdownDialog* self, gdouble x) {
+	gdouble result = 0.0;
+	gdouble _tmp0_;
+	_tmp0_ = x;
+	result = _tmp0_;
+	return result;
+}
+
+
+static gdouble ___lambda39__animate_timer_easing_func (gdouble x, gpointer self) {
+	gdouble result;
+	result = __lambda39_ (self, x);
+	return result;
+}
+
+
+static void __lambda40_ (ShutdownDialog* self) {
+	gtk_widget_queue_draw ((GtkWidget*) self);
+}
+
+
+static void ___lambda40__animate_timer_animate (AnimateTimer* _sender, gdouble progress, gpointer self) {
+	__lambda40_ (self);
+}
+
+
+static void __lambda41_ (ShutdownDialog* self) {
+	AnimateTimer* _tmp0_;
+	_tmp0_ = self->priv->animation;
+	animate_timer_reset (_tmp0_, -1);
+}
+
+
+static void ___lambda41__gtk_widget_show (GtkWidget* _sender, gpointer self) {
+	__lambda41_ (self);
+}
+
+
+ShutdownDialog* shutdown_dialog_construct (GType object_type, ShutdownDialogType type, Background* bg) {
 	ShutdownDialog * self = NULL;
-	GtkBox* _tmp0_;
-	GtkBox* _tmp1_;
-	GtkBox* _tmp2_;
-	GtkBox* _tmp3_;
-	const gchar* _tmp4_ = NULL;
-	GtkLabel* _tmp5_;
-	GtkLabel* title_label;
-	GtkLabel* _tmp6_;
-	PangoFontDescription* _tmp7_ = NULL;
-	PangoFontDescription* _tmp8_;
-	GtkLabel* _tmp9_;
-	GdkRGBA _tmp10_ = {0};
-	GtkLabel* _tmp11_;
+	Background* _tmp0_;
+	Background* _tmp1_;
+	Background* _tmp2_;
+	GtkEventBox* _tmp3_;
+	GtkEventBox* _tmp4_;
+	GtkEventBox* _tmp5_;
+	GtkEventBox* _tmp6_;
+	GtkEventBox* _tmp7_;
+	GdkEventMask _tmp8_;
+	GdkEventMask _tmp9_;
+	GtkEventBox* _tmp10_;
+	GtkEventBox* _tmp11_;
 	GtkBox* _tmp12_;
-	GtkLabel* _tmp13_;
+	GtkBox* _tmp13_;
+	GtkBox* _tmp14_;
+	GtkBox* _tmp15_;
+	GtkBox* _tmp16_;
+	gint _tmp17_;
+	gint _tmp18_;
+	GtkBox* _tmp19_;
+	GtkBox* _tmp20_;
+	gint _tmp21_;
+	gint _tmp22_;
+	GtkBox* _tmp23_;
+	GtkBox* _tmp24_;
+	gint _tmp25_;
+	gint _tmp26_;
+	GtkBox* _tmp27_;
+	GtkBox* _tmp28_;
+	gint _tmp29_;
+	gint _tmp30_;
+	GtkEventBox* _tmp31_;
+	GtkEventBox* _tmp32_;
+	GtkEventBox* _tmp33_;
+	GtkEventBox* _tmp34_;
+	GtkEventBox* _tmp35_;
+	GdkEventMask _tmp36_;
+	GdkEventMask _tmp37_;
+	GtkEventBox* _tmp38_;
+	GtkEventBox* _tmp39_;
+	GtkBox* _tmp40_;
+	GtkEventBox* _tmp41_;
+	GtkEventBox* _tmp42_;
 	gchar* text = NULL;
-	ShutdownDialogType _tmp14_;
-	const gchar* _tmp20_;
-	GtkLabel* _tmp21_;
+	ShutdownDialogType _tmp43_;
+	const gchar* _tmp59_;
+	GtkLabel* _tmp60_;
 	GtkLabel* label;
-	GtkLabel* _tmp22_;
-	GtkLabel* _tmp23_;
-	PangoFontDescription* _tmp24_ = NULL;
-	PangoFontDescription* _tmp25_;
-	GtkLabel* _tmp26_;
-	GdkRGBA _tmp27_ = {0};
-	GtkLabel* _tmp28_;
-	GtkLabel* _tmp29_;
-	GtkBox* _tmp30_;
-	GtkLabel* _tmp31_;
-	GtkBox* _tmp32_;
-	GtkBox* _tmp33_;
-	GtkBox* _tmp34_;
-	GtkBox* _tmp35_;
-	ShutdownDialogType _tmp36_;
-	gboolean _tmp55_ = FALSE;
-	gboolean _tmp64_ = FALSE;
-	gchar* _tmp73_ = NULL;
-	gchar* _tmp74_;
-	gchar* _tmp75_ = NULL;
-	gchar* _tmp76_;
-	DialogButton* _tmp77_;
-	DialogButton* _tmp78_;
-	DialogButton* _tmp79_;
-	DialogButton* _tmp80_;
-	DialogButton* _tmp81_;
+	GtkLabel* _tmp61_;
+	GtkLabel* _tmp62_;
+	PangoFontDescription* _tmp63_ = NULL;
+	PangoFontDescription* _tmp64_;
+	GtkLabel* _tmp65_;
+	GdkRGBA _tmp66_ = {0};
+	GtkLabel* _tmp67_;
+	GtkLabel* _tmp68_;
+	GtkBox* _tmp69_;
+	GtkLabel* _tmp70_;
+	GtkBox* _tmp71_;
+	GtkBox* _tmp72_;
+	GtkBox* _tmp73_;
+	GtkBox* _tmp74_;
+	ShutdownDialogType _tmp75_;
+	gboolean _tmp94_ = FALSE;
+	gboolean _tmp103_ = FALSE;
+	gchar* _tmp113_ = NULL;
+	gchar* _tmp114_;
+	gchar* _tmp115_ = NULL;
+	gchar* _tmp116_;
+	gchar* _tmp117_ = NULL;
+	gchar* _tmp118_;
+	DialogButton* _tmp119_;
+	DialogButton* _tmp120_;
+	DialogButton* _tmp121_;
+	DialogButton* _tmp122_;
+	DialogButton* _tmp123_;
+	AnimateTimer* _tmp124_;
+	AnimateTimer* _tmp125_;
+	g_return_val_if_fail (bg != NULL, NULL);
 	self = (ShutdownDialog*) g_object_new (object_type, NULL);
-	_tmp0_ = (GtkBox*) gtk_box_new (GTK_ORIENTATION_VERTICAL, 10);
-	g_object_ref_sink (_tmp0_);
+	_tmp0_ = bg;
+	self->priv->background = _tmp0_;
+	_tmp1_ = self->priv->background;
+	g_signal_connect_object ((GObject*) _tmp1_, "notify::alpha", (GCallback) _shutdown_dialog_rebuild_background_g_object_notify, self, 0);
+	_tmp2_ = self->priv->background;
+	g_signal_connect_object ((GObject*) _tmp2_, "notify::average-color", (GCallback) _shutdown_dialog_rebuild_background_g_object_notify, self, 0);
+	_tmp3_ = (GtkEventBox*) gtk_event_box_new ();
+	g_object_ref_sink (_tmp3_);
+	_g_object_unref0 (self->priv->monitor_events);
+	self->priv->monitor_events = _tmp3_;
+	_tmp4_ = self->priv->monitor_events;
+	gtk_widget_set_visible ((GtkWidget*) _tmp4_, TRUE);
+	_tmp5_ = self->priv->monitor_events;
+	gtk_event_box_set_visible_window (_tmp5_, FALSE);
+	_tmp6_ = self->priv->monitor_events;
+	_tmp7_ = self->priv->monitor_events;
+	_tmp8_ = gtk_widget_get_events ((GtkWidget*) _tmp7_);
+	_tmp9_ = _tmp8_;
+	gtk_widget_set_events ((GtkWidget*) _tmp7_, _tmp9_ | GDK_BUTTON_PRESS_MASK);
+	_tmp10_ = self->priv->monitor_events;
+	g_signal_connect_object ((GtkWidget*) _tmp10_, "button-press-event", (GCallback) ___lambda29__gtk_widget_button_press_event, self, 0);
+	_tmp11_ = self->priv->monitor_events;
+	gtk_container_add ((GtkContainer*) self, (GtkWidget*) _tmp11_);
+	_tmp12_ = (GtkBox*) gtk_box_new (GTK_ORIENTATION_VERTICAL, 10);
+	g_object_ref_sink (_tmp12_);
 	_g_object_unref0 (self->priv->vbox);
-	self->priv->vbox = _tmp0_;
-	_tmp1_ = self->priv->vbox;
-	gtk_widget_set_visible ((GtkWidget*) _tmp1_, TRUE);
-	_tmp2_ = self->priv->vbox;
-	gtk_container_add ((GtkContainer*) self, (GtkWidget*) _tmp2_);
-	_tmp3_ = self->priv->vbox;
-	gtk_container_set_border_width ((GtkContainer*) _tmp3_, (guint) 20);
-	_tmp4_ = _ ("Shutdown");
-	_tmp5_ = (GtkLabel*) gtk_label_new (_tmp4_);
-	g_object_ref_sink (_tmp5_);
-	title_label = _tmp5_;
-	_tmp6_ = title_label;
-	_tmp7_ = pango_font_description_from_string ("Ubuntu Light 15");
-	_tmp8_ = _tmp7_;
-	gtk_widget_override_font ((GtkWidget*) _tmp6_, _tmp8_);
-	__vala_PangoFontDescription_free0 (_tmp8_);
-	_tmp9_ = title_label;
-	_tmp10_.red = (gdouble) 1.0f;
-	_tmp10_.green = (gdouble) 1.0f;
-	_tmp10_.blue = (gdouble) 1.0f;
-	_tmp10_.alpha = (gdouble) 1.0f;
-	gtk_widget_override_color ((GtkWidget*) _tmp9_, GTK_STATE_FLAG_NORMAL, &_tmp10_);
-	_tmp11_ = title_label;
-	gtk_misc_set_alignment ((GtkMisc*) _tmp11_, 0.0f, 0.5f);
-	_tmp12_ = self->priv->vbox;
-	_tmp13_ = title_label;
-	gtk_box_pack_start (_tmp12_, (GtkWidget*) _tmp13_, FALSE, FALSE, (guint) 0);
-	_tmp14_ = type;
-	if (_tmp14_ == SHUTDOWN_DIALOG_TYPE_SHUTDOWN) {
-		const gchar* _tmp15_ = NULL;
-		gchar* _tmp16_;
-		_tmp15_ = _ ("Goodbye. Would you like to…");
-		_tmp16_ = g_strdup (_tmp15_);
+	self->priv->vbox = _tmp12_;
+	_tmp13_ = self->priv->vbox;
+	gtk_widget_set_visible ((GtkWidget*) _tmp13_, TRUE);
+	_tmp14_ = self->priv->vbox;
+	g_object_set ((GtkWidget*) _tmp14_, "margin", SHUTDOWN_DIALOG_BORDER_INTERNAL_SIZE, NULL);
+	_tmp15_ = self->priv->vbox;
+	_tmp16_ = self->priv->vbox;
+	_tmp17_ = gtk_widget_get_margin_top ((GtkWidget*) _tmp16_);
+	_tmp18_ = _tmp17_;
+	gtk_widget_set_margin_top ((GtkWidget*) _tmp16_, _tmp18_ + 9);
+	_tmp19_ = self->priv->vbox;
+	_tmp20_ = self->priv->vbox;
+	_tmp21_ = gtk_widget_get_margin_left ((GtkWidget*) _tmp20_);
+	_tmp22_ = _tmp21_;
+	gtk_widget_set_margin_left ((GtkWidget*) _tmp20_, _tmp22_ + 20);
+	_tmp23_ = self->priv->vbox;
+	_tmp24_ = self->priv->vbox;
+	_tmp25_ = gtk_widget_get_margin_right ((GtkWidget*) _tmp24_);
+	_tmp26_ = _tmp25_;
+	gtk_widget_set_margin_right ((GtkWidget*) _tmp24_, _tmp26_ + 20);
+	_tmp27_ = self->priv->vbox;
+	_tmp28_ = self->priv->vbox;
+	_tmp29_ = gtk_widget_get_margin_bottom ((GtkWidget*) _tmp28_);
+	_tmp30_ = _tmp29_;
+	gtk_widget_set_margin_bottom ((GtkWidget*) _tmp28_, _tmp30_ + 2);
+	_tmp31_ = (GtkEventBox*) gtk_event_box_new ();
+	g_object_ref_sink (_tmp31_);
+	_g_object_unref0 (self->priv->vbox_events);
+	self->priv->vbox_events = _tmp31_;
+	_tmp32_ = self->priv->vbox_events;
+	gtk_widget_set_visible ((GtkWidget*) _tmp32_, TRUE);
+	_tmp33_ = self->priv->vbox_events;
+	gtk_event_box_set_visible_window (_tmp33_, FALSE);
+	_tmp34_ = self->priv->vbox_events;
+	_tmp35_ = self->priv->vbox_events;
+	_tmp36_ = gtk_widget_get_events ((GtkWidget*) _tmp35_);
+	_tmp37_ = _tmp36_;
+	gtk_widget_set_events ((GtkWidget*) _tmp35_, _tmp37_ | GDK_BUTTON_PRESS_MASK);
+	_tmp38_ = self->priv->vbox_events;
+	g_signal_connect_object ((GtkWidget*) _tmp38_, "button-press-event", (GCallback) ___lambda32__gtk_widget_button_press_event, self, 0);
+	_tmp39_ = self->priv->vbox_events;
+	_tmp40_ = self->priv->vbox;
+	gtk_container_add ((GtkContainer*) _tmp39_, (GtkWidget*) _tmp40_);
+	_tmp41_ = self->priv->monitor_events;
+	_tmp42_ = self->priv->vbox_events;
+	gtk_container_add ((GtkContainer*) _tmp41_, (GtkWidget*) _tmp42_);
+	_tmp43_ = type;
+	if (_tmp43_ == SHUTDOWN_DIALOG_TYPE_SHUTDOWN) {
+		const gchar* _tmp44_ = NULL;
+		gchar* _tmp45_;
+		_tmp44_ = _ ("Goodbye. Would you like to…");
+		_tmp45_ = g_strdup (_tmp44_);
 		_g_free0 (text);
-		text = _tmp16_;
+		text = _tmp45_;
 	} else {
-		const gchar* _tmp17_ = NULL;
-		gchar* _tmp18_;
-		GtkLabel* _tmp19_;
-		_tmp17_ = _ ("Are you sure you want to shut down the computer?");
-		_tmp18_ = g_strdup (_tmp17_);
-		_g_free0 (text);
-		text = _tmp18_;
-		_tmp19_ = title_label;
-		gtk_widget_set_visible ((GtkWidget*) _tmp19_, TRUE);
-	}
-	_tmp20_ = text;
-	_tmp21_ = (GtkLabel*) gtk_label_new (_tmp20_);
-	g_object_ref_sink (_tmp21_);
-	label = _tmp21_;
-	_tmp22_ = label;
-	gtk_label_set_line_wrap (_tmp22_, TRUE);
-	_tmp23_ = label;
-	_tmp24_ = pango_font_description_from_string ("Ubuntu Light 12");
-	_tmp25_ = _tmp24_;
-	gtk_widget_override_font ((GtkWidget*) _tmp23_, _tmp25_);
-	__vala_PangoFontDescription_free0 (_tmp25_);
-	_tmp26_ = label;
-	_tmp27_.red = (gdouble) 1.0f;
-	_tmp27_.green = (gdouble) 1.0f;
-	_tmp27_.blue = (gdouble) 1.0f;
-	_tmp27_.alpha = (gdouble) 1.0f;
-	gtk_widget_override_color ((GtkWidget*) _tmp26_, GTK_STATE_FLAG_NORMAL, &_tmp27_);
-	_tmp28_ = label;
-	gtk_misc_set_alignment ((GtkMisc*) _tmp28_, 0.0f, 0.5f);
-	_tmp29_ = label;
-	gtk_widget_set_visible ((GtkWidget*) _tmp29_, TRUE);
-	_tmp30_ = self->priv->vbox;
-	_tmp31_ = label;
-	gtk_box_pack_start (_tmp30_, (GtkWidget*) _tmp31_, FALSE, FALSE, (guint) 0);
-	_tmp32_ = (GtkBox*) gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 20);
-	g_object_ref_sink (_tmp32_);
-	_g_object_unref0 (self->priv->button_box);
-	self->priv->button_box = _tmp32_;
-	_tmp33_ = self->priv->button_box;
-	gtk_widget_set_visible ((GtkWidget*) _tmp33_, TRUE);
-	_tmp34_ = self->priv->vbox;
-	_tmp35_ = self->priv->button_box;
-	gtk_box_pack_start (_tmp34_, (GtkWidget*) _tmp35_, FALSE, FALSE, (guint) 0);
-	_tmp36_ = type;
-	if (_tmp36_ == SHUTDOWN_DIALOG_TYPE_SHUTDOWN) {
-		gboolean _tmp37_ = FALSE;
-		gboolean _tmp46_ = FALSE;
-		_tmp37_ = lightdm_get_can_suspend ();
-		if (_tmp37_) {
-			const gchar* _tmp38_ = NULL;
-			gchar* _tmp39_ = NULL;
-			gchar* _tmp40_;
-			gchar* _tmp41_ = NULL;
-			gchar* _tmp42_;
-			DialogButton* _tmp43_ = NULL;
-			DialogButton* _tmp44_;
-			DialogButton* button;
-			DialogButton* _tmp45_;
-			_tmp38_ = _ ("Suspend");
-			_tmp39_ = g_build_filename (PKGDATADIR, "suspend.png", NULL);
-			_tmp40_ = _tmp39_;
-			_tmp41_ = g_build_filename (PKGDATADIR, "suspend_highlight.png", NULL);
-			_tmp42_ = _tmp41_;
-			_tmp43_ = shutdown_dialog_add_button (self, _tmp38_, _tmp40_, _tmp42_);
-			_tmp44_ = _tmp43_;
-			_g_free0 (_tmp42_);
-			_g_free0 (_tmp40_);
-			button = _tmp44_;
-			_tmp45_ = button;
-			g_signal_connect_object ((GtkButton*) _tmp45_, "clicked", (GCallback) _____lambda29__gtk_button_clicked, self, 0);
-			_g_object_unref0 (button);
-		}
-		_tmp46_ = lightdm_get_can_hibernate ();
-		if (_tmp46_) {
-			const gchar* _tmp47_ = NULL;
-			gchar* _tmp48_ = NULL;
-			gchar* _tmp49_;
-			gchar* _tmp50_ = NULL;
-			gchar* _tmp51_;
-			DialogButton* _tmp52_ = NULL;
-			DialogButton* _tmp53_;
-			DialogButton* button;
-			DialogButton* _tmp54_;
-			_tmp47_ = _ ("Hibernate");
-			_tmp48_ = g_build_filename (PKGDATADIR, "hibernate.png", NULL);
-			_tmp49_ = _tmp48_;
-			_tmp50_ = g_build_filename (PKGDATADIR, "hibernate_highlight.png", NULL);
-			_tmp51_ = _tmp50_;
-			_tmp52_ = shutdown_dialog_add_button (self, _tmp47_, _tmp49_, _tmp51_);
-			_tmp53_ = _tmp52_;
-			_g_free0 (_tmp51_);
-			_g_free0 (_tmp49_);
-			button = _tmp53_;
-			_tmp54_ = button;
-			g_signal_connect_object ((GtkButton*) _tmp54_, "clicked", (GCallback) _____lambda30__gtk_button_clicked, self, 0);
-			_g_object_unref0 (button);
-		}
-	}
-	_tmp55_ = lightdm_get_can_restart ();
-	if (_tmp55_) {
-		const gchar* _tmp56_ = NULL;
-		gchar* _tmp57_ = NULL;
+		const gchar* _tmp46_ = NULL;
+		GtkLabel* _tmp47_;
+		GtkLabel* title_label;
+		GtkLabel* _tmp48_;
+		GtkLabel* _tmp49_;
+		PangoFontDescription* _tmp50_ = NULL;
+		PangoFontDescription* _tmp51_;
+		GtkLabel* _tmp52_;
+		GdkRGBA _tmp53_ = {0};
+		GtkLabel* _tmp54_;
+		GtkBox* _tmp55_;
+		GtkLabel* _tmp56_;
+		const gchar* _tmp57_ = NULL;
 		gchar* _tmp58_;
-		gchar* _tmp59_ = NULL;
-		gchar* _tmp60_;
-		DialogButton* _tmp61_ = NULL;
-		DialogButton* _tmp62_;
+		_tmp46_ = _ ("Shut Down");
+		_tmp47_ = (GtkLabel*) gtk_label_new (_tmp46_);
+		g_object_ref_sink (_tmp47_);
+		title_label = _tmp47_;
+		_tmp48_ = title_label;
+		gtk_widget_set_visible ((GtkWidget*) _tmp48_, TRUE);
+		_tmp49_ = title_label;
+		_tmp50_ = pango_font_description_from_string ("Ubuntu Light 15");
+		_tmp51_ = _tmp50_;
+		gtk_widget_override_font ((GtkWidget*) _tmp49_, _tmp51_);
+		__vala_PangoFontDescription_free0 (_tmp51_);
+		_tmp52_ = title_label;
+		_tmp53_.red = (gdouble) 1.0f;
+		_tmp53_.green = (gdouble) 1.0f;
+		_tmp53_.blue = (gdouble) 1.0f;
+		_tmp53_.alpha = (gdouble) 1.0f;
+		gtk_widget_override_color ((GtkWidget*) _tmp52_, GTK_STATE_FLAG_NORMAL, &_tmp53_);
+		_tmp54_ = title_label;
+		gtk_misc_set_alignment ((GtkMisc*) _tmp54_, 0.0f, 0.5f);
+		_tmp55_ = self->priv->vbox;
+		_tmp56_ = title_label;
+		gtk_box_pack_start (_tmp55_, (GtkWidget*) _tmp56_, FALSE, FALSE, (guint) 0);
+		_tmp57_ = _ ("Are you sure you want to shut down the computer?");
+		_tmp58_ = g_strdup (_tmp57_);
+		_g_free0 (text);
+		text = _tmp58_;
+		_g_object_unref0 (title_label);
+	}
+	_tmp59_ = text;
+	_tmp60_ = (GtkLabel*) gtk_label_new (_tmp59_);
+	g_object_ref_sink (_tmp60_);
+	label = _tmp60_;
+	_tmp61_ = label;
+	gtk_label_set_line_wrap (_tmp61_, TRUE);
+	_tmp62_ = label;
+	_tmp63_ = pango_font_description_from_string ("Ubuntu Light 12");
+	_tmp64_ = _tmp63_;
+	gtk_widget_override_font ((GtkWidget*) _tmp62_, _tmp64_);
+	__vala_PangoFontDescription_free0 (_tmp64_);
+	_tmp65_ = label;
+	_tmp66_.red = (gdouble) 1.0f;
+	_tmp66_.green = (gdouble) 1.0f;
+	_tmp66_.blue = (gdouble) 1.0f;
+	_tmp66_.alpha = (gdouble) 1.0f;
+	gtk_widget_override_color ((GtkWidget*) _tmp65_, GTK_STATE_FLAG_NORMAL, &_tmp66_);
+	_tmp67_ = label;
+	gtk_misc_set_alignment ((GtkMisc*) _tmp67_, 0.0f, 0.5f);
+	_tmp68_ = label;
+	gtk_widget_set_visible ((GtkWidget*) _tmp68_, TRUE);
+	_tmp69_ = self->priv->vbox;
+	_tmp70_ = label;
+	gtk_box_pack_start (_tmp69_, (GtkWidget*) _tmp70_, FALSE, FALSE, (guint) 0);
+	_tmp71_ = (GtkBox*) gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 20);
+	g_object_ref_sink (_tmp71_);
+	_g_object_unref0 (self->priv->button_box);
+	self->priv->button_box = _tmp71_;
+	_tmp72_ = self->priv->button_box;
+	gtk_widget_set_visible ((GtkWidget*) _tmp72_, TRUE);
+	_tmp73_ = self->priv->vbox;
+	_tmp74_ = self->priv->button_box;
+	gtk_box_pack_start (_tmp73_, (GtkWidget*) _tmp74_, FALSE, FALSE, (guint) 0);
+	_tmp75_ = type;
+	if (_tmp75_ == SHUTDOWN_DIALOG_TYPE_SHUTDOWN) {
+		gboolean _tmp76_ = FALSE;
+		gboolean _tmp85_ = FALSE;
+		_tmp76_ = lightdm_get_can_suspend ();
+		if (_tmp76_) {
+			const gchar* _tmp77_ = NULL;
+			gchar* _tmp78_ = NULL;
+			gchar* _tmp79_;
+			gchar* _tmp80_ = NULL;
+			gchar* _tmp81_;
+			DialogButton* _tmp82_ = NULL;
+			DialogButton* _tmp83_;
+			DialogButton* button;
+			DialogButton* _tmp84_;
+			_tmp77_ = _ ("Suspend");
+			_tmp78_ = g_build_filename (PKGDATADIR, "suspend.png", NULL);
+			_tmp79_ = _tmp78_;
+			_tmp80_ = g_build_filename (PKGDATADIR, "suspend_highlight.png", NULL);
+			_tmp81_ = _tmp80_;
+			_tmp82_ = shutdown_dialog_add_button (self, _tmp77_, _tmp79_, _tmp81_);
+			_tmp83_ = _tmp82_;
+			_g_free0 (_tmp81_);
+			_g_free0 (_tmp79_);
+			button = _tmp83_;
+			_tmp84_ = button;
+			g_signal_connect_object ((GtkButton*) _tmp84_, "clicked", (GCallback) _____lambda33__gtk_button_clicked, self, 0);
+			_g_object_unref0 (button);
+		}
+		_tmp85_ = lightdm_get_can_hibernate ();
+		if (_tmp85_) {
+			const gchar* _tmp86_ = NULL;
+			gchar* _tmp87_ = NULL;
+			gchar* _tmp88_;
+			gchar* _tmp89_ = NULL;
+			gchar* _tmp90_;
+			DialogButton* _tmp91_ = NULL;
+			DialogButton* _tmp92_;
+			DialogButton* button;
+			DialogButton* _tmp93_;
+			_tmp86_ = _ ("Hibernate");
+			_tmp87_ = g_build_filename (PKGDATADIR, "hibernate.png", NULL);
+			_tmp88_ = _tmp87_;
+			_tmp89_ = g_build_filename (PKGDATADIR, "hibernate_highlight.png", NULL);
+			_tmp90_ = _tmp89_;
+			_tmp91_ = shutdown_dialog_add_button (self, _tmp86_, _tmp88_, _tmp90_);
+			_tmp92_ = _tmp91_;
+			_g_free0 (_tmp90_);
+			_g_free0 (_tmp88_);
+			button = _tmp92_;
+			_tmp93_ = button;
+			g_signal_connect_object ((GtkButton*) _tmp93_, "clicked", (GCallback) _____lambda34__gtk_button_clicked, self, 0);
+			_g_object_unref0 (button);
+		}
+	}
+	_tmp94_ = lightdm_get_can_restart ();
+	if (_tmp94_) {
+		const gchar* _tmp95_ = NULL;
+		gchar* _tmp96_ = NULL;
+		gchar* _tmp97_;
+		gchar* _tmp98_ = NULL;
+		gchar* _tmp99_;
+		DialogButton* _tmp100_ = NULL;
+		DialogButton* _tmp101_;
 		DialogButton* button;
-		DialogButton* _tmp63_;
-		_tmp56_ = _ ("Restart");
-		_tmp57_ = g_build_filename (PKGDATADIR, "restart.png", NULL);
-		_tmp58_ = _tmp57_;
-		_tmp59_ = g_build_filename (PKGDATADIR, "restart_highlight.png", NULL);
-		_tmp60_ = _tmp59_;
-		_tmp61_ = shutdown_dialog_add_button (self, _tmp56_, _tmp58_, _tmp60_);
-		_tmp62_ = _tmp61_;
-		_g_free0 (_tmp60_);
-		_g_free0 (_tmp58_);
-		button = _tmp62_;
-		_tmp63_ = button;
-		g_signal_connect_object ((GtkButton*) _tmp63_, "clicked", (GCallback) ____lambda31__gtk_button_clicked, self, 0);
+		DialogButton* _tmp102_;
+		_tmp95_ = _ ("Restart");
+		_tmp96_ = g_build_filename (PKGDATADIR, "restart.png", NULL);
+		_tmp97_ = _tmp96_;
+		_tmp98_ = g_build_filename (PKGDATADIR, "restart_highlight.png", NULL);
+		_tmp99_ = _tmp98_;
+		_tmp100_ = shutdown_dialog_add_button (self, _tmp95_, _tmp97_, _tmp99_);
+		_tmp101_ = _tmp100_;
+		_g_free0 (_tmp99_);
+		_g_free0 (_tmp97_);
+		button = _tmp101_;
+		_tmp102_ = button;
+		g_signal_connect_object ((GtkButton*) _tmp102_, "clicked", (GCallback) ____lambda35__gtk_button_clicked, self, 0);
 		_g_object_unref0 (button);
 	}
-	_tmp64_ = lightdm_get_can_shutdown ();
-	if (_tmp64_) {
-		const gchar* _tmp65_ = NULL;
-		gchar* _tmp66_ = NULL;
-		gchar* _tmp67_;
-		gchar* _tmp68_ = NULL;
-		gchar* _tmp69_;
-		DialogButton* _tmp70_ = NULL;
-		DialogButton* _tmp71_;
-		DialogButton* button;
-		DialogButton* _tmp72_;
-		_tmp65_ = _ ("Shutdown");
-		_tmp66_ = g_build_filename (PKGDATADIR, "shutdown.png", NULL);
-		_tmp67_ = _tmp66_;
-		_tmp68_ = g_build_filename (PKGDATADIR, "shutdown_highlight.png", NULL);
-		_tmp69_ = _tmp68_;
-		_tmp70_ = shutdown_dialog_add_button (self, _tmp65_, _tmp67_, _tmp69_);
-		_tmp71_ = _tmp70_;
-		_g_free0 (_tmp69_);
-		_g_free0 (_tmp67_);
-		button = _tmp71_;
-		_tmp72_ = button;
-		g_signal_connect_object ((GtkButton*) _tmp72_, "clicked", (GCallback) ____lambda32__gtk_button_clicked, self, 0);
-		_g_object_unref0 (button);
+	_tmp103_ = lightdm_get_can_shutdown ();
+	if (_tmp103_) {
+		Block5Data* _data5_;
+		const gchar* _tmp104_ = NULL;
+		gchar* _tmp105_ = NULL;
+		gchar* _tmp106_;
+		gchar* _tmp107_ = NULL;
+		gchar* _tmp108_;
+		DialogButton* _tmp109_ = NULL;
+		DialogButton* _tmp110_;
+		DialogButton* _tmp111_;
+		ShutdownDialogType _tmp112_;
+		_data5_ = g_slice_new0 (Block5Data);
+		_data5_->_ref_count_ = 1;
+		_data5_->self = g_object_ref (self);
+		_tmp104_ = _ ("Shut Down");
+		_tmp105_ = g_build_filename (PKGDATADIR, "shutdown.png", NULL);
+		_tmp106_ = _tmp105_;
+		_tmp107_ = g_build_filename (PKGDATADIR, "shutdown_highlight.png", NULL);
+		_tmp108_ = _tmp107_;
+		_tmp109_ = shutdown_dialog_add_button (self, _tmp104_, _tmp106_, _tmp108_);
+		_tmp110_ = _tmp109_;
+		_g_free0 (_tmp108_);
+		_g_free0 (_tmp106_);
+		_data5_->button = _tmp110_;
+		_tmp111_ = _data5_->button;
+		g_signal_connect_object ((GtkButton*) _tmp111_, "clicked", (GCallback) ____lambda36__gtk_button_clicked, self, 0);
+		_tmp112_ = type;
+		if (_tmp112_ != SHUTDOWN_DIALOG_TYPE_SHUTDOWN) {
+			g_signal_connect_data ((GtkWidget*) self, "show", (GCallback) _____lambda37__gtk_widget_show, block5_data_ref (_data5_), (GClosureNotify) block5_data_unref, 0);
+		}
+		block5_data_unref (_data5_);
+		_data5_ = NULL;
 	}
-	_tmp73_ = g_build_filename (PKGDATADIR, "dialog_close.png", NULL);
-	_tmp74_ = _tmp73_;
-	_tmp75_ = g_build_filename (PKGDATADIR, "dialog_close_highlight.png", NULL);
-	_tmp76_ = _tmp75_;
-	_tmp77_ = dialog_button_new (_tmp74_, _tmp76_, NULL);
-	g_object_ref_sink (_tmp77_);
+	_tmp113_ = g_build_filename (PKGDATADIR, "dialog_close.png", NULL);
+	_tmp114_ = _tmp113_;
+	_tmp115_ = g_build_filename (PKGDATADIR, "dialog_close_highlight.png", NULL);
+	_tmp116_ = _tmp115_;
+	_tmp117_ = g_build_filename (PKGDATADIR, "dialog_close_press.png", NULL);
+	_tmp118_ = _tmp117_;
+	_tmp119_ = dialog_button_new (_tmp114_, _tmp116_, _tmp118_, NULL);
+	g_object_ref_sink (_tmp119_);
 	_g_object_unref0 (self->priv->close_button);
-	self->priv->close_button = _tmp77_;
-	_g_free0 (_tmp76_);
-	_g_free0 (_tmp74_);
-	_tmp78_ = self->priv->close_button;
-	g_object_set ((GtkWidget*) _tmp78_, "can-focus", FALSE, NULL);
-	_tmp79_ = self->priv->close_button;
-	g_signal_connect_object ((GtkButton*) _tmp79_, "clicked", (GCallback) ___lambda33__gtk_button_clicked, self, 0);
-	_tmp80_ = self->priv->close_button;
-	gtk_widget_set_visible ((GtkWidget*) _tmp80_, TRUE);
-	_tmp81_ = self->priv->close_button;
-	gtk_container_add ((GtkContainer*) self, (GtkWidget*) _tmp81_);
+	self->priv->close_button = _tmp119_;
+	_g_free0 (_tmp118_);
+	_g_free0 (_tmp116_);
+	_g_free0 (_tmp114_);
+	_tmp120_ = self->priv->close_button;
+	g_object_set ((GtkWidget*) _tmp120_, "can-focus", FALSE, NULL);
+	_tmp121_ = self->priv->close_button;
+	g_signal_connect_object ((GtkButton*) _tmp121_, "clicked", (GCallback) ___lambda38__gtk_button_clicked, self, 0);
+	_tmp122_ = self->priv->close_button;
+	gtk_widget_set_visible ((GtkWidget*) _tmp122_, TRUE);
+	_tmp123_ = self->priv->close_button;
+	gtk_container_add ((GtkContainer*) self, (GtkWidget*) _tmp123_);
+	_tmp124_ = animate_timer_new (___lambda39__animate_timer_easing_func, self, ANIMATE_TIMER_INSTANT);
+	_g_object_unref0 (self->priv->animation);
+	self->priv->animation = _tmp124_;
+	_tmp125_ = self->priv->animation;
+	g_signal_connect_object (_tmp125_, "animate", (GCallback) ___lambda40__animate_timer_animate, self, 0);
+	g_signal_connect_object ((GtkWidget*) self, "show", (GCallback) ___lambda41__gtk_widget_show, self, 0);
 	_g_object_unref0 (label);
 	_g_free0 (text);
-	_g_object_unref0 (title_label);
 	return self;
 }
 
 
-ShutdownDialog* shutdown_dialog_new (ShutdownDialogType type) {
-	return shutdown_dialog_construct (TYPE_SHUTDOWN_DIALOG, type);
+ShutdownDialog* shutdown_dialog_new (ShutdownDialogType type, Background* bg) {
+	return shutdown_dialog_construct (TYPE_SHUTDOWN_DIALOG, type, bg);
+}
+
+
+static Block6Data* block6_data_ref (Block6Data* _data6_) {
+	g_atomic_int_inc (&_data6_->_ref_count_);
+	return _data6_;
+}
+
+
+static void block6_data_unref (void * _userdata_) {
+	Block6Data* _data6_;
+	_data6_ = (Block6Data*) _userdata_;
+	if (g_atomic_int_dec_and_test (&_data6_->_ref_count_)) {
+		ShutdownDialog * self;
+		self = _data6_->self;
+		_g_object_unref0 (self);
+		g_slice_free (Block6Data, _data6_);
+	}
+}
+
+
+static gdouble __lambda30_ (Block6Data* _data6_, gdouble x) {
+	ShutdownDialog * self;
+	gdouble result = 0.0;
+	gdouble _tmp0_;
+	self = _data6_->self;
+	_tmp0_ = x;
+	result = _data6_->start_value + _tmp0_;
+	return result;
+}
+
+
+static gdouble ___lambda30__animate_timer_easing_func (gdouble x, gpointer self) {
+	gdouble result;
+	result = __lambda30_ (self, x);
+	return result;
+}
+
+
+static void __lambda31_ (ShutdownDialog* self, gdouble p) {
+	gdouble _tmp0_;
+	gtk_widget_queue_draw ((GtkWidget*) self);
+	_tmp0_ = p;
+	if (_tmp0_ >= ((gdouble) 1.0f)) {
+		AnimateTimer* _tmp1_;
+		_tmp1_ = self->priv->animation;
+		animate_timer_stop (_tmp1_);
+		g_signal_emit_by_name (self, "closed");
+	}
+}
+
+
+static void ___lambda31__animate_timer_animate (AnimateTimer* _sender, gdouble progress, gpointer self) {
+	__lambda31_ (self, progress);
+}
+
+
+void shutdown_dialog_close (ShutdownDialog* self) {
+	Block6Data* _data6_;
+	AnimateTimer* _tmp0_;
+	gdouble _tmp1_;
+	gdouble _tmp2_;
+	AnimateTimer* _tmp3_;
+	AnimateTimer* _tmp4_;
+	AnimateTimer* _tmp5_;
+	g_return_if_fail (self != NULL);
+	_data6_ = g_slice_new0 (Block6Data);
+	_data6_->_ref_count_ = 1;
+	_data6_->self = g_object_ref (self);
+	_tmp0_ = self->priv->animation;
+	_tmp1_ = animate_timer_get_progress (_tmp0_);
+	_tmp2_ = _tmp1_;
+	_data6_->start_value = 1.0f - _tmp2_;
+	_tmp3_ = animate_timer_new (___lambda30__animate_timer_easing_func, _data6_, ANIMATE_TIMER_INSTANT);
+	_g_object_unref0 (self->priv->animation);
+	self->priv->animation = _tmp3_;
+	_tmp4_ = self->priv->animation;
+	g_signal_connect_object (_tmp4_, "animate", (GCallback) ___lambda31__animate_timer_animate, self, 0);
+	self->priv->closing = TRUE;
+	_tmp5_ = self->priv->animation;
+	animate_timer_reset (_tmp5_, -1);
+	block6_data_unref (_data6_);
+	_data6_ = NULL;
+}
+
+
+static void shutdown_dialog_rebuild_background (ShutdownDialog* self) {
+	g_return_if_fail (self != NULL);
+	_cairo_surface_destroy0 (self->priv->bg_surface);
+	self->priv->bg_surface = NULL;
+	gtk_widget_queue_draw ((GtkWidget*) self);
+}
+
+
+static gpointer _monitor_ref0 (gpointer self) {
+	return self ? monitor_ref (self) : NULL;
+}
+
+
+void shutdown_dialog_set_active_monitor (ShutdownDialog* self, Monitor* m) {
+	gboolean _tmp0_ = FALSE;
+	Monitor* _tmp1_;
+	Monitor* _tmp2_;
+	gboolean _tmp6_;
+	Monitor* _tmp7_;
+	Monitor* _tmp8_;
+	Monitor* _tmp9_;
+	gint _tmp10_;
+	Monitor* _tmp11_;
+	gint _tmp12_;
+	g_return_if_fail (self != NULL);
+	g_return_if_fail (m != NULL);
+	_tmp1_ = m;
+	_tmp2_ = self->priv->monitor;
+	if (_tmp1_ == _tmp2_) {
+		_tmp0_ = TRUE;
+	} else {
+		Monitor* _tmp3_;
+		Monitor* _tmp4_;
+		gboolean _tmp5_ = FALSE;
+		_tmp3_ = m;
+		_tmp4_ = self->priv->monitor;
+		_tmp5_ = monitor_equals (_tmp3_, _tmp4_);
+		_tmp0_ = _tmp5_;
+	}
+	_tmp6_ = _tmp0_;
+	if (_tmp6_) {
+		return;
+	}
+	_tmp7_ = m;
+	_tmp8_ = _monitor_ref0 (_tmp7_);
+	_monitor_unref0 (self->priv->monitor);
+	self->priv->monitor = _tmp8_;
+	shutdown_dialog_rebuild_background (self);
+	_tmp9_ = self->priv->monitor;
+	_tmp10_ = _tmp9_->width;
+	_tmp11_ = self->priv->monitor;
+	_tmp12_ = _tmp11_->height;
+	gtk_widget_set_size_request ((GtkWidget*) self, _tmp10_, _tmp12_);
 }
 
 
@@ -632,7 +1118,7 @@ void shutdown_dialog_cancel (ShutdownDialog* self) {
 		_tmp4_ = gtk_widget_get_toplevel ((GtkWidget*) self);
 		gtk_window_set_focus (G_TYPE_CHECK_INSTANCE_TYPE (_tmp4_, GTK_TYPE_WINDOW) ? ((GtkWindow*) _tmp4_) : NULL, NULL);
 	} else {
-		g_signal_emit_by_name (self, "close");
+		shutdown_dialog_close (self);
 	}
 	_g_object_unref0 (widget);
 }
@@ -641,102 +1127,107 @@ void shutdown_dialog_cancel (ShutdownDialog* self) {
 static void shutdown_dialog_real_size_allocate (GtkWidget* base, GtkAllocation* allocation) {
 	ShutdownDialog * self;
 	GtkAllocation _tmp0_;
+	GtkEventBox* _tmp1_;
+	GtkAllocation _tmp2_;
 	GtkAllocation content_allocation = {0};
 	gint minimum_width = 0;
 	gint natural_width = 0;
 	gint minimum_height = 0;
 	gint natural_height = 0;
-	GtkBox* _tmp1_;
-	gint _tmp2_ = 0;
-	gint _tmp3_ = 0;
-	GtkBox* _tmp4_;
-	gint _tmp5_;
-	gint _tmp6_ = 0;
-	gint _tmp7_ = 0;
-	GtkAllocation _tmp8_;
-	gint _tmp9_;
+	GtkEventBox* _tmp3_;
+	gint _tmp4_ = 0;
+	gint _tmp5_ = 0;
+	GtkEventBox* _tmp6_;
+	gint _tmp7_;
+	gint _tmp8_ = 0;
+	gint _tmp9_ = 0;
 	GtkAllocation _tmp10_;
 	gint _tmp11_;
-	gint _tmp12_;
-	GtkAllocation _tmp13_;
+	GtkAllocation _tmp12_;
+	gint _tmp13_;
 	gint _tmp14_;
 	GtkAllocation _tmp15_;
 	gint _tmp16_;
-	gint _tmp17_;
+	GtkAllocation _tmp17_;
 	gint _tmp18_;
 	gint _tmp19_;
-	GtkBox* _tmp20_;
-	GtkAllocation _tmp21_;
+	gint _tmp20_;
+	gint _tmp21_;
+	GtkEventBox* _tmp22_;
+	GtkAllocation _tmp23_;
 	GtkAllocation a = {0};
-	DialogButton* _tmp22_;
-	gint _tmp23_ = 0;
-	gint _tmp24_ = 0;
-	DialogButton* _tmp25_;
+	DialogButton* _tmp24_;
+	gint _tmp25_ = 0;
 	gint _tmp26_ = 0;
-	gint _tmp27_ = 0;
-	GtkAllocation _tmp28_;
-	gint _tmp29_;
+	DialogButton* _tmp27_;
+	gint _tmp28_ = 0;
+	gint _tmp29_ = 0;
 	GtkAllocation _tmp30_;
 	gint _tmp31_;
-	gint _tmp32_;
+	GtkAllocation _tmp32_;
 	gint _tmp33_;
-	DialogButton* _tmp34_;
-	GtkAllocation _tmp35_;
+	gint _tmp34_;
+	gint _tmp35_;
+	DialogButton* _tmp36_;
+	GtkAllocation _tmp37_;
 	self = (ShutdownDialog*) base;
 	g_return_if_fail (allocation != NULL);
 	_tmp0_ = *allocation;
 	GTK_WIDGET_CLASS (shutdown_dialog_parent_class)->size_allocate ((GtkWidget*) G_TYPE_CHECK_INSTANCE_CAST (self, GTK_TYPE_FIXED, GtkFixed), &_tmp0_);
+	_tmp1_ = self->priv->monitor_events;
+	_tmp2_ = *allocation;
+	gtk_widget_size_allocate ((GtkWidget*) _tmp1_, &_tmp2_);
 	memset (&content_allocation, 0, sizeof (GtkAllocation));
-	_tmp1_ = self->priv->vbox;
-	gtk_widget_get_preferred_width ((GtkWidget*) _tmp1_, &_tmp2_, &_tmp3_);
-	minimum_width = _tmp2_;
-	natural_width = _tmp3_;
-	_tmp4_ = self->priv->vbox;
-	_tmp5_ = minimum_width;
-	gtk_widget_get_preferred_height_for_width ((GtkWidget*) _tmp4_, _tmp5_, &_tmp6_, &_tmp7_);
-	minimum_height = _tmp6_;
-	natural_height = _tmp7_;
-	_tmp8_ = *allocation;
-	_tmp9_ = _tmp8_.x;
+	_tmp3_ = self->priv->vbox_events;
+	gtk_widget_get_preferred_width ((GtkWidget*) _tmp3_, &_tmp4_, &_tmp5_);
+	minimum_width = _tmp4_;
+	natural_width = _tmp5_;
+	_tmp6_ = self->priv->vbox_events;
+	_tmp7_ = minimum_width;
+	gtk_widget_get_preferred_height_for_width ((GtkWidget*) _tmp6_, _tmp7_, &_tmp8_, &_tmp9_);
+	minimum_height = _tmp8_;
+	natural_height = _tmp9_;
 	_tmp10_ = *allocation;
-	_tmp11_ = _tmp10_.width;
-	_tmp12_ = minimum_width;
-	content_allocation.x = _tmp9_ + ((_tmp11_ - _tmp12_) / 2);
-	_tmp13_ = *allocation;
-	_tmp14_ = _tmp13_.y;
+	_tmp11_ = _tmp10_.x;
+	_tmp12_ = *allocation;
+	_tmp13_ = _tmp12_.width;
+	_tmp14_ = minimum_width;
+	content_allocation.x = _tmp11_ + ((_tmp13_ - _tmp14_) / 2);
 	_tmp15_ = *allocation;
-	_tmp16_ = _tmp15_.height;
-	_tmp17_ = minimum_height;
-	content_allocation.y = _tmp14_ + ((_tmp16_ - _tmp17_) / 2);
-	_tmp18_ = minimum_width;
-	content_allocation.width = _tmp18_;
+	_tmp16_ = _tmp15_.y;
+	_tmp17_ = *allocation;
+	_tmp18_ = _tmp17_.height;
 	_tmp19_ = minimum_height;
-	content_allocation.height = _tmp19_;
-	_tmp20_ = self->priv->vbox;
-	_tmp21_ = content_allocation;
-	gtk_widget_size_allocate ((GtkWidget*) _tmp20_, &_tmp21_);
+	content_allocation.y = _tmp16_ + ((_tmp18_ - _tmp19_) / 2);
+	_tmp20_ = minimum_width;
+	content_allocation.width = _tmp20_;
+	_tmp21_ = minimum_height;
+	content_allocation.height = _tmp21_;
+	_tmp22_ = self->priv->vbox_events;
+	_tmp23_ = content_allocation;
+	gtk_widget_size_allocate ((GtkWidget*) _tmp22_, &_tmp23_);
 	memset (&a, 0, sizeof (GtkAllocation));
-	_tmp22_ = self->priv->close_button;
-	gtk_widget_get_preferred_width ((GtkWidget*) _tmp22_, &_tmp23_, &_tmp24_);
-	minimum_width = _tmp23_;
-	natural_width = _tmp24_;
-	_tmp25_ = self->priv->close_button;
-	gtk_widget_get_preferred_height ((GtkWidget*) _tmp25_, &_tmp26_, &_tmp27_);
-	minimum_height = _tmp26_;
-	natural_height = _tmp27_;
-	_tmp28_ = content_allocation;
-	_tmp29_ = _tmp28_.x;
-	a.x = (_tmp29_ - SHUTDOWN_DIALOG_BORDER_SIZE) + SHUTDOWN_DIALOG_CLOSE_OFFSET;
+	_tmp24_ = self->priv->close_button;
+	gtk_widget_get_preferred_width ((GtkWidget*) _tmp24_, &_tmp25_, &_tmp26_);
+	minimum_width = _tmp25_;
+	natural_width = _tmp26_;
+	_tmp27_ = self->priv->close_button;
+	gtk_widget_get_preferred_height ((GtkWidget*) _tmp27_, &_tmp28_, &_tmp29_);
+	minimum_height = _tmp28_;
+	natural_height = _tmp29_;
 	_tmp30_ = content_allocation;
-	_tmp31_ = _tmp30_.y;
-	a.y = (_tmp31_ - SHUTDOWN_DIALOG_BORDER_SIZE) + SHUTDOWN_DIALOG_CLOSE_OFFSET;
-	_tmp32_ = minimum_width;
-	a.width = _tmp32_;
-	_tmp33_ = minimum_height;
-	a.height = _tmp33_;
-	_tmp34_ = self->priv->close_button;
-	_tmp35_ = a;
-	gtk_widget_size_allocate ((GtkWidget*) _tmp34_, &_tmp35_);
+	_tmp31_ = _tmp30_.x;
+	a.x = (_tmp31_ - SHUTDOWN_DIALOG_BORDER_EXTERNAL_SIZE) + SHUTDOWN_DIALOG_CLOSE_OFFSET;
+	_tmp32_ = content_allocation;
+	_tmp33_ = _tmp32_.y;
+	a.y = (_tmp33_ - SHUTDOWN_DIALOG_BORDER_EXTERNAL_SIZE) + SHUTDOWN_DIALOG_CLOSE_OFFSET;
+	_tmp34_ = minimum_width;
+	a.width = _tmp34_;
+	_tmp35_ = minimum_height;
+	a.height = _tmp35_;
+	_tmp36_ = self->priv->close_button;
+	_tmp37_ = a;
+	gtk_widget_size_allocate ((GtkWidget*) _tmp36_, &_tmp37_);
 }
 
 
@@ -744,73 +1235,131 @@ static gboolean shutdown_dialog_real_draw (GtkWidget* base, cairo_t* c) {
 	ShutdownDialog * self;
 	gboolean result = FALSE;
 	cairo_surface_t* _tmp0_;
-	GtkBox* _tmp18_;
+	GtkEventBox* _tmp18_;
 	gint _tmp19_ = 0;
 	gint width;
-	GtkBox* _tmp20_;
+	GtkEventBox* _tmp20_;
 	gint _tmp21_ = 0;
 	gint height;
-	cairo_t* _tmp22_;
-	cairo_t* _tmp23_;
-	cairo_t* _tmp24_;
-	cairo_t* _tmp25_;
-	gint _tmp26_ = 0;
-	gint _tmp27_ = 0;
-	cairo_matrix_t m = {0};
-	cairo_pattern_t* _tmp28_;
-	cairo_matrix_t _tmp29_;
+	gint _tmp22_ = 0;
+	gint _tmp23_;
+	gint x;
+	gint _tmp24_ = 0;
+	gint _tmp25_;
+	gint y;
+	AnimateTimer* _tmp26_;
+	gboolean _tmp27_;
+	gboolean _tmp28_;
 	cairo_t* _tmp30_;
-	cairo_pattern_t* _tmp31_;
-	cairo_t* _tmp32_;
-	cairo_t* _tmp33_;
-	cairo_pattern_t* _tmp34_;
-	cairo_matrix_t _tmp35_;
-	cairo_t* _tmp36_;
-	cairo_pattern_t* _tmp37_;
-	cairo_t* _tmp38_;
-	cairo_t* _tmp39_;
-	cairo_pattern_t* _tmp40_;
-	cairo_matrix_t _tmp41_;
-	cairo_t* _tmp42_;
-	cairo_pattern_t* _tmp43_;
-	cairo_t* _tmp44_;
-	cairo_t* _tmp45_;
-	cairo_pattern_t* _tmp46_;
-	cairo_matrix_t _tmp47_;
-	cairo_t* _tmp48_;
-	cairo_pattern_t* _tmp49_;
-	cairo_t* _tmp50_;
-	cairo_t* _tmp51_;
-	cairo_pattern_t* _tmp52_;
-	cairo_matrix_t _tmp53_;
-	cairo_t* _tmp54_;
-	cairo_pattern_t* _tmp55_;
-	cairo_t* _tmp56_;
+	cairo_t* _tmp31_;
+	gboolean _tmp32_ = FALSE;
+	cairo_surface_t* _tmp33_;
+	gboolean _tmp37_;
 	cairo_t* _tmp57_;
-	cairo_pattern_t* _tmp58_;
-	cairo_matrix_t _tmp59_;
-	cairo_t* _tmp60_;
-	cairo_pattern_t* _tmp61_;
-	cairo_t* _tmp62_;
-	cairo_t* _tmp63_;
-	cairo_pattern_t* _tmp64_;
-	cairo_matrix_t _tmp65_;
-	cairo_t* _tmp66_;
-	cairo_pattern_t* _tmp67_;
-	cairo_t* _tmp68_;
+	cairo_t* _tmp58_;
+	gint _tmp59_;
+	gint _tmp60_;
+	Background* _tmp61_;
+	GdkRGBA _tmp62_;
+	GdkRGBA _tmp63_;
+	GdkRGBA avg_color;
+	cairo_t* _tmp64_;
+	gint _tmp65_;
+	gint _tmp66_;
+	cairo_t* _tmp67_;
+	cairo_surface_t* _tmp68_;
 	cairo_t* _tmp69_;
-	cairo_pattern_t* _tmp70_;
-	cairo_matrix_t _tmp71_;
+	cairo_t* _tmp70_;
+	cairo_t* _tmp71_;
 	cairo_t* _tmp72_;
-	cairo_pattern_t* _tmp73_;
-	cairo_t* _tmp74_;
-	cairo_t* _tmp75_;
-	cairo_t* _tmp76_;
-	cairo_t* _tmp77_;
-	cairo_t* _tmp78_;
+	GdkRGBA _tmp73_;
+	gdouble _tmp74_;
+	GdkRGBA _tmp75_;
+	gdouble _tmp76_;
+	GdkRGBA _tmp77_;
+	gdouble _tmp78_;
 	cairo_t* _tmp79_;
 	cairo_t* _tmp80_;
-	gboolean _tmp81_ = FALSE;
+	gint _tmp81_;
+	gint _tmp82_;
+	gint _tmp83_;
+	gint _tmp84_;
+	cairo_t* _tmp85_;
+	cairo_t* _tmp86_;
+	gint _tmp87_;
+	gint _tmp88_;
+	cairo_matrix_t m = {0};
+	cairo_pattern_t* _tmp89_;
+	cairo_matrix_t _tmp90_;
+	cairo_t* _tmp91_;
+	cairo_pattern_t* _tmp92_;
+	cairo_t* _tmp93_;
+	cairo_t* _tmp94_;
+	gint _tmp95_;
+	cairo_pattern_t* _tmp96_;
+	cairo_matrix_t _tmp97_;
+	cairo_t* _tmp98_;
+	cairo_pattern_t* _tmp99_;
+	cairo_t* _tmp100_;
+	gint _tmp101_;
+	cairo_t* _tmp102_;
+	gint _tmp103_;
+	cairo_pattern_t* _tmp104_;
+	cairo_matrix_t _tmp105_;
+	cairo_t* _tmp106_;
+	cairo_pattern_t* _tmp107_;
+	cairo_t* _tmp108_;
+	gint _tmp109_;
+	cairo_t* _tmp110_;
+	gint _tmp111_;
+	gint _tmp112_;
+	cairo_pattern_t* _tmp113_;
+	cairo_matrix_t _tmp114_;
+	cairo_t* _tmp115_;
+	cairo_pattern_t* _tmp116_;
+	cairo_t* _tmp117_;
+	gint _tmp118_;
+	gint _tmp119_;
+	cairo_t* _tmp120_;
+	cairo_pattern_t* _tmp121_;
+	cairo_matrix_t _tmp122_;
+	cairo_t* _tmp123_;
+	cairo_pattern_t* _tmp124_;
+	cairo_t* _tmp125_;
+	gint _tmp126_;
+	cairo_t* _tmp127_;
+	gint _tmp128_;
+	cairo_pattern_t* _tmp129_;
+	cairo_matrix_t _tmp130_;
+	cairo_t* _tmp131_;
+	cairo_pattern_t* _tmp132_;
+	cairo_t* _tmp133_;
+	gint _tmp134_;
+	gint _tmp135_;
+	cairo_t* _tmp136_;
+	cairo_pattern_t* _tmp137_;
+	cairo_matrix_t _tmp138_;
+	cairo_t* _tmp139_;
+	cairo_pattern_t* _tmp140_;
+	cairo_t* _tmp141_;
+	gint _tmp142_;
+	cairo_t* _tmp143_;
+	gint _tmp144_;
+	cairo_pattern_t* _tmp145_;
+	cairo_matrix_t _tmp146_;
+	cairo_t* _tmp147_;
+	cairo_pattern_t* _tmp148_;
+	cairo_t* _tmp149_;
+	gint _tmp150_;
+	gint _tmp151_;
+	cairo_t* _tmp152_;
+	cairo_t* _tmp153_;
+	cairo_t* _tmp154_;
+	gboolean _tmp155_ = FALSE;
+	gboolean ret;
+	AnimateTimer* _tmp156_;
+	gboolean _tmp157_;
+	gboolean _tmp158_;
 	self = (ShutdownDialog*) base;
 	g_return_val_if_fail (c != NULL, FALSE);
 	_tmp0_ = self->priv->corner_surface;
@@ -867,142 +1416,294 @@ static gboolean shutdown_dialog_real_draw (GtkWidget* base, cairo_t* c) {
 		_tmp17_ = self->priv->top_pattern;
 		cairo_pattern_set_extend (_tmp17_, CAIRO_EXTEND_REPEAT);
 	}
-	_tmp18_ = self->priv->vbox;
+	_tmp18_ = self->priv->vbox_events;
 	_tmp19_ = gtk_widget_get_allocated_width ((GtkWidget*) _tmp18_);
-	width = (_tmp19_ + (20 * 2)) + (SHUTDOWN_DIALOG_BORDER_SIZE * 2);
-	_tmp20_ = self->priv->vbox;
+	width = _tmp19_;
+	_tmp20_ = self->priv->vbox_events;
 	_tmp21_ = gtk_widget_get_allocated_height ((GtkWidget*) _tmp20_);
-	height = (_tmp21_ + (20 * 2)) + (SHUTDOWN_DIALOG_BORDER_SIZE * 2);
-	_tmp22_ = c;
-	cairo_set_source_rgba (_tmp22_, (gdouble) 0, (gdouble) 0, (gdouble) 0, 0.25);
-	_tmp23_ = c;
-	cairo_paint (_tmp23_);
-	_tmp24_ = c;
-	cairo_save (_tmp24_);
-	_tmp25_ = c;
-	_tmp26_ = gtk_widget_get_allocated_width ((GtkWidget*) self);
-	_tmp27_ = gtk_widget_get_allocated_height ((GtkWidget*) self);
-	cairo_translate (_tmp25_, (_tmp26_ - width) * 0.5, (_tmp27_ - height) * 0.5);
-	cairo_matrix_init_identity (&m);
-	_tmp28_ = self->priv->corner_pattern;
-	_tmp29_ = m;
-	cairo_pattern_set_matrix (_tmp28_, &_tmp29_);
+	height = _tmp21_;
+	_tmp22_ = gtk_widget_get_allocated_width ((GtkWidget*) self);
+	_tmp23_ = width;
+	x = (_tmp22_ - _tmp23_) / 2;
+	_tmp24_ = gtk_widget_get_allocated_height ((GtkWidget*) self);
+	_tmp25_ = height;
+	y = (_tmp24_ - _tmp25_) / 2;
+	_tmp26_ = self->priv->animation;
+	_tmp27_ = animate_timer_get_is_running (_tmp26_);
+	_tmp28_ = _tmp27_;
+	if (_tmp28_) {
+		cairo_t* _tmp29_;
+		_tmp29_ = c;
+		cairo_push_group (_tmp29_);
+	}
 	_tmp30_ = c;
-	_tmp31_ = self->priv->corner_pattern;
-	cairo_set_source (_tmp30_, _tmp31_);
-	_tmp32_ = c;
-	cairo_rectangle (_tmp32_, (gdouble) 0, (gdouble) 0, (gdouble) SHUTDOWN_DIALOG_BORDER_SIZE, (gdouble) SHUTDOWN_DIALOG_BORDER_SIZE);
-	_tmp33_ = c;
-	cairo_fill (_tmp33_);
-	cairo_matrix_init_identity (&m);
-	cairo_matrix_translate (&m, (gdouble) width, (gdouble) 0);
-	cairo_matrix_scale (&m, (gdouble) (-1), (gdouble) 1);
-	_tmp34_ = self->priv->corner_pattern;
-	_tmp35_ = m;
-	cairo_pattern_set_matrix (_tmp34_, &_tmp35_);
-	_tmp36_ = c;
-	_tmp37_ = self->priv->corner_pattern;
-	cairo_set_source (_tmp36_, _tmp37_);
-	_tmp38_ = c;
-	cairo_rectangle (_tmp38_, (gdouble) (width - SHUTDOWN_DIALOG_BORDER_SIZE), (gdouble) 0, (gdouble) SHUTDOWN_DIALOG_BORDER_SIZE, (gdouble) SHUTDOWN_DIALOG_BORDER_SIZE);
-	_tmp39_ = c;
-	cairo_fill (_tmp39_);
-	cairo_matrix_init_identity (&m);
-	cairo_matrix_translate (&m, (gdouble) 0, (gdouble) height);
-	cairo_matrix_scale (&m, (gdouble) 1, (gdouble) (-1));
-	_tmp40_ = self->priv->corner_pattern;
-	_tmp41_ = m;
-	cairo_pattern_set_matrix (_tmp40_, &_tmp41_);
-	_tmp42_ = c;
-	_tmp43_ = self->priv->corner_pattern;
-	cairo_set_source (_tmp42_, _tmp43_);
-	_tmp44_ = c;
-	cairo_rectangle (_tmp44_, (gdouble) 0, (gdouble) (height - SHUTDOWN_DIALOG_BORDER_SIZE), (gdouble) SHUTDOWN_DIALOG_BORDER_SIZE, (gdouble) SHUTDOWN_DIALOG_BORDER_SIZE);
-	_tmp45_ = c;
-	cairo_fill (_tmp45_);
-	cairo_matrix_init_identity (&m);
-	cairo_matrix_translate (&m, (gdouble) width, (gdouble) height);
-	cairo_matrix_scale (&m, (gdouble) (-1), (gdouble) (-1));
-	_tmp46_ = self->priv->corner_pattern;
-	_tmp47_ = m;
-	cairo_pattern_set_matrix (_tmp46_, &_tmp47_);
-	_tmp48_ = c;
-	_tmp49_ = self->priv->corner_pattern;
-	cairo_set_source (_tmp48_, _tmp49_);
-	_tmp50_ = c;
-	cairo_rectangle (_tmp50_, (gdouble) (width - SHUTDOWN_DIALOG_BORDER_SIZE), (gdouble) (height - SHUTDOWN_DIALOG_BORDER_SIZE), (gdouble) SHUTDOWN_DIALOG_BORDER_SIZE, (gdouble) SHUTDOWN_DIALOG_BORDER_SIZE);
-	_tmp51_ = c;
-	cairo_fill (_tmp51_);
-	cairo_matrix_init_identity (&m);
-	_tmp52_ = self->priv->left_pattern;
-	_tmp53_ = m;
-	cairo_pattern_set_matrix (_tmp52_, &_tmp53_);
-	_tmp54_ = c;
-	_tmp55_ = self->priv->left_pattern;
-	cairo_set_source (_tmp54_, _tmp55_);
-	_tmp56_ = c;
-	cairo_rectangle (_tmp56_, (gdouble) 0, (gdouble) SHUTDOWN_DIALOG_BORDER_SIZE, (gdouble) SHUTDOWN_DIALOG_BORDER_SIZE, (gdouble) (height - (SHUTDOWN_DIALOG_BORDER_SIZE * 2)));
+	cairo_set_source_rgba (_tmp30_, (gdouble) 0, (gdouble) 0, (gdouble) 0, 0.25);
+	_tmp31_ = c;
+	cairo_paint (_tmp31_);
+	_tmp33_ = self->priv->bg_surface;
+	if (_tmp33_ == NULL) {
+		_tmp32_ = TRUE;
+	} else {
+		AnimateTimer* _tmp34_;
+		gboolean _tmp35_;
+		gboolean _tmp36_;
+		_tmp34_ = self->priv->animation;
+		_tmp35_ = animate_timer_get_is_running (_tmp34_);
+		_tmp36_ = _tmp35_;
+		_tmp32_ = _tmp36_;
+	}
+	_tmp37_ = _tmp32_;
+	if (_tmp37_) {
+		gint _tmp38_;
+		gint _tmp39_;
+		cairo_surface_t* _tmp40_;
+		cairo_surface_t* _tmp41_;
+		cairo_t* _tmp42_;
+		cairo_t* bg_cr;
+		cairo_t* _tmp43_;
+		cairo_t* _tmp44_;
+		cairo_surface_t* _tmp45_ = NULL;
+		gint _tmp46_;
+		Monitor* _tmp47_;
+		gint _tmp48_;
+		gint _tmp49_;
+		Monitor* _tmp50_;
+		gint _tmp51_;
+		cairo_t* _tmp52_;
+		gint _tmp53_;
+		gint _tmp54_;
+		cairo_t* _tmp55_;
+		cairo_surface_t* _tmp56_;
+		_tmp38_ = width;
+		_tmp39_ = height;
+		_tmp40_ = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, _tmp38_, _tmp39_);
+		_cairo_surface_destroy0 (self->priv->bg_surface);
+		self->priv->bg_surface = _tmp40_;
+		_tmp41_ = self->priv->bg_surface;
+		_tmp42_ = cairo_create (_tmp41_);
+		bg_cr = _tmp42_;
+		_tmp43_ = bg_cr;
+		_tmp44_ = c;
+		_tmp45_ = cairo_get_target (_tmp44_);
+		_tmp46_ = x;
+		_tmp47_ = self->priv->monitor;
+		_tmp48_ = _tmp47_->x;
+		_tmp49_ = y;
+		_tmp50_ = self->priv->monitor;
+		_tmp51_ = _tmp50_->y;
+		cairo_set_source_surface (_tmp43_, _tmp45_, (gdouble) ((-_tmp46_) - _tmp48_), (gdouble) ((-_tmp49_) - _tmp51_));
+		_tmp52_ = bg_cr;
+		_tmp53_ = width;
+		_tmp54_ = height;
+		cairo_rectangle (_tmp52_, (gdouble) 0, (gdouble) 0, (gdouble) _tmp53_, (gdouble) _tmp54_);
+		_tmp55_ = bg_cr;
+		cairo_fill (_tmp55_);
+		_tmp56_ = self->priv->bg_surface;
+		cairo_utils_exponential_blur_surface (_tmp56_, SHUTDOWN_DIALOG_BLUR_RADIUS);
+		_cairo_destroy0 (bg_cr);
+	}
 	_tmp57_ = c;
-	cairo_fill (_tmp57_);
-	cairo_matrix_init_identity (&m);
-	cairo_matrix_translate (&m, (gdouble) width, (gdouble) 0);
-	cairo_matrix_scale (&m, (gdouble) (-1), (gdouble) 1);
-	_tmp58_ = self->priv->left_pattern;
-	_tmp59_ = m;
-	cairo_pattern_set_matrix (_tmp58_, &_tmp59_);
-	_tmp60_ = c;
-	_tmp61_ = self->priv->left_pattern;
-	cairo_set_source (_tmp60_, _tmp61_);
-	_tmp62_ = c;
-	cairo_rectangle (_tmp62_, (gdouble) (width - SHUTDOWN_DIALOG_BORDER_SIZE), (gdouble) SHUTDOWN_DIALOG_BORDER_SIZE, (gdouble) SHUTDOWN_DIALOG_BORDER_SIZE, (gdouble) (height - (SHUTDOWN_DIALOG_BORDER_SIZE * 2)));
-	_tmp63_ = c;
-	cairo_fill (_tmp63_);
-	cairo_matrix_init_identity (&m);
-	_tmp64_ = self->priv->top_pattern;
-	_tmp65_ = m;
-	cairo_pattern_set_matrix (_tmp64_, &_tmp65_);
-	_tmp66_ = c;
-	_tmp67_ = self->priv->top_pattern;
-	cairo_set_source (_tmp66_, _tmp67_);
-	_tmp68_ = c;
-	cairo_rectangle (_tmp68_, (gdouble) SHUTDOWN_DIALOG_BORDER_SIZE, (gdouble) 0, (gdouble) (width - (SHUTDOWN_DIALOG_BORDER_SIZE * 2)), (gdouble) SHUTDOWN_DIALOG_BORDER_SIZE);
+	cairo_save (_tmp57_);
+	_tmp58_ = c;
+	_tmp59_ = x;
+	_tmp60_ = y;
+	cairo_translate (_tmp58_, (gdouble) _tmp59_, (gdouble) _tmp60_);
+	_tmp61_ = self->priv->background;
+	background_get_average_color (_tmp61_, &_tmp62_);
+	_tmp63_ = _tmp62_;
+	avg_color = _tmp63_;
+	_tmp64_ = c;
+	_tmp65_ = width;
+	_tmp66_ = height;
+	cairo_utils_rounded_rectangle (_tmp64_, (gdouble) 0, (gdouble) 0, (gdouble) _tmp65_, (gdouble) _tmp66_, (gdouble) 4);
+	_tmp67_ = c;
+	_tmp68_ = self->priv->bg_surface;
+	cairo_set_source_surface (_tmp67_, _tmp68_, (gdouble) 0, (gdouble) 0);
 	_tmp69_ = c;
-	cairo_fill (_tmp69_);
-	cairo_matrix_init_identity (&m);
-	cairo_matrix_translate (&m, (gdouble) 0, (gdouble) height);
-	cairo_matrix_scale (&m, (gdouble) 1, (gdouble) (-1));
-	_tmp70_ = self->priv->top_pattern;
-	_tmp71_ = m;
-	cairo_pattern_set_matrix (_tmp70_, &_tmp71_);
+	cairo_fill_preserve (_tmp69_);
+	_tmp70_ = c;
+	cairo_set_source_rgba (_tmp70_, 0.0, 0.0, 0.0, (gdouble) 0.55f);
+	_tmp71_ = c;
+	cairo_fill_preserve (_tmp71_);
 	_tmp72_ = c;
-	_tmp73_ = self->priv->top_pattern;
-	cairo_set_source (_tmp72_, _tmp73_);
-	_tmp74_ = c;
-	cairo_rectangle (_tmp74_, (gdouble) SHUTDOWN_DIALOG_BORDER_SIZE, (gdouble) (height - SHUTDOWN_DIALOG_BORDER_SIZE), (gdouble) (width - (SHUTDOWN_DIALOG_BORDER_SIZE * 2)), (gdouble) SHUTDOWN_DIALOG_BORDER_SIZE);
-	_tmp75_ = c;
-	cairo_fill (_tmp75_);
-	_tmp76_ = c;
-	dash_box_cairo_rounded_rectangle (_tmp76_, (gdouble) 20, (gdouble) 20, (gdouble) (width - 40), (gdouble) (height - 40), (gdouble) 5);
-	_tmp77_ = c;
-	cairo_set_source_rgba (_tmp77_, (gdouble) 0, (gdouble) 0, (gdouble) 0, 0.75);
-	_tmp78_ = c;
-	cairo_fill (_tmp78_);
+	_tmp73_ = avg_color;
+	_tmp74_ = _tmp73_.red;
+	_tmp75_ = avg_color;
+	_tmp76_ = _tmp75_.green;
+	_tmp77_ = avg_color;
+	_tmp78_ = _tmp77_.blue;
+	cairo_set_source_rgba (_tmp72_, _tmp74_, _tmp76_, _tmp78_, 0.35);
 	_tmp79_ = c;
-	cairo_restore (_tmp79_);
+	cairo_fill (_tmp79_);
 	_tmp80_ = c;
-	_tmp81_ = GTK_WIDGET_CLASS (shutdown_dialog_parent_class)->draw ((GtkWidget*) G_TYPE_CHECK_INSTANCE_CAST (self, GTK_TYPE_FIXED, GtkFixed), _tmp80_);
-	result = _tmp81_;
-	return result;
-}
-
-
-static gboolean shutdown_dialog_real_button_press_event (GtkWidget* base, GdkEventButton* event) {
-	ShutdownDialog * self;
-	gboolean result = FALSE;
-	self = (ShutdownDialog*) base;
-	g_return_val_if_fail (event != NULL, FALSE);
-	g_signal_emit_by_name (self, "close");
-	result = TRUE;
+	cairo_restore (_tmp80_);
+	_tmp81_ = x;
+	x = _tmp81_ - SHUTDOWN_DIALOG_BORDER_EXTERNAL_SIZE;
+	_tmp82_ = y;
+	y = _tmp82_ - SHUTDOWN_DIALOG_BORDER_EXTERNAL_SIZE;
+	_tmp83_ = width;
+	width = _tmp83_ + (SHUTDOWN_DIALOG_BORDER_EXTERNAL_SIZE * 2);
+	_tmp84_ = height;
+	height = _tmp84_ + (SHUTDOWN_DIALOG_BORDER_EXTERNAL_SIZE * 2);
+	_tmp85_ = c;
+	cairo_save (_tmp85_);
+	_tmp86_ = c;
+	_tmp87_ = x;
+	_tmp88_ = y;
+	cairo_translate (_tmp86_, (gdouble) _tmp87_, (gdouble) _tmp88_);
+	cairo_matrix_init_identity (&m);
+	_tmp89_ = self->priv->corner_pattern;
+	_tmp90_ = m;
+	cairo_pattern_set_matrix (_tmp89_, &_tmp90_);
+	_tmp91_ = c;
+	_tmp92_ = self->priv->corner_pattern;
+	cairo_set_source (_tmp91_, _tmp92_);
+	_tmp93_ = c;
+	cairo_rectangle (_tmp93_, (gdouble) 0, (gdouble) 0, (gdouble) SHUTDOWN_DIALOG_BORDER_SIZE, (gdouble) SHUTDOWN_DIALOG_BORDER_SIZE);
+	_tmp94_ = c;
+	cairo_fill (_tmp94_);
+	cairo_matrix_init_identity (&m);
+	_tmp95_ = width;
+	cairo_matrix_translate (&m, (gdouble) _tmp95_, (gdouble) 0);
+	cairo_matrix_scale (&m, (gdouble) (-1), (gdouble) 1);
+	_tmp96_ = self->priv->corner_pattern;
+	_tmp97_ = m;
+	cairo_pattern_set_matrix (_tmp96_, &_tmp97_);
+	_tmp98_ = c;
+	_tmp99_ = self->priv->corner_pattern;
+	cairo_set_source (_tmp98_, _tmp99_);
+	_tmp100_ = c;
+	_tmp101_ = width;
+	cairo_rectangle (_tmp100_, (gdouble) (_tmp101_ - SHUTDOWN_DIALOG_BORDER_SIZE), (gdouble) 0, (gdouble) SHUTDOWN_DIALOG_BORDER_SIZE, (gdouble) SHUTDOWN_DIALOG_BORDER_SIZE);
+	_tmp102_ = c;
+	cairo_fill (_tmp102_);
+	cairo_matrix_init_identity (&m);
+	_tmp103_ = height;
+	cairo_matrix_translate (&m, (gdouble) 0, (gdouble) _tmp103_);
+	cairo_matrix_scale (&m, (gdouble) 1, (gdouble) (-1));
+	_tmp104_ = self->priv->corner_pattern;
+	_tmp105_ = m;
+	cairo_pattern_set_matrix (_tmp104_, &_tmp105_);
+	_tmp106_ = c;
+	_tmp107_ = self->priv->corner_pattern;
+	cairo_set_source (_tmp106_, _tmp107_);
+	_tmp108_ = c;
+	_tmp109_ = height;
+	cairo_rectangle (_tmp108_, (gdouble) 0, (gdouble) (_tmp109_ - SHUTDOWN_DIALOG_BORDER_SIZE), (gdouble) SHUTDOWN_DIALOG_BORDER_SIZE, (gdouble) SHUTDOWN_DIALOG_BORDER_SIZE);
+	_tmp110_ = c;
+	cairo_fill (_tmp110_);
+	cairo_matrix_init_identity (&m);
+	_tmp111_ = width;
+	_tmp112_ = height;
+	cairo_matrix_translate (&m, (gdouble) _tmp111_, (gdouble) _tmp112_);
+	cairo_matrix_scale (&m, (gdouble) (-1), (gdouble) (-1));
+	_tmp113_ = self->priv->corner_pattern;
+	_tmp114_ = m;
+	cairo_pattern_set_matrix (_tmp113_, &_tmp114_);
+	_tmp115_ = c;
+	_tmp116_ = self->priv->corner_pattern;
+	cairo_set_source (_tmp115_, _tmp116_);
+	_tmp117_ = c;
+	_tmp118_ = width;
+	_tmp119_ = height;
+	cairo_rectangle (_tmp117_, (gdouble) (_tmp118_ - SHUTDOWN_DIALOG_BORDER_SIZE), (gdouble) (_tmp119_ - SHUTDOWN_DIALOG_BORDER_SIZE), (gdouble) SHUTDOWN_DIALOG_BORDER_SIZE, (gdouble) SHUTDOWN_DIALOG_BORDER_SIZE);
+	_tmp120_ = c;
+	cairo_fill (_tmp120_);
+	cairo_matrix_init_identity (&m);
+	_tmp121_ = self->priv->left_pattern;
+	_tmp122_ = m;
+	cairo_pattern_set_matrix (_tmp121_, &_tmp122_);
+	_tmp123_ = c;
+	_tmp124_ = self->priv->left_pattern;
+	cairo_set_source (_tmp123_, _tmp124_);
+	_tmp125_ = c;
+	_tmp126_ = height;
+	cairo_rectangle (_tmp125_, (gdouble) 0, (gdouble) SHUTDOWN_DIALOG_BORDER_SIZE, (gdouble) SHUTDOWN_DIALOG_BORDER_SIZE, (gdouble) (_tmp126_ - (SHUTDOWN_DIALOG_BORDER_SIZE * 2)));
+	_tmp127_ = c;
+	cairo_fill (_tmp127_);
+	cairo_matrix_init_identity (&m);
+	_tmp128_ = width;
+	cairo_matrix_translate (&m, (gdouble) _tmp128_, (gdouble) 0);
+	cairo_matrix_scale (&m, (gdouble) (-1), (gdouble) 1);
+	_tmp129_ = self->priv->left_pattern;
+	_tmp130_ = m;
+	cairo_pattern_set_matrix (_tmp129_, &_tmp130_);
+	_tmp131_ = c;
+	_tmp132_ = self->priv->left_pattern;
+	cairo_set_source (_tmp131_, _tmp132_);
+	_tmp133_ = c;
+	_tmp134_ = width;
+	_tmp135_ = height;
+	cairo_rectangle (_tmp133_, (gdouble) (_tmp134_ - SHUTDOWN_DIALOG_BORDER_SIZE), (gdouble) SHUTDOWN_DIALOG_BORDER_SIZE, (gdouble) SHUTDOWN_DIALOG_BORDER_SIZE, (gdouble) (_tmp135_ - (SHUTDOWN_DIALOG_BORDER_SIZE * 2)));
+	_tmp136_ = c;
+	cairo_fill (_tmp136_);
+	cairo_matrix_init_identity (&m);
+	_tmp137_ = self->priv->top_pattern;
+	_tmp138_ = m;
+	cairo_pattern_set_matrix (_tmp137_, &_tmp138_);
+	_tmp139_ = c;
+	_tmp140_ = self->priv->top_pattern;
+	cairo_set_source (_tmp139_, _tmp140_);
+	_tmp141_ = c;
+	_tmp142_ = width;
+	cairo_rectangle (_tmp141_, (gdouble) SHUTDOWN_DIALOG_BORDER_SIZE, (gdouble) 0, (gdouble) (_tmp142_ - (SHUTDOWN_DIALOG_BORDER_SIZE * 2)), (gdouble) SHUTDOWN_DIALOG_BORDER_SIZE);
+	_tmp143_ = c;
+	cairo_fill (_tmp143_);
+	cairo_matrix_init_identity (&m);
+	_tmp144_ = height;
+	cairo_matrix_translate (&m, (gdouble) 0, (gdouble) _tmp144_);
+	cairo_matrix_scale (&m, (gdouble) 1, (gdouble) (-1));
+	_tmp145_ = self->priv->top_pattern;
+	_tmp146_ = m;
+	cairo_pattern_set_matrix (_tmp145_, &_tmp146_);
+	_tmp147_ = c;
+	_tmp148_ = self->priv->top_pattern;
+	cairo_set_source (_tmp147_, _tmp148_);
+	_tmp149_ = c;
+	_tmp150_ = height;
+	_tmp151_ = width;
+	cairo_rectangle (_tmp149_, (gdouble) SHUTDOWN_DIALOG_BORDER_SIZE, (gdouble) (_tmp150_ - SHUTDOWN_DIALOG_BORDER_SIZE), (gdouble) (_tmp151_ - (SHUTDOWN_DIALOG_BORDER_SIZE * 2)), (gdouble) SHUTDOWN_DIALOG_BORDER_SIZE);
+	_tmp152_ = c;
+	cairo_fill (_tmp152_);
+	_tmp153_ = c;
+	cairo_restore (_tmp153_);
+	_tmp154_ = c;
+	_tmp155_ = GTK_WIDGET_CLASS (shutdown_dialog_parent_class)->draw ((GtkWidget*) G_TYPE_CHECK_INSTANCE_CAST (self, GTK_TYPE_FIXED, GtkFixed), _tmp154_);
+	ret = _tmp155_;
+	_tmp156_ = self->priv->animation;
+	_tmp157_ = animate_timer_get_is_running (_tmp156_);
+	_tmp158_ = _tmp157_;
+	if (_tmp158_) {
+		cairo_t* _tmp159_;
+		gdouble _tmp160_ = 0.0;
+		gboolean _tmp161_;
+		cairo_t* _tmp168_;
+		gdouble _tmp169_;
+		_tmp159_ = c;
+		cairo_pop_group_to_source (_tmp159_);
+		_tmp161_ = self->priv->closing;
+		if (_tmp161_) {
+			AnimateTimer* _tmp162_;
+			gdouble _tmp163_;
+			gdouble _tmp164_;
+			_tmp162_ = self->priv->animation;
+			_tmp163_ = animate_timer_get_progress (_tmp162_);
+			_tmp164_ = _tmp163_;
+			_tmp160_ = 1.0f - _tmp164_;
+		} else {
+			AnimateTimer* _tmp165_;
+			gdouble _tmp166_;
+			gdouble _tmp167_;
+			_tmp165_ = self->priv->animation;
+			_tmp166_ = animate_timer_get_progress (_tmp165_);
+			_tmp167_ = _tmp166_;
+			_tmp160_ = _tmp167_;
+		}
+		_tmp168_ = c;
+		_tmp169_ = _tmp160_;
+		cairo_paint_with_alpha (_tmp168_, _tmp169_);
+	}
+	result = ret;
 	return result;
 }
 
@@ -1015,18 +1716,15 @@ static DialogButton* shutdown_dialog_add_button (ShutdownDialog* self, const gch
 	const gchar* _tmp2_;
 	GtkLabel* _tmp3_;
 	GtkLabel* label;
-	PangoFontDescription* _tmp4_ = NULL;
-	PangoFontDescription* _tmp5_;
-	GdkRGBA _tmp6_ = {0};
-	const gchar* _tmp7_;
-	const gchar* _tmp8_;
-	DialogButton* _tmp9_;
+	const gchar* _tmp4_;
+	const gchar* _tmp5_;
+	DialogButton* _tmp6_;
 	DialogButton* button;
 	g_return_val_if_fail (self != NULL, NULL);
 	g_return_val_if_fail (text != NULL, NULL);
 	g_return_val_if_fail (inactive_filename != NULL, NULL);
 	g_return_val_if_fail (active_filename != NULL, NULL);
-	_tmp0_ = (GtkBox*) gtk_box_new (GTK_ORIENTATION_VERTICAL, 9);
+	_tmp0_ = (GtkBox*) gtk_box_new (GTK_ORIENTATION_VERTICAL, SHUTDOWN_DIALOG_BUTTON_TEXT_SPACE);
 	g_object_ref_sink (_tmp0_);
 	b = _tmp0_;
 	gtk_widget_set_visible ((GtkWidget*) b, TRUE);
@@ -1036,21 +1734,11 @@ static DialogButton* shutdown_dialog_add_button (ShutdownDialog* self, const gch
 	_tmp3_ = (GtkLabel*) gtk_label_new (_tmp2_);
 	g_object_ref_sink (_tmp3_);
 	label = _tmp3_;
-	gtk_widget_set_visible ((GtkWidget*) label, TRUE);
-	_tmp4_ = pango_font_description_from_string ("Ubuntu Light 12");
-	_tmp5_ = _tmp4_;
-	gtk_widget_override_font ((GtkWidget*) label, _tmp5_);
-	__vala_PangoFontDescription_free0 (_tmp5_);
-	_tmp6_.red = (gdouble) 1.0f;
-	_tmp6_.green = (gdouble) 1.0f;
-	_tmp6_.blue = (gdouble) 1.0f;
-	_tmp6_.alpha = (gdouble) 0.0f;
-	gtk_widget_override_color ((GtkWidget*) label, GTK_STATE_FLAG_NORMAL, &_tmp6_);
-	_tmp7_ = inactive_filename;
-	_tmp8_ = active_filename;
-	_tmp9_ = dialog_button_new (_tmp7_, _tmp8_, label);
-	g_object_ref_sink (_tmp9_);
-	button = _tmp9_;
+	_tmp4_ = inactive_filename;
+	_tmp5_ = active_filename;
+	_tmp6_ = dialog_button_new (_tmp4_, _tmp5_, NULL, label);
+	g_object_ref_sink (_tmp6_);
+	button = _tmp6_;
 	gtk_widget_set_visible ((GtkWidget*) button, TRUE);
 	gtk_box_pack_start (b, (GtkWidget*) button, FALSE, FALSE, (guint) 0);
 	gtk_box_pack_start (b, (GtkWidget*) label, FALSE, FALSE, (guint) 0);
@@ -1066,35 +1754,41 @@ static void shutdown_dialog_class_init (ShutdownDialogClass * klass) {
 	g_type_class_add_private (klass, sizeof (ShutdownDialogPrivate));
 	GTK_WIDGET_CLASS (klass)->size_allocate = shutdown_dialog_real_size_allocate;
 	GTK_WIDGET_CLASS (klass)->draw = shutdown_dialog_real_draw;
-	GTK_WIDGET_CLASS (klass)->button_press_event = shutdown_dialog_real_button_press_event;
 	G_OBJECT_CLASS (klass)->finalize = shutdown_dialog_finalize;
-	g_signal_new ("close", TYPE_SHUTDOWN_DIALOG, G_SIGNAL_RUN_LAST, 0, NULL, NULL, g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
+	g_signal_new ("closed", TYPE_SHUTDOWN_DIALOG, G_SIGNAL_RUN_LAST, 0, NULL, NULL, g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
 }
 
 
 static void shutdown_dialog_instance_init (ShutdownDialog * self) {
 	self->priv = SHUTDOWN_DIALOG_GET_PRIVATE (self);
+	self->priv->bg_surface = NULL;
 	self->priv->corner_surface = NULL;
 	self->priv->left_surface = NULL;
 	self->priv->top_surface = NULL;
 	self->priv->corner_pattern = NULL;
 	self->priv->left_pattern = NULL;
 	self->priv->top_pattern = NULL;
+	self->priv->closing = FALSE;
 }
 
 
 static void shutdown_dialog_finalize (GObject* obj) {
 	ShutdownDialog * self;
 	self = G_TYPE_CHECK_INSTANCE_CAST (obj, TYPE_SHUTDOWN_DIALOG, ShutdownDialog);
+	_cairo_surface_destroy0 (self->priv->bg_surface);
 	_cairo_surface_destroy0 (self->priv->corner_surface);
 	_cairo_surface_destroy0 (self->priv->left_surface);
 	_cairo_surface_destroy0 (self->priv->top_surface);
 	_cairo_pattern_destroy0 (self->priv->corner_pattern);
 	_cairo_pattern_destroy0 (self->priv->left_pattern);
 	_cairo_pattern_destroy0 (self->priv->top_pattern);
+	_monitor_unref0 (self->priv->monitor);
 	_g_object_unref0 (self->priv->vbox);
 	_g_object_unref0 (self->priv->close_button);
 	_g_object_unref0 (self->priv->button_box);
+	_g_object_unref0 (self->priv->monitor_events);
+	_g_object_unref0 (self->priv->vbox_events);
+	_g_object_unref0 (self->priv->animation);
 	G_OBJECT_CLASS (shutdown_dialog_parent_class)->finalize (obj);
 }
 
@@ -1111,33 +1805,37 @@ GType shutdown_dialog_get_type (void) {
 }
 
 
-DialogButton* dialog_button_construct (GType object_type, const gchar* inactive_filename, const gchar* active_filename, GtkLabel* label) {
+DialogButton* dialog_button_construct (GType object_type, const gchar* inactive_filename, const gchar* focused_filename, const gchar* active_filename, GtkLabel* label) {
 	DialogButton * self = NULL;
 	const gchar* _tmp0_;
 	gchar* _tmp1_;
 	const gchar* _tmp2_;
 	gchar* _tmp3_;
-	GtkLabel* _tmp4_;
-	GtkLabel* _tmp5_;
+	const gchar* _tmp4_;
+	gchar* _tmp5_;
 	const gchar* _tmp6_;
 	GtkImage* _tmp7_;
 	GtkImage* _tmp8_;
 	GtkImage* _tmp9_;
+	GtkLabel* _tmp10_;
+	GtkLabel* _tmp11_;
+	GtkLabel* _tmp12_;
+	GError * _inner_error_ = NULL;
 	g_return_val_if_fail (inactive_filename != NULL, NULL);
-	g_return_val_if_fail (active_filename != NULL, NULL);
+	g_return_val_if_fail (focused_filename != NULL, NULL);
 	self = (DialogButton*) g_object_new (object_type, NULL);
 	_tmp0_ = inactive_filename;
 	_tmp1_ = g_strdup (_tmp0_);
 	_g_free0 (self->priv->inactive_filename);
 	self->priv->inactive_filename = _tmp1_;
-	_tmp2_ = active_filename;
+	_tmp2_ = focused_filename;
 	_tmp3_ = g_strdup (_tmp2_);
+	_g_free0 (self->priv->focused_filename);
+	self->priv->focused_filename = _tmp3_;
+	_tmp4_ = active_filename;
+	_tmp5_ = g_strdup (_tmp4_);
 	_g_free0 (self->priv->active_filename);
-	self->priv->active_filename = _tmp3_;
-	_tmp4_ = label;
-	_tmp5_ = _g_object_ref0 (_tmp4_);
-	_g_object_unref0 (self->priv->l);
-	self->priv->l = _tmp5_;
+	self->priv->active_filename = _tmp5_;
 	gtk_button_set_relief ((GtkButton*) self, GTK_RELIEF_NONE);
 	gtk_button_set_focus_on_click ((GtkButton*) self, FALSE);
 	_tmp6_ = inactive_filename;
@@ -1149,12 +1847,90 @@ DialogButton* dialog_button_construct (GType object_type, const gchar* inactive_
 	gtk_widget_set_visible ((GtkWidget*) _tmp8_, TRUE);
 	_tmp9_ = self->priv->i;
 	gtk_container_add ((GtkContainer*) self, (GtkWidget*) _tmp9_);
+	_tmp10_ = label;
+	_tmp11_ = _g_object_ref0 (_tmp10_);
+	_g_object_unref0 (self->priv->l);
+	self->priv->l = _tmp11_;
+	_tmp12_ = self->priv->l;
+	if (_tmp12_ != NULL) {
+		GtkLabel* _tmp13_;
+		GtkLabel* _tmp14_;
+		PangoFontDescription* _tmp15_ = NULL;
+		PangoFontDescription* _tmp16_;
+		GtkLabel* _tmp17_;
+		GdkRGBA _tmp18_ = {0};
+		GtkLabel* _tmp19_;
+		GdkRGBA _tmp20_ = {0};
+		GtkLabel* _tmp21_;
+		GdkRGBA _tmp22_ = {0};
+		_tmp13_ = self->priv->l;
+		gtk_widget_set_visible ((GtkWidget*) _tmp13_, TRUE);
+		_tmp14_ = self->priv->l;
+		_tmp15_ = pango_font_description_from_string ("Ubuntu Light 12");
+		_tmp16_ = _tmp15_;
+		gtk_widget_override_font ((GtkWidget*) _tmp14_, _tmp16_);
+		__vala_PangoFontDescription_free0 (_tmp16_);
+		_tmp17_ = self->priv->l;
+		_tmp18_.red = (gdouble) 1.0f;
+		_tmp18_.green = (gdouble) 1.0f;
+		_tmp18_.blue = (gdouble) 1.0f;
+		_tmp18_.alpha = (gdouble) 0.0f;
+		gtk_widget_override_color ((GtkWidget*) _tmp17_, GTK_STATE_FLAG_NORMAL, &_tmp18_);
+		_tmp19_ = self->priv->l;
+		_tmp20_.red = (gdouble) 1.0f;
+		_tmp20_.green = (gdouble) 1.0f;
+		_tmp20_.blue = (gdouble) 1.0f;
+		_tmp20_.alpha = (gdouble) 1.0f;
+		gtk_widget_override_color ((GtkWidget*) _tmp19_, GTK_STATE_FLAG_FOCUSED, &_tmp20_);
+		_tmp21_ = self->priv->l;
+		_tmp22_.red = (gdouble) 1.0f;
+		_tmp22_.green = (gdouble) 1.0f;
+		_tmp22_.blue = (gdouble) 1.0f;
+		_tmp22_.alpha = (gdouble) 1.0f;
+		gtk_widget_override_color ((GtkWidget*) _tmp21_, GTK_STATE_FLAG_ACTIVE, &_tmp22_);
+	}
+	unity_greeter_add_style_class ((GtkWidget*) self);
+	{
+		GtkCssProvider* _tmp23_;
+		GtkCssProvider* style;
+		GtkStyleContext* _tmp24_ = NULL;
+		_tmp23_ = gtk_css_provider_new ();
+		style = _tmp23_;
+		gtk_css_provider_load_from_data (style, "* {padding: 0px 0px 0px 0px; border: 0px; }", (gssize) (-1), &_inner_error_);
+		if (_inner_error_ != NULL) {
+			_g_object_unref0 (style);
+			goto __catch28_g_error;
+		}
+		_tmp24_ = gtk_widget_get_style_context ((GtkWidget*) self);
+		gtk_style_context_add_provider (_tmp24_, (GtkStyleProvider*) style, (guint) GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+		_g_object_unref0 (style);
+	}
+	goto __finally28;
+	__catch28_g_error:
+	{
+		GError* e = NULL;
+		GError* _tmp25_;
+		const gchar* _tmp26_;
+		e = _inner_error_;
+		_inner_error_ = NULL;
+		_tmp25_ = e;
+		_tmp26_ = _tmp25_->message;
+		g_debug ("shutdown-dialog.vala:488: Internal error loading session chooser style" \
+": %s", _tmp26_);
+		_g_error_free0 (e);
+	}
+	__finally28:
+	if (_inner_error_ != NULL) {
+		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
+		g_clear_error (&_inner_error_);
+		return NULL;
+	}
 	return self;
 }
 
 
-DialogButton* dialog_button_new (const gchar* inactive_filename, const gchar* active_filename, GtkLabel* label) {
-	return dialog_button_construct (TYPE_DIALOG_BUTTON, inactive_filename, active_filename, label);
+DialogButton* dialog_button_new (const gchar* inactive_filename, const gchar* focused_filename, const gchar* active_filename, GtkLabel* label) {
+	return dialog_button_construct (TYPE_DIALOG_BUTTON, inactive_filename, focused_filename, active_filename, label);
 }
 
 
@@ -1190,68 +1966,6 @@ static gboolean dialog_button_real_leave_notify_event (GtkWidget* base, GdkEvent
 }
 
 
-static gboolean dialog_button_real_focus_in_event (GtkWidget* base, GdkEventFocus* event) {
-	DialogButton * self;
-	gboolean result = FALSE;
-	GtkImage* _tmp0_;
-	const gchar* _tmp1_;
-	GtkLabel* _tmp2_;
-	GdkEventFocus _tmp5_;
-	gboolean _tmp6_ = FALSE;
-	self = (DialogButton*) base;
-	g_return_val_if_fail (event != NULL, FALSE);
-	_tmp0_ = self->priv->i;
-	_tmp1_ = self->priv->active_filename;
-	gtk_image_set_from_file (_tmp0_, _tmp1_);
-	_tmp2_ = self->priv->l;
-	if (_tmp2_ != NULL) {
-		GtkLabel* _tmp3_;
-		GdkRGBA _tmp4_ = {0};
-		_tmp3_ = self->priv->l;
-		_tmp4_.red = (gdouble) 1.0f;
-		_tmp4_.green = (gdouble) 1.0f;
-		_tmp4_.blue = (gdouble) 1.0f;
-		_tmp4_.alpha = (gdouble) 1.0f;
-		gtk_widget_override_color ((GtkWidget*) _tmp3_, GTK_STATE_FLAG_NORMAL, &_tmp4_);
-	}
-	_tmp5_ = *event;
-	_tmp6_ = GTK_WIDGET_CLASS (dialog_button_parent_class)->focus_in_event ((GtkWidget*) G_TYPE_CHECK_INSTANCE_CAST (self, GTK_TYPE_BUTTON, GtkButton), &_tmp5_);
-	result = _tmp6_;
-	return result;
-}
-
-
-static gboolean dialog_button_real_focus_out_event (GtkWidget* base, GdkEventFocus* event) {
-	DialogButton * self;
-	gboolean result = FALSE;
-	GtkImage* _tmp0_;
-	const gchar* _tmp1_;
-	GtkLabel* _tmp2_;
-	GdkEventFocus _tmp5_;
-	gboolean _tmp6_ = FALSE;
-	self = (DialogButton*) base;
-	g_return_val_if_fail (event != NULL, FALSE);
-	_tmp0_ = self->priv->i;
-	_tmp1_ = self->priv->inactive_filename;
-	gtk_image_set_from_file (_tmp0_, _tmp1_);
-	_tmp2_ = self->priv->l;
-	if (_tmp2_ != NULL) {
-		GtkLabel* _tmp3_;
-		GdkRGBA _tmp4_ = {0};
-		_tmp3_ = self->priv->l;
-		_tmp4_.red = (gdouble) 1.0f;
-		_tmp4_.green = (gdouble) 1.0f;
-		_tmp4_.blue = (gdouble) 1.0f;
-		_tmp4_.alpha = (gdouble) 0.0f;
-		gtk_widget_override_color ((GtkWidget*) _tmp3_, GTK_STATE_FLAG_NORMAL, &_tmp4_);
-	}
-	_tmp5_ = *event;
-	_tmp6_ = GTK_WIDGET_CLASS (dialog_button_parent_class)->focus_out_event ((GtkWidget*) G_TYPE_CHECK_INSTANCE_CAST (self, GTK_TYPE_BUTTON, GtkButton), &_tmp5_);
-	result = _tmp6_;
-	return result;
-}
-
-
 static gboolean dialog_button_real_draw (GtkWidget* base, cairo_t* c) {
 	DialogButton * self;
 	gboolean result = FALSE;
@@ -1267,14 +1981,92 @@ static gboolean dialog_button_real_draw (GtkWidget* base, cairo_t* c) {
 }
 
 
+static void dialog_button_real_state_flags_changed (GtkWidget* base, GtkStateFlags previous_state) {
+	DialogButton * self;
+	GtkStateFlags _tmp0_ = 0;
+	GtkStateFlags new_flags;
+	gboolean _tmp1_ = FALSE;
+	gboolean _tmp2_ = FALSE;
+	GtkStateFlags _tmp3_;
+	gboolean _tmp6_;
+	gboolean _tmp8_;
+	GtkLabel* _tmp19_;
+	GtkStateFlags _tmp22_;
+	self = (DialogButton*) base;
+	_tmp0_ = gtk_widget_get_state_flags ((GtkWidget*) self);
+	new_flags = _tmp0_;
+	_tmp3_ = new_flags;
+	if ((_tmp3_ & GTK_STATE_FLAG_PRELIGHT) != 0) {
+		gboolean _tmp4_ = FALSE;
+		gboolean _tmp5_;
+		g_object_get ((GtkWidget*) self, "can-focus", &_tmp4_, NULL);
+		_tmp5_ = _tmp4_;
+		_tmp2_ = !_tmp5_;
+	} else {
+		_tmp2_ = FALSE;
+	}
+	_tmp6_ = _tmp2_;
+	if (_tmp6_) {
+		_tmp1_ = TRUE;
+	} else {
+		GtkStateFlags _tmp7_;
+		_tmp7_ = new_flags;
+		_tmp1_ = (_tmp7_ & GTK_STATE_FLAG_FOCUSED) != 0;
+	}
+	_tmp8_ = _tmp1_;
+	if (_tmp8_) {
+		gboolean _tmp9_ = FALSE;
+		GtkStateFlags _tmp10_;
+		gboolean _tmp12_;
+		_tmp10_ = new_flags;
+		if ((_tmp10_ & GTK_STATE_FLAG_ACTIVE) != 0) {
+			const gchar* _tmp11_;
+			_tmp11_ = self->priv->active_filename;
+			_tmp9_ = _tmp11_ != NULL;
+		} else {
+			_tmp9_ = FALSE;
+		}
+		_tmp12_ = _tmp9_;
+		if (_tmp12_) {
+			GtkImage* _tmp13_;
+			const gchar* _tmp14_;
+			_tmp13_ = self->priv->i;
+			_tmp14_ = self->priv->active_filename;
+			gtk_image_set_from_file (_tmp13_, _tmp14_);
+		} else {
+			GtkImage* _tmp15_;
+			const gchar* _tmp16_;
+			_tmp15_ = self->priv->i;
+			_tmp16_ = self->priv->focused_filename;
+			gtk_image_set_from_file (_tmp15_, _tmp16_);
+		}
+	} else {
+		GtkImage* _tmp17_;
+		const gchar* _tmp18_;
+		_tmp17_ = self->priv->i;
+		_tmp18_ = self->priv->inactive_filename;
+		gtk_image_set_from_file (_tmp17_, _tmp18_);
+	}
+	_tmp19_ = self->priv->l;
+	if (_tmp19_ != NULL) {
+		GtkLabel* _tmp20_;
+		GtkStateFlags _tmp21_;
+		_tmp20_ = self->priv->l;
+		_tmp21_ = new_flags;
+		gtk_widget_set_state_flags ((GtkWidget*) _tmp20_, _tmp21_, TRUE);
+	}
+	_tmp22_ = previous_state;
+	GTK_WIDGET_CLASS (dialog_button_parent_class)->state_flags_changed ((GtkWidget*) G_TYPE_CHECK_INSTANCE_CAST (self, GTK_TYPE_BUTTON, GtkButton), _tmp22_);
+}
+
+
 static void dialog_button_class_init (DialogButtonClass * klass) {
 	dialog_button_parent_class = g_type_class_peek_parent (klass);
 	g_type_class_add_private (klass, sizeof (DialogButtonPrivate));
 	GTK_WIDGET_CLASS (klass)->enter_notify_event = dialog_button_real_enter_notify_event;
 	GTK_WIDGET_CLASS (klass)->leave_notify_event = dialog_button_real_leave_notify_event;
-	GTK_WIDGET_CLASS (klass)->focus_in_event = dialog_button_real_focus_in_event;
-	GTK_WIDGET_CLASS (klass)->focus_out_event = dialog_button_real_focus_out_event;
 	GTK_WIDGET_CLASS (klass)->draw = dialog_button_real_draw;
+	GTK_WIDGET_CLASS (klass)->state_flags_changed = dialog_button_real_state_flags_changed;
 	G_OBJECT_CLASS (klass)->finalize = dialog_button_finalize;
 }
 
@@ -1288,6 +2080,7 @@ static void dialog_button_finalize (GObject* obj) {
 	DialogButton * self;
 	self = G_TYPE_CHECK_INSTANCE_CAST (obj, TYPE_DIALOG_BUTTON, DialogButton);
 	_g_free0 (self->priv->inactive_filename);
+	_g_free0 (self->priv->focused_filename);
 	_g_free0 (self->priv->active_filename);
 	_g_object_unref0 (self->priv->i);
 	_g_object_unref0 (self->priv->l);

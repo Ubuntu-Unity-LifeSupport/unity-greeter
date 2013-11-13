@@ -194,7 +194,7 @@ typedef struct _DashEntryClass DashEntryClass;
 #define _g_regex_unref0(var) ((var == NULL) ? NULL : (var = (g_regex_unref (var), NULL)))
 typedef struct _UnityGreeterPrivate UnityGreeterPrivate;
 typedef struct _UserListRemoteDirectoryRespondCbData UserListRemoteDirectoryRespondCbData;
-typedef struct _Block5Data Block5Data;
+typedef struct _Block7Data Block7Data;
 
 #define TYPE_USER_PROMPT_BOX (user_prompt_box_get_type ())
 #define USER_PROMPT_BOX(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_USER_PROMPT_BOX, UserPromptBox))
@@ -227,7 +227,7 @@ typedef struct _FadingLabelClass FadingLabelClass;
 typedef struct _FlatButton FlatButton;
 typedef struct _FlatButtonClass FlatButtonClass;
 typedef struct _UserPromptBoxPrivate UserPromptBoxPrivate;
-typedef struct _Block6Data Block6Data;
+typedef struct _Block8Data Block8Data;
 #define _g_ptr_array_unref0(var) ((var == NULL) ? NULL : (var = (g_ptr_array_unref (var), NULL)))
 #define _remote_server_field_free0(var) ((var == NULL) ? NULL : (var = (remote_server_field_free (var), NULL)))
 #define __g_list_free__remote_server_field_free0_0(var) ((var == NULL) ? NULL : (var = (_g_list_free__remote_server_field_free0_ (var), NULL)))
@@ -555,7 +555,7 @@ struct _UserListRemoteDirectoryRespondCbData {
 	GError * _inner_error_;
 };
 
-struct _Block5Data {
+struct _Block7Data {
 	int _ref_count_;
 	UserList * self;
 	GtkMessageDialog* dialog;
@@ -595,7 +595,7 @@ struct _UserPromptBoxClass {
 	PromptBoxClass parent_class;
 };
 
-struct _Block6Data {
+struct _Block8Data {
 	int _ref_count_;
 	GPtrArray * self;
 	GCompareFunc compare_func;
@@ -1037,10 +1037,10 @@ void unity_greeter_authenticate_remote (UnityGreeter* self, const gchar* session
 gchar* greeter_list_get_lightdm_session (GreeterList* self);
 void remote_login_service_set_last_used_server (RemoteLoginService* self, const gchar* uccsUrl, const gchar* serverUrl, GAsyncReadyCallback _callback_, gpointer _user_data_);
 void remote_login_service_set_last_used_server_finish (RemoteLoginService* self, GAsyncResult* _res_, GError** error);
-static Block5Data* block5_data_ref (Block5Data* _data5_);
-static void block5_data_unref (void * _userdata_);
+static Block7Data* block7_data_ref (Block7Data* _data7_);
+static void block7_data_unref (void * _userdata_);
 gboolean user_list_get_offer_guest (UserList* self);
-static void __lambda23_ (Block5Data* _data5_, gint id);
+static void __lambda23_ (Block7Data* _data7_, gint id);
 static gboolean user_list_is_supported_remote_session (UserList* self, const gchar* session_internal_name);
 static void ___lambda23__gtk_dialog_response (GtkDialog* _sender, gint response_id, gpointer self);
 static gboolean user_list_change_background_timeout_cb (UserList* self);
@@ -1074,8 +1074,8 @@ static gboolean user_list_create_remote_fields_for_current_item_co (UserListCrea
 static void _g_object_unref0_ (gpointer var);
 static gint _remote_server_field_sort_function_gcompare_func (gconstpointer a, gconstpointer b);
 DashEntry* greeter_list_add_prompt (GreeterList* self, const gchar* text, gboolean secret);
-static Block6Data* block6_data_ref (Block6Data* _data6_);
-static void block6_data_unref (void * _userdata_);
+static Block8Data* block8_data_ref (Block8Data* _data8_);
+static void block8_data_unref (void * _userdata_);
 static gint ___lambda0__gcompare_data_func (gconstpointer a, gconstpointer b, gpointer self);
 GtkComboBox* greeter_list_add_combo (GreeterList* self, GPtrArray* texts, gboolean read_only);
 void remote_login_service_get_cached_domains_for_server (RemoteLoginService* self, const gchar* url, GAsyncReadyCallback _callback_, gpointer _user_data_);
@@ -1409,7 +1409,7 @@ static gboolean user_list_query_directory_servers_co (UserListQueryDirectoryServ
 		if (_data_->_inner_error_ != NULL) {
 			_data_->server_list = (_vala_RemoteServer_array_free (_data_->server_list, _data_->server_list_length1), NULL);
 			if (_data_->_inner_error_->domain == G_IO_ERROR) {
-				goto __catch39_g_io_error;
+				goto __catch40_g_io_error;
 			}
 			_data_->server_list = (_vala_RemoteServer_array_free (_data_->server_list, _data_->server_list_length1), NULL);
 			g_critical ("file %s: line %d: unexpected error: %s (%s, %d)", __FILE__, __LINE__, _data_->_inner_error_->message, g_quark_to_string (_data_->_inner_error_->domain), _data_->_inner_error_->code);
@@ -1419,8 +1419,8 @@ static gboolean user_list_query_directory_servers_co (UserListQueryDirectoryServ
 		user_list_set_remote_directory_servers (_data_->self, _data_->server_list, _data_->server_list_length1);
 		_data_->server_list = (_vala_RemoteServer_array_free (_data_->server_list, _data_->server_list_length1), NULL);
 	}
-	goto __finally39;
-	__catch39_g_io_error:
+	goto __finally40;
+	__catch40_g_io_error:
 	{
 		_data_->e = _data_->_inner_error_;
 		_data_->_inner_error_ = NULL;
@@ -1431,7 +1431,7 @@ static gboolean user_list_query_directory_servers_co (UserListQueryDirectoryServ
 		user_list_remove_remote_servers (_data_->self);
 		_g_error_free0 (_data_->e);
 	}
-	__finally39:
+	__finally40:
 	if (_data_->_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _data_->_inner_error_->message, g_quark_to_string (_data_->_inner_error_->domain), _data_->_inner_error_->code);
 		g_clear_error (&_data_->_inner_error_);
@@ -2141,7 +2141,7 @@ static void __lambda24_ (UserList* self, GObject* obj, GAsyncResult* res) {
 		_tmp3_ = (RemoteLoginService*) _tmp2_;
 		if (_inner_error_ != NULL) {
 			if (_inner_error_->domain == G_IO_ERROR) {
-				goto __catch40_g_io_error;
+				goto __catch41_g_io_error;
 			}
 			g_critical ("file %s: line %d: unexpected error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 			g_clear_error (&_inner_error_);
@@ -2157,8 +2157,8 @@ static void __lambda24_ (UserList* self, GObject* obj, GAsyncResult* res) {
 		g_signal_connect_object (_tmp6_, "login-changed", (GCallback) _user_list_remote_login_changed_remote_login_service_login_changed, self, 0);
 		user_list_query_directory_servers (self, NULL, NULL);
 	}
-	goto __finally40;
-	__catch40_g_io_error:
+	goto __finally41;
+	__catch41_g_io_error:
 	{
 		GError* e = NULL;
 		GError* _tmp7_;
@@ -2174,7 +2174,7 @@ static void __lambda24_ (UserList* self, GObject* obj, GAsyncResult* res) {
 		self->priv->remote_login_service = NULL;
 		_g_error_free0 (e);
 	}
-	__finally40:
+	__finally41:
 	if (_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
@@ -2374,7 +2374,7 @@ static gboolean user_list_remote_directory_respond_cb_co (UserListRemoteDirector
 		_data_->re = _data_->_tmp17_;
 		if (_data_->_inner_error_ != NULL) {
 			if (_data_->_inner_error_->domain == G_REGEX_ERROR) {
-				goto __catch41_g_regex_error;
+				goto __catch42_g_regex_error;
 			}
 			_g_free0 (_data_->email);
 			_data_->server_list = (_vala_RemoteServer_array_free (_data_->server_list, _data_->server_list_length1), NULL);
@@ -2418,8 +2418,8 @@ static gboolean user_list_remote_directory_respond_cb_co (UserListRemoteDirector
 		_g_match_info_free0 (_data_->info);
 		_g_regex_unref0 (_data_->re);
 	}
-	goto __finally41;
-	__catch41_g_regex_error:
+	goto __finally42;
+	__catch42_g_regex_error:
 	{
 		_data_->e = _data_->_inner_error_;
 		_data_->_inner_error_ = NULL;
@@ -2428,7 +2428,7 @@ static gboolean user_list_remote_directory_respond_cb_co (UserListRemoteDirector
 		g_debug ("user-list.vala:391: Calling email regex match failed. Error: %s", _data_->_tmp34_);
 		_g_error_free0 (_data_->e);
 	}
-	__finally41:
+	__finally42:
 	if (_data_->_inner_error_ != NULL) {
 		_g_free0 (_data_->email);
 		_data_->server_list = (_vala_RemoteServer_array_free (_data_->server_list, _data_->server_list_length1), NULL);
@@ -2586,7 +2586,7 @@ static gboolean user_list_remote_directory_respond_cb_co (UserListRemoteDirector
 					_g_free0 (_data_->data_type);
 					_g_free0 (_data_->url);
 					if (_data_->_inner_error_->domain == G_IO_ERROR) {
-						goto __catch42_g_io_error;
+						goto __catch43_g_io_error;
 					}
 					_g_free0 (_data_->data_type);
 					_g_free0 (_data_->url);
@@ -2610,8 +2610,8 @@ static gboolean user_list_remote_directory_respond_cb_co (UserListRemoteDirector
 			_data_->self->priv->currently_browsing_server_email = _data_->_tmp98_;
 			_g_free0 (_data_->url);
 		}
-		goto __finally42;
-		__catch42_g_io_error:
+		goto __finally43;
+		__catch43_g_io_error:
 		{
 			_data_->_vala1_e = _data_->_inner_error_;
 			_data_->_inner_error_ = NULL;
@@ -2621,7 +2621,7 @@ static gboolean user_list_remote_directory_respond_cb_co (UserListRemoteDirector
 "bus service failed. Error: %s", _data_->_tmp100_);
 			_g_error_free0 (_data_->_vala1_e);
 		}
-		__finally42:
+		__finally43:
 		if (_data_->_inner_error_ != NULL) {
 			_g_free0 (_data_->email);
 			_data_->server_list = (_vala_RemoteServer_array_free (_data_->server_list, _data_->server_list_length1), NULL);
@@ -2801,30 +2801,30 @@ static void user_list_remote_login_respond_cb (UserList* self) {
 }
 
 
-static Block5Data* block5_data_ref (Block5Data* _data5_) {
-	g_atomic_int_inc (&_data5_->_ref_count_);
-	return _data5_;
+static Block7Data* block7_data_ref (Block7Data* _data7_) {
+	g_atomic_int_inc (&_data7_->_ref_count_);
+	return _data7_;
 }
 
 
-static void block5_data_unref (void * _userdata_) {
-	Block5Data* _data5_;
-	_data5_ = (Block5Data*) _userdata_;
-	if (g_atomic_int_dec_and_test (&_data5_->_ref_count_)) {
+static void block7_data_unref (void * _userdata_) {
+	Block7Data* _data7_;
+	_data7_ = (Block7Data*) _userdata_;
+	if (g_atomic_int_dec_and_test (&_data7_->_ref_count_)) {
 		UserList * self;
-		self = _data5_->self;
-		_g_object_unref0 (_data5_->dialog);
+		self = _data7_->self;
+		_g_object_unref0 (_data7_->dialog);
 		_g_object_unref0 (self);
-		g_slice_free (Block5Data, _data5_);
+		g_slice_free (Block7Data, _data7_);
 	}
 }
 
 
-static void __lambda23_ (Block5Data* _data5_, gint id) {
+static void __lambda23_ (Block7Data* _data7_, gint id) {
 	UserList * self;
 	gint _tmp0_;
 	GtkMessageDialog* _tmp11_;
-	self = _data5_->self;
+	self = _data7_->self;
 	_tmp0_ = id;
 	if (_tmp0_ == 1) {
 		gchar* _tmp1_;
@@ -2856,7 +2856,7 @@ static void __lambda23_ (Block5Data* _data5_, gint id) {
 		}
 		_g_free0 (config_session);
 	}
-	_tmp11_ = _data5_->dialog;
+	_tmp11_ = _data7_->dialog;
 	gtk_widget_destroy ((GtkWidget*) _tmp11_);
 }
 
@@ -2867,7 +2867,7 @@ static void ___lambda23__gtk_dialog_response (GtkDialog* _sender, gint response_
 
 
 static void user_list_show_remote_account_dialog (UserList* self) {
-	Block5Data* _data5_;
+	Block7Data* _data7_;
 	GtkMessageDialog* _tmp0_;
 	GtkMessageDialog* _tmp1_;
 	GtkMessageDialog* _tmp2_;
@@ -2880,19 +2880,19 @@ static void user_list_show_remote_account_dialog (UserList* self) {
 	GtkMessageDialog* _tmp22_;
 	GtkMessageDialog* _tmp23_;
 	g_return_if_fail (self != NULL);
-	_data5_ = g_slice_new0 (Block5Data);
-	_data5_->_ref_count_ = 1;
-	_data5_->self = g_object_ref (self);
+	_data7_ = g_slice_new0 (Block7Data);
+	_data7_->_ref_count_ = 1;
+	_data7_->self = g_object_ref (self);
 	_tmp0_ = (GtkMessageDialog*) gtk_message_dialog_new (NULL, 0, GTK_MESSAGE_OTHER, GTK_BUTTONS_NONE, "");
 	g_object_ref_sink (_tmp0_);
-	_data5_->dialog = _tmp0_;
-	_tmp1_ = _data5_->dialog;
+	_data7_->dialog = _tmp0_;
+	_tmp1_ = _data7_->dialog;
 	gtk_window_set_position ((GtkWindow*) _tmp1_, GTK_WIN_POS_CENTER_ALWAYS);
-	_tmp2_ = _data5_->dialog;
+	_tmp2_ = _data7_->dialog;
 	_tmp3_ = _ ("If you have an account on an RDP or Citrix server, Remote Login lets y" \
 "ou run applications from that server.");
 	g_object_set (_tmp2_, "secondary-text", _tmp3_, NULL);
-	_tmp4_ = _data5_->dialog;
+	_tmp4_ = _data7_->dialog;
 	_tmp5_ = _ ("If you have an account on an RDP server, Remote Login lets you run app" \
 "lications from that server.");
 	g_object_set (_tmp4_, "secondary-text", _tmp5_, NULL);
@@ -2909,17 +2909,17 @@ static void user_list_show_remote_account_dialog (UserList* self) {
 		GtkWidget* _tmp14_;
 		GtkMessageDialog* _tmp15_;
 		const gchar* _tmp16_ = NULL;
-		_tmp8_ = _data5_->dialog;
+		_tmp8_ = _data7_->dialog;
 		_tmp9_ = _ ("Cancel");
 		gtk_dialog_add_button ((GtkDialog*) _tmp8_, _tmp9_, 0);
-		_tmp10_ = _data5_->dialog;
+		_tmp10_ = _data7_->dialog;
 		_tmp11_ = _ ("Set Up…");
 		_tmp12_ = gtk_dialog_add_button ((GtkDialog*) _tmp10_, _tmp11_, 1);
 		_tmp13_ = _g_object_ref0 (_tmp12_);
 		b = _tmp13_;
 		_tmp14_ = b;
 		gtk_widget_grab_focus (_tmp14_);
-		_tmp15_ = _data5_->dialog;
+		_tmp15_ = _data7_->dialog;
 		_tmp16_ = _ ("You need an Ubuntu Remote Login account to use this service. Would you" \
 " like to set up an account now?");
 		g_object_set (_tmp15_, "text", _tmp16_, NULL);
@@ -2929,22 +2929,22 @@ static void user_list_show_remote_account_dialog (UserList* self) {
 		const gchar* _tmp18_ = NULL;
 		GtkMessageDialog* _tmp19_;
 		const gchar* _tmp20_ = NULL;
-		_tmp17_ = _data5_->dialog;
+		_tmp17_ = _data7_->dialog;
 		_tmp18_ = _ ("OK");
 		gtk_dialog_add_button ((GtkDialog*) _tmp17_, _tmp18_, 0);
-		_tmp19_ = _data5_->dialog;
+		_tmp19_ = _data7_->dialog;
 		_tmp20_ = _ ("You need an Ubuntu Remote Login account to use this service. Visit ucc" \
 "s.canonical.com to set up an account.");
 		g_object_set (_tmp19_, "text", _tmp20_, NULL);
 	}
-	_tmp21_ = _data5_->dialog;
+	_tmp21_ = _data7_->dialog;
 	gtk_widget_show_all ((GtkWidget*) _tmp21_);
-	_tmp22_ = _data5_->dialog;
-	g_signal_connect_data ((GtkDialog*) _tmp22_, "response", (GCallback) ___lambda23__gtk_dialog_response, block5_data_ref (_data5_), (GClosureNotify) block5_data_unref, 0);
-	_tmp23_ = _data5_->dialog;
+	_tmp22_ = _data7_->dialog;
+	g_signal_connect_data ((GtkDialog*) _tmp22_, "response", (GCallback) ___lambda23__gtk_dialog_response, block7_data_ref (_data7_), (GClosureNotify) block7_data_unref, 0);
+	_tmp23_ = _data7_->dialog;
 	gtk_dialog_run ((GtkDialog*) _tmp23_);
-	block5_data_unref (_data5_);
-	_data5_ = NULL;
+	block7_data_unref (_data7_);
+	_data7_ = NULL;
 }
 
 
@@ -3301,33 +3301,33 @@ static void g_ptr_array_set_length (GPtrArray* self, gint value) {
 }
 
 
-static Block6Data* block6_data_ref (Block6Data* _data6_) {
-	g_atomic_int_inc (&_data6_->_ref_count_);
-	return _data6_;
+static Block8Data* block8_data_ref (Block8Data* _data8_) {
+	g_atomic_int_inc (&_data8_->_ref_count_);
+	return _data8_;
 }
 
 
-static void block6_data_unref (void * _userdata_) {
-	Block6Data* _data6_;
-	_data6_ = (Block6Data*) _userdata_;
-	if (g_atomic_int_dec_and_test (&_data6_->_ref_count_)) {
+static void block8_data_unref (void * _userdata_) {
+	Block8Data* _data8_;
+	_data8_ = (Block8Data*) _userdata_;
+	if (g_atomic_int_dec_and_test (&_data8_->_ref_count_)) {
 		GPtrArray * self;
-		self = _data6_->self;
+		self = _data8_->self;
 		_g_ptr_array_unref0 (self);
-		g_slice_free (Block6Data, _data6_);
+		g_slice_free (Block8Data, _data8_);
 	}
 }
 
 
-static gint __lambda0_ (Block6Data* _data6_, gconstpointer** a, gconstpointer** b) {
+static gint __lambda0_ (Block8Data* _data8_, gconstpointer** a, gconstpointer** b) {
 	GPtrArray * self;
 	gint result = 0;
 	GCompareFunc _tmp0_;
 	gconstpointer** _tmp1_;
 	gconstpointer** _tmp2_;
 	gint _tmp3_ = 0;
-	self = _data6_->self;
-	_tmp0_ = _data6_->compare_func;
+	self = _data8_->self;
+	_tmp0_ = _data8_->compare_func;
 	_tmp1_ = a;
 	_tmp2_ = b;
 	_tmp3_ = _tmp0_ ((gconstpointer**) (*_tmp1_), (gconstpointer**) (*_tmp2_));
@@ -3344,17 +3344,17 @@ static gint ___lambda0__gcompare_data_func (gconstpointer a, gconstpointer b, gp
 
 
 static void vala_g_ptr_array_sort (GPtrArray* self, GCompareFunc compare_func) {
-	Block6Data* _data6_;
+	Block8Data* _data8_;
 	GCompareFunc _tmp0_;
 	g_return_if_fail (self != NULL);
-	_data6_ = g_slice_new0 (Block6Data);
-	_data6_->_ref_count_ = 1;
-	_data6_->self = g_ptr_array_ref (self);
+	_data8_ = g_slice_new0 (Block8Data);
+	_data8_->_ref_count_ = 1;
+	_data8_->self = g_ptr_array_ref (self);
 	_tmp0_ = compare_func;
-	_data6_->compare_func = _tmp0_;
-	g_ptr_array_sort_with_data (self, ___lambda0__gcompare_data_func, _data6_);
-	block6_data_unref (_data6_);
-	_data6_ = NULL;
+	_data8_->compare_func = _tmp0_;
+	g_ptr_array_sort_with_data (self, ___lambda0__gcompare_data_func, _data8_);
+	block8_data_unref (_data8_);
+	_data8_ = NULL;
 }
 
 
@@ -3871,7 +3871,7 @@ static gboolean user_list_create_remote_fields_for_current_item_co (UserListCrea
 														_data_->_email_domains_size_ = _data_->email_domains_length1;
 														if (_data_->_inner_error_ != NULL) {
 															if (_data_->_inner_error_->domain == G_IO_ERROR) {
-																goto __catch43_g_io_error;
+																goto __catch44_g_io_error;
 															}
 															_data_->email_domains = (_vala_array_free (_data_->email_domains, _data_->email_domains_length1, (GDestroyNotify) g_free), NULL);
 															_g_free0 (_data_->default_value);
@@ -3888,8 +3888,8 @@ static gboolean user_list_create_remote_fields_for_current_item_co (UserListCrea
 														}
 													}
 												}
-												goto __finally43;
-												__catch43_g_io_error:
+												goto __finally44;
+												__catch44_g_io_error:
 												{
 													_data_->e = _data_->_inner_error_;
 													_data_->_inner_error_ = NULL;
@@ -3905,7 +3905,7 @@ static gboolean user_list_create_remote_fields_for_current_item_co (UserListCrea
 "ical.RemoteLogin dbus service failed. Error: %s", _data_->_tmp225_);
 													_g_error_free0 (_data_->e);
 												}
-												__finally43:
+												__finally44:
 												if (_data_->_inner_error_ != NULL) {
 													_data_->email_domains = (_vala_array_free (_data_->email_domains, _data_->email_domains_length1, (GDestroyNotify) g_free), NULL);
 													_g_free0 (_data_->default_value);
@@ -5215,7 +5215,7 @@ static void user_list_test_fill_list (UserList* self) {
 		dir = _tmp0_;
 		if (_inner_error_ != NULL) {
 			if (_inner_error_->domain == G_FILE_ERROR) {
-				goto __catch44_g_file_error;
+				goto __catch45_g_file_error;
 			}
 			g_critical ("file %s: line %d: unexpected error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 			g_clear_error (&_inner_error_);
@@ -5245,15 +5245,15 @@ static void user_list_test_fill_list (UserList* self) {
 		}
 		_g_dir_close0 (dir);
 	}
-	goto __finally44;
-	__catch44_g_file_error:
+	goto __finally45;
+	__catch45_g_file_error:
 	{
 		GError* e = NULL;
 		e = _inner_error_;
 		_inner_error_ = NULL;
 		_g_error_free0 (e);
 	}
-	__finally44:
+	__finally45:
 	if (_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
@@ -6897,13 +6897,13 @@ static GObject * user_list_constructor (GType type, guint n_construct_properties
 		_g_free0 (_tmp3_);
 		_tmp6_ = _tmp5_;
 		if (_inner_error_ != NULL) {
-			goto __catch45_g_error;
+			goto __catch46_g_error;
 		}
 		_g_object_unref0 (self->priv->message_pixbuf);
 		self->priv->message_pixbuf = _tmp6_;
 	}
-	goto __finally45;
-	__catch45_g_error:
+	goto __finally46;
+	__catch46_g_error:
 	{
 		GError* e = NULL;
 		GError* _tmp7_;
@@ -6915,7 +6915,7 @@ static GObject * user_list_constructor (GType type, guint n_construct_properties
 		g_debug ("user-list.vala:114: Error loading message image: %s", _tmp8_);
 		_g_error_free0 (e);
 	}
-	__finally45:
+	__finally46:
 	if (_inner_error_ != NULL) {
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);

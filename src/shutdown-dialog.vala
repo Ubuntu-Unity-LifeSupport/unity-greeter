@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Authors: Robert Ancell <robert.ancell@canonical.com>
+ *          Marco Trevisan <marco.trevisan@canonical.com>
  */
 
 public enum ShutdownDialogType
@@ -26,44 +27,89 @@ public enum ShutdownDialogType
 
 public class ShutdownDialog : Gtk.Fixed
 {
-    public signal void close ();
+    public signal void closed ();
 
+    private Cairo.ImageSurface? bg_surface = null;
     private Cairo.ImageSurface? corner_surface = null;
     private Cairo.ImageSurface? left_surface = null;
     private Cairo.ImageSurface? top_surface = null;
     private Cairo.Pattern? corner_pattern = null;
     private Cairo.Pattern? left_pattern = null;
     private Cairo.Pattern? top_pattern = null;
-    
+
     private const int BORDER_SIZE = 30;
+    private const int BORDER_INTERNAL_SIZE = 10;
+    private const int BORDER_EXTERNAL_SIZE = BORDER_SIZE - BORDER_INTERNAL_SIZE;
     private const int CLOSE_OFFSET = 3;
+    private const int BUTTON_TEXT_SPACE = 9;
+    private const int BLUR_RADIUS = 4;
+
+    private Monitor monitor;
+    private weak Background background;
 
     private Gtk.Box vbox;
     private DialogButton close_button;
     private Gtk.Box button_box;
+    private Gtk.EventBox monitor_events;
+    private Gtk.EventBox vbox_events;
 
-    public ShutdownDialog (ShutdownDialogType type)
+    private AnimateTimer animation;
+    private bool closing = false;
+
+
+    public ShutdownDialog (ShutdownDialogType type, Background bg)
     {
+        background = bg;
+        background.notify["alpha"].connect (rebuild_background);
+        background.notify["average-color"].connect (rebuild_background);
+
+        // This event box covers the monitor size, and closes the dialog on click.
+        monitor_events = new Gtk.EventBox ();
+        monitor_events.visible = true;
+        monitor_events.set_visible_window (false);
+        monitor_events.events |= Gdk.EventMask.BUTTON_PRESS_MASK;
+        monitor_events.button_press_event.connect (() => {
+            close ();
+            return true;
+        });
+        add (monitor_events);
+
         vbox = new Gtk.Box (Gtk.Orientation.VERTICAL, 10);
         vbox.visible = true;
-        add (vbox);
 
-        vbox.border_width = 20;
+        vbox.margin = BORDER_INTERNAL_SIZE;
+        vbox.margin_top += 9;
+        vbox.margin_left += 20;
+        vbox.margin_right += 20;
+        vbox.margin_bottom += 2;
 
-        var title_label = new Gtk.Label (_("Shutdown"));
-        title_label.override_font (Pango.FontDescription.from_string ("Ubuntu Light 15"));
-        title_label.override_color (Gtk.StateFlags.NORMAL, { 1.0f, 1.0f, 1.0f, 1.0f });
-        title_label.set_alignment (0.0f, 0.5f);
-        vbox.pack_start (title_label, false, false, 0);
+        // This event box consumes the click events inside the vbox
+        vbox_events = new Gtk.EventBox();
+        vbox_events.visible = true;
+        vbox_events.set_visible_window (false);
+        vbox_events.events |= Gdk.EventMask.BUTTON_PRESS_MASK;
+        vbox_events.button_press_event.connect (() => { return true; });
+        vbox_events.add (vbox);
+        monitor_events.add (vbox_events);
 
         string text;
+
         if (type == ShutdownDialogType.SHUTDOWN)
+        {
             text = _("Goodbye. Would you like to…");
+        }
         else
         {
-            text = _("Are you sure you want to shut down the computer?");
+            var title_label = new Gtk.Label (_("Shut Down"));
             title_label.visible = true;
+            title_label.override_font (Pango.FontDescription.from_string ("Ubuntu Light 15"));
+            title_label.override_color (Gtk.StateFlags.NORMAL, { 1.0f, 1.0f, 1.0f, 1.0f });
+            title_label.set_alignment (0.0f, 0.5f);
+            vbox.pack_start (title_label, false, false, 0);
+
+            text = _("Are you sure you want to shut down the computer?");
         }
+
         var label = new Gtk.Label (text);
         label.set_line_wrap (true);
         label.override_font (Pango.FontDescription.from_string ("Ubuntu Light 12"));
@@ -132,7 +178,7 @@ public class ShutdownDialog : Gtk.Fixed
 
         if (LightDM.get_can_shutdown ())
         {
-            var button = add_button (_("Shutdown"), Path.build_filename (Config.PKGDATADIR, "shutdown.png"), Path.build_filename (Config.PKGDATADIR, "shutdown_highlight.png"));
+            var button = add_button (_("Shut Down"), Path.build_filename (Config.PKGDATADIR, "shutdown.png"), Path.build_filename (Config.PKGDATADIR, "shutdown_highlight.png"));
             button.clicked.connect (() =>
             {
                 try
@@ -145,13 +191,55 @@ public class ShutdownDialog : Gtk.Fixed
                     warning ("Failed to shutdown: %s", e.message);
                 }
             });
+
+            if (type != ShutdownDialogType.SHUTDOWN)
+                show.connect(() => { button.grab_focus (); });
         }
 
-        close_button = new DialogButton (Path.build_filename (Config.PKGDATADIR, "dialog_close.png"), Path.build_filename (Config.PKGDATADIR, "dialog_close_highlight.png"));
+        close_button = new DialogButton (Path.build_filename (Config.PKGDATADIR, "dialog_close.png"), Path.build_filename (Config.PKGDATADIR, "dialog_close_highlight.png"), Path.build_filename (Config.PKGDATADIR, "dialog_close_press.png"));
         close_button.can_focus = false;
         close_button.clicked.connect (() => { close (); });
         close_button.visible = true;
         add (close_button);
+
+        animation = new AnimateTimer ((x) => { return x; }, AnimateTimer.INSTANT);
+        animation.animate.connect (() => { queue_draw (); });
+        show.connect (() => { animation.reset(); });
+    }
+
+    public void close ()
+    {
+        var start_value = 1.0f - animation.progress;
+        animation = new AnimateTimer ((x) => { return start_value + x; }, AnimateTimer.INSTANT);
+        animation.animate.connect ((p) =>
+        {
+            queue_draw ();
+
+            if (p >= 1.0f)
+            {
+                animation.stop ();
+                closed ();
+            }
+        });
+
+        closing = true;
+        animation.reset();
+    }
+
+    private void rebuild_background ()
+    {
+        bg_surface = null;
+        queue_draw ();
+    }
+
+    public void set_active_monitor (Monitor m)
+    {
+        if (m == this.monitor || m.equals (this.monitor))
+            return;
+
+        monitor = m;
+        rebuild_background ();
+        set_size_request (monitor.width, monitor.height);
     }
 
     public void focus_next ()
@@ -176,24 +264,25 @@ public class ShutdownDialog : Gtk.Fixed
     public override void size_allocate (Gtk.Allocation allocation)
     {
         base.size_allocate (allocation);
+        monitor_events.size_allocate (allocation);
 
         var content_allocation = Gtk.Allocation ();
         int minimum_width, natural_width, minimum_height, natural_height;
-        vbox.get_preferred_width (out minimum_width, out natural_width);
-        vbox.get_preferred_height_for_width (minimum_width, out minimum_height, out natural_height);
+        vbox_events.get_preferred_width (out minimum_width, out natural_width);
+        vbox_events.get_preferred_height_for_width (minimum_width, out minimum_height, out natural_height);
         content_allocation.x = allocation.x + (allocation.width - minimum_width) / 2;
         content_allocation.y = allocation.y + (allocation.height - minimum_height) / 2;
         content_allocation.width = minimum_width;
         content_allocation.height = minimum_height;
-        vbox.size_allocate (content_allocation);
+        vbox_events.size_allocate (content_allocation);
 
         var a = Gtk.Allocation ();
         close_button.get_preferred_width (out minimum_width, out natural_width);
         close_button.get_preferred_height (out minimum_height, out natural_height);
-        a.x = content_allocation.x - BORDER_SIZE + CLOSE_OFFSET;
-        a.y = content_allocation.y - BORDER_SIZE + CLOSE_OFFSET;
+        a.x = content_allocation.x - BORDER_EXTERNAL_SIZE + CLOSE_OFFSET;
+        a.y = content_allocation.y - BORDER_EXTERNAL_SIZE + CLOSE_OFFSET;
         a.width = minimum_width;
-        a.height = minimum_height;       
+        a.height = minimum_height;
         close_button.size_allocate (a);
     }
 
@@ -211,16 +300,54 @@ public class ShutdownDialog : Gtk.Fixed
             top_pattern.set_extend (Cairo.Extend.REPEAT);
         }
 
-        var width = vbox.get_allocated_width () + 20 * 2 + BORDER_SIZE * 2;
-        var height = vbox.get_allocated_height () + 20 * 2 + BORDER_SIZE * 2;
+        int width = vbox_events.get_allocated_width ();
+        int height = vbox_events.get_allocated_height ();
+        int x = (get_allocated_width () - width) / 2;
+        int y = (get_allocated_height () - height) / 2;
+
+        if (animation.is_running)
+            c.push_group ();
 
         /* Darken background */
         c.set_source_rgba (0, 0, 0, 0.25);
         c.paint ();
 
-        /* Draw dialog */
+        if (bg_surface == null || animation.is_running)
+        {
+            /* Create a new blurred surface of the current surface */
+            bg_surface = new Cairo.ImageSurface (Cairo.Format.ARGB32, width, height);
+            var bg_cr = new Cairo.Context (bg_surface);
+
+            bg_cr.set_source_surface (c.get_target (), -x - monitor.x, -y - monitor.y);
+            bg_cr.rectangle (0, 0, width, height);
+            bg_cr.fill ();
+
+            CairoUtils.ExponentialBlur.surface (bg_surface, BLUR_RADIUS);
+        }
+
+        /* Background */
         c.save ();
-        c.translate ((get_allocated_width () - width) * 0.5, (get_allocated_height () - height) * 0.5);
+        c.translate (x, y);
+
+        var avg_color = background.average_color;
+        CairoUtils.rounded_rectangle (c, 0, 0, width, height, 4);
+        c.set_source_surface (bg_surface, 0, 0);
+        c.fill_preserve ();
+        c.set_source_rgba (0.0, 0.0, 0.0, 0.55f);
+        c.fill_preserve ();
+        c.set_source_rgba (avg_color.red, avg_color.green, avg_color.blue, 0.35);
+        c.fill ();
+
+        c.restore();
+
+        /* Draw borders */
+        x -= BORDER_EXTERNAL_SIZE;
+        y -= BORDER_EXTERNAL_SIZE;
+        width += BORDER_EXTERNAL_SIZE * 2;
+        height += BORDER_EXTERNAL_SIZE * 2;
+
+        c.save ();
+        c.translate (x, y);
 
         /* Top left */
         var m = Cairo.Matrix.identity ();
@@ -279,7 +406,7 @@ public class ShutdownDialog : Gtk.Fixed
         c.rectangle (BORDER_SIZE, 0, width - BORDER_SIZE * 2, BORDER_SIZE);
         c.fill ();
 
-        /* Right */
+        /* Bottom */
         m = Cairo.Matrix.identity ();
         m.translate (0, height);
         m.scale (1, -1);
@@ -288,35 +415,27 @@ public class ShutdownDialog : Gtk.Fixed
         c.rectangle (BORDER_SIZE, height - BORDER_SIZE, width - BORDER_SIZE * 2, BORDER_SIZE);
         c.fill ();
 
-        /* Background */
-        DashBox.cairo_rounded_rectangle (c, 20, 20, width - 40, height - 40, 5);
-        c.set_source_rgba (0, 0, 0, 0.75);
-        c.fill ();
-       
         c.restore ();
 
-        return base.draw (c);
-    }
+        var ret = base.draw (c);
 
-    public override bool button_press_event (Gdk.EventButton event)
-    {
-        /* Close when selecting the background */
-        // FIXME: Broken..
-        close ();
-        return true;
+        if (animation.is_running)
+        {
+            c.pop_group_to_source ();
+            c.paint_with_alpha (closing ? 1.0f - animation.progress : animation.progress);
+        }
+
+        return ret;
     }
 
     private DialogButton add_button (string text, string inactive_filename, string active_filename)
     {
-        var b = new Gtk.Box (Gtk.Orientation.VERTICAL, 9);
+        var b = new Gtk.Box (Gtk.Orientation.VERTICAL, BUTTON_TEXT_SPACE);
         b.visible = true;
         button_box.pack_start (b, false, false, 0);
 
         var label = new Gtk.Label (text);
-        label.visible = true;
-        label.override_font (Pango.FontDescription.from_string ("Ubuntu Light 12"));
-        label.override_color (Gtk.StateFlags.NORMAL, { 1.0f, 1.0f, 1.0f, 0.0f });
-        var button = new DialogButton (inactive_filename, active_filename, label);
+        var button = new DialogButton (inactive_filename, active_filename, null, label);
         button.visible = true;
 
         b.pack_start (button, false, false, 0);
@@ -329,22 +448,47 @@ public class ShutdownDialog : Gtk.Fixed
 private class DialogButton : Gtk.Button
 {
     private string inactive_filename;
-    private string active_filename;
+    private string focused_filename;
+    private string? active_filename;
     private Gtk.Image i;
     private Gtk.Label? l;
-    
-    public DialogButton (string inactive_filename, string active_filename, Gtk.Label? label = null)
+
+    public DialogButton (string inactive_filename, string focused_filename, string? active_filename, Gtk.Label? label = null)
     {
         this.inactive_filename = inactive_filename;
+        this.focused_filename = focused_filename;
         this.active_filename = active_filename;
-        l = label;
         relief = Gtk.ReliefStyle.NONE;
         focus_on_click = false;
         i = new Gtk.Image.from_file (inactive_filename);
         i.visible = true;
         add (i);
+
+        l = label;
+
+        if (l != null)
+        {
+            l.visible = true;
+            l.override_font (Pango.FontDescription.from_string ("Ubuntu Light 12"));
+            l.override_color (Gtk.StateFlags.NORMAL, { 1.0f, 1.0f, 1.0f, 0.0f });
+            l.override_color (Gtk.StateFlags.FOCUSED, { 1.0f, 1.0f, 1.0f, 1.0f });
+            l.override_color (Gtk.StateFlags.ACTIVE, { 1.0f, 1.0f, 1.0f, 1.0f });
+        }
+
+        UnityGreeter.add_style_class (this);
+        try
+        {
+            // Remove the default GtkButton paddings and border
+            var style = new Gtk.CssProvider ();
+            style.load_from_data ("* {padding: 0px 0px 0px 0px; border: 0px; }", -1);
+            get_style_context ().add_provider (style, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+        }
+        catch (Error e)
+        {
+            debug ("Internal error loading session chooser style: %s", e.message);
+        }
     }
-    
+
     public override bool enter_notify_event (Gdk.EventCrossing event)
     {
         grab_focus ();
@@ -357,25 +501,32 @@ private class DialogButton : Gtk.Button
         return base.leave_notify_event (event);
     }
 
-    public override bool focus_in_event (Gdk.EventFocus event)
-    {
-        i.set_from_file (active_filename);
-        if (l != null)
-            l.override_color (Gtk.StateFlags.NORMAL, { 1.0f, 1.0f, 1.0f, 1.0f });
-        return base.focus_in_event (event);
-    }
-
-    public override bool focus_out_event (Gdk.EventFocus event)
-    {
-        i.set_from_file (inactive_filename);
-        if (l != null)
-            l.override_color (Gtk.StateFlags.NORMAL, { 1.0f, 1.0f, 1.0f, 0.0f });
-        return base.focus_out_event (event);
-    }
-
     public override bool draw (Cairo.Context c)
     {
         i.draw (c);
         return true;
+    }
+
+    public override void state_flags_changed (Gtk.StateFlags previous_state)
+    {
+        var new_flags = get_state_flags ();
+
+        if ((new_flags & Gtk.StateFlags.PRELIGHT) != 0 && !can_focus ||
+            (new_flags & Gtk.StateFlags.FOCUSED) != 0)
+        {
+            if ((new_flags & Gtk.StateFlags.ACTIVE) != 0 && active_filename != null)
+                i.set_from_file (active_filename);
+            else
+                i.set_from_file (focused_filename);
+        }
+        else
+        {
+            i.set_from_file (inactive_filename);
+        }
+
+        if (l != null)
+            l.set_state_flags (new_flags, true);
+
+        base.state_flags_changed (previous_state);
     }
 }

@@ -9,8 +9,9 @@ dist_pkgdata_DATA = \
 	arrow_left.png \
 	arrow_right.png \
 	cof.png \
-	dialog_close_highlight.png \
 	dialog_close.png \
+	dialog_close_highlight.png \
+	dialog_close_press.png \
 	gnome_badge.png \
 	hibernate_highlight.png \
 	hibernate.png \

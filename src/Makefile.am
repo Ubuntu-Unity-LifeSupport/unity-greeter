@@ -9,6 +9,7 @@ unity_greeter_SOURCES = \
 	animate-timer.vala \
 	background.vala \
 	cached-image.vala \
+	cairo-utils.vala \
 	email-autocompleter.vala \
 	dash-box.vala \
 	dash-button.vala \
@@ -52,6 +53,7 @@ unity_greeter_VALAFLAGS = \
 	--pkg liblightdm-gobject-1 \
 	--pkg libcanberra \
 	--pkg gio-2.0 \
+	--pkg pixman-1 \
 	--target-glib 2.32
 
 unity_greeter_LDADD = \

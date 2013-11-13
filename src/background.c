@@ -233,6 +233,7 @@ enum  {
 };
 Monitor* monitor_new (gint x, gint y, gint width, gint height);
 Monitor* monitor_construct (GType object_type, gint x, gint y, gint width, gint height);
+gboolean monitor_equals (Monitor* self, Monitor* other);
 static void monitor_finalize (Monitor* obj);
 GType background_get_type (void) G_GNUC_CONST;
 GType animate_timer_get_type (void) G_GNUC_CONST;
@@ -242,7 +243,8 @@ enum  {
 	BACKGROUND_DEFAULT_BACKGROUND,
 	BACKGROUND_CURRENT_BACKGROUND,
 	BACKGROUND_DRAW_GRID,
-	BACKGROUND_ALPHA
+	BACKGROUND_ALPHA,
+	BACKGROUND_AVERAGE_COLOR
 };
 GType background_draw_flags_get_type (void) G_GNUC_CONST;
 gchar* ug_settings_get_string (const gchar* key);
@@ -287,6 +289,7 @@ static void ____lambda3__background_loader_loaded (BackgroundLoader* _sender, gp
 void background_set_default_background (Background* self, const gchar* value);
 void background_set_current_background (Background* self, const gchar* value);
 void background_set_draw_grid (Background* self, gboolean value);
+void background_get_average_color (Background* self, GdkRGBA* result);
 static void background_finalize (GObject* obj);
 static void _vala_background_get_property (GObject * object, guint property_id, GValue * value, GParamSpec * pspec);
 static void _vala_background_set_property (GObject * object, guint property_id, const GValue * value, GParamSpec * pspec);
@@ -508,7 +511,8 @@ gboolean background_loader_load (BackgroundLoader* self) {
 		gdouble _tmp34_;
 		cairo_pattern_t* _tmp35_;
 		cairo_pattern_t* pattern;
-		const gchar* _tmp46_;
+		GdkRGBA _tmp46_;
+		const gchar* _tmp47_;
 		_tmp27_ = color;
 		_tmp28_ = _tmp27_.red;
 		_tmp29_ = color;
@@ -560,25 +564,27 @@ gboolean background_loader_load (BackgroundLoader* self) {
 				}
 			}
 		}
+		_tmp46_ = color;
+		self->average_color = _tmp46_;
 		self->priv->finished = TRUE;
-		_tmp46_ = self->priv->_filename;
-		g_debug ("background.vala:77: Render of background %s complete", _tmp46_);
+		_tmp47_ = self->priv->_filename;
+		g_debug ("background.vala:79: Render of background %s complete", _tmp47_);
 		result = TRUE;
 		_cairo_pattern_destroy0 (pattern);
 		_g_free0 (text);
 		return result;
 	} else {
 		{
-			GThread* _tmp47_;
 			GThread* _tmp48_;
+			GThread* _tmp49_;
 			g_object_ref ((GObject*) self);
-			_tmp47_ = g_thread_try_new ("background-loader", _background_loader_load_and_scale_gthread_func, g_object_ref (self), &_inner_error_);
-			_tmp48_ = _tmp47_;
+			_tmp48_ = g_thread_try_new ("background-loader", _background_loader_load_and_scale_gthread_func, g_object_ref (self), &_inner_error_);
+			_tmp49_ = _tmp48_;
 			if (_inner_error_ != NULL) {
 				goto __catch0_g_error;
 			}
 			_g_thread_unref0 (self->priv->thread);
-			self->priv->thread = _tmp48_;
+			self->priv->thread = _tmp49_;
 		}
 		goto __finally0;
 		__catch0_g_error:
@@ -690,7 +696,7 @@ static gboolean background_loader_ready_cb (BackgroundLoader* self) {
 	GThread* _tmp1_;
 	g_return_val_if_fail (self != NULL, FALSE);
 	_tmp0_ = self->priv->_filename;
-	g_debug ("background.vala:117: Render of background %s complete", _tmp0_);
+	g_debug ("background.vala:119: Render of background %s complete", _tmp0_);
 	_tmp1_ = self->priv->thread;
 	g_thread_join (_tmp1_);
 	_g_thread_unref0 (self->priv->thread);
@@ -783,7 +789,7 @@ static gboolean background_loader_ready_cb (BackgroundLoader* self) {
 					cairo_pattern_t* _tmp29_;
 					_tmp25_ = i;
 					_tmp26_ = self->priv->_filename;
-					g_debug ("background.vala:134: images[%d] was null for %s", _tmp25_, _tmp26_);
+					g_debug ("background.vala:136: images[%d] was null for %s", _tmp25_, _tmp26_);
 					_tmp27_ = self->patterns;
 					_tmp27__length1 = self->patterns_length1;
 					_tmp28_ = i;
@@ -892,7 +898,7 @@ static void* background_loader_load_and_scale (BackgroundLoader* self) {
 		_inner_error_ = NULL;
 		_tmp18_ = e;
 		_tmp19_ = _tmp18_->message;
-		g_debug ("background.vala:155: Error loading background: %s", _tmp19_);
+		g_debug ("background.vala:157: Error loading background: %s", _tmp19_);
 		_g_error_free0 (e);
 	}
 	__finally1:
@@ -1806,6 +1812,68 @@ Monitor* monitor_new (gint x, gint y, gint width, gint height) {
 }
 
 
+gboolean monitor_equals (Monitor* self, Monitor* other) {
+	gboolean result = FALSE;
+	Monitor* _tmp0_;
+	g_return_val_if_fail (self != NULL, FALSE);
+	_tmp0_ = other;
+	if (_tmp0_ != NULL) {
+		gboolean _tmp1_ = FALSE;
+		gboolean _tmp2_ = FALSE;
+		gboolean _tmp3_ = FALSE;
+		gint _tmp4_;
+		Monitor* _tmp5_;
+		gint _tmp6_;
+		gboolean _tmp10_;
+		gboolean _tmp14_;
+		gboolean _tmp18_;
+		_tmp4_ = self->x;
+		_tmp5_ = other;
+		_tmp6_ = _tmp5_->x;
+		if (_tmp4_ == _tmp6_) {
+			gint _tmp7_;
+			Monitor* _tmp8_;
+			gint _tmp9_;
+			_tmp7_ = self->y;
+			_tmp8_ = other;
+			_tmp9_ = _tmp8_->y;
+			_tmp3_ = _tmp7_ == _tmp9_;
+		} else {
+			_tmp3_ = FALSE;
+		}
+		_tmp10_ = _tmp3_;
+		if (_tmp10_) {
+			gint _tmp11_;
+			Monitor* _tmp12_;
+			gint _tmp13_;
+			_tmp11_ = self->width;
+			_tmp12_ = other;
+			_tmp13_ = _tmp12_->width;
+			_tmp2_ = _tmp11_ == _tmp13_;
+		} else {
+			_tmp2_ = FALSE;
+		}
+		_tmp14_ = _tmp2_;
+		if (_tmp14_) {
+			gint _tmp15_;
+			Monitor* _tmp16_;
+			gint _tmp17_;
+			_tmp15_ = self->height;
+			_tmp16_ = other;
+			_tmp17_ = _tmp16_->height;
+			_tmp1_ = _tmp15_ == _tmp17_;
+		} else {
+			_tmp1_ = FALSE;
+		}
+		_tmp18_ = _tmp1_;
+		result = _tmp18_;
+		return result;
+	}
+	result = FALSE;
+	return result;
+}
+
+
 static void value_monitor_init (GValue* value) {
 	value->data[0].v_pointer = NULL;
 }
@@ -2162,7 +2230,7 @@ static cairo_surface_t* background_load_image (Background* self, const gchar* fi
 		_tmp17_ = filename;
 		_tmp18_ = e;
 		_tmp19_ = _tmp18_->message;
-		g_debug ("background.vala:442: Failed to load background component %s: %s", _tmp17_, _tmp19_);
+		g_debug ("background.vala:453: Failed to load background component %s: %s", _tmp17_, _tmp19_);
 		_g_error_free0 (e);
 	}
 	__finally2:
@@ -2262,7 +2330,7 @@ static void background_real_size_allocate (GtkWidget* base, GtkAllocation* alloc
 		GHashTable* _tmp10_;
 		BackgroundLoader* _tmp11_ = NULL;
 		BackgroundLoader* _tmp12_;
-		g_debug ("background.vala:470: Regenerating backgrounds");
+		g_debug ("background.vala:481: Regenerating backgrounds");
 		_tmp10_ = self->priv->loaders;
 		g_hash_table_remove_all (_tmp10_);
 		_tmp11_ = background_load_background (self, NULL);
@@ -3140,6 +3208,7 @@ static void background_publish_average_color (Background* self) {
 	guint8* _tmp10_;
 	gint _tmp10__length1;
 	g_return_if_fail (self != NULL);
+	g_object_notify ((GObject*) self, "average-color");
 	_tmp0_ = self->priv->current;
 	_tmp1_ = gdk_rgba_to_string (&_tmp0_->average_color);
 	rgba = _tmp1_;
@@ -3243,6 +3312,17 @@ static void background_set_alpha (Background* self, gdouble value) {
 }
 
 
+void background_get_average_color (Background* self, GdkRGBA* result) {
+	BackgroundLoader* _tmp0_;
+	GdkRGBA _tmp1_;
+	g_return_if_fail (self != NULL);
+	_tmp0_ = self->priv->current;
+	_tmp1_ = _tmp0_->average_color;
+	*result = _tmp1_;
+	return;
+}
+
+
 static void background_class_init (BackgroundClass * klass) {
 	background_parent_class = g_type_class_peek_parent (klass);
 	g_type_class_add_private (klass, sizeof (BackgroundPrivate));
@@ -3255,6 +3335,7 @@ static void background_class_init (BackgroundClass * klass) {
 	g_object_class_install_property (G_OBJECT_CLASS (klass), BACKGROUND_CURRENT_BACKGROUND, g_param_spec_string ("current-background", "current-background", "current-background", NULL, G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB | G_PARAM_READABLE | G_PARAM_WRITABLE));
 	g_object_class_install_property (G_OBJECT_CLASS (klass), BACKGROUND_DRAW_GRID, g_param_spec_boolean ("draw-grid", "draw-grid", "draw-grid", TRUE, G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB | G_PARAM_READABLE | G_PARAM_WRITABLE));
 	g_object_class_install_property (G_OBJECT_CLASS (klass), BACKGROUND_ALPHA, g_param_spec_double ("alpha", "alpha", "alpha", -G_MAXDOUBLE, G_MAXDOUBLE, 1.0, G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB | G_PARAM_READABLE));
+	g_object_class_install_property (G_OBJECT_CLASS (klass), BACKGROUND_AVERAGE_COLOR, g_param_spec_boxed ("average-color", "average-color", "average-color", gdk_rgba_get_type (), G_PARAM_STATIC_NAME | G_PARAM_STATIC_NICK | G_PARAM_STATIC_BLURB | G_PARAM_READABLE));
 }
 
 
@@ -3318,6 +3399,13 @@ static void _vala_background_get_property (GObject * object, guint property_id, 
 		break;
 		case BACKGROUND_ALPHA:
 		g_value_set_double (value, background_get_alpha (self));
+		break;
+		case BACKGROUND_AVERAGE_COLOR:
+		{
+			GdkRGBA boxed;
+			background_get_average_color (self, &boxed);
+			g_value_set_boxed (value, &boxed);
+		}
 		break;
 		default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);

@@ -1,3 +1,8 @@
+Overview of changes in unity-greeter 14.04.1
+
+    - Complete unity style shutdown dialogs (chameleon colours, spacing,
+      blurring, click outside to close, fading, assets, keyboard focus)
+
 Overview of changes in unity-greeter 14.04.0
 
     - Use Unity style shutdown dialogs

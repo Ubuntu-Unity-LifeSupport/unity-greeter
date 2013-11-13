@@ -1,3 +1,16 @@
+unity-greeter (14.04.1-0ubuntu1) trusty; urgency=low
+
+  [ Robert Ancell ]
+  * New upstream release:
+    - Complete unity style shutdown dialogs (chameleon colours, spacing,
+      blurring, click outside to close, fading, assets, keyboard focus)
+
+  [ Marco Trevisan ]
+  * debian/control:
+    - build-depends on libpixman-1-dev
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Thu, 14 Nov 2013 09:08:04 +1300
+
 unity-greeter (14.04.0-0ubuntu1) trusty; urgency=low
 
   * New upstream release:

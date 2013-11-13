@@ -58,6 +58,11 @@ private class AnimateTimer : Object
         this.easing_func = func;
     }
 
+    ~AnimateTimer ()
+    {
+        stop ();
+    }
+
     /* temp_speed is in milliseconds */
     public void reset (int temp_speed = -1)
     {
@@ -93,10 +98,11 @@ private class AnimateTimer : Object
         if (start_time == 0)
             start_time = GLib.get_monotonic_time ();
 
-        progress = calculate_progress (GLib.get_monotonic_time ());
+        var time_progress = normalize_time (GLib.get_monotonic_time ());
+        progress = calculate_progress (time_progress);
         animate (progress);
 
-        if (progress >= 1.0)
+        if (time_progress >= 1.0)
         {
             timeout = 0;
             return false;
@@ -108,17 +114,17 @@ private class AnimateTimer : Object
     /* Returns 0.0 to 1.0 where 1.0 is at or past end_time */
     private double normalize_time (TimeSpan now)
     {
+        if (length == 0)
+            return 1.0f;
+
         return (((double)(now - start_time)) / length).clamp (0.0, 1.0);
     }
 
     /* Returns 0.0 to 1.0 where 1.0 is done.
        time is not normalized yet! */
-    private double calculate_progress (TimeSpan time)
+    private double calculate_progress (double time_progress)
     {
-        if (length == 0)
-            return 1.0;
-        var x = normalize_time (time);
-        var y = easing_func (x);
+        var y = easing_func (time_progress);
         return y.clamp (0.0, 1.0);
     }
 

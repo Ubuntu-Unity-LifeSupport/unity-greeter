@@ -254,7 +254,7 @@ public class MainWindow : Gtk.Window
 
         if (shutdown_dialog != null)
         {
-            shutdown_dialog.set_size_request (monitor.width, monitor.height);
+            shutdown_dialog.set_active_monitor (monitor);
             background.move (shutdown_dialog, monitor.x, monitor.y);
         }
     }
@@ -342,11 +342,11 @@ public class MainWindow : Gtk.Window
         /* Stop input to login box */
         login_box.sensitive = false;
 
-        shutdown_dialog = new ShutdownDialog (type);
-        shutdown_dialog.visible = true;
-        shutdown_dialog.close.connect (close_shutdown_dialog);
+        shutdown_dialog = new ShutdownDialog (type, background);
+        shutdown_dialog.closed.connect (close_shutdown_dialog);
         background.add (shutdown_dialog);
         move_to_monitor (active_monitor);
+        shutdown_dialog.visible = true;
     }
 
     public void close_shutdown_dialog ()

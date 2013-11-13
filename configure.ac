@@ -2,7 +2,7 @@
 
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT(unity-greeter, 14.04.0)
+AC_INIT(unity-greeter, 14.04.1)
 AC_CONFIG_MACRO_DIR(m4)
 AM_INIT_AUTOMAKE
 AM_PROG_CC_C_O
@@ -26,6 +26,7 @@ PKG_CHECK_MODULES(UNITY_GREETER, [
     freetype2
     cairo-ft
     libcanberra
+    pixman-1
     x11
 ])
 

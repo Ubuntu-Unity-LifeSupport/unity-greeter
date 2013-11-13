@@ -84,12 +84,12 @@ DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am test.c \
 	../src/flat-button.c ../src/toggle-box.c ../src/user-list.c \
 	../src/greeter-list.c ../src/remote-login-service.c \
 	../src/background.c ../src/email-autocompleter.c \
-	../src/animate-timer.c ../src/fadable.c ../src/fadable-box.c \
-	../src/dash-box.c ../src/user-prompt-box.c \
-	../src/fading-label.c ../src/cached-image.c \
-	../src/dash-entry.c ../src/dash-button.c ../src/prompt-box.c \
-	../src/session-list.c ../src/main-window.c ../src/list-stack.c \
-	../src/settings.c ../src/shutdown-dialog.c \
+	../src/cairo-utils.c ../src/animate-timer.c ../src/fadable.c \
+	../src/fadable-box.c ../src/dash-box.c \
+	../src/user-prompt-box.c ../src/fading-label.c \
+	../src/cached-image.c ../src/dash-entry.c ../src/dash-button.c \
+	../src/prompt-box.c ../src/session-list.c ../src/main-window.c \
+	../src/list-stack.c ../src/settings.c ../src/shutdown-dialog.c \
 	$(top_srcdir)/depcomp $(srcdir)/unity_greeter_test_vala.stamp
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/intltool.m4 \
@@ -112,6 +112,7 @@ am_unity_greeter_test_OBJECTS = unity_greeter_test-test.$(OBJEXT) \
 	unity_greeter_test-remote-login-service.$(OBJEXT) \
 	unity_greeter_test-background.$(OBJEXT) \
 	unity_greeter_test-email-autocompleter.$(OBJEXT) \
+	unity_greeter_test-cairo-utils.$(OBJEXT) \
 	unity_greeter_test-animate-timer.$(OBJEXT) \
 	unity_greeter_test-fadable.$(OBJEXT) \
 	unity_greeter_test-fadable-box.$(OBJEXT) \
@@ -324,6 +325,7 @@ unity_greeter_test_SOURCES = \
 	../src/email-autocompleter.vala \
 	../src/config.vapi \
 	../src/fixes.vapi \
+	../src/cairo-utils.vala \
 	../src/animate-timer.vala \
 	../src/indicator.vapi \
 	../src/fadable.vala \
@@ -360,6 +362,7 @@ unity_greeter_test_VALAFLAGS = \
 	--pkg liblightdm-gobject-1 \
 	--pkg libcanberra \
 	--pkg gio-2.0 \
+	--pkg pixman-1 \
 	--target-glib 2.32
 
 unity_greeter_test_LDADD = \
@@ -423,6 +426,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter_test-animate-timer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter_test-background.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter_test-cached-image.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter_test-cairo-utils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter_test-dash-box.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter_test-dash-button.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unity_greeter_test-dash-entry.Po@am__quote@
@@ -629,6 +633,20 @@ unity_greeter_test-email-autocompleter.obj: ../src/email-autocompleter.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='../src/email-autocompleter.c' object='unity_greeter_test-email-autocompleter.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_test_CFLAGS) $(CFLAGS) -c -o unity_greeter_test-email-autocompleter.obj `if test -f '../src/email-autocompleter.c'; then $(CYGPATH_W) '../src/email-autocompleter.c'; else $(CYGPATH_W) '$(srcdir)/../src/email-autocompleter.c'; fi`
+
+unity_greeter_test-cairo-utils.o: ../src/cairo-utils.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_test_CFLAGS) $(CFLAGS) -MT unity_greeter_test-cairo-utils.o -MD -MP -MF $(DEPDIR)/unity_greeter_test-cairo-utils.Tpo -c -o unity_greeter_test-cairo-utils.o `test -f '../src/cairo-utils.c' || echo '$(srcdir)/'`../src/cairo-utils.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter_test-cairo-utils.Tpo $(DEPDIR)/unity_greeter_test-cairo-utils.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='../src/cairo-utils.c' object='unity_greeter_test-cairo-utils.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_test_CFLAGS) $(CFLAGS) -c -o unity_greeter_test-cairo-utils.o `test -f '../src/cairo-utils.c' || echo '$(srcdir)/'`../src/cairo-utils.c
+
+unity_greeter_test-cairo-utils.obj: ../src/cairo-utils.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_test_CFLAGS) $(CFLAGS) -MT unity_greeter_test-cairo-utils.obj -MD -MP -MF $(DEPDIR)/unity_greeter_test-cairo-utils.Tpo -c -o unity_greeter_test-cairo-utils.obj `if test -f '../src/cairo-utils.c'; then $(CYGPATH_W) '../src/cairo-utils.c'; else $(CYGPATH_W) '$(srcdir)/../src/cairo-utils.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/unity_greeter_test-cairo-utils.Tpo $(DEPDIR)/unity_greeter_test-cairo-utils.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='../src/cairo-utils.c' object='unity_greeter_test-cairo-utils.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_test_CFLAGS) $(CFLAGS) -c -o unity_greeter_test-cairo-utils.obj `if test -f '../src/cairo-utils.c'; then $(CYGPATH_W) '../src/cairo-utils.c'; else $(CYGPATH_W) '$(srcdir)/../src/cairo-utils.c'; fi`
 
 unity_greeter_test-animate-timer.o: ../src/animate-timer.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(unity_greeter_test_CFLAGS) $(CFLAGS) -MT unity_greeter_test-animate-timer.o -MD -MP -MF $(DEPDIR)/unity_greeter_test-animate-timer.Tpo -c -o unity_greeter_test-animate-timer.o `test -f '../src/animate-timer.c' || echo '$(srcdir)/'`../src/animate-timer.c
@@ -899,6 +917,11 @@ $(srcdir)/../src/email-autocompleter.c: $(srcdir)/unity_greeter_test_vala.stamp
 	@if test -f $@; then :; else \
 	  $(MAKE) $(AM_MAKEFLAGS) $(srcdir)/unity_greeter_test_vala.stamp; \
 	fi
+$(srcdir)/../src/cairo-utils.c: $(srcdir)/unity_greeter_test_vala.stamp
+	@if test -f $@; then :; else rm -f $(srcdir)/unity_greeter_test_vala.stamp; fi
+	@if test -f $@; then :; else \
+	  $(MAKE) $(AM_MAKEFLAGS) $(srcdir)/unity_greeter_test_vala.stamp; \
+	fi
 $(srcdir)/../src/animate-timer.c: $(srcdir)/unity_greeter_test_vala.stamp
 	@if test -f $@; then :; else rm -f $(srcdir)/unity_greeter_test_vala.stamp; fi
 	@if test -f $@; then :; else \
@@ -974,9 +997,9 @@ $(srcdir)/../src/shutdown-dialog.c: $(srcdir)/unity_greeter_test_vala.stamp
 	@if test -f $@; then :; else \
 	  $(MAKE) $(AM_MAKEFLAGS) $(srcdir)/unity_greeter_test_vala.stamp; \
 	fi
-$(srcdir)/unity_greeter_test_vala.stamp: test.vala test-list.vala test-main-window.vala menubar.vala unity-greeter.vala ../src/flat-button.vala ../src/toggle-box.vala ../src/user-list.vala ../src/greeter-list.vala ../src/remote-login-service.vala ../src/background.vala ../src/email-autocompleter.vala ../src/config.vapi ../src/fixes.vapi ../src/animate-timer.vala ../src/indicator.vapi ../src/fadable.vala ../src/fadable-box.vala ../src/dash-box.vala ../src/user-prompt-box.vala ../src/fading-label.vala ../src/cached-image.vala ../src/dash-entry.vala ../src/dash-button.vala ../src/prompt-box.vala ../src/session-list.vala ../src/main-window.vala ../src/list-stack.vala ../src/settings.vala ../src/shutdown-dialog.vala
+$(srcdir)/unity_greeter_test_vala.stamp: test.vala test-list.vala test-main-window.vala menubar.vala unity-greeter.vala ../src/flat-button.vala ../src/toggle-box.vala ../src/user-list.vala ../src/greeter-list.vala ../src/remote-login-service.vala ../src/background.vala ../src/email-autocompleter.vala ../src/config.vapi ../src/fixes.vapi ../src/cairo-utils.vala ../src/animate-timer.vala ../src/indicator.vapi ../src/fadable.vala ../src/fadable-box.vala ../src/dash-box.vala ../src/user-prompt-box.vala ../src/fading-label.vala ../src/cached-image.vala ../src/dash-entry.vala ../src/dash-button.vala ../src/prompt-box.vala ../src/session-list.vala ../src/main-window.vala ../src/list-stack.vala ../src/settings.vala ../src/shutdown-dialog.vala
 	$(AM_V_at)rm -f $@ && echo stamp > $@-t
-	$(AM_V_VALAC)$(am__cd) $(srcdir) && $(VALAC) $(unity_greeter_test_VALAFLAGS) $(VALAFLAGS) -C test.vala test-list.vala test-main-window.vala menubar.vala unity-greeter.vala ../src/flat-button.vala ../src/toggle-box.vala ../src/user-list.vala ../src/greeter-list.vala ../src/remote-login-service.vala ../src/background.vala ../src/email-autocompleter.vala ../src/config.vapi ../src/fixes.vapi ../src/animate-timer.vala ../src/indicator.vapi ../src/fadable.vala ../src/fadable-box.vala ../src/dash-box.vala ../src/user-prompt-box.vala ../src/fading-label.vala ../src/cached-image.vala ../src/dash-entry.vala ../src/dash-button.vala ../src/prompt-box.vala ../src/session-list.vala ../src/main-window.vala ../src/list-stack.vala ../src/settings.vala ../src/shutdown-dialog.vala
+	$(AM_V_VALAC)$(am__cd) $(srcdir) && $(VALAC) $(unity_greeter_test_VALAFLAGS) $(VALAFLAGS) -C test.vala test-list.vala test-main-window.vala menubar.vala unity-greeter.vala ../src/flat-button.vala ../src/toggle-box.vala ../src/user-list.vala ../src/greeter-list.vala ../src/remote-login-service.vala ../src/background.vala ../src/email-autocompleter.vala ../src/config.vapi ../src/fixes.vapi ../src/cairo-utils.vala ../src/animate-timer.vala ../src/indicator.vapi ../src/fadable.vala ../src/fadable-box.vala ../src/dash-box.vala ../src/user-prompt-box.vala ../src/fading-label.vala ../src/cached-image.vala ../src/dash-entry.vala ../src/dash-button.vala ../src/prompt-box.vala ../src/session-list.vala ../src/main-window.vala ../src/list-stack.vala ../src/settings.vala ../src/shutdown-dialog.vala
 	$(AM_V_at)mv -f $@-t $@
 
 ID: $(am__tagged_files)
@@ -1101,6 +1124,7 @@ maintainer-clean-generic:
 	-rm -f $(srcdir)/../src/animate-timer.c
 	-rm -f $(srcdir)/../src/background.c
 	-rm -f $(srcdir)/../src/cached-image.c
+	-rm -f $(srcdir)/../src/cairo-utils.c
 	-rm -f $(srcdir)/../src/dash-box.c
 	-rm -f $(srcdir)/../src/dash-button.c
 	-rm -f $(srcdir)/../src/dash-entry.c
@@ -1129,6 +1153,7 @@ maintainer-clean-generic:
 	-rm -f ../src/animate-timer.c
 	-rm -f ../src/background.c
 	-rm -f ../src/cached-image.c
+	-rm -f ../src/cairo-utils.c
 	-rm -f ../src/dash-box.c
 	-rm -f ../src/dash-button.c
 	-rm -f ../src/dash-entry.c

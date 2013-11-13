@@ -214,7 +214,7 @@ public class DashBox : Gtk.Box
 
         c.save ();
 
-        cairo_rounded_rectangle (c, 0, box_y, box_w, box_h, box_r);
+        CairoUtils.rounded_rectangle (c, 0, box_y, box_w, box_h, box_r);
 
         c.set_source_rgba (0.1, 0.1, 0.1, 0.4);
         c.fill_preserve ();
@@ -226,23 +226,5 @@ public class DashBox : Gtk.Box
         c.restore ();
 
         return base.draw (c);
-    }
-
-    public static void cairo_rounded_rectangle (Cairo.Context c, double x,
-                                                double y, double width,
-                                                double height, double radius)
-    {
-        var w = width - radius * 2;
-        var h = height - radius * 2;
-        var kappa = 0.5522847498 * radius;
-        c.move_to (x + radius, y);
-        c.rel_line_to (w, 0);
-        c.rel_curve_to (kappa, 0, radius, radius - kappa, radius, radius);
-        c.rel_line_to (0, h);
-        c.rel_curve_to (0, kappa, kappa - radius, radius, -radius, radius);
-        c.rel_line_to (-w, 0);
-        c.rel_curve_to (-kappa, 0, -radius, kappa - radius, -radius, -radius);
-        c.rel_line_to (0, -h);
-        c.rel_curve_to (0, -kappa, radius - kappa, -radius, radius, -radius);
     }
 }

@@ -71,6 +71,7 @@ enum  {
 	ANIMATE_TIMER_IS_RUNNING,
 	ANIMATE_TIMER_PROGRESS
 };
+void animate_timer_stop (AnimateTimer* self);
 #define ANIMATE_TIMER_INSTANT 150
 #define ANIMATE_TIMER_FAST 250
 #define ANIMATE_TIMER_NORMAL 500
@@ -79,14 +80,13 @@ AnimateTimer* animate_timer_new (AnimateTimerEasingFunc func, void* func_target,
 AnimateTimer* animate_timer_construct (GType object_type, AnimateTimerEasingFunc func, void* func_target, gint speed);
 static void animate_timer_set_easing_func (AnimateTimer* self, AnimateTimerEasingFunc value, gpointer value_target);
 void animate_timer_reset (AnimateTimer* self, gint temp_speed);
-void animate_timer_stop (AnimateTimer* self);
 static gboolean animate_timer_animate_cb (AnimateTimer* self);
 static gboolean _animate_timer_animate_cb_gsource_func (gpointer self);
 static void animate_timer_set_progress (AnimateTimer* self, gdouble value);
 gint animate_timer_get_speed (AnimateTimer* self);
-static gdouble animate_timer_calculate_progress (AnimateTimer* self, GTimeSpan time);
-gdouble animate_timer_get_progress (AnimateTimer* self);
 static gdouble animate_timer_normalize_time (AnimateTimer* self, GTimeSpan now);
+static gdouble animate_timer_calculate_progress (AnimateTimer* self, gdouble time_progress);
+gdouble animate_timer_get_progress (AnimateTimer* self);
 AnimateTimerEasingFunc animate_timer_get_easing_func (AnimateTimer* self, gpointer* result_target);
 gdouble animate_timer_ease_in_out (gdouble x);
 gdouble animate_timer_ease_out_quint (gdouble x);
@@ -164,8 +164,11 @@ static gboolean animate_timer_animate_cb (AnimateTimer* self) {
 	GTimeSpan _tmp0_;
 	gint64 _tmp2_ = 0LL;
 	gdouble _tmp3_ = 0.0;
+	gdouble time_progress;
 	gdouble _tmp4_;
-	gdouble _tmp5_;
+	gdouble _tmp5_ = 0.0;
+	gdouble _tmp6_;
+	gdouble _tmp7_;
 	g_return_val_if_fail (self != NULL, FALSE);
 	_tmp0_ = self->priv->start_time;
 	if (_tmp0_ == ((GTimeSpan) 0)) {
@@ -174,12 +177,15 @@ static gboolean animate_timer_animate_cb (AnimateTimer* self) {
 		self->priv->start_time = (GTimeSpan) _tmp1_;
 	}
 	_tmp2_ = g_get_monotonic_time ();
-	_tmp3_ = animate_timer_calculate_progress (self, (GTimeSpan) _tmp2_);
-	animate_timer_set_progress (self, _tmp3_);
-	_tmp4_ = self->priv->_progress;
-	g_signal_emit_by_name (self, "animate", _tmp4_);
-	_tmp5_ = self->priv->_progress;
-	if (_tmp5_ >= 1.0) {
+	_tmp3_ = animate_timer_normalize_time (self, (GTimeSpan) _tmp2_);
+	time_progress = _tmp3_;
+	_tmp4_ = time_progress;
+	_tmp5_ = animate_timer_calculate_progress (self, _tmp4_);
+	animate_timer_set_progress (self, _tmp5_);
+	_tmp6_ = self->priv->_progress;
+	g_signal_emit_by_name (self, "animate", _tmp6_);
+	_tmp7_ = time_progress;
+	if (_tmp7_ >= 1.0) {
 		self->priv->timeout = (guint) 0;
 		result = FALSE;
 		return result;
@@ -195,50 +201,42 @@ static gdouble animate_timer_normalize_time (AnimateTimer* self, GTimeSpan now) 
 	GTimeSpan _tmp0_;
 	GTimeSpan _tmp1_;
 	GTimeSpan _tmp2_;
-	gdouble _tmp3_ = 0.0;
+	GTimeSpan _tmp3_;
+	gdouble _tmp4_ = 0.0;
 	g_return_val_if_fail (self != NULL, 0.0);
-	_tmp0_ = now;
-	_tmp1_ = self->priv->start_time;
-	_tmp2_ = self->priv->length;
-	_tmp3_ = CLAMP (((gdouble) (_tmp0_ - _tmp1_)) / _tmp2_, 0.0, 1.0);
-	result = _tmp3_;
+	_tmp0_ = self->priv->length;
+	if (_tmp0_ == ((GTimeSpan) 0)) {
+		result = (gdouble) 1.0f;
+		return result;
+	}
+	_tmp1_ = now;
+	_tmp2_ = self->priv->start_time;
+	_tmp3_ = self->priv->length;
+	_tmp4_ = CLAMP (((gdouble) (_tmp1_ - _tmp2_)) / _tmp3_, 0.0, 1.0);
+	result = _tmp4_;
 	return result;
 }
 
 
-static gdouble animate_timer_calculate_progress (AnimateTimer* self, GTimeSpan time) {
+static gdouble animate_timer_calculate_progress (AnimateTimer* self, gdouble time_progress) {
 	gdouble result = 0.0;
-	GTimeSpan _tmp0_;
-	GTimeSpan _tmp1_;
-	gdouble _tmp2_ = 0.0;
-	gdouble x;
-	AnimateTimerEasingFunc _tmp3_;
-	void* _tmp3__target;
-	AnimateTimerEasingFunc _tmp4_;
-	void* _tmp4__target;
-	gdouble _tmp5_;
-	gdouble _tmp6_ = 0.0;
+	AnimateTimerEasingFunc _tmp0_;
+	void* _tmp0__target;
+	AnimateTimerEasingFunc _tmp1_;
+	void* _tmp1__target;
+	gdouble _tmp2_;
+	gdouble _tmp3_ = 0.0;
 	gdouble y;
-	gdouble _tmp7_;
-	gdouble _tmp8_ = 0.0;
+	gdouble _tmp4_ = 0.0;
 	g_return_val_if_fail (self != NULL, 0.0);
-	_tmp0_ = self->priv->length;
-	if (_tmp0_ == ((GTimeSpan) 0)) {
-		result = 1.0;
-		return result;
-	}
-	_tmp1_ = time;
-	_tmp2_ = animate_timer_normalize_time (self, _tmp1_);
-	x = _tmp2_;
-	_tmp3_ = animate_timer_get_easing_func (self, &_tmp3__target);
-	_tmp4_ = _tmp3_;
-	_tmp4__target = _tmp3__target;
-	_tmp5_ = x;
-	_tmp6_ = _tmp4_ (_tmp5_, _tmp4__target);
-	y = _tmp6_;
-	_tmp7_ = y;
-	_tmp8_ = CLAMP (_tmp7_, 0.0, 1.0);
-	result = _tmp8_;
+	_tmp0_ = animate_timer_get_easing_func (self, &_tmp0__target);
+	_tmp1_ = _tmp0_;
+	_tmp1__target = _tmp0__target;
+	_tmp2_ = time_progress;
+	_tmp3_ = _tmp1_ (_tmp2_, _tmp1__target);
+	y = _tmp3_;
+	_tmp4_ = CLAMP (y, 0.0, 1.0);
+	result = _tmp4_;
 	return result;
 }
 
@@ -367,6 +365,7 @@ static void animate_timer_instance_init (AnimateTimer * self) {
 static void animate_timer_finalize (GObject* obj) {
 	AnimateTimer * self;
 	self = G_TYPE_CHECK_INSTANCE_CAST (obj, TYPE_ANIMATE_TIMER, AnimateTimer);
+	animate_timer_stop (self);
 	G_OBJECT_CLASS (animate_timer_parent_class)->finalize (obj);
 }
 
