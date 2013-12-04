@@ -1,3 +1,12 @@
+unity-greeter (14.04.1-0ubuntu2) trusty; urgency=low
+
+  * debian/install:
+  * debian/maintscript:
+    - Remove the lightdm configuration from /etc/ and use /usr/share instead
+      so dpkg doesn't leave it there on uninstall
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Thu, 05 Dec 2013 09:39:49 +1300
+
 unity-greeter (14.04.1-0ubuntu1) trusty; urgency=low
 
   [ Robert Ancell ]

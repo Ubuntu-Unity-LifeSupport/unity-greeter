@@ -62,4 +62,9 @@ namespace Gdk
 namespace Gtk
 {
     public void socket_add_id (Gtk.Socket socket, int id);
+
+    namespace RGB
+    {
+        public void to_hsv (double r, double g, double b, out double h, out double s, out double v);
+    }
 }

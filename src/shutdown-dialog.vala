@@ -42,10 +42,11 @@ public class ShutdownDialog : Gtk.Fixed
     private const int BORDER_EXTERNAL_SIZE = BORDER_SIZE - BORDER_INTERNAL_SIZE;
     private const int CLOSE_OFFSET = 3;
     private const int BUTTON_TEXT_SPACE = 9;
-    private const int BLUR_RADIUS = 4;
+    private const int BLUR_RADIUS = 8;
 
     private Monitor monitor;
     private weak Background background;
+    private Gdk.RGBA avg_color;
 
     private Gtk.Box vbox;
     private DialogButton close_button;
@@ -61,7 +62,8 @@ public class ShutdownDialog : Gtk.Fixed
     {
         background = bg;
         background.notify["alpha"].connect (rebuild_background);
-        background.notify["average-color"].connect (rebuild_background);
+        background.notify["average-color"].connect (update_background_color);
+        update_background_color ();
 
         // This event box covers the monitor size, and closes the dialog on click.
         monitor_events = new Gtk.EventBox ();
@@ -232,6 +234,72 @@ public class ShutdownDialog : Gtk.Fixed
         queue_draw ();
     }
 
+    private void update_background_color ()
+    {
+        // Apply the same color corrections we do in Unity
+        // For reference, see unity's unity-shared/BGHash.cpp
+        double hue, saturation, value;
+        const double COLOR_ALPHA = 0.72f;
+
+        Gdk.RGBA color = background.average_color;
+        Gtk.RGB.to_hsv (color.red, color.green, color.blue,
+                        out hue, out saturation, out value);
+
+        if (saturation < 0.08)
+        {
+            // Got a grayscale image
+            avg_color = {0.18f, 0.20f, 0.21f, COLOR_ALPHA };
+        }
+        else
+        {
+            const Gdk.RGBA[] cmp_colors =
+            {
+                {84/255.0f, 14/255.0f, 68/255.0f, 1.0f},
+                {110/255.0f, 11/255.0f, 42/255.0f, 1.0f},
+                {132/255.0f, 22/255.0f, 23/255.0f, 1.0f},
+                {132/255.0f, 55/255.0f, 27/255.0f, 1.0f},
+                {134/255.0f, 77/255.0f, 32/255.0f, 1.0f},
+                {133/255.0f, 127/255.0f, 49/255.0f, 1.0f},
+                {29/255.0f, 99/255.0f, 49/255.0f, 1.0f},
+                {17/255.0f, 88/255.0f, 46/255.0f, 1.0f},
+                {14/255.0f, 89/255.0f, 85/255.0f, 1.0f},
+                {25/255.0f, 43/255.0f, 89/255.0f, 1.0f},
+                {27/255.0f, 19/255.0f, 76/255.0f, 1.0f},
+                {2/255.0f, 192/255.0f, 212/255.0f, 1.0f}
+            };
+
+            avg_color = {0, 0, 0, 1};
+            double closest_diff = 200.0f;
+
+            foreach (var c in cmp_colors)
+            {
+                double cmp_hue, cmp_sat, cmp_value;
+                Gtk.RGB.to_hsv (c.red, c.green, c.blue,
+                                out cmp_hue, out cmp_sat, out cmp_value);
+                double color_diff = Math.fabs (hue - cmp_hue);
+
+                if (color_diff < closest_diff)
+                {
+                    avg_color = c;
+                    closest_diff = color_diff;
+                }
+            }
+
+            double new_hue, new_saturation, new_value;
+            Gtk.RGB.to_hsv (avg_color.red, avg_color.green, avg_color.blue,
+                            out new_hue, out new_saturation, out new_value);
+
+            saturation = double.min (saturation, new_saturation);
+            saturation *= (2.0f - saturation);
+            value = double.min (double.min (value, new_value), 0.26f);
+            Gtk.HSV.to_rgb (hue, saturation, value,
+                            out avg_color.red, out avg_color.green, out avg_color.blue);
+            avg_color.alpha = COLOR_ALPHA;
+        }
+
+        rebuild_background ();
+    }
+
     public void set_active_monitor (Monitor m)
     {
         if (m == this.monitor || m.equals (this.monitor))
@@ -329,13 +397,10 @@ public class ShutdownDialog : Gtk.Fixed
         c.save ();
         c.translate (x, y);
 
-        var avg_color = background.average_color;
         CairoUtils.rounded_rectangle (c, 0, 0, width, height, 4);
         c.set_source_surface (bg_surface, 0, 0);
         c.fill_preserve ();
-        c.set_source_rgba (0.0, 0.0, 0.0, 0.55f);
-        c.fill_preserve ();
-        c.set_source_rgba (avg_color.red, avg_color.green, avg_color.blue, 0.35);
+        c.set_source_rgba (avg_color.red, avg_color.green, avg_color.blue, avg_color.alpha);
         c.fill ();
 
         c.restore();
