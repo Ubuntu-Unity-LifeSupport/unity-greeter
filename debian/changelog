@@ -1,3 +1,10 @@
+unity-greeter (14.04.2-0ubuntu2) trusty; urgency=medium
+
+  * debian/control:
+    - Move remote login packages from recommends to suggests
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Wed, 05 Feb 2014 12:34:10 +0000
+
 unity-greeter (14.04.2-0ubuntu1) trusty; urgency=medium
 
   * New upstream release:
