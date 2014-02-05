@@ -7,36 +7,36 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2013-12-03 05:55+0000\n"
-"PO-Revision-Date: 2012-01-24 16:14+0000\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2014-02-03 05:35+0000\n"
+"PO-Revision-Date: 2013-12-16 20:04+0000\n"
+"Last-Translator: Vojtěch Trefný <vojtech.trefny@gmail.com>\n"
 "Language-Team: Czech <cs@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-12-04 05:47+0000\n"
-"X-Generator: Launchpad (build 16861)\n"
+"X-Launchpad-Export-Date: 2014-02-04 06:18+0000\n"
+"X-Generator: Launchpad (build 16916)\n"
 
 #: ../src/greeter-list.vala:300
 #, c-format
 msgid "Enter password for %s"
-msgstr ""
+msgstr "Zadejte heslo pro %s"
 
 #: ../src/greeter-list.vala:802 ../src/user-list.vala:661
 msgid "Password:"
-msgstr ""
+msgstr "Heslo:"
 
 #: ../src/greeter-list.vala:804 ../src/user-list.vala:655
 msgid "Username:"
-msgstr ""
+msgstr "Uživatelské jméno:"
 
 #: ../src/greeter-list.vala:856
 msgid "Invalid password, please try again"
-msgstr ""
+msgstr "Chybné heslo, zkuste to znovu prosím"
 
 #: ../src/greeter-list.vala:867
 msgid "Failed to authenticate"
-msgstr ""
+msgstr "Ověření selhalo"
 
 #: ../src/greeter-list.vala:922
 msgid "Logging in…"
@@ -44,23 +44,27 @@ msgstr "Přihlašování..."
 
 #: ../src/main-window.vala:49
 msgid "Login Screen"
+msgstr "Přihlašovací obrazovka"
+
+#: ../src/main-window.vala:116
+msgid "Back"
 msgstr ""
 
 #: ../src/menubar.vala:217
 msgid "Onscreen keyboard"
-msgstr ""
+msgstr "Klávesnice na obrazovce"
 
 #: ../src/menubar.vala:222
 msgid "High Contrast"
-msgstr ""
+msgstr "Vysoký kontrast"
 
 #: ../src/menubar.vala:228
 msgid "Screen Reader"
-msgstr ""
+msgstr "Čtečka obrazovky"
 
 #: ../src/prompt-box.vala:211
 msgid "Session Options"
-msgstr ""
+msgstr "Vlastnosti sezení"
 
 #: ../src/session-list.vala:34
 msgid "Select desktop environment"
@@ -68,27 +72,27 @@ msgstr "Zvolte uživatelské prostředí"
 
 #: ../src/shutdown-dialog.vala:101
 msgid "Goodbye. Would you like to…"
-msgstr ""
+msgstr "Nashledanou. Chcete ..."
 
 #: ../src/shutdown-dialog.vala:105 ../src/shutdown-dialog.vala:183
 msgid "Shut Down"
-msgstr ""
+msgstr "Vypnout"
 
 #: ../src/shutdown-dialog.vala:112
 msgid "Are you sure you want to shut down the computer?"
-msgstr ""
+msgstr "Opravdu chcete vypnout počítač?"
 
 #: ../src/shutdown-dialog.vala:131
 msgid "Suspend"
-msgstr ""
+msgstr "Uspat do paměti"
 
 #: ../src/shutdown-dialog.vala:148
 msgid "Hibernate"
-msgstr ""
+msgstr "Uspat na disk"
 
 #: ../src/shutdown-dialog.vala:166
 msgid "Restart"
-msgstr ""
+msgstr "Restartovat"
 
 #. Translators: %s is a session name like KDE or Ubuntu
 #: ../src/toggle-box.vala:93
@@ -99,27 +103,29 @@ msgstr "%s (Výchozí)"
 #. Help string for command line --version flag
 #: ../src/unity-greeter.vala:480
 msgid "Show release version"
-msgstr ""
+msgstr "Zobrazit verzi vydání"
 
 #. Help string for command line --test-mode flag
 #: ../src/unity-greeter.vala:483
 msgid "Run in test mode"
-msgstr ""
+msgstr "Spustit v testovacím režimu"
 
 #. Arguments and description for --help text
 #: ../src/unity-greeter.vala:489
 msgid "- Unity Greeter"
-msgstr ""
+msgstr "- uvítací obrazovka Unity"
 
 #. Text printed out when an unknown command-line argument provided
 #: ../src/unity-greeter.vala:500
 #, c-format
 msgid "Run '%s --help' to see a full list of available command line options."
 msgstr ""
+"Spustit příkaz „%s --help“ k zobrazení úplného seznamu dostupných přepínačů "
+"příkazové řádky."
 
 #: ../src/user-list.vala:45
 msgid "Guest Session"
-msgstr ""
+msgstr "Sezení hosta"
 
 #: ../src/user-list.vala:398
 msgid "Please enter a complete e-mail address"
@@ -194,7 +200,7 @@ msgstr "Přihlásit se"
 #: ../src/user-list.vala:786
 #, c-format
 msgid "Login as %s"
-msgstr ""
+msgstr "Přihlásit se jako %s"
 
 #: ../src/user-list.vala:790
 msgid "Retry"
@@ -207,7 +213,7 @@ msgstr "Znovu jako %s"
 
 #: ../src/user-list.vala:829
 msgid "Login"
-msgstr ""
+msgstr "Přihlásit se"
 
 #~ msgid "_Back"
 #~ msgstr "_Zpět"

@@ -116,6 +116,8 @@ class BackgroundLoader : Object
 
     private bool ready_cb ()
     {
+        ready_id = 0;
+
         debug ("Render of background %s complete", filename);
 
         thread.join ();

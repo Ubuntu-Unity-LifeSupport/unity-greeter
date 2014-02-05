@@ -26,6 +26,7 @@ tests/greeter-list.c
 tests/main-window.c
 tests/prompt-box.c
 tests/session-list.c
+tests/shutdown-dialog.c
 tests/toggle-box.c
 tests/user-list.c
 

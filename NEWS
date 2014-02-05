@@ -1,3 +1,12 @@
+Overview of changes in unity-greeter 14.04.2
+
+    - Handle a window being destroyed after we get the map event and try and
+      focus it
+    - Add accessible description to back button
+    - Fix attempted removal of dead source
+    - Apply the same unity color corrections to the average color in shutdown
+      dialog
+
 Overview of changes in unity-greeter 14.04.1
 
     - Complete unity style shutdown dialogs (chameleon colours, spacing,

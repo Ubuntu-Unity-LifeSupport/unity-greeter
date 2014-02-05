@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2013-12-03 05:55+0000\n"
+"POT-Creation-Date: 2014-02-03 05:35+0000\n"
 "PO-Revision-Date: 2012-09-06 18:58+0000\n"
 "Last-Translator: Michael Moroni <michael.moroni@mailoo.org>\n"
 "Language-Team: Esperanto <eo@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-12-04 05:47+0000\n"
-"X-Generator: Launchpad (build 16861)\n"
+"X-Launchpad-Export-Date: 2014-02-04 06:18+0000\n"
+"X-Generator: Launchpad (build 16916)\n"
 
 #: ../src/greeter-list.vala:300
 #, c-format
@@ -45,6 +45,10 @@ msgstr ""
 #: ../src/main-window.vala:49
 msgid "Login Screen"
 msgstr "Ensalutekrano"
+
+#: ../src/main-window.vala:116
+msgid "Back"
+msgstr ""
 
 #: ../src/menubar.vala:217
 msgid "Onscreen keyboard"

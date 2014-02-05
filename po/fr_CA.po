@@ -7,48 +7,52 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2013-12-03 05:55+0000\n"
+"POT-Creation-Date: 2014-02-03 05:35+0000\n"
 "PO-Revision-Date: 2012-03-28 19:22+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: French (Canada) <fr_CA@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-12-04 05:48+0000\n"
-"X-Generator: Launchpad (build 16861)\n"
+"X-Launchpad-Export-Date: 2014-02-04 06:19+0000\n"
+"X-Generator: Launchpad (build 16916)\n"
 
 #: ../src/greeter-list.vala:300
 #, c-format
 msgid "Enter password for %s"
-msgstr "Entrez le mot de passe pour %s"
+msgstr "Saisir le mot de passe pour %s"
 
 #: ../src/greeter-list.vala:802 ../src/user-list.vala:661
 msgid "Password:"
-msgstr "Mot de passe:"
+msgstr "Mot de passe :"
 
 #: ../src/greeter-list.vala:804 ../src/user-list.vala:655
 msgid "Username:"
-msgstr "Nom d'utilisateur:"
+msgstr "Nom d'utilisateur :"
 
 #: ../src/greeter-list.vala:856
 msgid "Invalid password, please try again"
-msgstr "Mot de passe invalide, veuillez réessayer à nouveau"
+msgstr "Mot de passe invalide, veuillez ressayer"
 
 #: ../src/greeter-list.vala:867
 msgid "Failed to authenticate"
-msgstr "Authentification échouée"
+msgstr "Échec de l'authentification"
 
 #: ../src/greeter-list.vala:922
 msgid "Logging in…"
-msgstr ""
+msgstr "Connexion..."
 
 #: ../src/main-window.vala:49
 msgid "Login Screen"
 msgstr "Écran de connexion"
 
+#: ../src/main-window.vala:116
+msgid "Back"
+msgstr ""
+
 #: ../src/menubar.vala:217
 msgid "Onscreen keyboard"
-msgstr "Clavier virtuel"
+msgstr "Clavier à l'écran"
 
 #: ../src/menubar.vala:222
 msgid "High Contrast"
@@ -60,35 +64,35 @@ msgstr "Lecteur d'écran"
 
 #: ../src/prompt-box.vala:211
 msgid "Session Options"
-msgstr "Options de Session"
+msgstr "Options de la session"
 
 #: ../src/session-list.vala:34
 msgid "Select desktop environment"
-msgstr ""
+msgstr "Choisir l'environnement de bureau"
 
 #: ../src/shutdown-dialog.vala:101
 msgid "Goodbye. Would you like to…"
-msgstr ""
+msgstr "Au revoir. Voudriez-vous…"
 
 #: ../src/shutdown-dialog.vala:105 ../src/shutdown-dialog.vala:183
 msgid "Shut Down"
-msgstr ""
+msgstr "Éteindre"
 
 #: ../src/shutdown-dialog.vala:112
 msgid "Are you sure you want to shut down the computer?"
-msgstr ""
+msgstr "Êtes-vous sûr de vouloir éteindre l'ordinateur?"
 
 #: ../src/shutdown-dialog.vala:131
 msgid "Suspend"
-msgstr ""
+msgstr "Mettre en veille"
 
 #: ../src/shutdown-dialog.vala:148
 msgid "Hibernate"
-msgstr ""
+msgstr "Mettre en veille prolongée"
 
 #: ../src/shutdown-dialog.vala:166
 msgid "Restart"
-msgstr ""
+msgstr "Redémarrer"
 
 #. Translators: %s is a session name like KDE or Ubuntu
 #: ../src/toggle-box.vala:93
@@ -99,25 +103,25 @@ msgstr "%s (par défaut)"
 #. Help string for command line --version flag
 #: ../src/unity-greeter.vala:480
 msgid "Show release version"
-msgstr "Afficher la version du logiciel"
+msgstr "Afficher la version"
 
 #. Help string for command line --test-mode flag
 #: ../src/unity-greeter.vala:483
 msgid "Run in test mode"
-msgstr "Lancer en mode test"
+msgstr "Exécuter en mode test"
 
 #. Arguments and description for --help text
 #: ../src/unity-greeter.vala:489
 msgid "- Unity Greeter"
-msgstr "- Accueil Unity"
+msgstr "- Écran d'accueil d'Unity"
 
 #. Text printed out when an unknown command-line argument provided
 #: ../src/unity-greeter.vala:500
 #, c-format
 msgid "Run '%s --help' to see a full list of available command line options."
 msgstr ""
-"Lancez '%s --help' pour voir une liste complète des options de ligne de "
-"commande disponibles."
+"Exécuter « %s --help » pour voir une liste complète des options disponibles "
+"en ligne de commande."
 
 #: ../src/user-list.vala:45
 msgid "Guest Session"
@@ -136,8 +140,8 @@ msgid ""
 "If you have an account on an RDP or Citrix server, Remote Login lets you run "
 "applications from that server."
 msgstr ""
-"Si vous possédez un compte sur un serveur RDP ou Citrix, votre compte à "
-"distance vous permet de lancer des applications depuis ce serveur."
+"Si vous possédez un compte sur un serveur RDP ou Citrix, la connexion à "
+"distance vous laisse exécuter des applications depuis ce serveur."
 
 #. For 12.10 we still don't support Citrix
 #: ../src/user-list.vala:511
@@ -145,20 +149,24 @@ msgid ""
 "If you have an account on an RDP server, Remote Login lets you run "
 "applications from that server."
 msgstr ""
+"Si vous possédez un compte sur un serveur RDP, la  connexion à distance vous "
+"laisse exécuter des applications depuis ce serveur."
 
 #: ../src/user-list.vala:514
 msgid "Cancel"
-msgstr ""
+msgstr "Annuler"
 
 #: ../src/user-list.vala:515
 msgid "Set Up…"
-msgstr ""
+msgstr "Configuration…"
 
 #: ../src/user-list.vala:517
 msgid ""
 "You need an Ubuntu Remote Login account to use this service. Would you like "
 "to set up an account now?"
 msgstr ""
+"Vous avez besoin d'un compte de connexion à distance Ubuntu pour utiliser ce "
+"service. Voudriez-vous en créer un maintenant?"
 
 #: ../src/user-list.vala:521
 msgid "OK"
@@ -169,18 +177,20 @@ msgid ""
 "You need an Ubuntu Remote Login account to use this service. Visit "
 "uccs.canonical.com to set up an account."
 msgstr ""
+"Vous avez besoin d'un compte de connexion à distance Ubuntu pour utiliser ce "
+"service. Visitez uccs.canonical.com pour en créer."
 
 #: ../src/user-list.vala:639
 msgid "Server type not supported."
-msgstr ""
+msgstr "Type de serveur non pris en charge."
 
 #: ../src/user-list.vala:680
 msgid "Domain:"
-msgstr ""
+msgstr "Domaine :"
 
 #: ../src/user-list.vala:741
 msgid "Email address:"
-msgstr ""
+msgstr "Adresse courriel :"
 
 #. 'Log In' here is the button for logging in.
 #: ../src/user-list.vala:785
@@ -194,12 +204,12 @@ msgstr "Se connecter en tant que %s"
 
 #: ../src/user-list.vala:790
 msgid "Retry"
-msgstr "Réessayer"
+msgstr "Ressayer"
 
 #: ../src/user-list.vala:791
 #, c-format
 msgid "Retry as %s"
-msgstr "Réessayer en tant que %s"
+msgstr "Ressayer en tant que %s"
 
 #: ../src/user-list.vala:829
 msgid "Login"

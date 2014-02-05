@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2013-12-03 05:55+0000\n"
+"POT-Creation-Date: 2014-02-03 05:35+0000\n"
 "PO-Revision-Date: 2012-06-12 16:14+0000\n"
 "Last-Translator: inashdeen <Unknown>\n"
 "Language-Team: Malay <ms@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-12-04 05:48+0000\n"
-"X-Generator: Launchpad (build 16861)\n"
+"X-Launchpad-Export-Date: 2014-02-04 06:19+0000\n"
+"X-Generator: Launchpad (build 16916)\n"
 
 #: ../src/greeter-list.vala:300
 #, c-format
@@ -46,6 +46,10 @@ msgstr "Mendaftar masuk..."
 msgid "Login Screen"
 msgstr "Skrin Daftar Masuk"
 
+#: ../src/main-window.vala:116
+msgid "Back"
+msgstr ""
+
 #: ../src/menubar.vala:217
 msgid "Onscreen keyboard"
 msgstr "Papan kekunci atas skrin"
@@ -68,27 +72,27 @@ msgstr "Pilih persekitaran desktop"
 
 #: ../src/shutdown-dialog.vala:101
 msgid "Goodbye. Would you like to…"
-msgstr ""
+msgstr "Selamat Tinggal. Apakah yang anda mahu..."
 
 #: ../src/shutdown-dialog.vala:105 ../src/shutdown-dialog.vala:183
 msgid "Shut Down"
-msgstr ""
+msgstr "Matikan"
 
 #: ../src/shutdown-dialog.vala:112
 msgid "Are you sure you want to shut down the computer?"
-msgstr ""
+msgstr "Anda pasti mahu matikan komputer?"
 
 #: ../src/shutdown-dialog.vala:131
 msgid "Suspend"
-msgstr ""
+msgstr "Tangguh"
 
 #: ../src/shutdown-dialog.vala:148
 msgid "Hibernate"
-msgstr ""
+msgstr "Hibernasi"
 
 #: ../src/shutdown-dialog.vala:166
 msgid "Restart"
-msgstr ""
+msgstr "Mula Semula"
 
 #. Translators: %s is a session name like KDE or Ubuntu
 #: ../src/toggle-box.vala:93

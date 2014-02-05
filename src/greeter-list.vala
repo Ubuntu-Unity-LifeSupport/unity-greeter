@@ -642,7 +642,7 @@ public abstract class GreeterList : FadableBox
             {
                 var new_distance = new_direction * (new_target - new_start);
                 /* Base rate is 350 (250 + 100).  If we find ourselves going further, slow down animation */
-                scroll_timer.reset (250 + int.min ((int)(100 * (new_distance)), 500));
+                scroll_timer.reset (250 + int.min ((int)(100 * (Math.fabs (new_distance))), 500));
 
                 mode = Mode.SCROLLING;
             }

@@ -304,19 +304,21 @@ public class UnityGreeter
             var display = Gdk.x11_lookup_xdisplay (xevent.xmap.display);
             var xwin = xevent.xmap.window;
             var win = Gdk.X11Window.foreign_new_for_display (display, xwin);
-
-            /* Check to see if this window is our onboard window, since we don't want to focus it. */
-            X.Window keyboard_xid = 0;
-            if (main_window.menubar.keyboard_window != null)
-                keyboard_xid = Gdk.X11Window.get_xid (main_window.menubar.keyboard_window.get_window ());
-
-            if (xwin != keyboard_xid && win.get_type_hint() != Gdk.WindowTypeHint.NOTIFICATION)
+            if (win != null)
             {
-                win.focus (Gdk.CURRENT_TIME);
-
-                /* Make sure to keep keyboard above */
+                /* Check to see if this window is our onboard window, since we don't want to focus it. */
+                X.Window keyboard_xid = 0;
                 if (main_window.menubar.keyboard_window != null)
-                    main_window.menubar.keyboard_window.get_window ().raise ();
+                    keyboard_xid = Gdk.X11Window.get_xid (main_window.menubar.keyboard_window.get_window ());
+
+                if (xwin != keyboard_xid && win.get_type_hint() != Gdk.WindowTypeHint.NOTIFICATION)
+                {
+                    win.focus (Gdk.CURRENT_TIME);
+
+                    /* Make sure to keep keyboard above */
+                    if (main_window.menubar.keyboard_window != null)
+                        main_window.menubar.keyboard_window.get_window ().raise ();
+                }
             }
         }
         else if (xevent.type == X.EventType.UnmapNotify)

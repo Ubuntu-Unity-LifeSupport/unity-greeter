@@ -1,3 +1,15 @@
+unity-greeter (14.04.2-0ubuntu1) trusty; urgency=medium
+
+  * New upstream release:
+    - Handle a window being destroyed after we get the map event and try and
+      focus it (LP: #1048131)
+    - Add accessible description to back button (LP: #1266366)
+    - Fix attempted removal of dead source
+    - Apply the same unity color corrections to the average color in shutdown
+      dialog
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Wed, 05 Feb 2014 10:01:12 +0000
+
 unity-greeter (14.04.1-0ubuntu2) trusty; urgency=low
 
   * debian/install:
