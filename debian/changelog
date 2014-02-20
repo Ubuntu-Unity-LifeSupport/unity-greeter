@@ -1,3 +1,13 @@
+unity-greeter (14.04.3-0ubuntu1) trusty; urgency=medium
+
+  * New upstream release:
+    - Generate version stamp on background (LP: #1269901)
+    - Add option to disable hostname in login screen (LP: #1208469)
+    - Use unity-settings-daemon instead of gnome-settings-daemon (LP: #1277487)
+    - Fix accessible name in shutdown dialog
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Thu, 20 Feb 2014 17:17:59 +1300
+
 unity-greeter (14.04.2-0ubuntu2) trusty; urgency=medium
 
   * debian/control:

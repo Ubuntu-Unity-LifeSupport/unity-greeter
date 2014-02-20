@@ -1,6 +1,7 @@
 # -*- Mode: Automake; indent-tabs-mode: t; tab-width: 4 -*-
 
 sbin_PROGRAMS = unity-greeter
+noinst_PROGRAMS = logo-generator
 
 unity_greeter_SOURCES = \
 	config.vapi \
@@ -34,6 +35,8 @@ unity_greeter_SOURCES = \
 	user-list.vala \
 	user-prompt-box.vala
 
+logo_generator_SOURCES = logo-generator.vala
+
 unity_greeter_CFLAGS = \
 	$(UNITY_GREETER_CFLAGS) \
 	-w \
@@ -43,6 +46,8 @@ unity_greeter_CFLAGS = \
 	-DCONFIG_FILE=\""$(sysconfdir)/lightdm/unity-greeter.conf"\" \
 	-DPKGDATADIR=\""$(pkgdatadir)"\" \
 	-DINDICATORDIR=\""$(INDICATORDIR)"\"
+
+logo_generator_CFLAGS = $(unity_greeter_CFLAGS)
 
 unity_greeter_VALAFLAGS = \
 	--pkg posix \
@@ -56,9 +61,13 @@ unity_greeter_VALAFLAGS = \
 	--pkg pixman-1 \
 	--target-glib 2.32
 
+logo_generator_VALAFLAGS = $(unity_greeter_VALAFLAGS)
+
 unity_greeter_LDADD = \
 	$(UNITY_GREETER_LIBS) \
 	-lm
+
+logo_generator_LDADD = $(unity_greeter_LDADD)
 
 unity_greeter_vala.stamp: $(top_srcdir)/config.h
 

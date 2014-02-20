@@ -1,3 +1,10 @@
+Overview of changes in unity-greeter 14.04.3
+
+    - Generate version stamp on background
+    - Add option to disable hostname in login screen
+    - Use unity-settings-daemon instead of gnome-settings-daemon
+    - Fix accessible name in shutdown dialog
+
 Overview of changes in unity-greeter 14.04.2
 
     - Handle a window being destroyed after we get the map event and try and

@@ -17,6 +17,10 @@
       <default>true</default>
       <summary>Whether to draw an overlay grid</summary>
     </key>
+    <key name="show-hostname" type="b">
+      <default>true</default>
+      <summary>Whether to show the hostname in the menubar</summary>
+    </key>
     <key name="logo" type="s">
       <default>'/usr/share/unity-greeter/logo.png'</default>
       <summary>Logo file to use</summary>

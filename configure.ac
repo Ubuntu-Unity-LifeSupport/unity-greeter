@@ -2,7 +2,7 @@
 
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT(unity-greeter, 14.04.2)
+AC_INIT(unity-greeter, 14.04.3)
 AC_CONFIG_MACRO_DIR(m4)
 AM_INIT_AUTOMAKE
 AM_PROG_CC_C_O
@@ -35,11 +35,11 @@ AC_DEFINE_UNQUOTED([INDICATOR_FILE_DIR], ["${prefix}/share/unity/indicators"], [
 INDICATORDIR=`$PKG_CONFIG --variable=indicatordir indicator3-0.4`
 AC_SUBST(INDICATORDIR)
 
-GSD_BINARY=`$PKG_CONFIG --variable=binary gnome-settings-daemon`
-if test -z "$GSD_BINARY"; then
-    AC_MSG_ERROR([Could not find path to gnome-settings-daemon binary])
+USD_BINARY=`$PKG_CONFIG --variable=binary unity-settings-daemon`
+if test -z "$USD_BINARY"; then
+    AC_MSG_ERROR([Could not find path to unity-settings-daemon binary])
 fi
-AC_DEFINE_UNQUOTED([GSD_BINARY], ["$GSD_BINARY"], [Path to g-s-d])
+AC_DEFINE_UNQUOTED([USD_BINARY], ["$USD_BINARY"], [Path to g-s-d])
 
 dnl ###########################################################################
 dnl Internationalization

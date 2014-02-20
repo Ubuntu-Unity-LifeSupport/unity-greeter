@@ -122,19 +122,22 @@ public class MenuBar : Gtk.MenuBar
 
         pack_direction = Gtk.PackDirection.RTL;
 
-        var label = new Gtk.Label (Posix.utsname ().nodename);
-        label.show ();
-        var hostname_item = new Gtk.MenuItem ();
-        hostname_item.add (label);
-        hostname_item.sensitive = false;
-        hostname_item.right_justified = true;
-        hostname_item.show ();
-        append (hostname_item);
+        if (UGSettings.get_boolean (UGSettings.KEY_SHOW_HOSTNAME))
+        {
+            var label = new Gtk.Label (Posix.utsname ().nodename);
+            label.show ();
+            var hostname_item = new Gtk.MenuItem ();
+            hostname_item.add (label);
+            hostname_item.sensitive = false;
+            hostname_item.right_justified = true;
+            hostname_item.show ();
+            append (hostname_item);
 
-        /* Hack to get a label showing on the menubar */
-        label.ensure_style ();
-        var fg = label.get_style_context ().get_color (Gtk.StateFlags.NORMAL);
-        label.override_color (Gtk.StateFlags.INSENSITIVE, fg);
+            /* Hack to get a label showing on the menubar */
+            label.ensure_style ();
+            var fg = label.get_style_context ().get_color (Gtk.StateFlags.NORMAL);
+            label.override_color (Gtk.StateFlags.INSENSITIVE, fg);
+        }
 
         /* Prevent dragging the window by the menubar */
         try
@@ -315,7 +318,7 @@ public class MenuBar : Gtk.MenuBar
         greeter_set_env ("GIO_USE_VFS", "local");
         greeter_set_env ("GVFS_DISABLE_FUSE", "1");
 
-        /* Hint to have gnome-settings-daemon run in greeter mode */
+        /* Hint to have unity-settings-daemon run in greeter mode */
         greeter_set_env ("RUNNING_UNDER_GDM", "1");
 
         /* Let indicators know about our unique dbus name */

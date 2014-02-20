@@ -538,6 +538,7 @@ private class DialogButton : Gtk.Button
             l.override_color (Gtk.StateFlags.NORMAL, { 1.0f, 1.0f, 1.0f, 0.0f });
             l.override_color (Gtk.StateFlags.FOCUSED, { 1.0f, 1.0f, 1.0f, 1.0f });
             l.override_color (Gtk.StateFlags.ACTIVE, { 1.0f, 1.0f, 1.0f, 1.0f });
+            this.get_accessible ().set_name (l.get_text ());
         }
 
         UnityGreeter.add_style_class (this);

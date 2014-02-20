@@ -117,11 +117,11 @@ public class SettingsDaemon : Object
     {
         try
         {
-            Process.spawn_command_line_async (Config.GSD_BINARY);
+            Process.spawn_command_line_async (Config.USD_BINARY);
         }
         catch (SpawnError e)
         {
-            debug ("Could not start gnome-settings-daemon: %s", e.message);
+            debug ("Could not start unity-settings-daemon: %s", e.message);
         }
     }
 }
