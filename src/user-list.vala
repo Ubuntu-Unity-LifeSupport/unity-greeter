@@ -116,11 +116,7 @@ public class UserList : GreeterList
 
         fill_list ();
 
-        if (selected_entry != null)
-        {
-            entry_selected.connect (entry_selected_cb);
-            entry_selected_cb (selected_entry.id);
-        }
+        entry_selected.connect (entry_selected_cb);
 
         connect_to_lightdm ();
 

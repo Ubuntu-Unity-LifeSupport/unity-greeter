@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2014-02-18 21:35+0000\n"
+"POT-Creation-Date: 2014-03-11 06:03+0000\n"
 "PO-Revision-Date: 2014-01-10 10:37+0000\n"
 "Last-Translator: Atanas Kovachki <Unknown>\n"
 "Language-Team: Bulgarian <bg@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2014-02-19 05:32+0000\n"
-"X-Generator: Launchpad (build 16916)\n"
+"X-Launchpad-Export-Date: 2014-03-12 05:17+0000\n"
+"X-Generator: Launchpad (build 16963)\n"
 
 #: ../src/greeter-list.vala:300
 #, c-format
@@ -42,11 +42,11 @@ msgstr "Неуспешно идентифициране"
 msgid "Logging in…"
 msgstr "Влизане..."
 
-#: ../src/main-window.vala:49
+#: ../src/main-window.vala:50
 msgid "Login Screen"
-msgstr "Екран за вход в системата"
+msgstr "Екран за вход"
 
-#: ../src/main-window.vala:116
+#: ../src/main-window.vala:117
 msgid "Back"
 msgstr "Назад"
 
@@ -98,12 +98,12 @@ msgstr "Рестартирай"
 #: ../src/toggle-box.vala:93
 #, c-format
 msgid "%s (Default)"
-msgstr "%s (по подразбиране)"
+msgstr "%s (стандартно)"
 
 #. Help string for command line --version flag
 #: ../src/unity-greeter.vala:482
 msgid "Show release version"
-msgstr "Покажи версията на реализа"
+msgstr "Покажи версията на изданието"
 
 #. Help string for command line --test-mode flag
 #: ../src/unity-greeter.vala:485
@@ -139,8 +139,8 @@ msgid ""
 "If you have an account on an RDP or Citrix server, Remote Login lets you run "
 "applications from that server."
 msgstr ""
-"Ако имате акаунт на RDP или Citrix сървър, отдалеченото влизане ще ви "
-"позволи да стартирате приложения от този сървър."
+"Ако имате профил на RDP или Citrix сървър, отдалеченият достъп ще ви позволи "
+"да стартирате приложения от този сървър."
 
 #. For 12.10 we still don't support Citrix
 #: ../src/user-list.vala:511
@@ -148,7 +148,7 @@ msgid ""
 "If you have an account on an RDP server, Remote Login lets you run "
 "applications from that server."
 msgstr ""
-"Ако имате акаунт на RDP сървър, отдалеченото влизане ще ви позволи да "
+"Ако имате профил на RDP сървър, отдалеченият достъп ще ви позволи да "
 "стартирате приложения от този сървър."
 
 #: ../src/user-list.vala:514
@@ -164,8 +164,8 @@ msgid ""
 "You need an Ubuntu Remote Login account to use this service. Would you like "
 "to set up an account now?"
 msgstr ""
-"За да ползвате тази услуга, трябва да имате Ubuntu Remote Login акаунт. "
-"Искате ли да създаде акаунта си сега?"
+"За да ползвате тази услуга, трябва да имате Убунту профил за отдалечен "
+"достъп. Искате ли сега да създаде профила?"
 
 #: ../src/user-list.vala:521
 msgid "OK"
@@ -176,12 +176,12 @@ msgid ""
 "You need an Ubuntu Remote Login account to use this service. Visit "
 "uccs.canonical.com to set up an account."
 msgstr ""
-"За да ползвате тази услуга, трябва да имате Ubuntu Remote Login акаунт. За "
-"да настройте акаута си, посетите сайта uccs.canonical.com"
+"За да ползвате тази услуга, трябва да имате Убунту профил за отдалечен "
+"достъп. За да настройте профила си, посетите сайта uccs.canonical.com"
 
 #: ../src/user-list.vala:639
 msgid "Server type not supported."
-msgstr "Този тип на сървъра не се поддържа."
+msgstr "Този вид сървър не се поддържа."
 
 #: ../src/user-list.vala:680
 msgid "Domain:"

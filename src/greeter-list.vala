@@ -685,6 +685,7 @@ public abstract class GreeterList : FadableBox
     {
         base.realize ();
 
+        /* NOTE: This is going to cause the entry_selected signal to be emitted even if selected_entry has not changed */
         var saved_entry = selected_entry;
         selected_entry = null;
         select_entry (saved_entry, 1, start_scrolling);

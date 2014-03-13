@@ -1,3 +1,11 @@
+unity-greeter (14.04.4-0ubuntu1) trusty; urgency=medium
+
+  * New upstream release:
+    - Add primary monitor support
+    - Fix the greeter authenticating twice when it starts
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Thu, 13 Mar 2014 14:23:11 +1300
+
 unity-greeter (14.04.3-0ubuntu2) trusty; urgency=medium
 
   * Add build-dependency on ttf-ubuntu-font-family for correct logo

@@ -24,6 +24,7 @@ public class MainWindow : Gtk.Window
     public MenuBar menubar;
 
     private List<Monitor> monitors;
+    private Monitor? primary_monitor;
     private Monitor active_monitor;
     private Background background;
     private Gtk.Box login_box;
@@ -181,8 +182,11 @@ public class MainWindow : Gtk.Window
 
     private void monitors_changed_cb (Gdk.Screen screen)
     {
+        int primary = screen.get_primary_monitor ();
         debug ("Screen is %dx%d pixels", screen.get_width (), screen.get_height ());
         monitors = new List<Monitor> ();
+        primary_monitor = null;
+
         for (var i = 0; i < screen.get_n_monitors (); i++)
         {
             Gdk.Rectangle geometry;
@@ -190,13 +194,19 @@ public class MainWindow : Gtk.Window
             debug ("Monitor %d is %dx%d pixels at %d,%d", i, geometry.width, geometry.height, geometry.x, geometry.y);
 
             if (monitor_is_unique_position (screen, i))
-                monitors.append (new Monitor (geometry.x, geometry.y, geometry.width, geometry.height));
+            {
+                var monitor = new Monitor (geometry.x, geometry.y, geometry.width, geometry.height);
+                monitors.append (monitor);
+
+                if (primary_monitor == null || i == primary)
+                    primary_monitor = monitor;
+            }
         }
 
         background.set_monitors (monitors);
         resize (screen.get_width (), screen.get_height ());
         move (0, 0);
-        move_to_monitor (monitors.nth_data (0));
+        move_to_monitor (primary_monitor);
     }
 
     /* Check if a monitor has a unique position */
