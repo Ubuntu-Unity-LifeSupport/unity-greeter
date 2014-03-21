@@ -1,3 +1,11 @@
+unity-greeter (14.04.5-0ubuntu1) trusty; urgency=medium
+
+  * New upstream release:
+    - Don't focus windows that set override-redirect. This was causing a
+      gnome-screensaver window to get focus when it shouldn't. (LP: #1255558) 
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Fri, 21 Mar 2014 14:52:22 +1300
+
 unity-greeter (14.04.4-0ubuntu1) trusty; urgency=medium
 
   * New upstream release:

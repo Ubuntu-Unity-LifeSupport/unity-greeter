@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2014-03-11 06:03+0000\n"
+"POT-Creation-Date: 2014-03-19 06:21+0000\n"
 "PO-Revision-Date: 2013-03-06 21:46+0000\n"
 "Last-Translator: Марко М. Костић <Unknown>\n"
 "Language-Team: Ubuntu Serbian Translators\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2014-03-12 05:17+0000\n"
-"X-Generator: Launchpad (build 16963)\n"
+"X-Launchpad-Export-Date: 2014-03-20 06:10+0000\n"
+"X-Generator: Launchpad (build 16967)\n"
 "Language: sr\n"
 
 #: ../src/greeter-list.vala:300
@@ -23,23 +23,23 @@ msgstr ""
 msgid "Enter password for %s"
 msgstr "Унесите лозинку за %s"
 
-#: ../src/greeter-list.vala:802 ../src/user-list.vala:661
+#: ../src/greeter-list.vala:803 ../src/user-list.vala:657
 msgid "Password:"
 msgstr "Лозинка:"
 
-#: ../src/greeter-list.vala:804 ../src/user-list.vala:655
+#: ../src/greeter-list.vala:805 ../src/user-list.vala:651
 msgid "Username:"
 msgstr "Корисничко име:"
 
-#: ../src/greeter-list.vala:856
+#: ../src/greeter-list.vala:857
 msgid "Invalid password, please try again"
 msgstr "Неисправна лозинка, унесите је поново"
 
-#: ../src/greeter-list.vala:867
+#: ../src/greeter-list.vala:868
 msgid "Failed to authenticate"
-msgstr "Неуспех при идентификацији"
+msgstr "Пријава није успела"
 
-#: ../src/greeter-list.vala:922
+#: ../src/greeter-list.vala:923
 msgid "Logging in…"
 msgstr "Пријављивање..."
 
@@ -49,7 +49,7 @@ msgstr "Пријавни екран"
 
 #: ../src/main-window.vala:117
 msgid "Back"
-msgstr ""
+msgstr "Назад"
 
 #: ../src/menubar.vala:220
 msgid "Onscreen keyboard"
@@ -73,27 +73,27 @@ msgstr "Изаберите графичко окружење"
 
 #: ../src/shutdown-dialog.vala:101
 msgid "Goodbye. Would you like to…"
-msgstr ""
+msgstr "Довиђења. Желите ли да се рачунар..."
 
 #: ../src/shutdown-dialog.vala:105 ../src/shutdown-dialog.vala:183
 msgid "Shut Down"
-msgstr ""
+msgstr "Искључи"
 
 #: ../src/shutdown-dialog.vala:112
 msgid "Are you sure you want to shut down the computer?"
-msgstr ""
+msgstr "Да ли сте сигурни да желите да искључите рачунар?"
 
 #: ../src/shutdown-dialog.vala:131
 msgid "Suspend"
-msgstr ""
+msgstr "Обустави"
 
 #: ../src/shutdown-dialog.vala:148
 msgid "Hibernate"
-msgstr ""
+msgstr "Замрзне"
 
 #: ../src/shutdown-dialog.vala:166
 msgid "Restart"
-msgstr ""
+msgstr "Поново покрене"
 
 #. Translators: %s is a session name like KDE or Ubuntu
 #: ../src/toggle-box.vala:93
@@ -127,15 +127,15 @@ msgstr ""
 msgid "Guest Session"
 msgstr "Сесија за госта"
 
-#: ../src/user-list.vala:398
+#: ../src/user-list.vala:394
 msgid "Please enter a complete e-mail address"
 msgstr "Унесите потпуну е-адресу"
 
-#: ../src/user-list.vala:478
+#: ../src/user-list.vala:474
 msgid "Incorrect e-mail address or password"
 msgstr "Нетачна е-адреса или лозинка"
 
-#: ../src/user-list.vala:509
+#: ../src/user-list.vala:505
 msgid ""
 "If you have an account on an RDP or Citrix server, Remote Login lets you run "
 "applications from that server."
@@ -144,7 +144,7 @@ msgstr ""
 "омогућава да покрећете програме са тог сервера."
 
 #. For 12.10 we still don't support Citrix
-#: ../src/user-list.vala:511
+#: ../src/user-list.vala:507
 msgid ""
 "If you have an account on an RDP server, Remote Login lets you run "
 "applications from that server."
@@ -152,15 +152,15 @@ msgstr ""
 "Уколико имате налог на РДП серверу, удаљена пријава вам омогућује да "
 "покрећете програме са тог сервера."
 
-#: ../src/user-list.vala:514
+#: ../src/user-list.vala:510
 msgid "Cancel"
 msgstr "Откажи"
 
-#: ../src/user-list.vala:515
+#: ../src/user-list.vala:511
 msgid "Set Up…"
 msgstr "Подеси..."
 
-#: ../src/user-list.vala:517
+#: ../src/user-list.vala:513
 msgid ""
 "You need an Ubuntu Remote Login account to use this service. Would you like "
 "to set up an account now?"
@@ -168,11 +168,11 @@ msgstr ""
 "Потребан вам је налог за коришћење Убунтуове удаљене пријаве. Да ли желите "
 "да направите налог?"
 
-#: ../src/user-list.vala:521
+#: ../src/user-list.vala:517
 msgid "OK"
 msgstr "У реду"
 
-#: ../src/user-list.vala:522
+#: ../src/user-list.vala:518
 msgid ""
 "You need an Ubuntu Remote Login account to use this service. Visit "
 "uccs.canonical.com to set up an account."
@@ -180,38 +180,38 @@ msgstr ""
 "Потребан вам је налог за коришћење Убунтуове удаљене пријаве. Посетите "
 "uccs.canonical.com да бисте направили налог."
 
-#: ../src/user-list.vala:639
+#: ../src/user-list.vala:635
 msgid "Server type not supported."
 msgstr "Тип сервера није подржан."
 
-#: ../src/user-list.vala:680
+#: ../src/user-list.vala:676
 msgid "Domain:"
 msgstr "Домен:"
 
-#: ../src/user-list.vala:741
+#: ../src/user-list.vala:737
 msgid "Email address:"
 msgstr "Е-адреса:"
 
 #. 'Log In' here is the button for logging in.
-#: ../src/user-list.vala:785
+#: ../src/user-list.vala:781
 msgid "Log In"
 msgstr "Пријави ме"
 
-#: ../src/user-list.vala:786
+#: ../src/user-list.vala:782
 #, c-format
 msgid "Login as %s"
 msgstr "Пријави ме као %s"
 
-#: ../src/user-list.vala:790
+#: ../src/user-list.vala:786
 msgid "Retry"
 msgstr "Покушај поново"
 
-#: ../src/user-list.vala:791
+#: ../src/user-list.vala:787
 #, c-format
 msgid "Retry as %s"
 msgstr "Покушај поново као %s"
 
-#: ../src/user-list.vala:829
+#: ../src/user-list.vala:825
 msgid "Login"
 msgstr "Пријава"
 

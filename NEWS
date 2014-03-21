@@ -1,3 +1,8 @@
+Overview of changes in unity-greeter 14.04.5
+
+    - Don't focus windows that set override-redirect. This was causing a
+      gnome-screensaver window to get focus when it shouldn't.
+
 Overview of changes in unity-greeter 14.04.4
 
     - Add primary monitor support

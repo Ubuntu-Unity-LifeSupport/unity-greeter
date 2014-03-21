@@ -7,38 +7,38 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2014-03-11 06:03+0000\n"
+"POT-Creation-Date: 2014-03-19 06:21+0000\n"
 "PO-Revision-Date: 2014-01-10 10:37+0000\n"
 "Last-Translator: Atanas Kovachki <Unknown>\n"
 "Language-Team: Bulgarian <bg@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2014-03-12 05:17+0000\n"
-"X-Generator: Launchpad (build 16963)\n"
+"X-Launchpad-Export-Date: 2014-03-20 06:10+0000\n"
+"X-Generator: Launchpad (build 16967)\n"
 
 #: ../src/greeter-list.vala:300
 #, c-format
 msgid "Enter password for %s"
 msgstr "Въведете парола за %s"
 
-#: ../src/greeter-list.vala:802 ../src/user-list.vala:661
+#: ../src/greeter-list.vala:803 ../src/user-list.vala:657
 msgid "Password:"
 msgstr "Парола:"
 
-#: ../src/greeter-list.vala:804 ../src/user-list.vala:655
+#: ../src/greeter-list.vala:805 ../src/user-list.vala:651
 msgid "Username:"
 msgstr "Потребител:"
 
-#: ../src/greeter-list.vala:856
+#: ../src/greeter-list.vala:857
 msgid "Invalid password, please try again"
 msgstr "Грешна парола, моля опитайте отново"
 
-#: ../src/greeter-list.vala:867
+#: ../src/greeter-list.vala:868
 msgid "Failed to authenticate"
 msgstr "Неуспешно идентифициране"
 
-#: ../src/greeter-list.vala:922
+#: ../src/greeter-list.vala:923
 msgid "Logging in…"
 msgstr "Влизане..."
 
@@ -126,15 +126,15 @@ msgstr ""
 msgid "Guest Session"
 msgstr "Сесия за гости"
 
-#: ../src/user-list.vala:398
+#: ../src/user-list.vala:394
 msgid "Please enter a complete e-mail address"
 msgstr "Моля, напишете пълен имейл адрес"
 
-#: ../src/user-list.vala:478
+#: ../src/user-list.vala:474
 msgid "Incorrect e-mail address or password"
 msgstr "Невалиден имейл адрес или парола"
 
-#: ../src/user-list.vala:509
+#: ../src/user-list.vala:505
 msgid ""
 "If you have an account on an RDP or Citrix server, Remote Login lets you run "
 "applications from that server."
@@ -143,7 +143,7 @@ msgstr ""
 "да стартирате приложения от този сървър."
 
 #. For 12.10 we still don't support Citrix
-#: ../src/user-list.vala:511
+#: ../src/user-list.vala:507
 msgid ""
 "If you have an account on an RDP server, Remote Login lets you run "
 "applications from that server."
@@ -151,15 +151,15 @@ msgstr ""
 "Ако имате профил на RDP сървър, отдалеченият достъп ще ви позволи да "
 "стартирате приложения от този сървър."
 
-#: ../src/user-list.vala:514
+#: ../src/user-list.vala:510
 msgid "Cancel"
 msgstr "Отмени"
 
-#: ../src/user-list.vala:515
+#: ../src/user-list.vala:511
 msgid "Set Up…"
 msgstr "Настройка..."
 
-#: ../src/user-list.vala:517
+#: ../src/user-list.vala:513
 msgid ""
 "You need an Ubuntu Remote Login account to use this service. Would you like "
 "to set up an account now?"
@@ -167,11 +167,11 @@ msgstr ""
 "За да ползвате тази услуга, трябва да имате Убунту профил за отдалечен "
 "достъп. Искате ли сега да създаде профила?"
 
-#: ../src/user-list.vala:521
+#: ../src/user-list.vala:517
 msgid "OK"
 msgstr "Да"
 
-#: ../src/user-list.vala:522
+#: ../src/user-list.vala:518
 msgid ""
 "You need an Ubuntu Remote Login account to use this service. Visit "
 "uccs.canonical.com to set up an account."
@@ -179,38 +179,38 @@ msgstr ""
 "За да ползвате тази услуга, трябва да имате Убунту профил за отдалечен "
 "достъп. За да настройте профила си, посетите сайта uccs.canonical.com"
 
-#: ../src/user-list.vala:639
+#: ../src/user-list.vala:635
 msgid "Server type not supported."
 msgstr "Този вид сървър не се поддържа."
 
-#: ../src/user-list.vala:680
+#: ../src/user-list.vala:676
 msgid "Domain:"
 msgstr "Домейн:"
 
-#: ../src/user-list.vala:741
+#: ../src/user-list.vala:737
 msgid "Email address:"
 msgstr "Имейл адрес:"
 
 #. 'Log In' here is the button for logging in.
-#: ../src/user-list.vala:785
+#: ../src/user-list.vala:781
 msgid "Log In"
 msgstr "Вход"
 
-#: ../src/user-list.vala:786
+#: ../src/user-list.vala:782
 #, c-format
 msgid "Login as %s"
 msgstr "Влез от името на %s"
 
-#: ../src/user-list.vala:790
+#: ../src/user-list.vala:786
 msgid "Retry"
 msgstr "Повторен опит"
 
-#: ../src/user-list.vala:791
+#: ../src/user-list.vala:787
 #, c-format
 msgid "Retry as %s"
 msgstr "Повторен опит като %s"
 
-#: ../src/user-list.vala:829
+#: ../src/user-list.vala:825
 msgid "Login"
 msgstr "Влез"
 

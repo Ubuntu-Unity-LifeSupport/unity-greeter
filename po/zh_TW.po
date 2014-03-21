@@ -7,38 +7,38 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2014-03-11 06:03+0000\n"
+"POT-Creation-Date: 2014-03-19 06:21+0000\n"
 "PO-Revision-Date: 2012-05-08 13:34+0000\n"
 "Last-Translator: taijuin lee <Unknown>\n"
 "Language-Team: Chinese (Traditional) <zh_TW@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2014-03-12 05:17+0000\n"
-"X-Generator: Launchpad (build 16963)\n"
+"X-Launchpad-Export-Date: 2014-03-20 06:11+0000\n"
+"X-Generator: Launchpad (build 16967)\n"
 
 #: ../src/greeter-list.vala:300
 #, c-format
 msgid "Enter password for %s"
 msgstr "輸入 %s 的密碼"
 
-#: ../src/greeter-list.vala:802 ../src/user-list.vala:661
+#: ../src/greeter-list.vala:803 ../src/user-list.vala:657
 msgid "Password:"
 msgstr "密碼："
 
-#: ../src/greeter-list.vala:804 ../src/user-list.vala:655
+#: ../src/greeter-list.vala:805 ../src/user-list.vala:651
 msgid "Username:"
 msgstr "使用者名稱："
 
-#: ../src/greeter-list.vala:856
+#: ../src/greeter-list.vala:857
 msgid "Invalid password, please try again"
 msgstr "無效的密碼，請重試"
 
-#: ../src/greeter-list.vala:867
+#: ../src/greeter-list.vala:868
 msgid "Failed to authenticate"
 msgstr "身分核對失敗"
 
-#: ../src/greeter-list.vala:922
+#: ../src/greeter-list.vala:923
 msgid "Logging in…"
 msgstr "正在登入…"
 
@@ -125,83 +125,83 @@ msgstr "執行「%s --help」來查看指令列所有可用選項的完整清單
 msgid "Guest Session"
 msgstr "訪客作業階段"
 
-#: ../src/user-list.vala:398
+#: ../src/user-list.vala:394
 msgid "Please enter a complete e-mail address"
 msgstr "請輸入完整的電子郵件位址"
 
-#: ../src/user-list.vala:478
+#: ../src/user-list.vala:474
 msgid "Incorrect e-mail address or password"
 msgstr "不正確的電子郵件位址或密碼"
 
-#: ../src/user-list.vala:509
+#: ../src/user-list.vala:505
 msgid ""
 "If you have an account on an RDP or Citrix server, Remote Login lets you run "
 "applications from that server."
 msgstr "若您有個 RDP 或 Citrix 伺服器的帳號，「遠端登入」讓您可從該伺服器執行應用程式。"
 
 #. For 12.10 we still don't support Citrix
-#: ../src/user-list.vala:511
+#: ../src/user-list.vala:507
 msgid ""
 "If you have an account on an RDP server, Remote Login lets you run "
 "applications from that server."
 msgstr "若您有個 RDP 伺服器的帳號，「遠端登入」可讓您從該伺服器執行應用程式。"
 
-#: ../src/user-list.vala:514
+#: ../src/user-list.vala:510
 msgid "Cancel"
 msgstr "取消"
 
-#: ../src/user-list.vala:515
+#: ../src/user-list.vala:511
 msgid "Set Up…"
 msgstr "設置..."
 
-#: ../src/user-list.vala:517
+#: ../src/user-list.vala:513
 msgid ""
 "You need an Ubuntu Remote Login account to use this service. Would you like "
 "to set up an account now?"
 msgstr "您需要有 Ubuntu 遠端登入帳號才能使用此服務。您想要馬上設置帳號嗎？"
 
-#: ../src/user-list.vala:521
+#: ../src/user-list.vala:517
 msgid "OK"
 msgstr "確定"
 
-#: ../src/user-list.vala:522
+#: ../src/user-list.vala:518
 msgid ""
 "You need an Ubuntu Remote Login account to use this service. Visit "
 "uccs.canonical.com to set up an account."
 msgstr "您需要有 Ubuntu 遠端登入帳號才能使用此服務。請造訪 uccs.canonical.com 來設置帳號。"
 
-#: ../src/user-list.vala:639
+#: ../src/user-list.vala:635
 msgid "Server type not supported."
 msgstr "伺服器類型尚未支援。"
 
-#: ../src/user-list.vala:680
+#: ../src/user-list.vala:676
 msgid "Domain:"
 msgstr "網域："
 
-#: ../src/user-list.vala:741
+#: ../src/user-list.vala:737
 msgid "Email address:"
 msgstr "電子郵件位址："
 
 #. 'Log In' here is the button for logging in.
-#: ../src/user-list.vala:785
+#: ../src/user-list.vala:781
 msgid "Log In"
 msgstr "登入"
 
-#: ../src/user-list.vala:786
+#: ../src/user-list.vala:782
 #, c-format
 msgid "Login as %s"
 msgstr "以 %s 身分登入"
 
-#: ../src/user-list.vala:790
+#: ../src/user-list.vala:786
 msgid "Retry"
 msgstr "重試"
 
-#: ../src/user-list.vala:791
+#: ../src/user-list.vala:787
 #, c-format
 msgid "Retry as %s"
 msgstr "以 %s 身分重試"
 
-#: ../src/user-list.vala:829
+#: ../src/user-list.vala:825
 msgid "Login"
 msgstr "登入"
 

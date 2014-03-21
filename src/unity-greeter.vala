@@ -304,7 +304,7 @@ public class UnityGreeter
             var display = Gdk.x11_lookup_xdisplay (xevent.xmap.display);
             var xwin = xevent.xmap.window;
             var win = Gdk.X11Window.foreign_new_for_display (display, xwin);
-            if (win != null)
+            if (win != null && !xevent.xmap.override_redirect)
             {
                 /* Check to see if this window is our onboard window, since we don't want to focus it. */
                 X.Window keyboard_xid = 0;
