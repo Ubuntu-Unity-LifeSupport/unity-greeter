@@ -112,6 +112,30 @@ public class ShutdownDialog : Gtk.Fixed
             text = _("Are you sure you want to shut down the computer?");
         }
 
+        var have_open_sessions = false;
+        try
+        {
+            var b = Bus.get_sync (BusType.SYSTEM);
+            var result = b.call_sync ("org.freedesktop.DisplayManager",
+                                      "/org/freedesktop/DisplayManager",
+                                      "org.freedesktop.DBus.Properties",
+                                      "Get",
+                                      new Variant ("(ss)", "org.freedesktop.DisplayManager", "Sessions"),
+                                      new VariantType ("(v)"),
+                                      DBusCallFlags.NONE,
+                                      -1,
+                                      null);
+            Variant value;
+            result.get ("(v)", out value);
+            have_open_sessions = value.n_children () > 0;
+        }
+        catch (Error e)
+        {
+            warning ("Failed to check sessions from logind: %s", e.message);
+        }
+        if (have_open_sessions)
+            text = "%s\n\n%s".printf (_("Other users are currently logged in to this computer, shutting down now will also close these other sessions."), text);
+
         var label = new Gtk.Label (text);
         label.set_line_wrap (true);
         label.override_font (Pango.FontDescription.from_string ("Ubuntu Light 12"));

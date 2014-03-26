@@ -224,13 +224,13 @@ public class MenuBar : Gtk.MenuBar
         submenu.append (onscreen_keyboard_item);
         high_contrast_item = new Gtk.CheckMenuItem.with_label (_("High Contrast"));
         high_contrast_item.toggled.connect (high_contrast_toggled_cb);
-        high_contrast_item.add_accelerator ("activate", accel_group, Gdk.KEY_h, Gdk.ModifierType.CONTROL_MASK, Gtk.AccelFlags.VISIBLE);
+        high_contrast_item.add_accelerator ("activate", accel_group, Gdk.Key.h, Gdk.ModifierType.CONTROL_MASK, Gtk.AccelFlags.VISIBLE);
         high_contrast_item.show ();
         submenu.append (high_contrast_item);
         high_contrast_item.set_active (UGSettings.get_boolean (UGSettings.KEY_HIGH_CONTRAST));
         var item = new Gtk.CheckMenuItem.with_label (_("Screen Reader"));
         item.toggled.connect (screen_reader_toggled_cb);
-        item.add_accelerator ("activate", accel_group, Gdk.KEY_s, Gdk.ModifierType.CONTROL_MASK, Gtk.AccelFlags.VISIBLE);
+        item.add_accelerator ("activate", accel_group, Gdk.Key.s, Gdk.ModifierType.CONTROL_MASK, Gtk.AccelFlags.VISIBLE);
         item.show ();
         submenu.append (item);
         item.set_active (UGSettings.get_boolean (UGSettings.KEY_SCREEN_READER));
@@ -414,7 +414,7 @@ public class MenuBar : Gtk.MenuBar
             keyboard_window.accept_focus = false;
             keyboard_window.focus_on_map = false;
             keyboard_window.add (keyboard_socket);
-            Gtk.socket_add_id (keyboard_socket, id);
+            keyboard_socket.add_id (id);
 
             /* Put keyboard at the bottom of the screen */
             var screen = get_screen ();

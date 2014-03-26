@@ -1,3 +1,12 @@
+unity-greeter (14.04.6-0ubuntu1) trusty; urgency=medium
+
+  * New upstream release:
+    - Add option to hide certain users until alt+ctrl+shift is pressed.
+    - Show a warning when shutting down and users are logged in. (LP: #1281058)
+    - Drop some fixes that are in Vala 0.22 now.
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Thu, 27 Mar 2014 10:51:42 +1300
+
 unity-greeter (14.04.5-0ubuntu1) trusty; urgency=medium
 
   * New upstream release:

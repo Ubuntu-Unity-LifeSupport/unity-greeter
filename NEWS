@@ -1,3 +1,9 @@
+Overview of changes in unity-greeter 14.04.6
+
+    - Add option to hide certain users until alt+ctrl+shift is pressed.
+    - Show a warning when shutting down and users are logged in.
+    - Drop some fixes that are in Vala 0.22 now.
+
 Overview of changes in unity-greeter 14.04.5
 
     - Don't focus windows that set override-redirect. This was causing a

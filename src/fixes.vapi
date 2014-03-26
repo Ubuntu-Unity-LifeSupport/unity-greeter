@@ -12,6 +12,7 @@ namespace Posix
 }
 #endif
 
+// See https://bugzilla.gnome.org/show_bug.cgi?id=727113
 [CCode (cprefix = "", lower_case_cprefix = "", cheader_filename = "X11/Xlib.h")]
 namespace X
 {
@@ -24,47 +25,11 @@ namespace X
     public const int RetainPermanent;
 }
 
-namespace Gdk
-{
-    public const int KEY_Escape;
-    public const int KEY_Home;
-    public const int KEY_End;
-    public const int KEY_Page_Up;
-    public const int KEY_Page_Down;
-    public const int KEY_Up;
-    public const int KEY_Down;
-    public const int KEY_Left;
-    public const int KEY_Right;
-    public const int KEY_KP_Home;
-    public const int KEY_KP_End;
-    public const int KEY_KP_Page_Up;
-    public const int KEY_KP_Page_Down;
-    public const int KEY_KP_Up;
-    public const int KEY_KP_Down;
-    public const int KEY_KP_Left;
-    public const int KEY_KP_Right;
-    public const int KEY_F10;
-    public const int KEY_0;
-    public const int KEY_g;
-    public const int KEY_G;
-    public const int KEY_h;
-    public const int KEY_m;
-    public const int KEY_M;
-    public const int KEY_s;
-    public const int KEY_z;
-    public const int KEY_plus;
-    public const int KEY_minus;
-    public const int KEY_equal;
-    public const int CONTROL_MASK;
-    public const int KEY_PowerOff;
-}
-
 namespace Gtk
 {
-    public void socket_add_id (Gtk.Socket socket, int id);
-
     namespace RGB
     {
+        // Fixed in Vala 0.24
         public void to_hsv (double r, double g, double b, out double h, out double s, out double v);
     }
 }

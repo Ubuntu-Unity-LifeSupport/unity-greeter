@@ -20,7 +20,6 @@
 
 public class MainWindow : Gtk.Window
 {
-    public UserList user_list;
     public MenuBar menubar;
 
     private List<Monitor> monitors;
@@ -283,55 +282,81 @@ public class MainWindow : Gtk.Window
     {
         var top = stack.top ();
 
+        if (stack.top () is UserList)
+        {
+            var user_list = stack.top () as UserList;
+            if (!user_list.show_hidden_users)
+            {
+                var shift_mask = Gdk.ModifierType.CONTROL_MASK | Gdk.ModifierType.MOD1_MASK;
+                var control_mask = Gdk.ModifierType.SHIFT_MASK | Gdk.ModifierType.MOD1_MASK;
+                var alt_mask = Gdk.ModifierType.CONTROL_MASK | Gdk.ModifierType.SHIFT_MASK;
+                if (((event.keyval == Gdk.Key.Shift_L || event.keyval == Gdk.Key.Shift_R) && (event.state & shift_mask) == shift_mask) ||
+                    ((event.keyval == Gdk.Key.Control_L || event.keyval == Gdk.Key.Control_R) && (event.state & control_mask) == control_mask) ||
+                    ((event.keyval == Gdk.Key.Alt_L || event.keyval == Gdk.Key.Alt_R) && (event.state & alt_mask) == alt_mask))
+                {
+                    debug ("Hidden user key combination detected");
+                    user_list.show_hidden_users = true;
+                    return true;
+                }
+            }
+        }
+
         switch (event.keyval)
         {
-        case Gdk.KEY_Escape:
+        case Gdk.Key.Escape:
             if (login_box.sensitive)
                 top.cancel_authentication ();
             if (shutdown_dialog != null)
                 shutdown_dialog.cancel ();
             return true;
-        case Gdk.KEY_Page_Up:
-        case Gdk.KEY_KP_Page_Up:
+        case Gdk.Key.Page_Up:
+        case Gdk.Key.KP_Page_Up:
             if (login_box.sensitive)
                 top.scroll (GreeterList.ScrollTarget.START);
             return true;
-        case Gdk.KEY_Page_Down:
-        case Gdk.KEY_KP_Page_Down:
+        case Gdk.Key.Page_Down:
+        case Gdk.Key.KP_Page_Down:
             if (login_box.sensitive)
                 top.scroll (GreeterList.ScrollTarget.END);
             return true;
-        case Gdk.KEY_Up:
-        case Gdk.KEY_KP_Up:
+        case Gdk.Key.Up:
+        case Gdk.Key.KP_Up:
             if (login_box.sensitive)
                 top.scroll (GreeterList.ScrollTarget.UP);
             return true;
-        case Gdk.KEY_Down:
-        case Gdk.KEY_KP_Down:
+        case Gdk.Key.Down:
+        case Gdk.Key.KP_Down:
             if (login_box.sensitive)
                 top.scroll (GreeterList.ScrollTarget.DOWN);
             return true;
-        case Gdk.KEY_Left:
-        case Gdk.KEY_KP_Left:
+        case Gdk.Key.Left:
+        case Gdk.Key.KP_Left:
             if (shutdown_dialog != null)
                 shutdown_dialog.focus_prev ();
             return true;
-        case Gdk.KEY_Right:
-        case Gdk.KEY_KP_Right:
+        case Gdk.Key.Right:
+        case Gdk.Key.KP_Right:
             if (shutdown_dialog != null)
                 shutdown_dialog.focus_next ();
             return true;
-        case Gdk.KEY_F10:
+        case Gdk.Key.F10:
             if (login_box.sensitive)
                 menubar.select_first (false);
             return true;
-        case Gdk.KEY_PowerOff:
+        case Gdk.Key.PowerOff:
             show_shutdown_dialog (ShutdownDialogType.SHUTDOWN);
             return true;
-        case Gdk.KEY_z:
+        case Gdk.Key.z:
             if (UnityGreeter.singleton.test_mode && (event.state & Gdk.ModifierType.MOD1_MASK) != 0)
             {
                 show_shutdown_dialog (ShutdownDialogType.SHUTDOWN);
+                return true;
+            }
+            break;
+        case Gdk.Key.Z:
+            if (UnityGreeter.singleton.test_mode && (event.state & Gdk.ModifierType.MOD1_MASK) != 0)
+            {
+                show_shutdown_dialog (ShutdownDialogType.RESTART);
                 return true;
             }
             break;

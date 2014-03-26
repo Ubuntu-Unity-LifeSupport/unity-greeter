@@ -64,6 +64,50 @@ public class UserList : GreeterList
     /* User to authenticate against */
     private string ?authenticate_user = null;
 
+    private bool show_hidden_users_ = false;
+    public bool show_hidden_users
+    {
+        set
+        {
+            show_hidden_users_ = value;
+
+            if (UnityGreeter.singleton.test_mode)
+            {
+                if (value)
+                    add_user ("hidden", "Hidden User", null, false, false, null);
+                else
+                    remove_entry ("hidden");
+                return;
+            }
+
+            var hidden_users = UGSettings.get_strv (UGSettings.KEY_HIDDEN_USERS);
+            if (!value)
+            {
+                foreach (var username in hidden_users)
+                    remove_entry (username);
+                return;
+            }
+
+            var users = LightDM.UserList.get_instance ();
+            foreach (var user in users.users)
+            {
+                foreach (var username in hidden_users)
+                {
+                    if (user.name == username)
+                    {
+                        debug ("Showing hidden user %s", username);
+                        user_added_cb (user);
+                    }
+                }
+            }
+        }
+
+        get
+        {
+            return show_hidden_users_;
+        }
+    }
+
     private string _default_session = "ubuntu";
     public string default_session
     {
@@ -968,7 +1012,7 @@ public class UserList : GreeterList
             }
 
             /* If we have no entries at all, we should show manual */
-            if (!have_entries () && !always_show_manual)
+            if (!have_entries ())
                 add_manual_entry ();
 
             var last_user = UnityGreeter.singleton.get_state ("last-user");
@@ -982,6 +1026,14 @@ public class UserList : GreeterList
     private void user_added_cb (LightDM.User user)
     {
         debug ("Adding/updating user %s (%s)", user.name, user.real_name);
+
+        if (!show_hidden_users)
+        {
+            var hidden_users = UGSettings.get_strv (UGSettings.KEY_HIDDEN_USERS);
+            foreach (var username in hidden_users)
+                if (username == user.name)
+                    return;
+        }
 
         var label = user.real_name;
         if (user.real_name == "")
@@ -1316,35 +1368,35 @@ public class UserList : GreeterList
     
     private bool test_key_press_cb (Gdk.EventKey event)
     {
-        if ((event.state & Gdk.CONTROL_MASK) == 0)
+        if ((event.state & Gdk.ModifierType.CONTROL_MASK) == 0)
             return false;
 
         switch (event.keyval)
         {
-        case Gdk.KEY_plus:
+        case Gdk.Key.plus:
             add_test_entry ();
             break;
-        case Gdk.KEY_minus:
+        case Gdk.Key.minus:
             remove_test_entry ();
             break;
-        case Gdk.KEY_0:
+        case Gdk.Key.@0:
             while (remove_test_entry ());
             offer_guest = false;
             break;
-        case Gdk.KEY_equal:
+        case Gdk.Key.equal:
             while (add_test_entry ());
             offer_guest = true;
             break;
-        case Gdk.KEY_g:
+        case Gdk.Key.g:
             offer_guest = false;
             break;
-        case Gdk.KEY_G:
+        case Gdk.Key.G:
             offer_guest = true;
             break;
-        case Gdk.KEY_m:
+        case Gdk.Key.m:
             always_show_manual = false;
             break;
-        case Gdk.KEY_M:
+        case Gdk.Key.M:
             always_show_manual = true;
             break;
         }

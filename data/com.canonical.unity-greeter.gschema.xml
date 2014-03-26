@@ -90,5 +90,9 @@
       <default>['ug-accessibility', 'com.canonical.indicator.keyboard', 'com.canonical.indicator.session', 'com.canonical.indicator.datetime', 'com.canonical.indicator.power', 'com.canonical.indicator.sound', 'application']</default>
       <summary>Which indicators to load</summary>
     </key>
+    <key name="hidden-users" type="as">
+      <default>[]</default>
+      <summary>List of usernames that are hidden until a special key combination is hit</summary>
+    </key>
   </schema>
 </schemalist>

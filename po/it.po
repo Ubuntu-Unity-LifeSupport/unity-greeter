@@ -7,28 +7,28 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2014-03-19 06:21+0000\n"
-"PO-Revision-Date: 2012-01-24 16:14+0000\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2014-03-25 06:46+0000\n"
+"PO-Revision-Date: 2014-03-22 16:07+0000\n"
+"Last-Translator: Milo Casagrande <milo.casagrande@gmail.com>\n"
 "Language-Team: Italian <it@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2014-03-20 06:10+0000\n"
+"X-Launchpad-Export-Date: 2014-03-26 06:30+0000\n"
 "X-Generator: Launchpad (build 16967)\n"
 
 #: ../src/greeter-list.vala:300
 #, c-format
 msgid "Enter password for %s"
-msgstr ""
+msgstr "Inserire la password per %s"
 
 #: ../src/greeter-list.vala:803 ../src/user-list.vala:657
 msgid "Password:"
-msgstr ""
+msgstr "Password:"
 
 #: ../src/greeter-list.vala:805 ../src/user-list.vala:651
 msgid "Username:"
-msgstr ""
+msgstr "Nome utente:"
 
 #: ../src/greeter-list.vala:857
 msgid "Invalid password, please try again"
@@ -36,7 +36,7 @@ msgstr "Password non valida, riprovare"
 
 #: ../src/greeter-list.vala:868
 msgid "Failed to authenticate"
-msgstr ""
+msgstr "Autenticazione non riuscita"
 
 #: ../src/greeter-list.vala:923
 msgid "Logging in…"
@@ -44,7 +44,7 @@ msgstr "Accesso..."
 
 #: ../src/main-window.vala:50
 msgid "Login Screen"
-msgstr ""
+msgstr "Schermata di accesso"
 
 #: ../src/main-window.vala:117
 msgid "Back"
@@ -52,19 +52,19 @@ msgstr "Indietro"
 
 #: ../src/menubar.vala:220
 msgid "Onscreen keyboard"
-msgstr ""
+msgstr "Tastiera a schermo"
 
 #: ../src/menubar.vala:225
 msgid "High Contrast"
-msgstr ""
+msgstr "Contrasto elevato"
 
 #: ../src/menubar.vala:231
 msgid "Screen Reader"
-msgstr ""
+msgstr "Lettore schermo"
 
 #: ../src/prompt-box.vala:211
 msgid "Session Options"
-msgstr ""
+msgstr "Opzioni sessione"
 
 #: ../src/session-list.vala:34
 msgid "Select desktop environment"
@@ -103,27 +103,29 @@ msgstr "%s (predefinito)"
 #. Help string for command line --version flag
 #: ../src/unity-greeter.vala:482
 msgid "Show release version"
-msgstr ""
+msgstr "Mostra la versione del rilascio"
 
 #. Help string for command line --test-mode flag
 #: ../src/unity-greeter.vala:485
 msgid "Run in test mode"
-msgstr ""
+msgstr "Esegui in modalità di test"
 
 #. Arguments and description for --help text
 #: ../src/unity-greeter.vala:491
 msgid "- Unity Greeter"
-msgstr ""
+msgstr "- Unity greeter"
 
 #. Text printed out when an unknown command-line argument provided
 #: ../src/unity-greeter.vala:502
 #, c-format
 msgid "Run '%s --help' to see a full list of available command line options."
 msgstr ""
+"Eseguire \"%s --help\" per l'elenco completo delle opzioni disponibili a "
+"riga di comando."
 
 #: ../src/user-list.vala:45
 msgid "Guest Session"
-msgstr ""
+msgstr "Sessione ospite"
 
 #: ../src/user-list.vala:394
 msgid "Please enter a complete e-mail address"
@@ -198,7 +200,7 @@ msgstr "Accedi"
 #: ../src/user-list.vala:782
 #, c-format
 msgid "Login as %s"
-msgstr ""
+msgstr "Accesso come %s"
 
 #: ../src/user-list.vala:786
 msgid "Retry"
@@ -211,7 +213,7 @@ msgstr "Riprova come %s"
 
 #: ../src/user-list.vala:825
 msgid "Login"
-msgstr ""
+msgstr "Accedi"
 
 #~ msgid "_Back"
 #~ msgstr "_Indietro"

@@ -374,7 +374,7 @@ public abstract class GreeterList : FadableBox
     {
         foreach (var e in entries)
         {
-            if (!e.id.has_prefix ("*"))
+            if (e.id != "*other")
                 return true;
         }
         return false;

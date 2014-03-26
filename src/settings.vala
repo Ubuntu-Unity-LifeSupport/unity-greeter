@@ -39,6 +39,7 @@ public class UGSettings
     public static const string KEY_SCREEN_READER = "screen-reader";
     public static const string KEY_PLAY_READY_SOUND = "play-ready-sound";
     public static const string KEY_INDICATORS = "indicators";
+    public static const string KEY_HIDDEN_USERS = "hidden-users";
 
     public static bool get_boolean (string key)
     {
