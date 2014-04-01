@@ -7,14 +7,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2014-03-25 06:46+0000\n"
+"POT-Creation-Date: 2014-03-31 06:08+0000\n"
 "PO-Revision-Date: 2014-01-05 15:15+0000\n"
 "Last-Translator: Melroy vd Berg (OpenLaptop) <info@openlaptop.nl>\n"
 "Language-Team: Dutch <nl@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2014-03-26 06:30+0000\n"
+"X-Launchpad-Export-Date: 2014-04-01 06:18+0000\n"
 "X-Generator: Launchpad (build 16967)\n"
 
 #: ../src/greeter-list.vala:300
@@ -22,11 +22,11 @@ msgstr ""
 msgid "Enter password for %s"
 msgstr "Wachtwoord voor %s invoeren"
 
-#: ../src/greeter-list.vala:803 ../src/user-list.vala:657
+#: ../src/greeter-list.vala:803 ../src/user-list.vala:701
 msgid "Password:"
 msgstr "Wachtwoord:"
 
-#: ../src/greeter-list.vala:805 ../src/user-list.vala:651
+#: ../src/greeter-list.vala:805 ../src/user-list.vala:695
 msgid "Username:"
 msgstr "Gebruikersnaam:"
 
@@ -42,11 +42,11 @@ msgstr "Authenticatie mislukt"
 msgid "Logging in…"
 msgstr "Aanmelden…"
 
-#: ../src/main-window.vala:50
+#: ../src/main-window.vala:49
 msgid "Login Screen"
 msgstr "Aanmeldscherm"
 
-#: ../src/main-window.vala:117
+#: ../src/main-window.vala:116
 msgid "Back"
 msgstr "Terug"
 
@@ -74,7 +74,7 @@ msgstr "Bureaubladomgeving selecteren"
 msgid "Goodbye. Would you like to…"
 msgstr "Tot ziens. Wilt u misschien ..."
 
-#: ../src/shutdown-dialog.vala:105 ../src/shutdown-dialog.vala:183
+#: ../src/shutdown-dialog.vala:105 ../src/shutdown-dialog.vala:207
 msgid "Shut Down"
 msgstr "Afsluiten"
 
@@ -82,15 +82,23 @@ msgstr "Afsluiten"
 msgid "Are you sure you want to shut down the computer?"
 msgstr "Weet u zeker dat u de computer wilt afsluiten?"
 
-#: ../src/shutdown-dialog.vala:131
+#: ../src/shutdown-dialog.vala:137
+msgid ""
+"Other users are currently logged in to this computer, shutting down now will "
+"also close these other sessions."
+msgstr ""
+"Er zijn thans andere gebruikers aangemeld op deze computer; nu afsluiten zal "
+"ook hun sessies sluiten."
+
+#: ../src/shutdown-dialog.vala:155
 msgid "Suspend"
 msgstr "Pauzestand"
 
-#: ../src/shutdown-dialog.vala:148
+#: ../src/shutdown-dialog.vala:172
 msgid "Hibernate"
 msgstr "Slaapstand"
 
-#: ../src/shutdown-dialog.vala:166
+#: ../src/shutdown-dialog.vala:190
 msgid "Restart"
 msgstr "Herstarten"
 
@@ -125,15 +133,15 @@ msgstr "Voer ‘%s --help’ uit voor een lijst van alle opdrachtregelopties."
 msgid "Guest Session"
 msgstr "Gastsessie"
 
-#: ../src/user-list.vala:394
+#: ../src/user-list.vala:438
 msgid "Please enter a complete e-mail address"
 msgstr "Gelieve een volledig e-mailadres in te voeren"
 
-#: ../src/user-list.vala:474
+#: ../src/user-list.vala:518
 msgid "Incorrect e-mail address or password"
 msgstr "Onjuist e-mailadres of wachtwoord"
 
-#: ../src/user-list.vala:505
+#: ../src/user-list.vala:549
 msgid ""
 "If you have an account on an RDP or Citrix server, Remote Login lets you run "
 "applications from that server."
@@ -142,7 +150,7 @@ msgstr ""
 "Login u in staat toepassingen van die server te draaien."
 
 #. For 12.10 we still don't support Citrix
-#: ../src/user-list.vala:507
+#: ../src/user-list.vala:551
 msgid ""
 "If you have an account on an RDP server, Remote Login lets you run "
 "applications from that server."
@@ -150,15 +158,15 @@ msgstr ""
 "Als u een account heeft op een RDP-server kunt u met Remote Login "
 "toepassingen vanaf die server draaien."
 
-#: ../src/user-list.vala:510
+#: ../src/user-list.vala:554
 msgid "Cancel"
 msgstr "Annuleren"
 
-#: ../src/user-list.vala:511
+#: ../src/user-list.vala:555
 msgid "Set Up…"
 msgstr "Instellen…"
 
-#: ../src/user-list.vala:513
+#: ../src/user-list.vala:557
 msgid ""
 "You need an Ubuntu Remote Login account to use this service. Would you like "
 "to set up an account now?"
@@ -166,11 +174,11 @@ msgstr ""
 "U heeft een Ubuntu Remote Login-account nodig om van deze dienst gebruik te "
 "maken. Wilt u nu een account instellen?"
 
-#: ../src/user-list.vala:517
+#: ../src/user-list.vala:561
 msgid "OK"
 msgstr "Ok"
 
-#: ../src/user-list.vala:518
+#: ../src/user-list.vala:562
 msgid ""
 "You need an Ubuntu Remote Login account to use this service. Visit "
 "uccs.canonical.com to set up an account."
@@ -178,38 +186,38 @@ msgstr ""
 "U heeft een Ubuntu Remote Login-account nodig om van deze dienst gebruik te "
 "maken. Bezoek uccs.canonical.com om een account in te stellen."
 
-#: ../src/user-list.vala:635
+#: ../src/user-list.vala:679
 msgid "Server type not supported."
 msgstr "Servertype wordt niet ondersteund."
 
-#: ../src/user-list.vala:676
+#: ../src/user-list.vala:720
 msgid "Domain:"
 msgstr "Domein:"
 
-#: ../src/user-list.vala:737
+#: ../src/user-list.vala:781
 msgid "Email address:"
 msgstr "E-mailadres:"
 
 #. 'Log In' here is the button for logging in.
-#: ../src/user-list.vala:781
+#: ../src/user-list.vala:825
 msgid "Log In"
 msgstr "Aanmelden"
 
-#: ../src/user-list.vala:782
+#: ../src/user-list.vala:826
 #, c-format
 msgid "Login as %s"
 msgstr "Aanmelden als %s"
 
-#: ../src/user-list.vala:786
+#: ../src/user-list.vala:830
 msgid "Retry"
 msgstr "Opnieuw proberen"
 
-#: ../src/user-list.vala:787
+#: ../src/user-list.vala:831
 #, c-format
 msgid "Retry as %s"
 msgstr "Opnieuw proberen als %s"
 
-#: ../src/user-list.vala:825
+#: ../src/user-list.vala:869
 msgid "Login"
 msgstr "Aanmelden"
 

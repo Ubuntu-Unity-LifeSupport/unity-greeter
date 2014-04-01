@@ -1,3 +1,10 @@
+unity-greeter (14.04.7-0ubuntu1) trusty; urgency=medium
+
+  * New upstream release:
+    - Own the com.canonical.UnityGreeter D-Bus name
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Wed, 02 Apr 2014 10:13:46 +1300
+
 unity-greeter (14.04.6-0ubuntu1) trusty; urgency=medium
 
   * New upstream release:

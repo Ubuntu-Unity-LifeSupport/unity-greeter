@@ -7,14 +7,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2014-03-25 06:46+0000\n"
+"POT-Creation-Date: 2014-03-31 06:08+0000\n"
 "PO-Revision-Date: 2013-04-15 09:13+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: Tajik <tg@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2014-03-26 06:31+0000\n"
+"X-Launchpad-Export-Date: 2014-04-01 06:19+0000\n"
 "X-Generator: Launchpad (build 16967)\n"
 
 #: ../src/greeter-list.vala:300
@@ -22,11 +22,11 @@ msgstr ""
 msgid "Enter password for %s"
 msgstr "Паролро барои %s ворид кунед"
 
-#: ../src/greeter-list.vala:803 ../src/user-list.vala:657
+#: ../src/greeter-list.vala:803 ../src/user-list.vala:701
 msgid "Password:"
 msgstr "Парол:"
 
-#: ../src/greeter-list.vala:805 ../src/user-list.vala:651
+#: ../src/greeter-list.vala:805 ../src/user-list.vala:695
 msgid "Username:"
 msgstr "Номи корбар:"
 
@@ -42,11 +42,11 @@ msgstr "Санҷиши эътибор ба анҷом нарасид"
 msgid "Logging in…"
 msgstr "Ворид шуда истодааст..."
 
-#: ../src/main-window.vala:50
+#: ../src/main-window.vala:49
 msgid "Login Screen"
 msgstr "Экрани воридшавӣ"
 
-#: ../src/main-window.vala:117
+#: ../src/main-window.vala:116
 msgid "Back"
 msgstr "Қафо"
 
@@ -74,7 +74,7 @@ msgstr "Муҳити мизи кориро интихоб кунед"
 msgid "Goodbye. Would you like to…"
 msgstr "Худо ҳофиз! Шумо мехоҳед, ки..."
 
-#: ../src/shutdown-dialog.vala:105 ../src/shutdown-dialog.vala:183
+#: ../src/shutdown-dialog.vala:105 ../src/shutdown-dialog.vala:207
 msgid "Shut Down"
 msgstr "Анҷоми кор"
 
@@ -82,15 +82,21 @@ msgstr "Анҷоми кор"
 msgid "Are you sure you want to shut down the computer?"
 msgstr "Шумо мутмаин ҳастед, ки мехоҳед компютерро хомӯш кунед?"
 
-#: ../src/shutdown-dialog.vala:131
+#: ../src/shutdown-dialog.vala:137
+msgid ""
+"Other users are currently logged in to this computer, shutting down now will "
+"also close these other sessions."
+msgstr ""
+
+#: ../src/shutdown-dialog.vala:155
 msgid "Suspend"
 msgstr "Таваққуф"
 
-#: ../src/shutdown-dialog.vala:148
+#: ../src/shutdown-dialog.vala:172
 msgid "Hibernate"
 msgstr "Гибернатсия"
 
-#: ../src/shutdown-dialog.vala:166
+#: ../src/shutdown-dialog.vala:190
 msgid "Restart"
 msgstr "Бозоғозӣ"
 
@@ -127,15 +133,15 @@ msgstr ""
 msgid "Guest Session"
 msgstr "Ҷаласаи меҳмон"
 
-#: ../src/user-list.vala:394
+#: ../src/user-list.vala:438
 msgid "Please enter a complete e-mail address"
 msgstr "Лутфан, суроғаи пурраи почтаи электрониро ворид кунед"
 
-#: ../src/user-list.vala:474
+#: ../src/user-list.vala:518
 msgid "Incorrect e-mail address or password"
 msgstr "Суроғаи почтаи электронӣ ё пароли нодуруст"
 
-#: ../src/user-list.vala:505
+#: ../src/user-list.vala:549
 msgid ""
 "If you have an account on an RDP or Citrix server, Remote Login lets you run "
 "applications from that server."
@@ -144,7 +150,7 @@ msgstr ""
 "шумо имконият медиҳад, ки барномаҳоро аз он сервер иҷро кунед."
 
 #. For 12.10 we still don't support Citrix
-#: ../src/user-list.vala:507
+#: ../src/user-list.vala:551
 msgid ""
 "If you have an account on an RDP server, Remote Login lets you run "
 "applications from that server."
@@ -152,15 +158,15 @@ msgstr ""
 "Агар шумо дар сервери RDP ҳисоб дошта бошед, Воридшавии дурдаст ба шумо "
 "имконият медиҳад, ки барномаҳоро аз он сервер иҷро кунед."
 
-#: ../src/user-list.vala:510
+#: ../src/user-list.vala:554
 msgid "Cancel"
 msgstr "Бекор кардан"
 
-#: ../src/user-list.vala:511
+#: ../src/user-list.vala:555
 msgid "Set Up…"
 msgstr "Танзим кардан..."
 
-#: ../src/user-list.vala:513
+#: ../src/user-list.vala:557
 msgid ""
 "You need an Ubuntu Remote Login account to use this service. Would you like "
 "to set up an account now?"
@@ -168,11 +174,11 @@ msgstr ""
 "Барои истифодаи ин хидмат ба шумо ҳисоби Воридшавии дурдасти Ubuntu лозим "
 "аст. Шумо мехоҳед, ки ҳисобро ҳозир танзим кунед?"
 
-#: ../src/user-list.vala:517
+#: ../src/user-list.vala:561
 msgid "OK"
 msgstr "OK"
 
-#: ../src/user-list.vala:518
+#: ../src/user-list.vala:562
 msgid ""
 "You need an Ubuntu Remote Login account to use this service. Visit "
 "uccs.canonical.com to set up an account."
@@ -180,38 +186,38 @@ msgstr ""
 "Барои истифодаи ин хидмат ба шумо ҳисоби Воридшавии дурдасти Ubuntu лозим "
 "аст. Барои танзим кардани ҳисоб, ба uccs.canonical.com ташриф оред."
 
-#: ../src/user-list.vala:635
+#: ../src/user-list.vala:679
 msgid "Server type not supported."
 msgstr "Намуди сервер дастгирӣ намешавад."
 
-#: ../src/user-list.vala:676
+#: ../src/user-list.vala:720
 msgid "Domain:"
 msgstr "Домен:"
 
-#: ../src/user-list.vala:737
+#: ../src/user-list.vala:781
 msgid "Email address:"
 msgstr "Суроғаи почтаи электронӣ:"
 
 #. 'Log In' here is the button for logging in.
-#: ../src/user-list.vala:781
+#: ../src/user-list.vala:825
 msgid "Log In"
 msgstr "Ворид шудан"
 
-#: ../src/user-list.vala:782
+#: ../src/user-list.vala:826
 #, c-format
 msgid "Login as %s"
 msgstr "Ворид шудан ҳамчун %s"
 
-#: ../src/user-list.vala:786
+#: ../src/user-list.vala:830
 msgid "Retry"
 msgstr "Такрор кардан"
 
-#: ../src/user-list.vala:787
+#: ../src/user-list.vala:831
 #, c-format
 msgid "Retry as %s"
 msgstr "Такрор кардан ҳамчун %s"
 
-#: ../src/user-list.vala:825
+#: ../src/user-list.vala:869
 msgid "Login"
 msgstr "Ворид шудан"
 

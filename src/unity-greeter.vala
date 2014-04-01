@@ -100,6 +100,8 @@ public class UnityGreeter
 
         main_window = new MainWindow ();
 
+        Bus.own_name (BusType.SESSION, "com.canonical.UnityGreeter", BusNameOwnerFlags.NONE);
+
         dbus_object = new DialogDBusInterface ();
         dbus_object.open_dialog.connect ((type) =>
         {

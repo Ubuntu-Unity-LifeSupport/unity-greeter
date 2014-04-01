@@ -7,14 +7,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2014-03-25 06:46+0000\n"
+"POT-Creation-Date: 2014-03-31 06:08+0000\n"
 "PO-Revision-Date: 2014-01-31 14:03+0000\n"
 "Last-Translator: Jiri Grönroos <Unknown>\n"
 "Language-Team: Finnish <fi@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2014-03-26 06:30+0000\n"
+"X-Launchpad-Export-Date: 2014-04-01 06:18+0000\n"
 "X-Generator: Launchpad (build 16967)\n"
 
 #: ../src/greeter-list.vala:300
@@ -22,11 +22,11 @@ msgstr ""
 msgid "Enter password for %s"
 msgstr "Syötä salasana käyttäjälle %s"
 
-#: ../src/greeter-list.vala:803 ../src/user-list.vala:657
+#: ../src/greeter-list.vala:803 ../src/user-list.vala:701
 msgid "Password:"
 msgstr "Salasana:"
 
-#: ../src/greeter-list.vala:805 ../src/user-list.vala:651
+#: ../src/greeter-list.vala:805 ../src/user-list.vala:695
 msgid "Username:"
 msgstr "Käyttäjänimi:"
 
@@ -42,11 +42,11 @@ msgstr "Tunnistautuminen epäonnistui"
 msgid "Logging in…"
 msgstr "Kirjaudutaan sisään…"
 
-#: ../src/main-window.vala:50
+#: ../src/main-window.vala:49
 msgid "Login Screen"
 msgstr "Sisäänkirjautumisruutu"
 
-#: ../src/main-window.vala:117
+#: ../src/main-window.vala:116
 msgid "Back"
 msgstr "Takaisin"
 
@@ -74,7 +74,7 @@ msgstr "Valitse työpöytäympäristö"
 msgid "Goodbye. Would you like to…"
 msgstr "Näkemiin. Haluaisitko..."
 
-#: ../src/shutdown-dialog.vala:105 ../src/shutdown-dialog.vala:183
+#: ../src/shutdown-dialog.vala:105 ../src/shutdown-dialog.vala:207
 msgid "Shut Down"
 msgstr "Sammuta"
 
@@ -82,15 +82,23 @@ msgstr "Sammuta"
 msgid "Are you sure you want to shut down the computer?"
 msgstr "Haluatko varmasti sammuttaa tietokoneen?"
 
-#: ../src/shutdown-dialog.vala:131
+#: ../src/shutdown-dialog.vala:137
+msgid ""
+"Other users are currently logged in to this computer, shutting down now will "
+"also close these other sessions."
+msgstr ""
+"Tietokoneelle on kirjautunut myös muita käyttäjiä. Tietokoneen sammuttaminen "
+"sulkee myös toisten käyttäjien istunnot."
+
+#: ../src/shutdown-dialog.vala:155
 msgid "Suspend"
 msgstr "Valmiustila"
 
-#: ../src/shutdown-dialog.vala:148
+#: ../src/shutdown-dialog.vala:172
 msgid "Hibernate"
 msgstr "Lepotila"
 
-#: ../src/shutdown-dialog.vala:166
+#: ../src/shutdown-dialog.vala:190
 msgid "Restart"
 msgstr "Käynnistä uudelleen"
 
@@ -125,15 +133,15 @@ msgstr "Näet kaikki komentorivivalitsimet komennolla ”%s --help”"
 msgid "Guest Session"
 msgstr "Vieras"
 
-#: ../src/user-list.vala:394
+#: ../src/user-list.vala:438
 msgid "Please enter a complete e-mail address"
 msgstr "Anna sähköpostiosoite kokonaisuudessaan"
 
-#: ../src/user-list.vala:474
+#: ../src/user-list.vala:518
 msgid "Incorrect e-mail address or password"
 msgstr "Virheellinen sähköpostiosoite tai salasana"
 
-#: ../src/user-list.vala:505
+#: ../src/user-list.vala:549
 msgid ""
 "If you have an account on an RDP or Citrix server, Remote Login lets you run "
 "applications from that server."
@@ -142,7 +150,7 @@ msgstr ""
 "sovellusten käytön kyseisiltä palvelimilta."
 
 #. For 12.10 we still don't support Citrix
-#: ../src/user-list.vala:507
+#: ../src/user-list.vala:551
 msgid ""
 "If you have an account on an RDP server, Remote Login lets you run "
 "applications from that server."
@@ -150,15 +158,15 @@ msgstr ""
 "Jos sinulla on tili RDP-palvelimella, etäkirjautuminen mahdollistaa "
 "sovellusten käytön kyseiseltä palvelimelta."
 
-#: ../src/user-list.vala:510
+#: ../src/user-list.vala:554
 msgid "Cancel"
 msgstr "Peru"
 
-#: ../src/user-list.vala:511
+#: ../src/user-list.vala:555
 msgid "Set Up…"
 msgstr "Tee asetukset..."
 
-#: ../src/user-list.vala:513
+#: ../src/user-list.vala:557
 msgid ""
 "You need an Ubuntu Remote Login account to use this service. Would you like "
 "to set up an account now?"
@@ -166,11 +174,11 @@ msgstr ""
 "Tarvitset Ubuntu-etäkirjautumistilin käyttääksesi tätä palvelua. Haluatko "
 "luoda tilin nyt?"
 
-#: ../src/user-list.vala:517
+#: ../src/user-list.vala:561
 msgid "OK"
 msgstr "OK"
 
-#: ../src/user-list.vala:518
+#: ../src/user-list.vala:562
 msgid ""
 "You need an Ubuntu Remote Login account to use this service. Visit "
 "uccs.canonical.com to set up an account."
@@ -178,38 +186,38 @@ msgstr ""
 "Tarvitset Ubuntu-etäkirjautumistilin käyttääksesi tätä palvelua. Luo tili "
 "osoitteessa uccs.canonical.com."
 
-#: ../src/user-list.vala:635
+#: ../src/user-list.vala:679
 msgid "Server type not supported."
 msgstr "Palvelimen tyyppi ei ole tuettu."
 
-#: ../src/user-list.vala:676
+#: ../src/user-list.vala:720
 msgid "Domain:"
 msgstr "Toimialue:"
 
-#: ../src/user-list.vala:737
+#: ../src/user-list.vala:781
 msgid "Email address:"
 msgstr "Sähköpostiosoite:"
 
 #. 'Log In' here is the button for logging in.
-#: ../src/user-list.vala:781
+#: ../src/user-list.vala:825
 msgid "Log In"
 msgstr "Kirjaudu sisään"
 
-#: ../src/user-list.vala:782
+#: ../src/user-list.vala:826
 #, c-format
 msgid "Login as %s"
 msgstr "Kirjaudu käyttäjänä %s"
 
-#: ../src/user-list.vala:786
+#: ../src/user-list.vala:830
 msgid "Retry"
 msgstr "Yritä uudelleen"
 
-#: ../src/user-list.vala:787
+#: ../src/user-list.vala:831
 #, c-format
 msgid "Retry as %s"
 msgstr "Yritä uudelleen käyttäjänä %s"
 
-#: ../src/user-list.vala:825
+#: ../src/user-list.vala:869
 msgid "Login"
 msgstr "Kirjaudu"
 
