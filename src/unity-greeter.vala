@@ -77,7 +77,7 @@ public class UnityGreeter
         if (!test_mode)
         {
             settings_daemon = new SettingsDaemon ();
-            settings_daemon.start.begin ();
+            settings_daemon.start ();
         }
 
         var state_dir = Path.build_filename (Environment.get_user_cache_dir (), "unity-greeter");

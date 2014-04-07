@@ -40,6 +40,7 @@ public class UGSettings
     public static const string KEY_PLAY_READY_SOUND = "play-ready-sound";
     public static const string KEY_INDICATORS = "indicators";
     public static const string KEY_HIDDEN_USERS = "hidden-users";
+    public static const string KEY_IDLE_TIMEOUT = "idle-timeout";    
 
     public static bool get_boolean (string key)
     {
@@ -58,6 +59,12 @@ public class UGSettings
 
         /* key not in child list */
         return default;
+    }
+
+    public static int get_integer (string key)
+    {
+        var gsettings = new Settings (SCHEMA);
+        return gsettings.get_int (key);
     }
 
     public static double get_double (string key)

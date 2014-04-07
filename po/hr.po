@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2014-03-31 06:08+0000\n"
+"POT-Creation-Date: 2014-04-06 06:45+0000\n"
 "PO-Revision-Date: 2012-04-10 16:12+0000\n"
 "Last-Translator: Saša Teković <Unknown>\n"
 "Language-Team: Croatian <hr@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2014-04-01 06:19+0000\n"
-"X-Generator: Launchpad (build 16967)\n"
+"X-Launchpad-Export-Date: 2014-04-07 06:40+0000\n"
+"X-Generator: Launchpad (build 16976)\n"
 
 #: ../src/greeter-list.vala:300
 #, c-format
@@ -107,22 +107,22 @@ msgid "%s (Default)"
 msgstr "%s (Zadano)"
 
 #. Help string for command line --version flag
-#: ../src/unity-greeter.vala:482
+#: ../src/unity-greeter.vala:484
 msgid "Show release version"
 msgstr ""
 
 #. Help string for command line --test-mode flag
-#: ../src/unity-greeter.vala:485
+#: ../src/unity-greeter.vala:487
 msgid "Run in test mode"
 msgstr "Pokreni u probnom načinu rada"
 
 #. Arguments and description for --help text
-#: ../src/unity-greeter.vala:491
+#: ../src/unity-greeter.vala:493
 msgid "- Unity Greeter"
 msgstr ""
 
 #. Text printed out when an unknown command-line argument provided
-#: ../src/unity-greeter.vala:502
+#: ../src/unity-greeter.vala:504
 #, c-format
 msgid "Run '%s --help' to see a full list of available command line options."
 msgstr ""

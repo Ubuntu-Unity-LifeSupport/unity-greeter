@@ -40,6 +40,7 @@ logo_generator_SOURCES = logo-generator.vala
 unity_greeter_CFLAGS = \
 	$(UNITY_GREETER_CFLAGS) \
 	-w \
+	-DGNOME_DESKTOP_USE_UNSTABLE_API \
 	-DGETTEXT_PACKAGE=\"$(GETTEXT_PACKAGE)\" \
 	-DLOCALEDIR=\""$(localedir)"\" \
 	-DVERSION=\"$(VERSION)\" \
