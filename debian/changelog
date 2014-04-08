@@ -1,3 +1,15 @@
+unity-greeter (14.04.9-0ubuntu1) trusty; urgency=medium
+
+  * New upstream release:
+    - Correctly handle SIGTERM and quit cleanly. We were previously not stopping
+      the signal and so not cleaning up on exit. This left an upstart process
+      for each greeter remaining.
+    - If a user has an invalid session, then use the system default session
+      (LP: #1303725)
+    - Correctly handle sessions not starting
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Tue, 08 Apr 2014 15:57:59 +1200
+
 unity-greeter (14.04.8-0ubuntu1) trusty; urgency=medium
 
   * New upstream release:

@@ -158,7 +158,7 @@ public class MenuBar : Gtk.MenuBar
 
     private void close_pid (ref Pid pid)
     {
-        if (pid != 0)
+        if (pid > 0)
         {
             Posix.kill (pid, Posix.SIGTERM);
             int status;

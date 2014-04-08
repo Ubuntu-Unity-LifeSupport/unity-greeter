@@ -908,11 +908,16 @@ public abstract class GreeterList : FadableBox
 
     private void start_session ()
     {
+        if (!UnityGreeter.singleton.start_session (get_lightdm_session (), background))
+        {
+            show_message (_("Failed to start session"), true);
+            start_authentication ();
+            return;
+        }
+
         /* Set the background */
         background.draw_grid = false;
         background.queue_draw ();
-
-        UnityGreeter.singleton.start_session (get_lightdm_session (), background);
     }
 
     public void login_complete ()

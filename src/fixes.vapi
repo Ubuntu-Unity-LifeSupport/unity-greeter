@@ -49,3 +49,9 @@ namespace Gnome
 
     public delegate void IdleMonitorWatchFunc (IdleMonitor monitor, uint id);
 }
+
+// Note, fixed in 1.10.0
+namespace LightDM
+{
+    bool greeter_start_session_sync (LightDM.Greeter greeter, string session) throws GLib.Error;
+}

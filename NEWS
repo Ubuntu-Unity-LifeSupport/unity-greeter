@@ -1,3 +1,11 @@
+Overview of changes in unity-greeter 14.04.9
+
+    - Correctly handle SIGTERM and quit cleanly. We were previously not stopping
+      the signal and so not cleaning up on exit. This left an upstart process
+      for each greeter remaining.      
+    - If a user has an invalid session, then use the system default session
+    - Correctly handle sessions not starting
+
 Overview of changes in unity-greeter 14.04.8
 
     - Allow unity-settings-daemon to blank the screen by implementing the

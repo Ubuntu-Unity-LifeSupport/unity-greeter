@@ -181,7 +181,7 @@ public class UnityGreeter
         ctx.add_class ("lightdm");
     }
 
-    public void start_session (string? session, Background bg)
+    public bool start_session (string? session, Background bg)
     {
         /* Paint our background onto the root window before we close our own window */
         var c = new Cairo.Context (background_surface);
@@ -191,21 +191,43 @@ public class UnityGreeter
 
         if (test_mode)
         {
-                debug ("Successfully logged in!  Quitting...");
-                Gtk.main_quit ();
+            debug ("Successfully logged in! Quitting...");
+            Gtk.main_quit ();
+            return true;
         }
-        else
+
+        if (!session_is_valid (session))
         {
-            starting_session ();
-            try
-            {
-                greeter.start_session_sync (session);
-            }
-            catch (Error e)
-            {
-                warning ("Failed to start session: %s", e.message);
-            }
+            debug ("Session %s is not available, using system default %s instead", session, greeter.default_session_hint);
+            session = greeter.default_session_hint;
         }
+
+        var result = false;
+        try
+        {
+            result = LightDM.greeter_start_session_sync (greeter, session);
+        }
+        catch (Error e)
+        {
+            warning ("Failed to start session: %s", e.message);
+        }
+
+        if (result)
+            starting_session ();
+
+        return result;
+    }
+
+    private bool session_is_valid (string? session)
+    {
+        if (session == null)
+            return true;
+
+        foreach (var s in LightDM.get_sessions ())
+            if (s.key == session)
+                return true;
+
+        return false;
     }
 
     private bool ready_cb ()
@@ -446,7 +468,7 @@ public class UnityGreeter
         Environment.set_variable ("GTK_MODULES", "atk-bridge", false);
 
         Pid atspi_pid = 0;
-        Pid indicator_pid = 0;
+        Pid upstart_pid = 0;
 
         try
         {
@@ -558,7 +580,7 @@ public class UnityGreeter
                                      null,
                                      SpawnFlags.SEARCH_PATH,
                                      null,
-                                     out indicator_pid);
+                                     out upstart_pid);
             }
             catch (Error e)
             {
@@ -582,18 +604,24 @@ public class UnityGreeter
         GLib.Unix.signal_add(GLib.ProcessSignal.TERM, () => {
             debug("Got a SIGTERM");
             Gtk.main_quit();
-            return false;
+            return true;
         });
 
         debug ("Starting main loop");
         Gtk.main ();
 
-        if (indicator_pid != 0)
+        debug ("Cleaning up");
+
+        if (upstart_pid != 0)
         {
-            Posix.kill (indicator_pid, Posix.SIGTERM);
+            Posix.kill (upstart_pid, Posix.SIGTERM);
             int status;
-            Posix.waitpid (indicator_pid, out status, 0);
-            indicator_pid = 0;
+            Posix.waitpid (upstart_pid, out status, 0);
+            if (Process.if_exited (status))
+                debug ("Upstart exited with return value %d", Process.exit_status (status));
+            else
+                debug ("Upstart terminated with signal %d", Process.term_sig (status));
+            upstart_pid = 0;
         }
 
         if (atspi_pid != 0)
@@ -601,8 +629,14 @@ public class UnityGreeter
             Posix.kill (atspi_pid, Posix.SIGKILL);
             int status;
             Posix.waitpid (atspi_pid, out status, 0);
+            if (Process.if_exited (status))
+                debug ("AT-SPI exited with return value %d", Process.exit_status (status));
+            else
+                debug ("AT-SPI terminated with signal %d", Process.term_sig (status));
             atspi_pid = 0;
         }
+
+        debug ("Exiting");
 
         return Posix.EXIT_SUCCESS;
     }

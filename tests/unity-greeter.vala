@@ -97,9 +97,10 @@ public class UnityGreeter
         return _has_guest_account_hint;
     }
 
-    public void start_session (string? session, Background bg)
+    public bool start_session (string? session, Background bg)
     {
         session_started = true;
+        return true;
     }
 
     public void push_list (GreeterList widget)
