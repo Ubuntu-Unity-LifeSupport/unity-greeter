@@ -1,3 +1,11 @@
+unity-greeter (14.10.0-0ubuntu2) utopic; urgency=medium
+
+  * New upstream release:
+    - Require user to acknowledge messages received after authentication is
+      complete, for example if their password is about to expire. (LP: #1304866)
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Wed, 30 Apr 2014 15:38:02 +1200
+
 unity-greeter (14.10.0-0ubuntu1) utopic; urgency=medium
 
   * Update greeter logo for Utopic Unicorn.

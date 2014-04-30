@@ -774,6 +774,7 @@ public abstract class GreeterList : FadableBox
 
     protected bool will_clear = false;
     protected bool prompted = false;
+    protected bool unacknowledged_messages = false;
 
     protected void connect_to_lightdm ()
     {
@@ -784,6 +785,7 @@ public abstract class GreeterList : FadableBox
 
     protected void show_message_cb (string text, LightDM.MessageType type)
     {
+        unacknowledged_messages = true;
         show_message (text, type == LightDM.MessageType.ERROR);
     }
 
@@ -828,8 +830,8 @@ public abstract class GreeterList : FadableBox
 
         if (is_authenticated)
         {
-            /* Login immediately if prompted */
-            if (prompted)
+            /* Login immediately if prompted and user has acknowledged all messages */
+            if (prompted && !unacknowledged_messages)
             {
                 login_complete ();
                 if (UnityGreeter.singleton.test_mode)
@@ -876,6 +878,7 @@ public abstract class GreeterList : FadableBox
     protected virtual void start_authentication ()
     {
         prompted = false;
+        unacknowledged_messages = false;
 
         /* Reset manual username */
         manual_name = null;

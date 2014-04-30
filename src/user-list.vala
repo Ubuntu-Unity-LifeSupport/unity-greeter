@@ -874,6 +874,7 @@ public class UserList : GreeterList
     {
         selected_entry.sensitive = false;
         will_clear = true;
+        unacknowledged_messages = false;
 
         foreach (var response in responses)
         {
@@ -888,6 +889,7 @@ public class UserList : GreeterList
     {
         debug ("Start session for %s", selected_entry.id);
 
+        unacknowledged_messages = false;
         var is_authenticated = false;
         if (UnityGreeter.singleton.test_mode)
             is_authenticated = test_is_authenticated;
@@ -1118,6 +1120,7 @@ public class UserList : GreeterList
         { "unicode",            "가나다라마",         "*" },
         { "no-response",        "No Response",       "*" },
         { "no-badge",           "No Badge",          "*" },
+        { "messages-after-login", "Messages After Login", "*" },
         { "" }
     };
     private List<string> test_backgrounds;
@@ -1518,6 +1521,12 @@ public class UserList : GreeterList
         case "locked":
             test_is_authenticated = false;
             show_message_cb ("Account is locked", LightDM.MessageType.ERROR);
+            authentication_complete_cb ();
+            break;
+        case "messages-after-login":
+            test_is_authenticated = text == "password";
+            if (test_is_authenticated)
+                show_message_cb ("Congratulations on logging in!", LightDM.MessageType.INFO);
             authentication_complete_cb ();
             break;
         default:
