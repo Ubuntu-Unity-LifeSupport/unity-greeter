@@ -1,3 +1,10 @@
+unity-greeter (14.10.1-0ubuntu1) utopic; urgency=medium
+
+  * New upstream release:
+    - Bring unstable idle timer code from gnome-desktop into unity-greeter
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Thu, 31 Jul 2014 10:56:12 +1200
+
 unity-greeter (14.10.0-0ubuntu2) utopic; urgency=medium
 
   * New upstream release:

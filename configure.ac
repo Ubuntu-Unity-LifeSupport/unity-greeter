@@ -2,7 +2,7 @@
 
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT(unity-greeter, 14.10.0)
+AC_INIT(unity-greeter, 14.10.1)
 AC_CONFIG_MACRO_DIR(m4)
 AM_INIT_AUTOMAKE
 AM_PROG_CC_C_O
@@ -23,12 +23,12 @@ PKG_CHECK_MODULES(UNITY_GREETER, [
     indicator3-0.4
     libido3-0.1 >= 13.10.0
     liblightdm-gobject-1 >= 1.4.0
-    gnome-desktop-3.0
     freetype2
     cairo-ft
     libcanberra
     pixman-1
     x11
+    xext
 ])
 
 AC_DEFINE_UNQUOTED([INDICATOR_FILE_DIR], ["${prefix}/share/unity/indicators"], [Indicator files are searched for in this directory])

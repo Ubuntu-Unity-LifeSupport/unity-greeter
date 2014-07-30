@@ -1,3 +1,7 @@
+Overview of changes in unity-greeter 14.10.1
+
+    - Bring unstable idle timer code from gnome-desktop into unity-greeter
+
 Overview of changes in unity-greeter 14.10.0
 
     - Require user to acknowledge messages received after authentication is
