@@ -1,3 +1,8 @@
+Overview of changes in unity-greeter 14.10.2
+
+    - Switch the screen reader keyboard shortcut to be the same as the default
+      shortcut used in the desktop session.
+
 Overview of changes in unity-greeter 14.10.1
 
     - Bring unstable idle timer code from gnome-desktop into unity-greeter

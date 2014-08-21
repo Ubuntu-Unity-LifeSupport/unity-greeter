@@ -1,3 +1,11 @@
+unity-greeter (14.10.2-0ubuntu1) utopic; urgency=medium
+
+  * New upstream release:
+    - Switch the screen reader keyboard shortcut to be the same as the default
+      shortcut used in the desktop session.
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Fri, 22 Aug 2014 09:43:44 +1200
+
 unity-greeter (14.10.1-0ubuntu1) utopic; urgency=medium
 
   * New upstream release:
