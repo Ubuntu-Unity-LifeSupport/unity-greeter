@@ -1,3 +1,12 @@
+unity-greeter (15.04.0-0ubuntu1) vivid; urgency=medium
+
+  * Update greeter logo for Vivid Vervet.
+  * Update GNOME flashback icon names
+  * Don't change shell background color in test mode
+  * Stop using deprecated API
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Fri, 28 Nov 2014 08:43:03 +1300
+
 unity-greeter (14.10.2-0ubuntu1) utopic; urgency=medium
 
   * New upstream release:
