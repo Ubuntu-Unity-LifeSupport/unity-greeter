@@ -1,3 +1,10 @@
+unity-greeter (15.04.1-0ubuntu1) vivid; urgency=medium
+
+  * Fix session selector and other buttons not being clickable due to regression
+    introduced in revision 1421.
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Tue, 02 Dec 2014 15:09:15 +1300
+
 unity-greeter (15.04.0-0ubuntu1) vivid; urgency=medium
 
   * Update greeter logo for Vivid Vervet.

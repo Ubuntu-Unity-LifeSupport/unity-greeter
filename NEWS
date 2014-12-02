@@ -1,3 +1,15 @@
+Overview of changes in unity-greeter 15.04.1
+
+    - Fix session selector and other buttons not being clickable due to
+      regression introduced by deprecated API removal in 15.04.0
+
+Overview of changes in unity-greeter 15.04.0
+
+    - Update greeter logo for Vivid Vervet.
+    - Update GNOME flashback icon names
+    - Don't change shell background color in test mode
+    - Stop using deprecated API
+
 Overview of changes in unity-greeter 14.10.2
 
     - Switch the screen reader keyboard shortcut to be the same as the default
