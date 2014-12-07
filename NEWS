@@ -1,3 +1,8 @@
+Overview of changes in unity-greeter 15.04.2
+
+    - Launch user upstart session with 'upstart' instead of 'init' which doesn't
+      work with systemd
+
 Overview of changes in unity-greeter 15.04.1
 
     - Fix session selector and other buttons not being clickable due to

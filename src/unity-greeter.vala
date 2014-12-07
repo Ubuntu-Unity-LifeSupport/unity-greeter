@@ -574,7 +574,7 @@ public class UnityGreeter
             {
                 string[] argv;
 
-                Shell.parse_argv ("init --user --startup-event indicator-services-start", out argv);
+                Shell.parse_argv ("upstart --user --startup-event indicator-services-start", out argv);
                 Process.spawn_async (null,
                                      argv,
                                      null,
