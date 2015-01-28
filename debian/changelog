@@ -1,3 +1,13 @@
+unity-greeter (15.04.2-0ubuntu2) vivid; urgency=medium
+
+  [ Iain Lane ]
+  * Set GSETTINGS_SCHEMA_DIR and install an icon theme.
+
+  [ Lars Uebernickel ]
+  * Remove old code for drawing DashEntry that is no longer needed.
+
+ -- Dmitry Shachnev <mitya57@ubuntu.com>  Wed, 28 Jan 2015 13:48:58 +0300
+
 unity-greeter (15.04.2-0ubuntu1) vivid; urgency=medium
 
   * Launch user upstart session with 'upstart' instead of 'init' which doesn't

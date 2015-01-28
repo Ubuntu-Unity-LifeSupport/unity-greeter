@@ -754,8 +754,7 @@ public class Test
             var schema_dir = Path.build_filename(dir, "share", "glib-2.0", "schemas");
             DirUtils.create_with_parents(schema_dir, 0700);
 
-            var data_dirs = Environment.get_variable("XDG_DATA_DIRS");
-            Environment.set_variable("XDG_DATA_DIRS", "%s:%s".printf(Path.build_filename(dir, "share"), data_dirs), true);
+            Environment.set_variable("GSETTINGS_SCHEMA_DIR", schema_dir, true);
 
             var top_srcdir = Environment.get_variable("top_srcdir");
             if (top_srcdir == null || top_srcdir == "")
