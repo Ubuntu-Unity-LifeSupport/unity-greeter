@@ -1,3 +1,11 @@
+Overview of changes in unity-greeter 15.04.3
+
+    - Ensure non-selected prompt boxes don't overlap adjacent boxes. This fixes
+      a bug where you couldn't select username.
+    - Show KDE icon for Plasma 5 sessions.
+    - Set GSETTINGS_SCHEMA_DIR when running tests.
+    - Remove old code for drawing DashEntry that is no longer needed.
+
 Overview of changes in unity-greeter 15.04.2
 
     - Launch user upstart session with 'upstart' instead of 'init' which doesn't

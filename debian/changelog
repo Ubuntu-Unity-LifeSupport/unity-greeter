@@ -1,3 +1,14 @@
+unity-greeter (15.04.3-0ubuntu1) vivid; urgency=medium
+
+  * New upstream release:
+    - Ensure non-selected prompt boxes don't overlap adjacent boxes. This fixes
+      a bug where you couldn't select username. (LP: #1374778)
+    - Show KDE icon for Plasma 5 sessions.
+    - Set GSETTINGS_SCHEMA_DIR when running tests.
+    - Remove old code for drawing DashEntry that is no longer needed.
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Thu, 29 Jan 2015 09:09:31 +1300
+
 unity-greeter (15.04.2-0ubuntu2) vivid; urgency=medium
 
   [ Iain Lane ]
