@@ -1,3 +1,13 @@
+unity-greeter (15.04.4-0ubuntu1) vivid; urgency=medium
+
+  * New upstream release:
+    - Update unity-greeter so it is possible to style buttons in greeter with
+      css (LP: #1423542)
+  * debian/control:
+    - Use standards version 3.9.6
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Tue, 14 Apr 2015 13:06:52 +1200
+
 unity-greeter (15.04.3-0ubuntu1) vivid; urgency=medium
 
   * New upstream release:
