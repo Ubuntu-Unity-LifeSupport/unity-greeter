@@ -1,3 +1,13 @@
+Overview of changes in unity-greeter 15.10.0
+
+    - Make source package using xzip
+    - Don't distribute AUTHORS, INSTALL, README, ChangeLog
+
+Overview of changes in unity-greeter 15.04.4
+
+    - Update unity-greeter so it is possible to style buttons in greeter with
+      css.
+
 Overview of changes in unity-greeter 15.04.3
 
     - Ensure non-selected prompt boxes don't overlap adjacent boxes. This fixes

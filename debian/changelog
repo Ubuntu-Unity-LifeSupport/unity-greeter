@@ -1,3 +1,16 @@
+unity-greeter (15.10.0-0ubuntu1) wily; urgency=medium
+
+  * New upstream release:
+    - Make source package using xzip
+    - Don't distribute AUTHORS, INSTALL, README, ChangeLog  
+  * debian/rules:
+    - Update greeter logo for Wily Werewolf.
+  * debian/50-unity-greeter.conf:
+    - Use new [Seat:*] section instead of deprecated [SeatDefaults]
+      (LP: #1456449)
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Wed, 20 May 2015 11:39:37 +1200
+
 unity-greeter (15.04.4-0ubuntu1) vivid; urgency=medium
 
   * New upstream release:
