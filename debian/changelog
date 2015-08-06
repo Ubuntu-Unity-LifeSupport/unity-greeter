@@ -1,3 +1,12 @@
+unity-greeter (15.10.1-0ubuntu1) wily; urgency=medium
+
+  * New upstream release:
+    - Use GNOME badge for gnome-wayland session
+  * debian/control:
+    - Depend on upstart instead of dummy package upstart-bin
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Thu, 06 Aug 2015 12:15:40 +1200
+
 unity-greeter (15.10.0-0ubuntu1) wily; urgency=medium
 
   * New upstream release:

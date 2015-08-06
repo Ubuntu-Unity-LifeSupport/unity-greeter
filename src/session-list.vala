@@ -103,6 +103,7 @@ public class SessionList : GreeterList
         case "gnome-flashback-compiz":
         case "gnome-flashback-metacity":
         case "gnome-shell":
+        case "gnome-wayland":
         case "gnome":
             return "gnome_badge.png";
         case "kde":

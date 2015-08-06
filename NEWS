@@ -1,3 +1,7 @@
+Overview of changes in unity-greeter 15.10.1
+
+    - Use GNOME badge for gnome-wayland session
+
 Overview of changes in unity-greeter 15.10.0
 
     - Make source package using xzip
