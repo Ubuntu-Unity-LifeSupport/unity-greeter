@@ -1,3 +1,15 @@
+unity-greeter (16.04.0-0ubuntu1) xenial; urgency=medium
+
+  * New upstream release:
+    - Add an option to only show users in a list of specified groups
+      (LP: #1493335)
+    - Use non-deprecated Gdk.Cursor methods
+    - Remove obsolete CONFIG_FILE define 
+  * debian/rules:
+    - Update greeter logo for Xenial Xerus.
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Tue, 27 Oct 2015 11:48:39 +1300
+
 unity-greeter (15.10.1-0ubuntu1) wily; urgency=medium
 
   * New upstream release:

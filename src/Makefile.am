@@ -45,7 +45,6 @@ unity_greeter_CFLAGS = \
 	-DGETTEXT_PACKAGE=\"$(GETTEXT_PACKAGE)\" \
 	-DLOCALEDIR=\""$(localedir)"\" \
 	-DVERSION=\"$(VERSION)\" \
-	-DCONFIG_FILE=\""$(sysconfdir)/lightdm/unity-greeter.conf"\" \
 	-DPKGDATADIR=\""$(pkgdatadir)"\" \
 	-DINDICATORDIR=\""$(INDICATORDIR)"\"
 

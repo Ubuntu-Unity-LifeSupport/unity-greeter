@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2015-08-04 05:29+0000\n"
+"POT-Creation-Date: 2015-10-25 05:33+0000\n"
 "PO-Revision-Date: 2014-10-04 17:54+0000\n"
 "Last-Translator: samson <Unknown>\n"
 "Language-Team: Amharic <am@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2015-08-05 05:27+0000\n"
-"X-Generator: Launchpad (build 17656)\n"
+"X-Launchpad-Export-Date: 2015-10-26 05:13+0000\n"
+"X-Generator: Launchpad (build 17812)\n"
 
 #: ../src/greeter-list.vala:300
 #, c-format
@@ -90,7 +90,7 @@ msgstr "በእርግጥ ኮምፒዩተሩን ማጥፋት ይፈልጋሉ?"
 msgid ""
 "Other users are currently logged in to this computer, shutting down now will "
 "also close these other sessions."
-msgstr ""
+msgstr "ሌሎች ተጠቃሚዎች በዚህ ኮምፒዩተር ላይ ገብተዋል: ማጥፋት የ ሌሎቹን ተጠቃሚዎች ክፍለ ጊዜ አብሮ ይዘጋዋል"
 
 #: ../src/shutdown-dialog.vala:155
 msgid "Suspend"
@@ -148,13 +148,14 @@ msgid ""
 "If you have an account on an RDP or Citrix server, Remote Login lets you run "
 "applications from that server."
 msgstr ""
+"መግለጫ ካለዎት በ an RDP ወይንም Citrix ሰርቨር በርቀት መግቢያ ከ ሰርቨሩ ላይ መተግበሪያዎች ማስኬድ ያስችሎታል"
 
 #. For 12.10 we still don't support Citrix
 #: ../src/user-list.vala:551
 msgid ""
 "If you have an account on an RDP server, Remote Login lets you run "
 "applications from that server."
-msgstr ""
+msgstr "መግለጫ ካለዎት በ an RDP ሰርቨር በርቀት መግቢያ ከ ሰርቨሩ ላይ መተግበሪያዎች ማስኬድ ያስችሎታል"
 
 #: ../src/user-list.vala:554
 msgid "Cancel"
@@ -169,6 +170,7 @@ msgid ""
 "You need an Ubuntu Remote Login account to use this service. Would you like "
 "to set up an account now?"
 msgstr ""
+"እርስዎ ይህን ግልጋሎት ለመጠቀም የ ኡቡንቱ በርቀት መግቢያ መግለጫ ያስፈልጎታል: መግለጫ አሁን ማሰናዳት ይፈልጋሉ?"
 
 #: ../src/user-list.vala:561
 msgid "OK"
@@ -179,6 +181,8 @@ msgid ""
 "You need an Ubuntu Remote Login account to use this service. Visit "
 "uccs.canonical.com to set up an account."
 msgstr ""
+"እርስዎ ይህን ግልጋሎት ለመጠቀም የ ኡቡንቱ በርቀት መግቢያ መግለጫ ያስፈልጎታል: ይጎብኙ uccs.canonical.com "
+"መግለጫ ማሰናጃ"
 
 #: ../src/user-list.vala:679
 msgid "Server type not supported."
