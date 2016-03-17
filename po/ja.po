@@ -7,20 +7,20 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2015-10-25 05:33+0000\n"
-"PO-Revision-Date: 2012-04-15 00:34+0000\n"
+"POT-Creation-Date: 2016-03-16 05:56+0000\n"
+"PO-Revision-Date: 2016-02-27 13:28+0000\n"
 "Last-Translator: Shushi Kurose <md81bird@hitaki.net>\n"
 "Language-Team: Japanese <ja@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2015-10-26 05:13+0000\n"
-"X-Generator: Launchpad (build 17812)\n"
+"X-Launchpad-Export-Date: 2016-03-17 05:24+0000\n"
+"X-Generator: Launchpad (build 17947)\n"
 
 #: ../src/greeter-list.vala:300
 #, c-format
 msgid "Enter password for %s"
-msgstr ""
+msgstr "%s のパスワードを入力"
 
 #: ../src/greeter-list.vala:805 ../src/user-list.vala:701
 msgid "Password:"
@@ -48,7 +48,7 @@ msgstr "ログインしています…"
 
 #: ../src/main-window.vala:49
 msgid "Login Screen"
-msgstr ""
+msgstr "ログイン画面"
 
 #: ../src/main-window.vala:116
 msgid "Back"
@@ -68,7 +68,7 @@ msgstr "スクリーンリーダー"
 
 #: ../src/prompt-box.vala:212
 msgid "Session Options"
-msgstr ""
+msgstr "セッションのオプション"
 
 #: ../src/session-list.vala:34
 msgid "Select desktop environment"
@@ -123,17 +123,17 @@ msgstr "テストモードで実行"
 #. Arguments and description for --help text
 #: ../src/unity-greeter.vala:515
 msgid "- Unity Greeter"
-msgstr ""
+msgstr "- Unity Greeter"
 
 #. Text printed out when an unknown command-line argument provided
 #: ../src/unity-greeter.vala:526
 #, c-format
 msgid "Run '%s --help' to see a full list of available command line options."
-msgstr ""
+msgstr "'%s --help' を実行すると利用可能なすべてのコマンドラインオプションの一覧が表示されます"
 
 #: ../src/user-list.vala:45
 msgid "Guest Session"
-msgstr ""
+msgstr "ゲストセッション"
 
 #: ../src/user-list.vala:438
 msgid "Please enter a complete e-mail address"
@@ -197,12 +197,12 @@ msgstr "メールアドレス:"
 #. 'Log In' here is the button for logging in.
 #: ../src/user-list.vala:825
 msgid "Log In"
-msgstr ""
+msgstr "ログイン"
 
 #: ../src/user-list.vala:826
 #, c-format
 msgid "Login as %s"
-msgstr ""
+msgstr "%s としてログイン"
 
 #: ../src/user-list.vala:830
 msgid "Retry"
@@ -215,7 +215,7 @@ msgstr "%s として再試行"
 
 #: ../src/user-list.vala:869
 msgid "Login"
-msgstr ""
+msgstr "ログイン"
 
 #~ msgid "_Back"
 #~ msgstr "戻る(_B)"

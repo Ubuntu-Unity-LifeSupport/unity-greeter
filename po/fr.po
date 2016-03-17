@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2015-10-25 05:33+0000\n"
-"PO-Revision-Date: 2015-06-14 15:47+0000\n"
-"Last-Translator: Emmanuel Sunyer <emmanuel.sunyer@gmail.com>\n"
+"POT-Creation-Date: 2016-03-16 05:56+0000\n"
+"PO-Revision-Date: 2015-11-12 13:04+0000\n"
+"Last-Translator: Jean-Marc <Unknown>\n"
 "Language-Team: French <fr@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2015-10-26 05:13+0000\n"
-"X-Generator: Launchpad (build 17812)\n"
+"X-Launchpad-Export-Date: 2016-03-17 05:24+0000\n"
+"X-Generator: Launchpad (build 17947)\n"
 
 #: ../src/greeter-list.vala:300
 #, c-format
@@ -76,7 +76,7 @@ msgstr "Sélection de l'environnement de bureau"
 
 #: ../src/shutdown-dialog.vala:101
 msgid "Goodbye. Would you like to…"
-msgstr "Au revoir. Souhaitez-vous…"
+msgstr "Au revoir. Souhaitez-vous..."
 
 #: ../src/shutdown-dialog.vala:105 ../src/shutdown-dialog.vala:207
 msgid "Shut Down"
@@ -84,7 +84,7 @@ msgstr "Éteindre"
 
 #: ../src/shutdown-dialog.vala:112
 msgid "Are you sure you want to shut down the computer?"
-msgstr "Êtes-vous sûr de vouloir éteindre l'ordinateur ?"
+msgstr "Êtes-vous sûr(e) de vouloir éteindre l'ordinateur ?"
 
 #: ../src/shutdown-dialog.vala:137
 msgid ""
@@ -141,11 +141,11 @@ msgstr "Session d'invité"
 
 #: ../src/user-list.vala:438
 msgid "Please enter a complete e-mail address"
-msgstr "Veuillez saisir une adresse de courriel complète"
+msgstr "Veuillez saisir une adresse électronique complète"
 
 #: ../src/user-list.vala:518
 msgid "Incorrect e-mail address or password"
-msgstr "Adresse de courriel ou mot de passe incorrect"
+msgstr "Adresse électronique ou mot de passe incorrect"
 
 #: ../src/user-list.vala:549
 msgid ""
@@ -170,7 +170,7 @@ msgstr "Annuler"
 
 #: ../src/user-list.vala:555
 msgid "Set Up…"
-msgstr "Configuration…"
+msgstr "Configuration..."
 
 #: ../src/user-list.vala:557
 msgid ""
@@ -229,6 +229,9 @@ msgstr "Ouvrir la session"
 
 #~ msgid "_Back"
 #~ msgstr "_Retour"
+
+#~ msgid "Logging in..."
+#~ msgstr "Connexion..."
 
 #~ msgid "Favorite Color (blue):"
 #~ msgstr "Couleur préférée (bleu) :"

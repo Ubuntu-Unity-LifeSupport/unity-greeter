@@ -1,3 +1,10 @@
+unity-greeter (16.04.1-0ubuntu1) xenial; urgency=medium
+
+  * New upstream release:
+    - Fix background after login being scaled incorrectly (LP: #1557893)
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Fri, 18 Mar 2016 09:46:32 +1300
+
 unity-greeter (16.04.0-0ubuntu1) xenial; urgency=medium
 
   * New upstream release:
