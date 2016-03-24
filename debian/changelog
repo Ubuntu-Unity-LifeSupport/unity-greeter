@@ -1,3 +1,10 @@
+unity-greeter (16.04.2-0ubuntu1) xenial; urgency=medium
+
+  * New upstream release:
+    - Limit prompt fields to 200 characters (LP: #1538615)
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Thu, 24 Mar 2016 14:03:38 +1300
+
 unity-greeter (16.04.1-0ubuntu1) xenial; urgency=medium
 
   * New upstream release:

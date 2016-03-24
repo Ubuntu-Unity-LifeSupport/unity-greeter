@@ -1,3 +1,7 @@
+Overview of changes in unity-greeter 16.04.2
+
+    - Limit prompt fields to 200 characters
+
 Overview of changes in unity-greeter 16.04.1
 
     - Fix background after login being scaled incorrectly
