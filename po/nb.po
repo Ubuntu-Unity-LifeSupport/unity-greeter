@@ -7,42 +7,42 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2016-03-22 05:42+0000\n"
+"POT-Creation-Date: 2016-04-21 05:31+0000\n"
 "PO-Revision-Date: 2014-05-08 12:01+0000\n"
 "Last-Translator: Åka Sikrom <Unknown>\n"
 "Language-Team: Norwegian Bokmal <nb@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2016-03-23 05:32+0000\n"
-"X-Generator: Launchpad (build 17958)\n"
+"X-Launchpad-Export-Date: 2016-04-22 05:25+0000\n"
+"X-Generator: Launchpad (build 17995)\n"
 
-#: ../src/greeter-list.vala:300
+#: ../src/greeter-list.vala:302
 #, c-format
 msgid "Enter password for %s"
 msgstr "Skriv inn passord for %s"
 
-#: ../src/greeter-list.vala:805 ../src/user-list.vala:701
+#: ../src/greeter-list.vala:807 ../src/user-list.vala:701
 msgid "Password:"
 msgstr "Passord:"
 
-#: ../src/greeter-list.vala:807 ../src/user-list.vala:695
+#: ../src/greeter-list.vala:809 ../src/user-list.vala:695
 msgid "Username:"
 msgstr "Brukernavn:"
 
-#: ../src/greeter-list.vala:859
+#: ../src/greeter-list.vala:864
 msgid "Invalid password, please try again"
 msgstr "Feil passord. Prøv igjen"
 
-#: ../src/greeter-list.vala:870
+#: ../src/greeter-list.vala:875
 msgid "Failed to authenticate"
 msgstr "Klarte ikke å autentisere"
 
-#: ../src/greeter-list.vala:916
+#: ../src/greeter-list.vala:921
 msgid "Failed to start session"
 msgstr "Klarte ikke å starte økt"
 
-#: ../src/greeter-list.vala:931
+#: ../src/greeter-list.vala:936
 msgid "Logging in…"
 msgstr "Logger inn …"
 
@@ -76,7 +76,7 @@ msgstr "Velg skrivebordsmiljø"
 
 #: ../src/shutdown-dialog.vala:101
 msgid "Goodbye. Would you like to…"
-msgstr "Ha det bra. Vil du …"
+msgstr "Ha det bra. Hva vil du gjøre?"
 
 #: ../src/shutdown-dialog.vala:105 ../src/shutdown-dialog.vala:207
 msgid "Shut Down"
@@ -152,7 +152,7 @@ msgid ""
 "applications from that server."
 msgstr ""
 "Hvis du har en konto på en RDP- eller Citrix-tjener, kan du kjøre programmer "
-"fra denne med «Remote Login»."
+"fra denne med fjerninnlogging."
 
 #. For 12.10 we still don't support Citrix
 #: ../src/user-list.vala:551
@@ -160,8 +160,8 @@ msgid ""
 "If you have an account on an RDP server, Remote Login lets you run "
 "applications from that server."
 msgstr ""
-"Hvis du har en konto på en RDP-tjener, kan du kjøre programmer fra denne med "
-"«Remote Login»."
+"Hvis du har en brukerkonto på en RDP-tjener, kan bruke fjerninnlogging til å "
+"kjøre programmer på den."
 
 #: ../src/user-list.vala:554
 msgid "Cancel"
@@ -176,8 +176,8 @@ msgid ""
 "You need an Ubuntu Remote Login account to use this service. Would you like "
 "to set up an account now?"
 msgstr ""
-"Du trenger en Ubuntu Remote Login-konto for å bruke denne tjenesten. Vil du "
-"lage en konto nå?"
+"Du trenger en fjerninnloggingskonto for Ubuntu for å bruke denne tjenesten. "
+"Vil du lage en konto nå?"
 
 #: ../src/user-list.vala:561
 msgid "OK"
@@ -188,8 +188,8 @@ msgid ""
 "You need an Ubuntu Remote Login account to use this service. Visit "
 "uccs.canonical.com to set up an account."
 msgstr ""
-"Du trenger en Ubuntu Remote Login-konto for å bruke denne tjenesten. Besøk "
-"uccs.canonical.com for å lage en konto."
+"Du trenger en fjerninnloggingskonto for Ubuntu for å bruke denne tjenesten. "
+"Besøk uccs.canonical.com for å lage en konto."
 
 #: ../src/user-list.vala:679
 msgid "Server type not supported."

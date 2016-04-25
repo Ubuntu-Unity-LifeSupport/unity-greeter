@@ -1,3 +1,11 @@
+unity-greeter (16.10.0-0ubuntu1) yakkety; urgency=medium
+
+  * New upstream release
+  * debian/rules:
+    - Update greeter logo for Yakkety Yak.
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Mon, 25 Apr 2016 14:24:35 +0200
+
 unity-greeter (16.04.2-0ubuntu1) xenial; urgency=medium
 
   * New upstream release:
