@@ -1,3 +1,10 @@
+unity-greeter (16.10.0-0ubuntu2) yakkety; urgency=medium
+
+  * Add a dependency on unity, to hint to germinate/components-mismatches
+    not to pull indicator-applet into main.
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Mon, 02 May 2016 09:56:20 -0500
+
 unity-greeter (16.10.0-0ubuntu1) yakkety; urgency=medium
 
   * New upstream release

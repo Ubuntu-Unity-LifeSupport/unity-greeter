@@ -31,7 +31,8 @@ Package: unity-greeter
 Architecture: any
 Depends: ${misc:Depends},
          ${shlibs:Depends},
-         upstart
+         upstart,
+         unity
 Recommends: unity-settings-daemon,
             indicator-application,
             indicator-datetime,
