@@ -1,3 +1,12 @@
+unity-greeter (16.10.1-0ubuntu1) yakkety; urgency=medium
+
+  * New upstream release:
+    - Wait for unity-settings-daemon xsettings plugin is ready to avoid HiDPI
+      resolution changing. (LP: #1571640)
+    - Workaround Vala trying to use GTK+ functions from GTK+ 3.20 (LP: #1591980)
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Wed, 22 Jun 2016 15:29:17 +1200
+
 unity-greeter (16.10.0-0ubuntu2) yakkety; urgency=medium
 
   * Add a dependency on unity, to hint to germinate/components-mismatches
