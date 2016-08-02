@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2016-06-20 05:46+0000\n"
+"POT-Creation-Date: 2016-07-24 05:24+0000\n"
 "PO-Revision-Date: 2012-05-08 13:34+0000\n"
 "Last-Translator: taijuin lee <Unknown>\n"
 "Language-Team: Chinese (Traditional) <zh_TW@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2016-06-21 05:31+0000\n"
-"X-Generator: Launchpad (build 18097)\n"
+"X-Launchpad-Export-Date: 2016-07-25 05:24+0000\n"
+"X-Generator: Launchpad (build 18147)\n"
 
 #: ../src/greeter-list.vala:302
 #, c-format
@@ -111,22 +111,22 @@ msgid "%s (Default)"
 msgstr "%s (預設)"
 
 #. Help string for command line --version flag
-#: ../src/unity-greeter.vala:512
+#: ../src/unity-greeter.vala:546
 msgid "Show release version"
 msgstr "顯示發行版本"
 
 #. Help string for command line --test-mode flag
-#: ../src/unity-greeter.vala:515
+#: ../src/unity-greeter.vala:549
 msgid "Run in test mode"
 msgstr "以測試模式執行"
 
 #. Arguments and description for --help text
-#: ../src/unity-greeter.vala:521
+#: ../src/unity-greeter.vala:555
 msgid "- Unity Greeter"
 msgstr "- Unity 歡迎程式"
 
 #. Text printed out when an unknown command-line argument provided
-#: ../src/unity-greeter.vala:532
+#: ../src/unity-greeter.vala:566
 #, c-format
 msgid "Run '%s --help' to see a full list of available command line options."
 msgstr "執行「%s --help」來查看指令列所有可用選項的完整清單。"

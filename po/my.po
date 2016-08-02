@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2016-06-20 05:46+0000\n"
+"POT-Creation-Date: 2016-07-24 05:24+0000\n"
 "PO-Revision-Date: 2014-09-06 13:42+0000\n"
 "Last-Translator: Bone Pyae Sone <bone.burma@gmail.com>\n"
 "Language-Team: Burmese <my@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2016-06-21 05:30+0000\n"
-"X-Generator: Launchpad (build 18097)\n"
+"X-Launchpad-Export-Date: 2016-07-25 05:23+0000\n"
+"X-Generator: Launchpad (build 18147)\n"
 
 #: ../src/greeter-list.vala:302
 #, c-format
@@ -36,15 +36,15 @@ msgstr "စကားဝှက် မှားနေပါသည်။ ကျေ�
 
 #: ../src/greeter-list.vala:875
 msgid "Failed to authenticate"
-msgstr "ခွင့်ပြုချက် ရယူနိုင်ခြင်းမရှိပါ။"
+msgstr "ခွင့်ပြုချက် မရပါ"
 
 #: ../src/greeter-list.vala:921
 msgid "Failed to start session"
-msgstr ""
+msgstr "session မစတင်နိုင်ပါ"
 
 #: ../src/greeter-list.vala:936
 msgid "Logging in…"
-msgstr ""
+msgstr "ဖွင်နေသည်..."
 
 #: ../src/main-window.vala:49
 msgid "Login Screen"
@@ -76,7 +76,7 @@ msgstr "desktop ပုံစံရွေးရန်"
 
 #: ../src/shutdown-dialog.vala:101
 msgid "Goodbye. Would you like to…"
-msgstr "Goodbye. သင်​...လိုပါသလား"
+msgstr "နှုတ်ဆက်ပါတယ်။ သင်အလိုရှိပါလား....."
 
 #: ../src/shutdown-dialog.vala:105 ../src/shutdown-dialog.vala:207
 msgid "Shut Down"
@@ -114,22 +114,22 @@ msgid "%s (Default)"
 msgstr "%s (မူလ)"
 
 #. Help string for command line --version flag
-#: ../src/unity-greeter.vala:512
+#: ../src/unity-greeter.vala:546
 msgid "Show release version"
 msgstr "ထုတ်လုပ်သော ဗားရှင်းကို ပြပါ"
 
 #. Help string for command line --test-mode flag
-#: ../src/unity-greeter.vala:515
+#: ../src/unity-greeter.vala:549
 msgid "Run in test mode"
 msgstr "စမ်းသပ်အခြေအနေဖြင့် အလုပ်လုပ်ပါ"
 
 #. Arguments and description for --help text
-#: ../src/unity-greeter.vala:521
+#: ../src/unity-greeter.vala:555
 msgid "- Unity Greeter"
 msgstr "Unity Greeter"
 
 #. Text printed out when an unknown command-line argument provided
-#: ../src/unity-greeter.vala:532
+#: ../src/unity-greeter.vala:566
 #, c-format
 msgid "Run '%s --help' to see a full list of available command line options."
 msgstr "အမိန့်ပေး စာရင်း အပြည့်အစုံမြင်ရရန်  '%s--help' ဖြင့် ခိုင်းပါ"
@@ -161,6 +161,8 @@ msgid ""
 "If you have an account on an RDP server, Remote Login lets you run "
 "applications from that server."
 msgstr ""
+"PRD ဆာဗာတွင် အကောင့်ရှိပါက ဆာဗာမှတဆင့် remote login ဝင်ပြီး "
+"အသုံးချဆော့ဖ်ဝဲကို အသုံးပြုနိုင်ပါတယ်။"
 
 #: ../src/user-list.vala:554
 msgid "Cancel"

@@ -1,3 +1,10 @@
+Overview of changes in unity-greeter 16.10.2
+
+    - Work around GTK 3.20's new allocation logic that caused some UI elements
+      to stop drawing themselves.  There is still a cosmetic glitch after
+      choosing a new user session and going back to the user list.  But it is
+      functional now with both the old and new GTK.
+
 Overview of changes in unity-greeter 16.10.1
 
     - Wait for unity-settings-daemon xsettings plugin is ready to avoid HiDPI
