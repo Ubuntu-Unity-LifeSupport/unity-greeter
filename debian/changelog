@@ -1,3 +1,10 @@
+unity-greeter (16.10.2-0ubuntu2) yakkety; urgency=medium
+
+  * Add back in accidentally lost changes from 16.10.1-0ubuntu2:
+    - Require unity-settings-daemon that has xsettings signal fixes.
+
+ -- Michael Terry <mterry@ubuntu.com>  Tue, 02 Aug 2016 15:23:57 -0400
+
 unity-greeter (16.10.2-0ubuntu1) yakkety; urgency=medium
 
   * New upstream release:
@@ -7,6 +14,13 @@ unity-greeter (16.10.2-0ubuntu1) yakkety; urgency=medium
       functional now with both the old and new GTK.
 
  -- Michael Terry <mterry@ubuntu.com>  Tue, 02 Aug 2016 13:38:03 -0400
+
+unity-greeter (16.10.1-0ubuntu2) yakkety; urgency=medium
+
+  * debian/control:
+    - Require unity-settings-daemon that has xsettings signal fixes.
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Fri, 24 Jun 2016 09:21:10 +1200
 
 unity-greeter (16.10.1-0ubuntu1) yakkety; urgency=medium
 
