@@ -1,3 +1,10 @@
+unity-greeter (16.10.2.1) yakkety; urgency=medium
+
+  * Apply the Gtk.ResizeMode.QUEUE fix to another place, so that the shutdown
+    dialog is positioned correctly again.
+
+ -- Iain Lane <iain@orangesquash.org.uk>  Thu, 18 Aug 2016 16:46:28 +0100
+
 unity-greeter (16.10.2-0ubuntu2) yakkety; urgency=medium
 
   * Add back in accidentally lost changes from 16.10.1-0ubuntu2:
