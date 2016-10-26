@@ -50,6 +50,7 @@ unity_greeter_test_CFLAGS = \
 	-DINDICATORDIR=\""$(INDICATORDIR)"\"
 
 unity_greeter_test_VALAFLAGS = \
+	--debug \
 	--pkg posix \
 	--pkg gtk+-3.0 \
 	--pkg gdk-x11-3.0 \

@@ -59,7 +59,16 @@ public class UnityGreeter
         greeter = new LightDM.Greeter ();
         greeter.show_message.connect ((text, type) => { show_message (text, type); });
         greeter.show_prompt.connect ((text, type) => { show_prompt (text, type); });
-        greeter.autologin_timer_expired.connect (() => { greeter.authenticate_autologin (); });
+        greeter.autologin_timer_expired.connect (() => {
+            try
+            {
+                greeter.authenticate_autologin ();
+            }
+            catch (Error e)
+            {
+                warning ("Failed to autologin authenticate: %s", e.message);
+            }
+        });
         greeter.authentication_complete.connect (() => { authentication_complete (); });
         var connected = false;
         try
@@ -68,7 +77,7 @@ public class UnityGreeter
         }
         catch (Error e)
         {
-            warning ("Failed to connect to LightDM daemon");
+            warning ("Failed to connect to LightDM daemon: %s", e.message);
         }
         if (!connected && !test_mode)
             Posix.exit (Posix.EXIT_FAILURE);
@@ -97,32 +106,36 @@ public class UnityGreeter
                 warning ("Failed to load state from %s: %s\n", state_file, e.message);
         }
 
-        /* Render things after xsettings is ready */
-        xsettings_ready.connect ( xsettings_ready_cb );
+        if (!test_mode) {
+            /* Render things after xsettings is ready */
+            xsettings_ready.connect ( xsettings_ready_cb );
 
-        GLib.Bus.watch_name (BusType.SESSION, "org.gnome.SettingsDaemon", BusNameWatcherFlags.NONE,
-                             (c, name, owner) =>
-                             {
-                                try {
-                                    settings_daemon_proxy = GLib.Bus.get_proxy_sync (
-                                        BusType.SESSION, "org.gnome.SettingsDaemon", "/org/gnome/SettingsDaemon");
-                                    settings_daemon_proxy.plugin_activated.connect (
-                                        (name) =>
-                                        {
-                                            if (name == "xsettings") {
-                                                debug ("xsettings is ready");
-                                                xsettings_ready ();
+            GLib.Bus.watch_name (BusType.SESSION, "org.gnome.SettingsDaemon", BusNameWatcherFlags.NONE,
+                                 (c, name, owner) =>
+                                 {
+                                    try {
+                                        settings_daemon_proxy = GLib.Bus.get_proxy_sync (
+                                            BusType.SESSION, "org.gnome.SettingsDaemon", "/org/gnome/SettingsDaemon");
+                                        settings_daemon_proxy.plugin_activated.connect (
+                                            (name) =>
+                                            {
+                                                if (name == "xsettings") {
+                                                    debug ("xsettings is ready");
+                                                    xsettings_ready ();
+                                                }
                                             }
-                                        }
-                                    );
-                                }
-                                catch (Error e)
-                                {
-                                    debug ("Failed to get USD proxy, proceed anyway");
-                                    xsettings_ready ();
-                                }
-                            },
-                            null);
+                                        );
+                                    }
+                                    catch (Error e)
+                                    {
+                                        debug ("Failed to get USD proxy, proceed anyway");
+                                        xsettings_ready ();
+                                    }
+                                },
+                                null);
+        }
+        else
+            xsettings_ready_cb ();
     }
 
     public string? get_state (string key)
@@ -254,27 +267,62 @@ public class UnityGreeter
 
     public void authenticate (string? userid = null)
     {
-        greeter.authenticate (userid);
+        try
+        {
+            greeter.authenticate (userid);
+        }
+        catch (Error e)
+        {
+            warning ("Failed to authenticate: %s", e.message);
+        }
     }
 
     public void authenticate_as_guest ()
     {
-        greeter.authenticate_as_guest ();
+        try
+        {
+            greeter.authenticate_as_guest ();
+        }
+        catch (Error e)
+        {
+            warning ("Failed to authenticate as guest: %s", e.message);
+        }
     }
 
-    public void authenticate_remote (string? session, string? userid)
+    public void authenticate_remote (string session, string? userid)
     {
-        UnityGreeter.singleton.greeter.authenticate_remote (session, userid);
+        try
+        {
+            UnityGreeter.singleton.greeter.authenticate_remote (session, userid);
+        }
+        catch (Error e)
+        {
+            warning ("Failed to remote authenticate: %s", e.message);
+        }
     }
 
     public void cancel_authentication ()
     {
-        greeter.cancel_authentication ();
+        try
+        {
+            greeter.cancel_authentication ();
+        }
+        catch (Error e)
+        {
+            warning ("Failed to cancel authentication: %s", e.message);
+        }
     }
 
     public void respond (string response)
     {
-        greeter.respond (response);
+        try
+        {
+            greeter.respond (response);
+        }
+        catch (Error e)
+        {
+            warning ("Failed to respond: %s", e.message);
+        }
     }
 
     public string authentication_user ()
@@ -508,7 +556,6 @@ public class UnityGreeter
         Environment.set_variable ("GTK_MODULES", "atk-bridge", false);
 
         Pid atspi_pid = 0;
-        Pid upstart_pid = 0;
 
         try
         {
@@ -604,30 +651,29 @@ public class UnityGreeter
         debug ("Creating Unity Greeter");
         var greeter = new UnityGreeter (do_test_mode);
 
-        greeter.greeter_ready.connect (() => {
-            debug ("Showing greeter");
-            greeter.show ();
-        });
-
-
         if (!do_test_mode)
         {
+            greeter.greeter_ready.connect (() => {
+                debug ("Showing greeter");
+                greeter.show ();
+            });
+
             /* Start the indicator services */
             try
             {
                 string[] argv;
 
-                Shell.parse_argv ("upstart --user --startup-event indicator-services-start", out argv);
+                Shell.parse_argv ("systemctl --user start indicator-application indicator-power indicator-datetime indicator-keyboard indicator-session indicator-sound", out argv);
                 Process.spawn_async (null,
                                      argv,
                                      null,
                                      SpawnFlags.SEARCH_PATH,
                                      null,
-                                     out upstart_pid);
+                                     null);
             }
             catch (Error e)
             {
-                warning ("Error starting Upstart for indicators: %s", e.message);
+                warning ("Error starting indicators: %s", e.message);
             }
 
             /* Make nm-applet hide items the user does not have permissions to interact with */
@@ -642,6 +688,8 @@ public class UnityGreeter
                 warning ("Error starting nm-applet: %s", e.message);
             }
         }
+        else
+            greeter.show ();
 
         /* Setup a handler for TERM so we quit cleanly */
         GLib.Unix.signal_add(GLib.ProcessSignal.TERM, () => {
@@ -654,18 +702,6 @@ public class UnityGreeter
         Gtk.main ();
 
         debug ("Cleaning up");
-
-        if (upstart_pid != 0)
-        {
-            Posix.kill (upstart_pid, Posix.SIGTERM);
-            int status;
-            Posix.waitpid (upstart_pid, out status, 0);
-            if (Process.if_exited (status))
-                debug ("Upstart exited with return value %d", Process.exit_status (status));
-            else
-                debug ("Upstart terminated with signal %d", Process.term_sig (status));
-            upstart_pid = 0;
-        }
 
         if (atspi_pid != 0)
         {

@@ -1,3 +1,18 @@
+unity-greeter (17.04.0-0ubuntu1) zesty; urgency=medium
+
+  * New upstream release:
+    - Move indicator launching from upstart to systemd.
+
+  [ Martin Pitt ]
+  * debian/control:
+    - Depend on lightdm with the "no duplicate session D-Bus" fix.
+
+  [ Robert Ancell ]
+  * debian/rules:
+    - Update greeter logo for Zesty Zapus.
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Thu, 27 Oct 2016 12:31:53 +1300
+
 unity-greeter (16.10.2.1) yakkety; urgency=medium
 
   * Apply the Gtk.ResizeMode.QUEUE fix to another place, so that the shutdown
