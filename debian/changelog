@@ -1,3 +1,15 @@
+unity-greeter (17.04.1-0ubuntu1) zesty; urgency=medium
+
+  * New upstream release:
+    - Fix some deprecation warnings
+    - Fix tests from crashing due to deprecated CSS settings
+    - Improve error handling from liblightdm
+    - Improved warning messages
+  * debian/control:
+    - Use standards version 3.9.8
+
+ -- Robert Ancell <robert.ancell@canonical.com>  Fri, 16 Dec 2016 14:38:58 +1300
+
 unity-greeter (17.04.0-0ubuntu1) zesty; urgency=medium
 
   * New upstream release:
