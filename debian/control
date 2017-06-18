@@ -20,6 +20,7 @@ Build-Depends: appmenu-gtk3,
                liblightdm-gobject-1-dev (>= 1.4.0),
                libpixman-1-dev,
                valac (>= 0.20.0),
+               valgrind [amd64],
                xvfb,
 Homepage: https://launchpad.net/unity-greeter
 # If you aren't a member of ~unity-greeter-team but need to upload packaging
@@ -40,8 +41,8 @@ Recommends: indicator-application,
             indicator-session,
             indicator-sound,
             network-manager-gnome,
-            lightdm (>= 1.20.0-0ubuntu2~),
-Suggests: lightdm-remote-session-freerdp,
+Suggests: lightdm (>= 1.20.0-0ubuntu2~),
+          lightdm-remote-session-freerdp,
           lightdm-remote-session-uccsconfigure,
           remote-login-service,
 Provides: lightdm-greeter

@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2016-12-14 05:17+0000\n"
+"POT-Creation-Date: 2017-06-05 05:58+0000\n"
 "PO-Revision-Date: 2012-03-30 03:25+0000\n"
 "Last-Translator: Søren Howe Gersager <syrelyre@gmail.com>\n"
 "Language-Team: Danish <da@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2016-12-15 04:46+0000\n"
-"X-Generator: Launchpad (build 18293)\n"
+"X-Launchpad-Export-Date: 2017-06-06 05:58+0000\n"
+"X-Generator: Launchpad (build 18399)\n"
 
 #: ../src/greeter-list.vala:302
 #, c-format
@@ -84,7 +84,7 @@ msgstr "Luk ned"
 
 #: ../src/shutdown-dialog.vala:112
 msgid "Are you sure you want to shut down the computer?"
-msgstr "Er du sikker på, at du vil lukke ned for computeren?"
+msgstr "Er du sikker på, at du vil lukke computeren?"
 
 #: ../src/shutdown-dialog.vala:137
 msgid ""
@@ -110,7 +110,7 @@ msgstr "Genstart"
 #: ../src/toggle-box.vala:98
 #, c-format
 msgid "%s (Default)"
-msgstr "%s (Standard)"
+msgstr "%s (standard)"
 
 #. Help string for command line --version flag
 #: ../src/unity-greeter.vala:593
@@ -141,19 +141,19 @@ msgstr "Gæstesession"
 
 #: ../src/user-list.vala:438
 msgid "Please enter a complete e-mail address"
-msgstr "Angiv venligst en komplet e-post-adresse"
+msgstr "Indtast venligst en komplet e-mailadresse"
 
 #: ../src/user-list.vala:518
 msgid "Incorrect e-mail address or password"
-msgstr "Forkert e-post-adresse eller adgangskode"
+msgstr "Forkert e-mailadresse eller adgangskode"
 
 #: ../src/user-list.vala:549
 msgid ""
 "If you have an account on an RDP or Citrix server, Remote Login lets you run "
 "applications from that server."
 msgstr ""
-"Hvis du har en konto på en RDP- eller Citrix-server, så lader Fjernt logind "
-"dig køre programmer fra denne server."
+"Hvis du har en konto på en RDP- eller Citrix-server, så kan du med Fjern-"
+"login køre programmer fra den server."
 
 #. For 12.10 we still don't support Citrix
 #: ../src/user-list.vala:551
@@ -161,8 +161,8 @@ msgid ""
 "If you have an account on an RDP server, Remote Login lets you run "
 "applications from that server."
 msgstr ""
-"Hvis du har en konto på en RDP-server, vil fjernlogind lade dig køre "
-"programmer på denne server."
+"Hvis du har en konto på en RDP-server, så kan du med Fjern-login køre "
+"programmer fra den server."
 
 #: ../src/user-list.vala:554
 msgid "Cancel"
@@ -177,24 +177,24 @@ msgid ""
 "You need an Ubuntu Remote Login account to use this service. Would you like "
 "to set up an account now?"
 msgstr ""
-"Der kræves en konto til Ubuntu Fjernlogind for at kunne anvende denne "
-"tjeneste. Vil du gerne opsætte en konto nu?"
+"Du skal have en konto til Ubuntu Fjern-login for at kunne bruge denne "
+"tjeneste. Vil du opsætte en konto nu?"
 
 #: ../src/user-list.vala:561
 msgid "OK"
-msgstr "O.k."
+msgstr "OK"
 
 #: ../src/user-list.vala:562
 msgid ""
 "You need an Ubuntu Remote Login account to use this service. Visit "
 "uccs.canonical.com to set up an account."
 msgstr ""
-"Der kræves en konto til Ubuntu Fjernlogind for at kunne anvende denne "
+"Du skal have en konto til Ubuntu Fjern-login for at kunne bruge denne "
 "tjeneste. Besøg uccs.canonical.com for at opsætte en konto."
 
 #: ../src/user-list.vala:679
 msgid "Server type not supported."
-msgstr "Servertype understøttes ikke."
+msgstr "Servertypen understøttes ikke."
 
 #: ../src/user-list.vala:720
 msgid "Domain:"
@@ -202,7 +202,7 @@ msgstr "Domæne:"
 
 #: ../src/user-list.vala:781
 msgid "Email address:"
-msgstr "E-post-adresse:"
+msgstr "E-mailadresse:"
 
 #. 'Log In' here is the button for logging in.
 #: ../src/user-list.vala:825
@@ -221,7 +221,7 @@ msgstr "Prøv igen"
 #: ../src/user-list.vala:831
 #, c-format
 msgid "Retry as %s"
-msgstr "Forsøg igen som %s"
+msgstr "Prøv igen som %s"
 
 #: ../src/user-list.vala:869
 msgid "Login"

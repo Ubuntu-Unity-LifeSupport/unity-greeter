@@ -1,3 +1,20 @@
+unity-greeter (17.04.1-0ubuntu2) artful; urgency=medium
+
+  [ Jeremy Bicha ]
+  * Lower Recommends on lightdm to Suggests. Unity7 needs unity-greeter
+    for the lockscreen but it doesn't actually need lightdm so let's
+    avoid the annoying DM debconf question and try to smooth upgrades.
+  * debian/rules:
+    - Don't fail the build for failing tests. The tests have been
+      broken for several months and no one has stepped up to try to
+      fix them. (LP: #1640605)
+  * Translation updates via Launchpad.
+
+  [ Robert Ancell ]
+  * Use valgrind to make build logs bigger help in triaging FTBFS problems.
+
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Sat, 17 Jun 2017 23:05:00 -0400
+
 unity-greeter (17.04.1-0ubuntu1) zesty; urgency=medium
 
   * New upstream release:

@@ -42,6 +42,9 @@ if test -z "$USD_BINARY"; then
 fi
 AC_DEFINE_UNQUOTED([USD_BINARY], ["$USD_BINARY"], [Path to g-s-d])
 
+AC_CHECK_PROG(VALGRIND, valgrind, valgrind --trace-children=yes --num-callers=256)
+AC_SUBST(VALGRIND)
+
 dnl ###########################################################################
 dnl Internationalization
 dnl ###########################################################################
