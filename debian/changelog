@@ -1,3 +1,10 @@
+unity-greeter (17.10.0-0ubuntu1) artful; urgency=medium
+
+  * Update greeter logo for 17.10 (LP: #1687856)
+  * Translation updates via Launchpad.
+
+ -- ventrical <dale_f_beaudoin@hotmail.com>  Tue, 15 Aug 2017 23:24:37 -0400
+
 unity-greeter (17.04.1-0ubuntu2) artful; urgency=medium
 
   [ Jeremy Bicha ]

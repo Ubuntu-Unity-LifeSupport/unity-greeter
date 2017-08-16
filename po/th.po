@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2017-06-05 05:58+0000\n"
+"POT-Creation-Date: 2017-08-15 05:26+0000\n"
 "PO-Revision-Date: 2012-01-24 16:14+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: Thai <th@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2017-06-06 05:58+0000\n"
-"X-Generator: Launchpad (build 18399)\n"
+"X-Launchpad-Export-Date: 2017-08-16 04:53+0000\n"
+"X-Generator: Launchpad (build 18446)\n"
 
 #: ../src/greeter-list.vala:302
 #, c-format
@@ -150,7 +150,7 @@ msgid ""
 "applications from that server."
 msgstr ""
 "ถ้าคุณมีบัญชี RDP หรือเซิร์ฟเวอร์ Citrix "
-"การเข้าระบบระยะไกลจะทำให้คุณใช้แอปพลิเคชั่นจากเซิร์ฟเวอร์ได้"
+"การเข้าระบบระยะไกลจะทำให้คุณใช้แอปพลิเคชันจากเซิร์ฟเวอร์ได้"
 
 #. For 12.10 we still don't support Citrix
 #: ../src/user-list.vala:551
@@ -159,7 +159,7 @@ msgid ""
 "applications from that server."
 msgstr ""
 "ถ้าคุณมีบัญชีเซิร์ฟเวอร์ RDP "
-"การเข้าระบบระยะไกลจะทำให้คุณใช้แอปพลิเคชั่นจากเซิร์ฟเวอร์ได้"
+"การเข้าระบบระยะไกลจะทำให้คุณใช้แอปพลิเคชันจากเซิร์ฟเวอร์ได้"
 
 #: ../src/user-list.vala:554
 msgid "Cancel"
