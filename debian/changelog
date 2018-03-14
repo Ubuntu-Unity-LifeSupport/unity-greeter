@@ -1,3 +1,14 @@
+unity-greeter (18.04.0+18.04.20180314.1-0ubuntu1) bionic; urgency=medium
+
+  [ Dale Beaudoin ]
+  * Update greeter logo to 18.04 LTS
+
+  [ Marco Trevisan (Treviño) ]
+  * Bump version and actually update logo
+  * menubar: fix compilation errors with recent vala
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Wed, 14 Mar 2018 16:44:30 +0000
+
 unity-greeter (17.10.0-0ubuntu1) artful; urgency=medium
 
   * Update greeter logo for 17.10 (LP: #1687856)
