@@ -27,6 +27,7 @@ Homepage: https://launchpad.net/unity-greeter
 # changes, just go ahead.  ~unity-greeter-team will notice and sync up the code
 # again.
 Vcs-Bzr: https://code.launchpad.net/~unity-greeter-team/unity-greeter/trunk
+X-Ubuntu-Use-Langpack: yes
 
 Package: unity-greeter
 Architecture: any

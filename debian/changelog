@@ -1,3 +1,10 @@
+unity-greeter (18.04.0+18.04.20180314.1-0ubuntu2) bionic; urgency=medium
+
+  * Add "X-Ubuntu-Use-Langpack: yes" to debian/control now that this package is
+    in Universe (LP: #1760435).
+
+ -- Simon Quigley <tsimonq2@ubuntu.com>  Thu, 05 Apr 2018 00:03:39 -0500
+
 unity-greeter (18.04.0+18.04.20180314.1-0ubuntu1) bionic; urgency=medium
 
   [ Dale Beaudoin ]
