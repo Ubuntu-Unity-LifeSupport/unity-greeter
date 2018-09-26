@@ -1,3 +1,10 @@
+unity-greeter (18.04.0+18.10.20180926-0ubuntu1) cosmic; urgency=medium
+
+  [ Khurshid Alam ]
+  * Update greeter logo for 18.10 (LP: #1793663)
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Wed, 26 Sep 2018 17:12:19 +0000
+
 unity-greeter (18.04.0+18.04.20180314.1-0ubuntu2) bionic; urgency=medium
 
   * Add "X-Ubuntu-Use-Langpack: yes" to debian/control now that this package is
