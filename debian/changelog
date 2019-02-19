@@ -1,3 +1,15 @@
+unity-greeter (18.04.0+18.10.20180926-0ubuntu2) disco; urgency=medium
+
+  * src/unity-greeter.vala:
+    - don't use mlockall, it's not meant to be used like that and stopped
+      working with the newer systemd version (lp: #1815493)
+  * debian/control:
+    - don't suggests packages that have not been part of Ubuntu since trusty
+  * debian/rules:
+    - enable the version number to the current serie
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Tue, 19 Feb 2019 16:48:37 +0100
+
 unity-greeter (18.04.0+18.10.20180926-0ubuntu1) cosmic; urgency=medium
 
   [ Khurshid Alam ]

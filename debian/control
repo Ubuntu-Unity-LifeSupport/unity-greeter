@@ -43,9 +43,6 @@ Recommends: indicator-application,
             indicator-sound,
             network-manager-gnome,
 Suggests: lightdm (>= 1.20.0-0ubuntu2~),
-          lightdm-remote-session-freerdp,
-          lightdm-remote-session-uccsconfigure,
-          remote-login-service,
 Provides: lightdm-greeter
 Breaks: edubuntu-artwork (<< 12.01.1~)
 Description: Unity Greeter

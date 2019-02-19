@@ -540,8 +540,6 @@ public class UnityGreeter
 
     public static int main (string[] args)
     {
-        /* Protect memory from being paged to disk, as we deal with passwords */
-        Posix.mlockall (Posix.MCL_CURRENT | Posix.MCL_FUTURE);
 
         /* Disable the stupid global menubar */
         Environment.unset_variable ("UBUNTU_MENUPROXY");
