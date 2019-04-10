@@ -1,3 +1,13 @@
+unity-greeter (18.04.0+19.04.20190410-0ubuntu1) disco; urgency=medium
+
+  [ Khurshid Alam ]
+  * src/list-stack.vala: Fix build with vala 0.43.x
+
+  [ Luke Yelavich ]
+  * Remove at-spi load/kill code (LP: #1670933)
+
+ -- Marco Trevisan (Treviño) <mail@3v1n0.net>  Wed, 10 Apr 2019 17:34:35 +0000
+
 unity-greeter (18.04.0+18.10.20180926-0ubuntu2) disco; urgency=medium
 
   * src/unity-greeter.vala:

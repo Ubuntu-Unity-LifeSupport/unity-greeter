@@ -553,25 +553,6 @@ public class UnityGreeter
         /* Set up the accessibility stack, in case the user needs it for screen reading etc. */
         Environment.set_variable ("GTK_MODULES", "atk-bridge", false);
 
-        Pid atspi_pid = 0;
-
-        try
-        {
-            string[] argv;
-
-            Shell.parse_argv ("/usr/lib/at-spi2-core/at-spi-bus-launcher --launch-immediately", out argv);
-            Process.spawn_async (null,
-                                 argv,
-                                 null,
-                                 SpawnFlags.SEARCH_PATH,
-                                 null,
-                                 out atspi_pid);
-        }
-        catch (Error e)
-        {
-            warning ("Error starting the at-spi registry: %s", e.message);
-        }
-
         Gtk.init (ref args);
         Ido.init ();
 
@@ -700,18 +681,6 @@ public class UnityGreeter
         Gtk.main ();
 
         debug ("Cleaning up");
-
-        if (atspi_pid != 0)
-        {
-            Posix.kill (atspi_pid, Posix.SIGKILL);
-            int status;
-            Posix.waitpid (atspi_pid, out status, 0);
-            if (Process.if_exited (status))
-                debug ("AT-SPI exited with return value %d", Process.exit_status (status));
-            else
-                debug ("AT-SPI terminated with signal %d", Process.term_sig (status));
-            atspi_pid = 0;
-        }
 
         debug ("Exiting");
 
