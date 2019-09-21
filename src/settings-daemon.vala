@@ -34,7 +34,7 @@ public class SettingsDaemon : Object
                               "org.gnome.settings-daemon.plugins.housekeeping",
                               "org.gnome.settings-daemon.plugins.keybindings",
                               "org.gnome.settings-daemon.plugins.keyboard",
-                              "org.gnome.settings-daemon.plugins.media-keys",
+                              "com.canonical.unity.settings-daemon.plugins.media-keys",
                               "org.gnome.settings-daemon.plugins.mouse",
                               "org.gnome.settings-daemon.plugins.print-notifications",
                               "org.gnome.settings-daemon.plugins.smartcard",

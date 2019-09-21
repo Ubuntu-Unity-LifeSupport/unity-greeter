@@ -14,8 +14,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2019-02-27 05:38+0000\n"
-"X-Generator: Launchpad (build 18886)\n"
+"X-Launchpad-Export-Date: 2019-04-18 05:42+0000\n"
+"X-Generator: Launchpad (build 18928)\n"
 
 #: ../src/greeter-list.vala:302
 #, c-format
@@ -111,22 +111,22 @@ msgid "%s (Default)"
 msgstr "%s (Dre ziouer)"
 
 #. Help string for command line --version flag
-#: ../src/unity-greeter.vala:591
+#: ../src/unity-greeter.vala:572
 msgid "Show release version"
 msgstr "Diskouez handelv an ermaeziadenn"
 
 #. Help string for command line --test-mode flag
-#: ../src/unity-greeter.vala:594
+#: ../src/unity-greeter.vala:575
 msgid "Run in test mode"
 msgstr "Loc'hañ e mod-esseal"
 
 #. Arguments and description for --help text
-#: ../src/unity-greeter.vala:600
+#: ../src/unity-greeter.vala:581
 msgid "- Unity Greeter"
 msgstr "- Degemerer Unity"
 
 #. Text printed out when an unknown command-line argument provided
-#: ../src/unity-greeter.vala:611
+#: ../src/unity-greeter.vala:592
 #, c-format
 msgid "Run '%s --help' to see a full list of available command line options."
 msgstr "Loc'hañ '%s --help' evit skrammañ rollad dibarzhioù an arc'hadoù."
