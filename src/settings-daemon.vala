@@ -26,28 +26,28 @@ public class SettingsDaemon : Object
 
     public void start ()
     {
-        string[] disabled = { "org.gnome.settings-daemon.plugins.background",
-                              "org.gnome.settings-daemon.plugins.clipboard",
-                              "org.gnome.settings-daemon.plugins.font",
-                              "org.gnome.settings-daemon.plugins.gconf",
-                              "org.gnome.settings-daemon.plugins.gsdwacom",
-                              "org.gnome.settings-daemon.plugins.housekeeping",
-                              "org.gnome.settings-daemon.plugins.keybindings",
-                              "org.gnome.settings-daemon.plugins.keyboard",
+        string[] disabled = { "com.canonical.unity.settings-daemon.plugins.background",
+                              "com.canonical.unity.settings-daemon.plugins.clipboard",
+                              "com.canonical.unity.settings-daemon.plugins.font",
+                              "com.canonical.unity.settings-daemon.plugins.gconf",
+                              "com.canonical.unity.settings-daemon.plugins.gsdwacom",
+                              "com.canonical.unity.settings-daemon.plugins.housekeeping",
+                              "com.canonical.unity.settings-daemon.plugins.keybindings",
+                              "com.canonical.unity.settings-daemon.plugins.keyboard",
                               "com.canonical.unity.settings-daemon.plugins.media-keys",
-                              "org.gnome.settings-daemon.plugins.mouse",
-                              "org.gnome.settings-daemon.plugins.print-notifications",
-                              "org.gnome.settings-daemon.plugins.smartcard",
-                              "org.gnome.settings-daemon.plugins.sound",
-                              "org.gnome.settings-daemon.plugins.wacom" };
+                              "com.canonical.unity.settings-daemon.plugins.mouse",
+                              "com.canonical.unity.settings-daemon.plugins.print-notifications",
+                              "com.canonical.unity.settings-daemon.plugins.smartcard",
+                              "com.canonical.unity.settings-daemon.plugins.sound",
+                              "com.canonical.unity.settings-daemon.plugins.wacom" };
 
-        string[] enabled =  { "org.gnome.settings-daemon.plugins.a11y-keyboard",
-                              "org.gnome.settings-daemon.plugins.a11y-settings",
-                              "org.gnome.settings-daemon.plugins.color",
-                              "org.gnome.settings-daemon.plugins.cursor",
-                              "org.gnome.settings-daemon.plugins.power",
-                              "org.gnome.settings-daemon.plugins.xrandr",
-                              "org.gnome.settings-daemon.plugins.xsettings" };
+        string[] enabled =  { "com.canonical.unity.settings-daemon.plugins.a11y-keyboard",
+                              "com.canonical.unity.settings-daemon.plugins.a11y-settings",
+                              "com.canonical.unity.settings-daemon.plugins.color",
+                              "com.canonical.unity.settings-daemon.plugins.cursor",
+                              "com.canonical.unity.settings-daemon.plugins.power",
+                              "com.canonical.unity.settings-daemon.plugins.xrandr",
+                              "com.canonical.unity.settings-daemon.plugins.xsettings" };
 
         foreach (var schema in disabled)
             set_plugin_enabled (schema, false);
