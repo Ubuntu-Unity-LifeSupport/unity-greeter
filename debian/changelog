@@ -1,3 +1,11 @@
+unity-greeter (18.04.0+20.04.20200312-0ubuntu2) focal; urgency=medium
+
+  [ Khurshid Alam ]
+  * debian/rules:
+    - Fix logo. We do not need ubuntu inside the logo text
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Thu, 02 Apr 2020 11:58:09 +0200
+
 unity-greeter (18.04.0+20.04.20200312-0ubuntu1) focal; urgency=medium
 
   [ Khurshid Alam ]

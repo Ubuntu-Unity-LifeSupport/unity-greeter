@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2020-03-11 05:54+0000\n"
+"POT-Creation-Date: 2020-04-01 06:07+0000\n"
 "PO-Revision-Date: 2020-01-27 14:40+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: Kabyle <kab@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2020-03-12 06:09+0000\n"
-"X-Generator: Launchpad (build e0878392dc799b267dea80578fa65500a5d74155)\n"
+"X-Launchpad-Export-Date: 2020-04-02 06:01+0000\n"
+"X-Generator: Launchpad (build a296f04231dee355be5db73cc878b9e21689a253)\n"
 
 #: ../src/greeter-list.vala:302
 #, c-format
@@ -44,7 +44,7 @@ msgstr "Tuccḍa i beddu n tγimit"
 
 #: ../src/greeter-list.vala:936
 msgid "Logging in…"
-msgstr ""
+msgstr "Tuqqna tetteddu..."
 
 #: ../src/main-window.vala:49
 msgid "Login Screen"
@@ -60,7 +60,7 @@ msgstr "Anasiw γef ugdil"
 
 #: ../src/menubar.vala:225
 msgid "High Contrast"
-msgstr ""
+msgstr "Amyeẓli afellay"
 
 #: ../src/menubar.vala:231
 msgid "Screen Reader"
@@ -91,6 +91,8 @@ msgid ""
 "Other users are currently logged in to this computer, shutting down now will "
 "also close these other sessions."
 msgstr ""
+"Iseqdacen-nniḍen qqnen akka tura s aselkim, ma tessexsiḍ-t tura ad medlent "
+"tɣimiyin-nniḍen."
 
 #: ../src/shutdown-dialog.vala:155
 msgid "Suspend"
@@ -118,7 +120,7 @@ msgstr "Sken lqem"
 #. Help string for command line --test-mode flag
 #: ../src/unity-greeter.vala:575
 msgid "Run in test mode"
-msgstr ""
+msgstr "Selkem deg uskar n usekyed"
 
 #. Arguments and description for --help text
 #: ../src/unity-greeter.vala:581
@@ -130,6 +132,8 @@ msgstr ""
 #, c-format
 msgid "Run '%s --help' to see a full list of available command line options."
 msgstr ""
+"Sekker '%s --help' iwakken ad twaliḍ tabdert tummidt n tnefrunin n "
+"yinezḍayen."
 
 #: ../src/user-list.vala:45
 msgid "Guest Session"
@@ -137,7 +141,7 @@ msgstr "Tiγimit n inebgi"
 
 #: ../src/user-list.vala:438
 msgid "Please enter a complete e-mail address"
-msgstr ""
+msgstr "Ttxil-k sekcem tansa imayl ummid"
 
 #: ../src/user-list.vala:518
 msgid "Incorrect e-mail address or password"
@@ -148,6 +152,8 @@ msgid ""
 "If you have an account on an RDP or Citrix server, Remote Login lets you run "
 "applications from that server."
 msgstr ""
+"Ma tesɛiḍ amiḍan deg uqeddac RDP neɣ Citrix, tuqqna tanmeggagt ad k-teǧǧ ad "
+"teslekmeḍ isnasen deg uqedac-a."
 
 #. For 12.10 we still don't support Citrix
 #: ../src/user-list.vala:551
@@ -155,6 +161,8 @@ msgid ""
 "If you have an account on an RDP server, Remote Login lets you run "
 "applications from that server."
 msgstr ""
+"Ma tesɛiḍ amiḍan deg uqeddac RDP, tuqqna tanmeggagt ad k-teǧǧ ad teslekmeḍ "
+"isnasen deg uqedac-a."
 
 #: ../src/user-list.vala:554
 msgid "Cancel"
@@ -162,13 +170,15 @@ msgstr "Sefsex"
 
 #: ../src/user-list.vala:555
 msgid "Set Up…"
-msgstr ""
+msgstr "Sbadu..."
 
 #: ../src/user-list.vala:557
 msgid ""
 "You need an Ubuntu Remote Login account to use this service. Would you like "
 "to set up an account now?"
 msgstr ""
+"Tesriḍ amiḍan anmeggag n tuqqna n Ubuntu iwakken ad tesqedceḍ ameẓlu-a. "
+"Tebɣiḍ ad tesbaduḍ amiḍan tura?"
 
 #: ../src/user-list.vala:561
 msgid "OK"
@@ -179,10 +189,12 @@ msgid ""
 "You need an Ubuntu Remote Login account to use this service. Visit "
 "uccs.canonical.com to set up an account."
 msgstr ""
+"Tesriḍ amiḍan anmeggag n tuqqna n Ubuntu iwakken ad tesqedceḍ ameẓlu-a. Rzu "
+"ɣer uccs.canonical.com iwakken ad tesbaduḍ amiḍan tura."
 
 #: ../src/user-list.vala:679
 msgid "Server type not supported."
-msgstr ""
+msgstr "Anaw n uqeddac ur itteddu ara."
 
 #: ../src/user-list.vala:720
 msgid "Domain:"
