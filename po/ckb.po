@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2020-04-01 06:07+0000\n"
+"POT-Creation-Date: 2020-05-04 04:44+0000\n"
 "PO-Revision-Date: 2013-02-22 11:36+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: Kurdish (Sorani) <ckb@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2020-04-02 06:02+0000\n"
-"X-Generator: Launchpad (build a296f04231dee355be5db73cc878b9e21689a253)\n"
+"X-Launchpad-Export-Date: 2020-05-05 05:59+0000\n"
+"X-Generator: Launchpad (build fbdff7602bd10fb883bf7e2ddcc7fd5a16f60398)\n"
 
 #: ../src/greeter-list.vala:302
 #, c-format
@@ -24,11 +24,11 @@ msgstr "ووشەی تێپەڕبوون بنووسە بۆ %s ."
 
 #: ../src/greeter-list.vala:807 ../src/user-list.vala:701
 msgid "Password:"
-msgstr "وشه‌ی تێپه‌ڕبوون:"
+msgstr "تێپەڕەوشە:"
 
 #: ../src/greeter-list.vala:809 ../src/user-list.vala:695
 msgid "Username:"
-msgstr "ناوی به‌كارهێنه‌ر:"
+msgstr "ناوی بەکارهێنەر:"
 
 #: ../src/greeter-list.vala:864
 msgid "Invalid password, please try again"
@@ -40,11 +40,11 @@ msgstr "نەتوانرا ڕێگەت پێبدرێت"
 
 #: ../src/greeter-list.vala:921
 msgid "Failed to start session"
-msgstr ""
+msgstr "نەتوانرا دانیشتن پێبکرێت"
 
 #: ../src/greeter-list.vala:936
 msgid "Logging in…"
-msgstr ""
+msgstr "دەچیتە ژوورەوە"
 
 #: ../src/main-window.vala:49
 msgid "Login Screen"
@@ -52,19 +52,19 @@ msgstr "پەردەی چوونەژورەوە"
 
 #: ../src/main-window.vala:118
 msgid "Back"
-msgstr ""
+msgstr "بڕۆدواوە"
 
 #: ../src/menubar.vala:220
 msgid "Onscreen keyboard"
-msgstr ""
+msgstr "تەختەکلیلی سەر ڕووپەر"
 
 #: ../src/menubar.vala:225
 msgid "High Contrast"
-msgstr ""
+msgstr "جیاوازی بەرز"
 
 #: ../src/menubar.vala:231
 msgid "Screen Reader"
-msgstr ""
+msgstr "خوێنەرەوەی ڕووپەر"
 
 #: ../src/prompt-box.vala:215
 msgid "Session Options"
@@ -76,11 +76,11 @@ msgstr ""
 
 #: ../src/shutdown-dialog.vala:101
 msgid "Goodbye. Would you like to…"
-msgstr ""
+msgstr "خوات لەگەڵ. دەتەوێت ..."
 
 #: ../src/shutdown-dialog.vala:105 ../src/shutdown-dialog.vala:207
 msgid "Shut Down"
-msgstr ""
+msgstr "کوژاندنەوە"
 
 #: ../src/shutdown-dialog.vala:112
 msgid "Are you sure you want to shut down the computer?"
@@ -94,15 +94,15 @@ msgstr ""
 
 #: ../src/shutdown-dialog.vala:155
 msgid "Suspend"
-msgstr ""
+msgstr "ڕاگرتن"
 
 #: ../src/shutdown-dialog.vala:172
 msgid "Hibernate"
-msgstr ""
+msgstr "دۆخەپشوو"
 
 #: ../src/shutdown-dialog.vala:190
 msgid "Restart"
-msgstr ""
+msgstr "دووبارە پێکردنەوە"
 
 #. Translators: %s is a session name like KDE or Ubuntu
 #: ../src/toggle-box.vala:98
@@ -113,12 +113,12 @@ msgstr "%s (بنچینەیی)"
 #. Help string for command line --version flag
 #: ../src/unity-greeter.vala:572
 msgid "Show release version"
-msgstr ""
+msgstr "وەشانی بڵاوکراوە پیشان بدە"
 
 #. Help string for command line --test-mode flag
 #: ../src/unity-greeter.vala:575
 msgid "Run in test mode"
-msgstr ""
+msgstr "پێکردن لە دۆخی تاقیکاری"
 
 #. Arguments and description for --help text
 #: ../src/unity-greeter.vala:581
@@ -133,7 +133,7 @@ msgstr ""
 
 #: ../src/user-list.vala:45
 msgid "Guest Session"
-msgstr ""
+msgstr "دانیشتنی میوان"
 
 #: ../src/user-list.vala:438
 msgid "Please enter a complete e-mail address"
@@ -158,11 +158,11 @@ msgstr ""
 
 #: ../src/user-list.vala:554
 msgid "Cancel"
-msgstr ""
+msgstr "پاشگەزبوونەوە"
 
 #: ../src/user-list.vala:555
 msgid "Set Up…"
-msgstr ""
+msgstr "ڕێکخستن..."
 
 #: ../src/user-list.vala:557
 msgid ""
@@ -172,7 +172,7 @@ msgstr ""
 
 #: ../src/user-list.vala:561
 msgid "OK"
-msgstr ""
+msgstr "باشە"
 
 #: ../src/user-list.vala:562
 msgid ""
@@ -204,7 +204,7 @@ msgstr ""
 
 #: ../src/user-list.vala:830
 msgid "Retry"
-msgstr ""
+msgstr "هەوڵ بدەرەوە"
 
 #: ../src/user-list.vala:831
 #, c-format
@@ -213,7 +213,7 @@ msgstr ""
 
 #: ../src/user-list.vala:869
 msgid "Login"
-msgstr ""
+msgstr "چوونەژوورەوە"
 
 #~ msgid "Logging in..."
 #~ msgstr "چوونەناوەوە..."

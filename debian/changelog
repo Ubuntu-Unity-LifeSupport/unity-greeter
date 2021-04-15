@@ -1,3 +1,11 @@
+unity-greeter (18.04.0+20.04.20200312-0ubuntu3) hirsute; urgency=medium
+
+  [ Khurshid Alam ]
+  * debian/rules:
+    - Update greeter logo version for hirsute
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Thu, 15 Apr 2021 10:38:06 +0200
+
 unity-greeter (18.04.0+20.04.20200312-0ubuntu2) focal; urgency=medium
 
   [ Khurshid Alam ]
