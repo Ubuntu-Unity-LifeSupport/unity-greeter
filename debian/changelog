@@ -1,3 +1,9 @@
+unity-greeter (22.04.1-0ubuntu2) jammy; urgency=medium
+
+  * debian/control: Build-Depend on fonts-ubuntu instead of old package name
+
+ -- Jeremy Bicha <jeremy.bicha@canonical.com>  Tue, 08 Mar 2022 14:25:19 -0500
+
 unity-greeter (22.04.1-0ubuntu1) jammy; urgency=medium
 
   [ Khurshid Alam ]
