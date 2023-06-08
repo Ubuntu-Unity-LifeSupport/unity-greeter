@@ -1,0 +1,67 @@
+// Disable Controlling of Network Devices
+polkit.addRule(function(action, subject) {
+    if (subject.user !== 'lightdm')
+        return undefined;
+
+    if (action.id == "org.freedesktop.NetworkManager.enable-disable-network" ||
+         action.id == "org.freedesktop.NetworkManager.enable-disable-wifi" ||
+         action.id == "org.freedesktop.NetworkManager.enable-disable-wwan" ||
+         action.id == "org.freedesktop.NetworkManager.enable-disable-wimax") {
+            return polkit.Result.NO;
+    }
+});
+
+// Disable Sleep and Wake
+polkit.addRule(function(action, subject) {
+    if (subject.user !== 'lightdm')
+        return undefined;
+
+    if (action.id == "org.freedesktop.NetworkManager.sleep-wake") {
+            return polkit.Result.NO;
+    }
+});
+
+// Disable WiFi Sharing
+polkit.addRule(function(action, subject) {
+    if (subject.user !== 'lightdm')
+        return undefined;
+
+    if ((action.id == "org.freedesktop.NetworkManager.wifi.share.protected" ||
+         action.id == "org.freedesktop.NetworkManager.wifi.share.open")) {
+            return polkit.Result.NO;
+    }
+});
+
+// Disable Settings Modifications
+polkit.addRule(function(action, subject) {
+    if (subject.user !== 'lightdm')
+        return undefined;
+
+    if (action.id == "org.freedesktop.NetworkManager.settings.modify.own" ||
+         action.id == "org.freedesktop.NetworkManager.settings.modify.system" ||
+         action.id == "org.freedesktop.NetworkManager.settings.modify.hostname") {
+            return polkit.Result.NO;
+    }
+});
+
+// Disable User Connections
+polkit.addRule(function(action, subject) {
+    if (subject.user !== 'lightdm')
+        return undefined;
+
+    if (action.id == "org.freedesktop.NetworkManager.use-user-connections") {
+            return polkit.Result.NO;
+    }
+});
+
+// Enable Controlling of Network Connections
+polkit.addRule(function(action, subject) {
+    if (subject.user !== 'lightdm')
+        return undefined;
+
+    if (action.id.match("org.freedesktop.NetworkManager.network-control") &&
+        subject.active == true) {
+            return polkit.Result.YES;
+    }
+});
+

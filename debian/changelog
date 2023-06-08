@@ -1,3 +1,13 @@
+unity-greeter (23.10.1-0ubuntu1) mantic; urgency=medium
+
+  * Include a .rules compatible with the new polkit versions
+  * Update the packaging to the current version, remove old code 
+    to clean a conffile which isn't needed anymore
+  * debian/rules:
+    - Updated the logo version for the new serie (lp: #1997999)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Thu, 08 Jun 2023 09:31:11 +0200
+
 unity-greeter (22.04.1-0ubuntu2) jammy; urgency=medium
 
   * debian/control: Build-Depend on fonts-ubuntu instead of old package name

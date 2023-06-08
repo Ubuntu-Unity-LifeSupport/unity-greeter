@@ -1,2 +1,3 @@
 debian/unity-greeter.pkla /var/lib/polkit-1/localauthority/10-vendor.d/
+debian/01-unity-greeter.rules /usr/share/polkit-1/rules.d/
 debian/50-unity-greeter.conf /usr/share/lightdm/lightdm.conf.d/

@@ -3,7 +3,7 @@
 LDFLAGS+=-Wl,--as-needed
 
 %:
-	dh $@ --with autoreconf --fail-missing
+	dh $@ --with autoreconf
 
 override_dh_autoreconf:
 	NOCONFIGURE=1 dh_autoreconf ./autogen.sh
@@ -11,7 +11,7 @@ override_dh_autoreconf:
 
 override_dh_auto_build:
 	dh_auto_build
-	./src/logo-generator --logo data/logo-bare.png --text ' 22.04' --output logo.png
+	./src/logo-generator --logo data/logo-bare.png --text ' 23.10' --output logo.png
 
 override_dh_auto_install:
 	dh_auto_install
