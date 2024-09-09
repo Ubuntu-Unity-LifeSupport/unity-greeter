@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unity-greeter\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2022-09-28 06:52+0000\n"
+"POT-Creation-Date: 2023-09-14 08:39+0000\n"
 "PO-Revision-Date: 2022-07-11 09:37+0000\n"
 "Last-Translator: Aniruddha Adhikary <Unknown>\n"
 "Language-Team: Bengali <bn@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2022-09-29 06:49+0000\n"
-"X-Generator: Launchpad (build 51d7c86a263563fbd9e884ec9127596444825394)\n"
+"X-Launchpad-Export-Date: 2023-09-15 04:41+0000\n"
+"X-Generator: Launchpad (build 32eed776db4e1fe74faaa77122cde19862d565ac)\n"
 
 #: ../src/greeter-list.vala:302
 #, c-format

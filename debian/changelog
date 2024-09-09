@@ -1,3 +1,15 @@
+unity-greeter (24.10.1-0ubuntu1) oracular; urgency=medium
+
+  * debian/rules: update the Ubuntu version string (lp: #2063557)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Mon, 09 Sep 2024 12:39:30 +0200
+
+unity-greeter (24.04.1-0ubuntu1) noble; urgency=medium
+
+  * debian/rules: update the Ubuntu version string (lp: #2063557)
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Mon, 09 Sep 2024 12:38:50 +0200
+
 unity-greeter (23.10.1-0ubuntu1) mantic; urgency=medium
 
   * Include a .rules compatible with the new polkit versions
