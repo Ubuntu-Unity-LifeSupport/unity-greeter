@@ -1,3 +1,9 @@
+unity-greeter (25.04.1-0ubuntu1) plucky; urgency=medium
+
+  * debian/rules: Update the version string for plucky
+
+ -- Sebastien Bacher <seb128@ubuntu.com>  Fri, 15 Nov 2024 13:20:10 +0100
+
 unity-greeter (24.10.1-0ubuntu1) oracular; urgency=medium
 
   * debian/rules: update the Ubuntu version string (lp: #2063557)
