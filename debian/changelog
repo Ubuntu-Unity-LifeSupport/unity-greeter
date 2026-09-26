@@ -4,6 +4,8 @@ unity-greeter (25.04.1-0ubuntu1+unity1) resolute; urgency=medium
     versioned build-dependency on liblightdm-gobject-1-dev (now only an
     unversioned Provides) made the package unbuildable in resolute after
     lightdm moved its vala files to lightdm-vala.
+  * tests: take Gdk.Key values as uint, so the test program compiles
+    with current Vala.
 
  -- Ubuntu Unity Life Support <mihail.rozshko@gmail.com>  Sat, 26 Sep 2026 16:22:57 +0000
 
