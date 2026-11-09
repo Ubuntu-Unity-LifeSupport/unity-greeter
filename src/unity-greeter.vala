@@ -538,6 +538,11 @@ public class UnityGreeter
         greeter_ready ();
     }
 
+    private static void set_root_cursor ()
+    {
+        Gdk.get_default_root_window ().set_cursor (new Gdk.Cursor.for_display (Gdk.Display.get_default (), Gdk.CursorType.LEFT_PTR));
+    }
+
     public static int main (string[] args)
     {
 
@@ -563,7 +568,12 @@ public class UnityGreeter
 
         /* Set the cursor to not be the crap default */
         debug ("Setting cursor");
-        Gdk.get_default_root_window ().set_cursor (new Gdk.Cursor.for_display (Gdk.Display.get_default (), Gdk.CursorType.LEFT_PTR));
+        set_root_cursor ();
+
+        /* GDK does not reload this cursor when the settings daemon sets the cursor theme later */
+        var cursor_settings = Gtk.Settings.get_default ();
+        cursor_settings.notify["gtk-cursor-theme-name"].connect (set_root_cursor);
+        cursor_settings.notify["gtk-cursor-theme-size"].connect (set_root_cursor);
 
         bool do_show_version = false;
         bool do_test_mode = false;
